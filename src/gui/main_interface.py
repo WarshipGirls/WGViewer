@@ -58,9 +58,9 @@ class MainInterface(QMainWindow):
         self.setWindowTitle('Warship Girls Viewer')
 
         if self.realrun:
-            self.realrun()
+            self._realrun()
 
-    def realrun(self):
+    def _realrun(self):
         self.sig_initGame.connect(self.side_dock.on_received_resource)
         self.sig_initGame.connect(self.side_dock.on_received_name)
         self.sig_initGame.connect(self.side_dock.on_received_tasks)

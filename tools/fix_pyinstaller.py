@@ -8,7 +8,7 @@ a.datas += [('images/icon.ico', 'D:\\[workspace]\\App\\src\\images\\icon.ico',  
 
 Run this scripts, and copy paste output to the *.spec file.     
 '''
-
+os.chdir("..")
 rootdir = os.path.dirname(os.path.realpath(__file__))
 prefix_len = len(rootdir) + 1
 

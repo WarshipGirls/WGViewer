@@ -30,7 +30,7 @@ if __name__ == '__main__':
     qss_path = get_data_path('src/assets/dark_style.qss')
     qss_file = open(qss_path).read()
 
-    if 0:   # user run
+    if 1:   # user run
         login_form = LoginForm(qss_file)
         login_form.show()
         login_form.raise_()
