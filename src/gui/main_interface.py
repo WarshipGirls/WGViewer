@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
-from PyQt5.QtWidgets import QDesktopWidget
+from PyQt5.QtWidgets import QDesktopWidget, QMessageBox
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QThreadPool, QTimer
 
@@ -91,6 +91,21 @@ class MainInterface(QMainWindow):
         else:
             pass
 
+    def open_author_info(self):
+        def get_hyperlink(link, text):
+            return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
+
+        msg = QMessageBox()
+        msg.setStyleSheet(self.qss)
+        msg.setWindowTitle("About")
+        msg.setTextFormat(Qt.RichText)
+
+        msg_str = '<h1>Warship Girls Viewer</h1>'
+        msg_str += "\n"
+        msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
+        msg.setText(msg_str)
+        msg.exec_()
+
     def add_file_menu(self):
         file_menu = self.bar.addMenu("File")
         file_menu.addAction("New")
@@ -103,6 +118,12 @@ class MainInterface(QMainWindow):
         # sidedock_action.setStatusTip("...")
         sidedock_action.triggered.connect(self.init_side_dock)
         view_menu.addAction(sidedock_action)
+
+        help_menu = self.bar.addMenu("Help")
+        about_action = QAction("&About Warship Girls Viewer", self)
+        about_action.triggered.connect(self.open_author_info)
+        help_menu.addAction(about_action)
+
 
     # ================================
     # WGR APIs

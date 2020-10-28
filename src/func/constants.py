@@ -92,6 +92,8 @@ reward_type = {
 }
 
 
+# 26 CB 大型巡洋舰
+# https://en.wikipedia.org/wiki/Hull_classification_symbol
 ship_type = {
     1: "CV",
     2: "CVL",
@@ -109,8 +111,10 @@ ship_type = {
     14: "SS",
     15: "SC",
     16: "AP",
-    17: "ASDG",
-    18: "AADG"
+    23: "ASDG",
+    24: "AADG",
+    26: "CB",
+    27: "BBG"
 }
 
 build_type = {
