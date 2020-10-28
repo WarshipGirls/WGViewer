@@ -1,6 +1,5 @@
-from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout
-from PyQt5.QtWidgets import QDesktopWidget, QMessageBox,QWidget
-from PyQt5 import QtWebEngineWidgets 
+from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
+from PyQt5.QtWidgets import QDesktopWidget, QMessageBox
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QThreadPool, QTimer
 
@@ -95,29 +94,17 @@ class MainInterface(QMainWindow):
     def open_author_info(self):
         def get_hyperlink(link, text):
             return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
-        # msg = QWidget(self)
-        # msg.setStyleSheet(self.qss)
-        # l = QVBoxLayout(msg)
-        # msg.setWindowTitle("About")
-        # h = QtWebEngineWidgets.QWebEngineView(self)
-        # h.setHtml('<!DOCTYPE html><html><body><a class="github-button" href="https://github.com/pwyq" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-size="large" aria-label="Follow @pwyq on GitHub">Follow @pwyq</a> <a class="github-button" href="https://github.com/WarshipGirls/WGViewer" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="false" aria-label="Star WarshipGirls/WGViewer on GitHub">Star</a> <a class="github-button" href="https://github.com/WarshipGirls/WGViewer/fork" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-repo-forked" data-size="large" data-show-count="false" aria-label="Fork WarshipGirls/WGViewer on GitHub">Fork</a> <a class="github-button" href="https://github.com/sponsors/pwyq" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-heart" data-size="large" aria-label="Sponsor @pwyq on GitHub">Sponsor</a><script async defer src="https://buttons.github.io/buttons.js"></script></body></html>')
-        # l.addWidget(h)
+
         msg = QMessageBox()
         msg.setStyleSheet(self.qss)
-        # msg.setIcon(QMessageBox.Information)
         msg.setWindowTitle("About")
         msg.setTextFormat(Qt.RichText)
 
-        # msg_str = '<head><script async defer src="https://buttons.github.io/buttons.js"></script></head>'
         msg_str = '<h1>Warship Girls Viewer</h1>'
         msg_str += "\n"
         msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
-        # msg_str += '<a class="github-button" href="https://github.com/WarshipGirls/WGViewer" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star WarshipGirls/WGViewer on GitHub">Star</a>'
-        # msg_str += "&#09;(<b>Star</b> to support author, or <b>Fork</b> to contribute.)"
         msg.setText(msg_str)
         msg.exec_()
-        # msg.show()
-
 
     def add_file_menu(self):
         file_menu = self.bar.addMenu("File")
