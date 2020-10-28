@@ -67,7 +67,7 @@ class MainInterface(QMainWindow):
         self.sig_initGame.connect(self.side_dock.on_received_lists)
         self.api_initGame()
 
-        self.sig_getShipList.connect(self.table_widget.on_received_shiplist)
+        self.sig_getShipList.connect(self.table_widget.tab_ships.on_received_shiplist)
         self.api_getShipList()
         # self.pve_getPveData()
         # self.pve_getUserData()

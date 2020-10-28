@@ -6,8 +6,10 @@ and the second is the location of the resource in the source directory.
 This is not limited to just images either. Any file can be packaged along with the source code.
 a.datas += [('images/icon.ico', 'D:\\[workspace]\\App\\src\\images\\icon.ico',  'DATA')]
 
-Run this scripts, and copy paste output to the *.spec file.     
+# TO USE
+Run this scripts, and copy paste output to the *.spec file. Do clean the old fix.
 '''
+
 os.chdir("..")
 rootdir = os.path.dirname(os.path.realpath(__file__))
 prefix_len = len(rootdir) + 1

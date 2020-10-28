@@ -7,7 +7,7 @@ The official sites of the mobile game, Warship Girls (R), are [here (CN server)]
 ## Development
 
 - [Python3](https://www.python.org/)
-- [PyQt5](https://doc.qt.io/qtforpython/)
+- [PyQt5](https://doc.qt.io/qtforpython/) (w/o Qt Designer)
 - Platforms:
 	- Windows 10
 	- Ubuntu 20.04

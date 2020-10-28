@@ -5,7 +5,8 @@ from PyQt5.QtWidgets import QWidget, QTabWidget, QLabel, QPushButton
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import QTimer, pyqtSlot
 
-from .tab_advance_functions import TabAdvanceFunctions
+from .tabs.advance_functions import TabAdvanceFunctions
+from .tabs.ships import TabShips
 
 
 def get_data_path(relative_path):
@@ -16,23 +17,23 @@ def get_data_path(relative_path):
 
 
 class MainInterfaceTabs(QWidget):
+    ''' Tentative plans
+        Tab 1 = Sortie
+        Tab 2 = 1-8 Fleets
+        Tab 3 = All Ships
+        Tab 4 = All Equips
+        Tab 5 = All tactics
+        Tab n = Extra functions
+    '''
     def __init__(self, parent, threadpool, realrun):
         super(QWidget, self).__init__(parent)
         self.threadpool = threadpool
+        self.realrun = realrun
 
         self.main_layout = QVBoxLayout(self)
-        self.resize(1000, 1)
-        
-        # Initialize tab screen
-        self.tabs = QTabWidget()
-        # self.tab1 = QWidget()
-        self.tab1 = TabAdvanceFunctions(self)
-        self.tab2 = QWidget()
-        self.tabs.resize(30,20)
-        
-        # Add tabs
-        self.tabs.addTab(self.tab1,"Tab 1")
-        self.tabs.addTab(self.tab2,"Tab 2")
+        self.resize(1000, 1)    # TODO: this seems not working
+
+        self.init_tab_bar()
         
         # Create first tab
         self.tab1.layout = QVBoxLayout(self)
@@ -53,67 +54,40 @@ class MainInterfaceTabs(QWidget):
         self.main_layout.addWidget(self.tabs)
         self.setLayout(self.main_layout)
 
-        # List created by ship-type number from 1-18
-        # CV, CVL, AV, BB, BBV
-        # BC, CA, CAV, CLT, CL
-        # BM, DD, SSV, SS, SC
-        # AP, ASDG, AADG
-        self.ships = []
-        for i in range(18):
-            self.ships.append([])
-
-        if realrun == False:
+        if self.realrun == False:
             self.test()
 
     def test(self):
-        import json
-        p = get_data_path('api_getShipList.json')
-        with open(p) as f:
-            d = json.load(f)
-        self.on_received_shiplist(d)
+        pass
+        # import json
+        # p = get_data_path('api_getShipList.json')
+        # with open(p) as f:
+        #     d = json.load(f)
+        # self.on_received_shiplist(d)
+
+    def init_tab_bar(self):
+        # Initialize tab screen
+        self.tabs = QTabWidget()
+        self.tab1 = QWidget()
+        self.tab2 = QWidget()
+        self.tab_ships = TabShips(self, self.realrun)
+        self.tab4 = QWidget()
+        self.tab5 = QWidget()
+        self.tab_advance = TabAdvanceFunctions(self)
+
+        # Add tabs
+        self.tabs.addTab(self.tab1,"  Sortie  ")
+        self.tabs.addTab(self.tab2,"  Fleets  ")
+        self.tabs.addTab(self.tab_ships,"  Ships  ")
+        self.tabs.addTab(self.tab4,"  Equipment  ")
+        self.tabs.addTab(self.tab5,"  Tactics  ")
+        self.tabs.addTab(self.tab_advance,"  Advance Functions  ")
 
     def recurring_timer(self):
         self.counter +=1
         print("I'm in " + os.path.basename(__file__))
         print("active thread = " + str(self.threadpool.activeThreadCount()))
         self.l.setText("Counter: %d" % self.counter)
-
-
-
-    @pyqtSlot(dict)
-    def on_received_shiplist(self, data):
-        if data != None:
-            x = data["userShipVO"]
-            for u in x: 
-                title = u["title"]
-                ship_type = u["type"]
-                cid = u["shipCid"]
-                lv = u["level"]
-                exp = u["exp"]
-                n_exp = u["nextExp"]
-                love = u["love"]
-                love_max = u["loveMax"]
-                equips = u["equipment"]
-                _id = u["id"]
-                tact = u["tactics"]
-                is_locked = u["isLocked"]
-                # if all 0, skip
-                cap_slot = u["capacitySlot"]
-                cap_max = u["capacitySlotMax"]
-                ms_slot = u["missileSlot"]
-                ms_max = u["missileSlotMax"]
-                # naked
-                sn = u["battlePropsBasic"]
-                # with equip but wounded
-                sp = u["battleProps"]
-                # with equip and full HP/full refuel etc
-                sm = u["battlePropsMax"]   
-                try:         
-                    skill = u["skillType"] #str
-                    skill_lv = u["skillLevel"]
-                except KeyError:
-                    # This ship doesn't have skill
-                    pass
 
 
 # End of File
