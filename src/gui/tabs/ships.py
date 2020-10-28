@@ -19,12 +19,8 @@ class TabShips(QWidget):
 
 
         self.ships = []
-        # List created by ship-type number from 1-18
-        # CV, CVL, AV, BB, BBV
-        # BC, CA, CAV, CLT, CL
-        # BM, DD, SSV, SS, SC
-        # AP, ASDG, AADG
-        for i in range(18):
+        # only 20 out of 27 is used by the game at 5.0.0
+        for i in range(27):
             self.ships.append([])
 
         if realrun == False:
@@ -42,9 +38,12 @@ class TabShips(QWidget):
     def on_received_shiplist(self, data):
         if data != None:
             x = data["userShipVO"]
-            for u in x: 
+            for s in x:
+                self.ships[s["type"]].append(s)
+            for i in range(len(self.ships)):
+                print(i, len(self.ships[i]))
+                '''
                 title = u["title"]
-                ship_type = u["type"]
                 cid = u["shipCid"]
                 lv = u["level"]
                 exp = u["exp"]
@@ -72,6 +71,7 @@ class TabShips(QWidget):
                 except KeyError:
                     # This ship doesn't have skill
                     pass
+                '''
 
 
 
