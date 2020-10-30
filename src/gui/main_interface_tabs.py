@@ -17,14 +17,6 @@ def get_data_path(relative_path):
 
 
 class MainInterfaceTabs(QWidget):
-    ''' Tentative plans
-        Tab 1 = Sortie
-        Tab 2 = 1-8 Fleets
-        Tab 3 = All Ships
-        Tab 4 = All Equips
-        Tab 5 = All tactics
-        Tab n = Extra functions
-    '''
     def __init__(self, parent, threadpool, realrun):
         super(QWidget, self).__init__(parent)
         self.realrun = realrun
@@ -36,32 +28,6 @@ class MainInterfaceTabs(QWidget):
         tabwidget.addTab(self.tab_ships, "  Ship  ")
         tabwidget.addTab(label2, "  Tab2  ")
         self.layout.addWidget(tabwidget, 0, 0)
-        # self.threadpool = threadpool
-        # self.realrun = realrun
-
-        # self.main_layout = QVBoxLayout(self)
-        # self.setLayout(self.main_layout)
-        # # self.resize(1000, 1)    # TODO: this seems not working
-
-        # self.init_tab_bar()
-        
-        # # Create first tab
-        # self.tab1.layout = QVBoxLayout(self)
-        # self.pushButton1 = QPushButton("PyQt5 button")
-
-        # self.l = QLabel("Start")
-        # self.counter = 0
-        # self.timer = QTimer()
-        # self.timer.setInterval(1000)
-        # self.timer.timeout.connect(self.recurring_timer)
-        # self.timer.start()
-
-        # self.tab1.layout.addWidget(self.pushButton1)
-        # self.tab1.layout.addWidget(self.l)
-        # self.tab1.setLayout(self.tab1.layout)
-        
-        # Add tabs to widget
-        # self.main_layout.addWidget(self.tabs)
 
         if self.realrun == False:
             self.test()

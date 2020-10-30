@@ -166,12 +166,6 @@ class TabShips(QWidget):
 
         self.scroll_layout = QVBoxLayout(scroll_content)
         scroll_content.setLayout(self.scroll_layout)
-        x = ShipTable(50)
-        y = ShipTable(50)
-        ck = TopCheckboxes()
-        self.scroll_layout.addWidget(ck)
-        self.scroll_layout.addWidget(x)
-        self.scroll_layout.addWidget(y)
         scroll.setWidget(scroll_content)
         self.show()
 
@@ -188,26 +182,12 @@ class TabShips(QWidget):
 
     def test(self):
         logging.debug("Starting tests")
-        # x = ShipTable(50)
-        # y = ShipTable(50)
-        # ck = TopCheckboxes()
-        # self.scroll_layout.addWidget(ck)
-        # self.scroll_layout.addWidget(x)
-        # self.scroll_layout.addWidget(y)
-
-    # def get_table_size(self, t):
-    #     logging.debug(t.verticalHeader().width())
-    #     logging.debug(t.columnCount())
-    #     logging.debug(t.verticalHeader().height())
-    #     logging.debug(t.rowCount())
-    #     w = t.verticalHeader().width() + 4
-    #     for i in range(t.columnCount()):
-    #         w += t.columnWidth(i)
-    #     h = t.horizontalHeader().height() + 4
-    #     for i in range(t.rowCount()):
-    #         h += t.rowHeight(i)
-    #     print(w, h)
-    #     return QSize(w, h)
+        x = ShipTable(50)
+        y = ShipTable(50)
+        ck = TopCheckboxes()
+        self.scroll_layout.addWidget(ck)
+        self.scroll_layout.addWidget(x)
+        self.scroll_layout.addWidget(y)
 
     # def init_table(self, table):
     #     table.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
