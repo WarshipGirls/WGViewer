@@ -1,11 +1,14 @@
 import sys
 import os
 import logging
+import traceback
 
-from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem
-from PyQt5.QtWidgets import QVBoxLayout, QScrollArea
+from PyQt5.QtWidgets import QWidget, QLabel, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QComboBox, QCheckBox
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QScrollArea
 from PyQt5.QtWidgets import QHeaderView, QSizePolicy
 from PyQt5.QtCore import Qt, pyqtSlot, QSize
+from PyQt5.QtGui import QPixmap
 # from PyQt5.QtGui import QSizePolicy
 
 from ...func import constants as CONST
@@ -18,20 +21,166 @@ def get_data_path(relative_path):
     return relative_path if not os.path.exists(res) else res
 
 
-class TabShips(QScrollArea):
+class TopCheckboxes(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.layout = QGridLayout(self)
+        self.layout.setContentsMargins(0,0,0,0)
+
+        for i in range(10):
+            self.layout.setColumnStretch(i, 1)
+        self.init_dropdowns()
+        self.init_ship_boxes()
+
+    def init_dropdowns(self):
+        lock_select = ["ALL", "YES", "NO"]
+        self.add_dropdown("LOCK", lock_select, self.lock_handler, 0, 0)
+        level_select = ["ALL", "Lv. 1", "> Lv. 1", "\u2265 Lv. 90", "\u2265 Lv. 100", "= Lv. 110"]
+        self.add_dropdown("LEVEL", level_select, self.level_handler, 0, 1)
+        value_select = ["Equip. Incl.", "Raw Value"]
+        self.add_dropdown("VALUE", value_select, self.value_handler, 0, 2)
+        mod_select = ["ALL", "Non-mod. Only", "Mod I. Only"]
+        self.add_dropdown("MOD.", mod_select, self.mod_handler, 0, 3)
+        rarity_select = ["\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
+        self.add_dropdown("RARITY", rarity_select, self.rarity_handler, 0, 4)
+        # current = 30/60
+        # max only = 60
+        health_select = ["Current Value", "Max Only"]
+        self.add_dropdown("HEALTH", health_select, self.health_handler, 0, 5)
+        married_select = ["ALL", "Married Only", "Non Married Only"]
+        self.add_dropdown("MARRY", married_select, self.marry_handler, 0, 6)
+
+    def add_dropdown(self, label, choices, handler, x, y):
+        w = QWidget()
+        wl = QHBoxLayout()
+        w.setLayout(wl)
+        l = QLabel(label)
+        lc = QComboBox()
+        lc.addItems(choices)
+        lc.currentTextChanged.connect(handler)
+        wl.addWidget(l)
+        wl.addWidget(lc)
+        wl.setStretch(0, 2)
+        wl.setStretch(1, 8)
+        self.layout.addWidget(w, x, y, 1, 1)
+
+    def lock_handler(self, text):
+        print(text)
+
+    def level_handler(self, text):
+        print(text)
+
+    def value_handler(self, text):
+        print(text)
+
+    def mod_handler(self, text):
+        print(text)
+
+    def rarity_handler(self, text):
+        print(text)
+
+    def health_handler(self, text):
+        print(text)
+
+    def marry_handler(self, text):
+        print(text)
+
+    def init_ship_boxes(self):
+        # in the ascending order of ship types (int)
+        first_row_types = ["CV", "CVL", "AV", "BB", "BBV", "BC", "CA", "CAV", "CLT", "CL"]
+        second_row_types = ["BM", "DD", "SSV", "SS", "SC", "AP", "ASDG", "AADG", "CB", "BBG"]
+
+        self.first_boxes = []
+        for k, v in enumerate(first_row_types):
+            b = QCheckBox(v, self)
+            self.first_boxes.append(b)
+            self.layout.addWidget(b, 1, k, 1, 1)
+            # https://stackoverflow.com/a/35821092
+            self.first_boxes[k].stateChanged.connect(lambda _, b=self.first_boxes[k]: self.checkbox_handler(b))
+        self.second_boxes = []
+        for k, v in enumerate(second_row_types):
+            b = QCheckBox(v, self)
+            self.second_boxes.append(b)
+            self.layout.addWidget(b, 2, k, 1, 1)
+            self.second_boxes[k].stateChanged.connect(lambda _, b=self.second_boxes[k]: self.checkbox_handler(b))
+
+    def checkbox_handler(self, cb):
+        if cb.isChecked():
+            print("checked " + cb.text())
+        else:
+            print("unchecked " + cb.text())
+
+class ShipTable(QTableWidget):
+    def __init__(self, rows):
+        super().__init__()
+        self.headers = ["", "Name", "ID", "Class", "Lv.", "HP", "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
+        self.setColumnCount(len(self.headers))
+        self.setHorizontalHeaderLabels(self.headers)
+        self.setShowGrid(False)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        try:
+            for i in range(rows):
+                self.insertRow(i)
+                # QPixmap vs. QImage https://stackoverflow.com/a/10315773
+                path = "src/assets/S/S_NORMAL_1.png"    # wxh=363x88, cropped=156x88
+                img = QPixmap()
+                is_loaded = img.load(path)
+                if is_loaded:
+                    self.setRowHeight(i, 50)
+                    self.setColumnWidth(i, 80)
+                    thumbnail = QTableWidgetItem()
+                    thumbnail.setData(Qt.DecorationRole, img.scaled(78, 44))
+                    self.setItem(i, 0, thumbnail)
+                else:
+                    print(path)
+
+            self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            self.setMaximumSize(self.getQTableWidgetSize())
+            self.setMinimumSize(self.getQTableWidgetSize())
+            self.show()
+        except Exception as e:
+            print(traceback.format_exc())
+
+    def getQTableWidgetSize(self):
+        w = self.verticalHeader().width() + 4  # +4 seems to be needed
+        for i in range(self.columnCount()):
+            w += self.columnWidth(i)  # seems to include gridline (on my machine)
+        h = self.horizontalHeader().height() + 4
+        for i in range(self.rowCount()):
+            h += self.rowHeight(i)
+        return QSize(w, h)
+
+class TabShips(QWidget):
     # https://pythonspot.com/pyqt5-table/
     def __init__(self, parent, realrun):
-        super(QScrollArea, self).__init__(parent)
+        super(QWidget, self).__init__(parent)
         # widget = QWidget()
-        self.setWidgetResizable(True)
-        content = QWidget(self)
-        self.setWidget(content)
-        self.main_layout = QVBoxLayout(content)
-        self.main_layout.setAlignment(Qt.AlignTop)
+        # self.setWidgetResizable(True)
+        # content = QWidget(self)
+        # self.setWidget(content)
+        # self.main_layout = QVBoxLayout(content)
+        # self.main_layout.setAlignment(Qt.AlignTop)
         # https://stackoverflow.com/a/40139336
 
 
         # self.addWidget(scroll)
+
+        super().__init__()
+        list_box = QVBoxLayout(self)
+        self.setLayout(list_box)
+
+        scroll = QScrollArea(self)
+        list_box.addWidget(scroll)
+        scroll.setWidgetResizable(True)
+        scroll_content = QWidget(scroll)
+
+        self.scroll_layout = QVBoxLayout(scroll_content)
+        scroll_content.setLayout(self.scroll_layout)
+
+        scroll.setWidget(scroll_content)
+        self.show()
 
         self.ships = []
         self.tables = []
@@ -41,18 +190,26 @@ class TabShips(QScrollArea):
             tb = QTableWidget()
             self.tables.append(tb)
             # self.main_layout.addWidget(tb)
-        self.setLayout(self.main_layout)
+        # self.setLayout(self.main_layout)
 
         if realrun == False:
             self.test()
 
     def test(self):
         logging.debug("Starting tests")
-        import json
-        p = get_data_path('api_getShipList.json')
-        with open(p) as f:
-            d = json.load(f)
-        self.on_received_shiplist(d)
+        x = ShipTable(50)
+        y = ShipTable(50)
+        ck = TopCheckboxes()
+        self.scroll_layout.addWidget(ck)
+        self.scroll_layout.addWidget(x)
+        self.scroll_layout.addWidget(y)
+        # x = ShipTable(50)
+        # import json
+        # p = get_data_path('api_getShipList.json')
+        # with open(p) as f:
+            # d = json.load(f)
+        # self.on_received_shiplist(d)
+
 
     # def init_table(self,):
     #     list_box = QVBoxLayout(self)
