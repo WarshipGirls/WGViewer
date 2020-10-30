@@ -9,7 +9,6 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QScrollArea
 from PyQt5.QtWidgets import QHeaderView, QSizePolicy
 from PyQt5.QtCore import Qt, pyqtSlot, QSize
 from PyQt5.QtGui import QPixmap
-# from PyQt5.QtGui import QSizePolicy
 
 from ...func import constants as CONST
 
@@ -43,8 +42,7 @@ class TopCheckboxes(QWidget):
         self.add_dropdown("MOD.", mod_select, self.mod_handler, 0, 3)
         rarity_select = ["\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
         self.add_dropdown("RARITY", rarity_select, self.rarity_handler, 0, 4)
-        # current = 30/60
-        # max only = 60
+        # current = 30/60, max only = 60
         health_select = ["Current Value", "Max Only"]
         self.add_dropdown("HEALTH", health_select, self.health_handler, 0, 5)
         married_select = ["ALL", "Married Only", "Non Married Only"]
@@ -113,6 +111,7 @@ class TopCheckboxes(QWidget):
 class ShipTable(QTableWidget):
     def __init__(self, rows):
         super().__init__()
+        self.setStyleSheet("")
         self.headers = ["", "Name", "ID", "Class", "Lv.", "HP", "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
         self.setColumnCount(len(self.headers))
         self.setHorizontalHeaderLabels(self.headers)
@@ -153,21 +152,10 @@ class ShipTable(QTableWidget):
         return QSize(w, h)
 
 class TabShips(QWidget):
-    # https://pythonspot.com/pyqt5-table/
-    def __init__(self, parent, realrun):
-        super(QWidget, self).__init__(parent)
-        # widget = QWidget()
-        # self.setWidgetResizable(True)
-        # content = QWidget(self)
-        # self.setWidget(content)
-        # self.main_layout = QVBoxLayout(content)
-        # self.main_layout.setAlignment(Qt.AlignTop)
-        # https://stackoverflow.com/a/40139336
-
-
-        # self.addWidget(scroll)
-
+    def __init__(self, realrun):
+        # super(QWidget, self).__init__(parent)
         super().__init__()
+
         list_box = QVBoxLayout(self)
         self.setLayout(list_box)
 
@@ -178,7 +166,12 @@ class TabShips(QWidget):
 
         self.scroll_layout = QVBoxLayout(scroll_content)
         scroll_content.setLayout(self.scroll_layout)
-
+        x = ShipTable(50)
+        y = ShipTable(50)
+        ck = TopCheckboxes()
+        self.scroll_layout.addWidget(ck)
+        self.scroll_layout.addWidget(x)
+        self.scroll_layout.addWidget(y)
         scroll.setWidget(scroll_content)
         self.show()
 
@@ -189,65 +182,44 @@ class TabShips(QWidget):
             self.ships.append([])
             tb = QTableWidget()
             self.tables.append(tb)
-            # self.main_layout.addWidget(tb)
-        # self.setLayout(self.main_layout)
 
         if realrun == False:
             self.test()
 
     def test(self):
         logging.debug("Starting tests")
-        x = ShipTable(50)
-        y = ShipTable(50)
-        ck = TopCheckboxes()
-        self.scroll_layout.addWidget(ck)
-        self.scroll_layout.addWidget(x)
-        self.scroll_layout.addWidget(y)
         # x = ShipTable(50)
-        # import json
-        # p = get_data_path('api_getShipList.json')
-        # with open(p) as f:
-            # d = json.load(f)
-        # self.on_received_shiplist(d)
+        # y = ShipTable(50)
+        # ck = TopCheckboxes()
+        # self.scroll_layout.addWidget(ck)
+        # self.scroll_layout.addWidget(x)
+        # self.scroll_layout.addWidget(y)
 
+    # def get_table_size(self, t):
+    #     logging.debug(t.verticalHeader().width())
+    #     logging.debug(t.columnCount())
+    #     logging.debug(t.verticalHeader().height())
+    #     logging.debug(t.rowCount())
+    #     w = t.verticalHeader().width() + 4
+    #     for i in range(t.columnCount()):
+    #         w += t.columnWidth(i)
+    #     h = t.horizontalHeader().height() + 4
+    #     for i in range(t.rowCount()):
+    #         h += t.rowHeight(i)
+    #     print(w, h)
+    #     return QSize(w, h)
 
-    # def init_table(self,):
-    #     list_box = QVBoxLayout(self)
-    #     self.setLayout(list_box)
+    # def init_table(self, table):
+    #     table.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
 
-    #     scroll = QScrollArea(self)
-    #     list_box.addWidget(scroll)
-    #     scroll.setWidgetResizable(True)
-    #     scroll_content = QWidget(scroll)
+    #     table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    #     table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    #     scroll_layout = QVBoxLayout(scroll_content)
-    #     scroll_content.setLayout(scroll_layout)
-
-    def get_table_size(self, t):
-        logging.debug(t.verticalHeader().width())
-        logging.debug(t.columnCount())
-        logging.debug(t.verticalHeader().height())
-        logging.debug(t.rowCount())
-        w = t.verticalHeader().width() + 4
-        for i in range(t.columnCount()):
-            w += t.columnWidth(i)
-        h = t.horizontalHeader().height() + 4
-        for i in range(t.rowCount()):
-            h += t.rowHeight(i)
-        print(w, h)
-        return QSize(w, h)
-
-    def init_table(self, table):
-        table.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-
-        table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-        table.resizeColumnsToContents()
-        table.setFixedSize(table.horizontalHeader().length() + 
-                           table.verticalHeader().width(),
-                           table.verticalHeader().length() + 
-                           table.horizontalHeader().height())
+    #     table.resizeColumnsToContents()
+    #     table.setFixedSize(table.horizontalHeader().length() + 
+    #                        table.verticalHeader().width(),
+    #                        table.verticalHeader().length() + 
+    #                        table.horizontalHeader().height())
 
     @pyqtSlot(dict)
     def on_received_shiplist(self, data):

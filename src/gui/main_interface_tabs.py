@@ -2,7 +2,7 @@ import sys
 import os
 
 from PyQt5.QtWidgets import QWidget, QTabWidget, QLabel, QPushButton
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout,QGridLayout
 from PyQt5.QtCore import QTimer, pyqtSlot
 
 from .tabs.advance_functions import TabAdvanceFunctions
@@ -27,32 +27,41 @@ class MainInterfaceTabs(QWidget):
     '''
     def __init__(self, parent, threadpool, realrun):
         super(QWidget, self).__init__(parent)
-        self.threadpool = threadpool
         self.realrun = realrun
+        self.layout = QGridLayout()
+        self.setLayout(self.layout)
+        self.tab_ships = TabShips(self.realrun)
+        label2 = QLabel("test")
+        tabwidget = QTabWidget()
+        tabwidget.addTab(self.tab_ships, "  Ship  ")
+        tabwidget.addTab(label2, "  Tab2  ")
+        self.layout.addWidget(tabwidget, 0, 0)
+        # self.threadpool = threadpool
+        # self.realrun = realrun
 
-        self.main_layout = QVBoxLayout(self)
-        self.resize(1000, 1)    # TODO: this seems not working
+        # self.main_layout = QVBoxLayout(self)
+        # self.setLayout(self.main_layout)
+        # # self.resize(1000, 1)    # TODO: this seems not working
 
-        self.init_tab_bar()
+        # self.init_tab_bar()
         
-        # Create first tab
-        self.tab1.layout = QVBoxLayout(self)
-        self.pushButton1 = QPushButton("PyQt5 button")
+        # # Create first tab
+        # self.tab1.layout = QVBoxLayout(self)
+        # self.pushButton1 = QPushButton("PyQt5 button")
 
-        self.l = QLabel("Start")
-        self.counter = 0
-        self.timer = QTimer()
-        self.timer.setInterval(1000)
-        self.timer.timeout.connect(self.recurring_timer)
-        self.timer.start()
+        # self.l = QLabel("Start")
+        # self.counter = 0
+        # self.timer = QTimer()
+        # self.timer.setInterval(1000)
+        # self.timer.timeout.connect(self.recurring_timer)
+        # self.timer.start()
 
-        self.tab1.layout.addWidget(self.pushButton1)
-        self.tab1.layout.addWidget(self.l)
-        self.tab1.setLayout(self.tab1.layout)
+        # self.tab1.layout.addWidget(self.pushButton1)
+        # self.tab1.layout.addWidget(self.l)
+        # self.tab1.setLayout(self.tab1.layout)
         
         # Add tabs to widget
-        self.main_layout.addWidget(self.tabs)
-        self.setLayout(self.main_layout)
+        # self.main_layout.addWidget(self.tabs)
 
         if self.realrun == False:
             self.test()
