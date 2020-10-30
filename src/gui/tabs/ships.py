@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QComboBox, QCheckBox
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QScrollArea
 from PyQt5.QtWidgets import QHeaderView, QSizePolicy
 from PyQt5.QtCore import Qt, pyqtSlot, QSize
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QIcon
 
 from ...func import constants as CONST
 
@@ -25,6 +25,8 @@ class TopCheckboxes(QWidget):
         super().__init__()
         self.layout = QGridLayout(self)
         self.layout.setContentsMargins(0,0,0,0)
+        # TODO: fix the size
+        # self.setGeometry(0,0, 1000, 100)
 
         for i in range(10):
             self.layout.setColumnStretch(i, 1)
@@ -33,20 +35,22 @@ class TopCheckboxes(QWidget):
 
     def init_dropdowns(self):
         lock_select = ["ALL", "YES", "NO"]
-        self.add_dropdown("LOCK", lock_select, self.lock_handler, 0, 0)
         level_select = ["ALL", "Lv. 1", "> Lv. 1", "\u2265 Lv. 90", "\u2265 Lv. 100", "= Lv. 110"]
-        self.add_dropdown("LEVEL", level_select, self.level_handler, 0, 1)
         value_select = ["Equip. Incl.", "Raw Value"]
-        self.add_dropdown("VALUE", value_select, self.value_handler, 0, 2)
         mod_select = ["ALL", "Non-mod. Only", "Mod I. Only"]
-        self.add_dropdown("MOD.", mod_select, self.mod_handler, 0, 3)
-        rarity_select = ["\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
-        self.add_dropdown("RARITY", rarity_select, self.rarity_handler, 0, 4)
-        # current = 30/60, max only = 60
         health_select = ["Current Value", "Max Only"]
-        self.add_dropdown("HEALTH", health_select, self.health_handler, 0, 5)
+        rarity_select = ["\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
         married_select = ["ALL", "Married Only", "Non Married Only"]
-        self.add_dropdown("MARRY", married_select, self.marry_handler, 0, 6)
+        size_select = ["ALL", "SMALL", "MIDIUM", "LARGE"]
+        self.add_dropdown("LOCK", lock_select, self.lock_handler, 0, 0)
+        self.add_dropdown("LEVEL", level_select, self.level_handler, 0, 1)
+        self.add_dropdown("VALUE", value_select, self.value_handler, 0, 2)
+        self.add_dropdown("MOD.", mod_select, self.mod_handler, 0, 3)
+        self.add_dropdown("Type (Size)", size_select, self.size_handler, 0, 4)
+        self.add_dropdown("RARITY", rarity_select, self.rarity_handler, 0, 5)
+        # current = 30/60, max only = 60
+        self.add_dropdown("HEALTH", health_select, self.health_handler, 0, 6)
+        self.add_dropdown("MARRY", married_select, self.marry_handler, 0, 7)
 
     def add_dropdown(self, label, choices, handler, x, y):
         w = QWidget()
@@ -63,6 +67,9 @@ class TopCheckboxes(QWidget):
         self.layout.addWidget(w, x, y, 1, 1)
 
     def lock_handler(self, text):
+        print(text)
+
+    def size_handler(self, text):
         print(text)
 
     def level_handler(self, text):
@@ -109,40 +116,74 @@ class TopCheckboxes(QWidget):
             print("unchecked " + cb.text())
 
 class ShipTable(QTableWidget):
-    def __init__(self, rows):
+    def __init__(self):
         super().__init__()
         self.setStyleSheet("")
+        # TODO: https://github.com/ColinDuquesnoy/QDarkStyleSheet/issues/245
         self.headers = ["", "Name", "ID", "Class", "Lv.", "HP", "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
         self.setColumnCount(len(self.headers))
         self.setHorizontalHeaderLabels(self.headers)
         self.setShowGrid(False)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        try:
-            for i in range(rows):
-                self.insertRow(i)
-                # QPixmap vs. QImage https://stackoverflow.com/a/10315773
-                path = "src/assets/S/S_NORMAL_1.png"    # wxh=363x88, cropped=156x88
-                img = QPixmap()
-                is_loaded = img.load(path)
-                if is_loaded:
-                    self.setRowHeight(i, 50)
-                    self.setColumnWidth(i, 80)
-                    thumbnail = QTableWidgetItem()
-                    thumbnail.setData(Qt.DecorationRole, img.scaled(78, 44))
-                    self.setItem(i, 0, thumbnail)
-                else:
-                    print(path)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setMaximumSize(self.get_table_widget_size())
+        self.setMinimumSize(self.get_table_widget_size())
+        # self.show()
 
-            self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-            self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-            self.setMaximumSize(self.getQTableWidgetSize())
-            self.setMinimumSize(self.getQTableWidgetSize())
-            self.show()
-        except Exception as e:
-            print(traceback.format_exc())
+    def add_ship(self, row, data):
+        # pass
+        # self.setItem(row, 0, "")
+        # "shipCid":10019311,
+        # self.set_thumbnail(row, data)
+        # self.set_name(row, data)
+        pass
 
-    def getQTableWidgetSize(self):
+    def set_name(self, row, data):
+        n = data["title"]
+        n_wig = QTableWidgetItem(n)
+        if data["married"] == 1:
+            n_wig.setIcon(QIcon(get_data_path("src/assets/icons/ring_60.png")))
+        self.setItem(row, 1, n_wig)
+
+    def set_thumbnail(self, row, data):
+        # get_data_path
+        cid = str(data["shipCid"])
+        if cid[:3] == "100":
+            prefix = "S_NORMAL_"
+        elif cid[:3] == "110":
+            prefix = "S_NORMAL_1"
+        else:
+            err = "Unrecognized ship cid prefix: " + cid
+            logging.warning(err)
+            return None
+        img_path = "src/assets/S/" + prefix + str(int(cid[3:6])) + ".png"
+        img = QPixmap()
+        is_loaded =  img.load(get_data_path(img_path))
+        if is_loaded:
+            thumbnail = QTableWidgetItem()
+            thumbnail.setData(Qt.DecorationRole, img.scaled(78, 44))
+            self.setItem(row, 0, thumbnail)
+        else:
+            img = QPixmap()
+            img.load(get_data_path("src/assets/S/0v0.png"))
+            thumbnail = QTableWidgetItem()
+            thumbnail.setData(Qt.DecorationRole, img.scaled(78, 44))
+            err = "Image path does not exist: " + img_path
+            logging.error(err)
+            print(cid, data["title"])
+            return None
+
+    def cid_to_id(self, cid):
+        # TODO, implement the ship/size at data level
+        # cid[-2:] == 11 ->small, 12->mid, 13->large
+        # cid[:3] == 100 -> non-mod, 110->mod
+        # 11019211 -> S_NORMAL_1192
+        # 10014412 -> S_NORMAL_144
+        return str(cid)[3:6]
+        
+
+    def get_table_widget_size(self):
         w = self.verticalHeader().width() + 4  # +4 seems to be needed
         for i in range(self.columnCount()):
             w += self.columnWidth(i)  # seems to include gridline (on my machine)
@@ -153,7 +194,6 @@ class ShipTable(QTableWidget):
 
 class TabShips(QWidget):
     def __init__(self, realrun):
-        # super(QWidget, self).__init__(parent)
         super().__init__()
 
         list_box = QVBoxLayout(self)
@@ -167,39 +207,23 @@ class TabShips(QWidget):
         self.scroll_layout = QVBoxLayout(scroll_content)
         scroll_content.setLayout(self.scroll_layout)
         scroll.setWidget(scroll_content)
-        self.show()
 
-        self.ships = []
-        self.tables = []
         # only 20 out of 27 is used by the game at 5.0.0
-        for i in range(27):
-            self.ships.append([])
-            tb = QTableWidget()
-            self.tables.append(tb)
+        self.ships = [[]] * 27
+        self.tables = [None] * 27
 
-        if realrun == False:
+        if realrun == 0:
             self.test()
 
     def test(self):
         logging.debug("Starting tests")
-        x = ShipTable(50)
-        y = ShipTable(50)
         ck = TopCheckboxes()
         self.scroll_layout.addWidget(ck)
-        self.scroll_layout.addWidget(x)
-        self.scroll_layout.addWidget(y)
-
-    # def init_table(self, table):
-    #     table.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-
-    #     table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-    #     table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-    #     table.resizeColumnsToContents()
-    #     table.setFixedSize(table.horizontalHeader().length() + 
-    #                        table.verticalHeader().width(),
-    #                        table.verticalHeader().length() + 
-    #                        table.horizontalHeader().height())
+        # import json
+        # p = get_data_path('api_getShipList.json')
+        # with open(p) as f:
+            # d = json.load(f)
+        # self.on_received_shiplist(d)
 
     @pyqtSlot(dict)
     def on_received_shiplist(self, data):
@@ -208,61 +232,21 @@ class TabShips(QWidget):
                 self.ships[s["type"]].append(s)
             for ship_type, ship_lists in enumerate(self.ships):
                 if ship_type not in CONST.ship_type:
-                    pass
+                    continue
                 else:
-                    if len(ship_lists) != 0 and ship_type==12:
-                        tb = self.tables[ship_type]
-                        self.main_layout.addWidget(tb)
+                    # if len(ship_lists) != 0:
+                    continue
+                    if len(ship_lists) != 0 and ship_type==4:
+                        tb = ShipTable()
+                        self.tables[ship_type] = tb
+                        self.scroll_layout.addWidget(tb)
+                        print("=================================")
                         print(ship_type, len(ship_lists))
                         row = col = 0
-                        tb.setColumnCount(1)    # TODO: set count according to ship type
-                        # self.tables[ship_type].horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
                         for ship in ship_lists:
                             tb.insertRow(row)
-                            tb.setItem(row, col, QTableWidgetItem(ship["title"]))
+                            tb.add_ship(row, ship)
                             row += 1
-                        # self.init_table(self.tables[ship_type])
-                        # self.tables[ship_type].resize(0,0)
-                        # tb.setHorizontalHeaderLabels(self.hheaders)
-                        tb.verticalHeader().setVisible(False)
-                        tb.resizeRowsToContents()
-                        tb.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-                        tb.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-                        tb.setMaximumSize(self.get_table_size(tb))
-                        tb.setMinimumSize(self.get_table_size(tb))
-                '''
-                title = u["title"]
-                cid = u["shipCid"]
-                lv = u["level"]
-                # lv hover
-                exp = u["exp"]
-                n_exp = u["nextExp"]
-                # name hover
-                love = u["love"]
-                love_max = u["loveMax"]
-                equips = u["equipment"]
-                _id = u["id"]
-                tact = u["tactics"]
-                is_locked = u["isLocked"]
-                # if all 0, skip
-                cap_slot = u["capacitySlot"]
-                cap_max = u["capacitySlotMax"]
-                ms_slot = u["missileSlot"]
-                ms_max = u["missileSlotMax"]
-                # w/o equip
-                sn = u["battlePropsBasic"]
-                # with equip but wounded
-                sp = u["battleProps"]
-                # with equip and full HP/full refuel etc
-                sm = u["battlePropsMax"]   
-                try:         
-                    skill = u["skillType"] #str
-                    skill_lv = u["skillLevel"]
-                except KeyError:
-                    # This ship doesn't have skill
-                    pass
-                '''
-
 
 
 # End of File
