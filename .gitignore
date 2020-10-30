@@ -112,3 +112,7 @@ dmypy.json
 *.json
 example_json/
 tools/S/
+equip.png
+gui_main.py
+resource.png
+ships.png
