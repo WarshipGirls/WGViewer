@@ -76,9 +76,9 @@ class MainInterfaceTabs(QWidget):
         self.tab_advance = TabAdvanceFunctions(self)
 
         # Add tabs
+        self.tabs.addTab(self.tab_ships,"  Ships  ")
         self.tabs.addTab(self.tab1,"  Sortie  ")
         self.tabs.addTab(self.tab2,"  Fleets  ")
-        self.tabs.addTab(self.tab_ships,"  Ships  ")
         self.tabs.addTab(self.tab4,"  Equipment  ")
         self.tabs.addTab(self.tab5,"  Tactics  ")
         self.tabs.addTab(self.tab_advance,"  Advance Functions  ")
