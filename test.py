@@ -8,22 +8,12 @@ class MyTable(QTableWidget):
     def __init__(self, rows):
         super().__init__()
 
-        # img, name(icon=married), id, Class(type), Lv. hp, aircraft, torpedo, evasion, range, AS(anti-sub), Firepower, Armour, Luck, AA(anti-air), Recon, speed, Equip(4 slot), Tactics (3 slot) Lock
-        # ASW = Anti-Submarin Warfare
-        # LOS = Line of sight = recon.
         self.headers = ["", "Name", "ID", "Class", "Lv.", "HP", "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
-        # TODO: name col need stretch=2 (incl. img)
         self.setColumnCount(len(self.headers))
         self.setHorizontalHeaderLabels(self.headers)
-        # self.setIconSize(QSize(x, x))
-        # self.verticalHeader().hide()
-        # self.horizontalHeader().hide()
         self.setShowGrid(False)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        # self.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        # self.horizontalScrollBar().setEnabled(False)
-        # self.verticalScrollBar().setEnabled(False)
         try:
             for i in range(rows):
                 self.insertRow(i)
@@ -169,6 +159,29 @@ class MyWindow(QWidget):
         self.show()
 
 
-App = QApplication(sys.argv)
-win = MyWindow()
-sys.exit(App.exec())
+# App = QApplication(sys.argv)
+# win = MyWindow()
+# sys.exit(App.exec())
+
+class Window(QWidget):
+    def __init__(self):
+        QWidget.__init__(self)
+        layout = QGridLayout()
+        self.setLayout(layout)
+        # label1 = QLabel("Widget in Tab 1.")
+        win = MyWindow()
+        # qss_path = 'src/assets/dark_style.qss'
+        # qss_file = open(qss_path).read()
+        # self.setStyleSheet(qss_file)
+        import qdarkstyle
+        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        label2 = QLabel("Widget in Tab 2.")
+        tabwidget = QTabWidget()
+        tabwidget.addTab(win, "Tab 1")
+        tabwidget.addTab(label2, "Tab 2")
+        layout.addWidget(tabwidget, 0, 0)
+
+app = QApplication(sys.argv)
+screen = Window()
+screen.show()
+sys.exit(app.exec_())
