@@ -31,7 +31,6 @@ class SideDock(QDockWidget):
     def __init__(self, parent, realrun):
         super(SideDock, self).__init__(parent)
         self.user_screen_h = QDesktopWidget().screenGeometry(-1).height()
-
         self.init_attr()
 
         self.sig_resized.connect(self.update_geometry)
@@ -315,8 +314,7 @@ class SideDock(QDockWidget):
             else:
                 counters[idx] = 0
                 timers[idx].stop()
-
-        labels[idx].setText(self.get_formatted_time(counters[idx]))
+        labels[idx].setText(str(timedelta(seconds=counters[idx])))
 
     def start_new_timer(self, counters, labels, timers, idx):
         '''
@@ -335,9 +333,6 @@ class SideDock(QDockWidget):
     def init_task_counters(self):
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, 0)
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, 1)
-
-    def get_formatted_time(self, t):
-        return str(timedelta(seconds=t))
 
 
     # ================================

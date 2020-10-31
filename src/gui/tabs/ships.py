@@ -7,11 +7,12 @@ from PyQt5.QtWidgets import QWidget, QLabel, QTableWidget, QTableWidgetItem
 from PyQt5.QtWidgets import QComboBox, QCheckBox
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QScrollArea
 from PyQt5.QtWidgets import QHeaderView, QSizePolicy
+from PyQt5.QtWidgets import QStyledItemDelegate
 from PyQt5.QtCore import Qt, pyqtSlot, QSize
 from PyQt5.QtGui import QPixmap, QIcon
 
+from ...func.helper_function import Helper
 from ...func import constants as CONST
-
 
 def get_data_path(relative_path):
     # This needs to be in current file
@@ -130,9 +131,21 @@ class TopCheckboxes(QWidget):
         else:
             print("unchecked " + cb.text())
 
+
+class ShipTableDelegate(QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        # Make only column 1 editable
+        if index.column() == 1:
+            return super(ShipTableDelegate, self).createEditor(parent, option, index)
+        else:
+            print("clicked " + str(index.column()))
+
+
 class ShipTable(QTableWidget):
     def __init__(self):
         super().__init__()
+        self.hlp = Helper()
+        self.setItemDelegate(ShipTableDelegate(self))
         # TODO: https://github.com/ColinDuquesnoy/QDarkStyleSheet/issues/245
         self.headers = ["", "Name", "ID", "Class", "Lv.", "HP", "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
         self.setColumnCount(len(self.headers))
@@ -157,6 +170,8 @@ class ShipTable(QTableWidget):
         n_wig = QTableWidgetItem(n)
         if data["married"] == 1:
             n_wig.setIcon(QIcon(get_data_path("src/assets/icons/ring_60.png")))
+            s = "Married on " + self.hlp.ts_to_date(data["marry_time"])
+            n_wig.setToolTip(s)
         self.setItem(row, 1, n_wig)
 
     def set_thumbnail(self, row, data):
