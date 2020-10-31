@@ -39,10 +39,11 @@ class TabShips(QWidget):
         self.ships = []
         for i in range(27):
             self.ships.append([])
-        ck = TopCheckboxes()
-        self.scroll_layout.addWidget(ck)
         # TODO? https://github.com/WarshipGirls/WGViewer/issues/7
         self.ship_table = ShipTable()
+        ck = TopCheckboxes(self.ship_table)
+
+        self.scroll_layout.addWidget(ck)
         self.scroll_layout.addWidget(self.ship_table)
 
         self.scroll_layout.setStretch(0, 1)

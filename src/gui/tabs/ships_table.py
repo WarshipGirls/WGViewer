@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QStyledItemDelegate
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSlot
 
 from ...func.helper_function import Helper
 from ...func import constants as CONST
@@ -151,6 +151,11 @@ class ShipTable(QTableWidget):
         # TODO TODO link checkbox status to table
         pass
 
-
+    @pyqtSlot(str)
+    def on_lock_handler(self, data):
+        if data == None:
+            pass
+        else:
+            print("ddddddddddddddddddddddddddd")
 
 # End of File

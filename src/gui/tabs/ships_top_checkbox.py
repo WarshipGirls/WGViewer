@@ -4,9 +4,10 @@ from PyQt5.QtWidgets import QHBoxLayout, QGridLayout
 
 
 class TopCheckboxes(QWidget):
-    def __init__(self):
+    def __init__(self, table):
         super().__init__()
         self.layout = QGridLayout(self)
+        self.table = table
         # self.layout.setContentsMargins(0,0,0,0)
         # TODO: fix the size
         # self.setGeometry(0,0, 500, 100)
@@ -33,7 +34,8 @@ class TopCheckboxes(QWidget):
         rarity_select = ["\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
         married_select = ["ALL", "Married Only", "Non Married Only"]
         size_select = ["ALL", "SMALL", "MIDIUM", "LARGE"]
-        self.add_dropdown("LOCK", lock_select, self.lock_handler, 0, 0)
+        # self.add_dropdown("LOCK", lock_select, self.lock_handler, 0, 0)
+        self.add_dropdown("LOCK", lock_select, self.table.on_lock_handler, 0, 0)
         self.add_dropdown("LEVEL", level_select, self.level_handler, 0, 1)
         self.add_dropdown("VALUE", value_select, self.value_handler, 0, 2)
         self.add_dropdown("MOD.", mod_select, self.mod_handler, 0, 3)
@@ -45,7 +47,7 @@ class TopCheckboxes(QWidget):
 
     def add_dropdown(self, label, choices, handler, x, y):
         w = QWidget()
-        w.setFixedHeight(40)
+        # w.setFixedHeight(40)
         # w.setFixedWidth(200)  # not working as expected
         wl = QHBoxLayout()
         w.setLayout(wl)
