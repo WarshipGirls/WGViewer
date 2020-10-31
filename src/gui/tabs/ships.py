@@ -37,8 +37,8 @@ class TopCheckboxes(QWidget):
         self.layout.setRowStretch(0, 1)
         self.layout.setRowStretch(1, 1)
         self.layout.setRowStretch(2, 1)
-        self.setFixedHeight(100)
-        # self.setFixedWidth(1000)
+        # self.setFixedHeight(100)
+        # self.setFixedWidth(1000)  # not working as expected
         print(self.width(), self.height())
 
     def init_dropdowns(self):
@@ -63,7 +63,7 @@ class TopCheckboxes(QWidget):
     def add_dropdown(self, label, choices, handler, x, y):
         w = QWidget()
         w.setFixedHeight(40)
-        # w.setFixedWidth(200)
+        # w.setFixedWidth(200)  # not working as expected
         wl = QHBoxLayout()
         w.setLayout(wl)
         l = QLabel(label)
@@ -133,7 +133,6 @@ class TopCheckboxes(QWidget):
 class ShipTable(QTableWidget):
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("")
         # TODO: https://github.com/ColinDuquesnoy/QDarkStyleSheet/issues/245
         self.headers = ["", "Name", "ID", "Class", "Lv.", "HP", "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
         self.setColumnCount(len(self.headers))
@@ -142,9 +141,20 @@ class ShipTable(QTableWidget):
 
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # self.show()
+
+        self.ships_S = []
+        self.ships_M = []
+        self.ships_L = []
+        self.non_mods = []
+        self.mods = []
+
+    def adjust_table_size(self):
         self.setMaximumSize(self.get_table_widget_size())
         self.setMinimumSize(self.get_table_widget_size())
-        # self.show()
+
+        i = "table w = " + str(self.width()) + ", h = " + str(self.height())
+        logging.debug(i)    # 1904, 2367
 
     def add_ship(self, row, data):
         # pass
@@ -152,7 +162,7 @@ class ShipTable(QTableWidget):
         # "shipCid":10019311,
         self.set_thumbnail(row, data)
         self.set_name(row, data)
-        pass
+        # pass
 
     def set_name(self, row, data):
         n = data["title"]
@@ -162,7 +172,6 @@ class ShipTable(QTableWidget):
         self.setItem(row, 1, n_wig)
 
     def set_thumbnail(self, row, data):
-        # get_data_path
         cid = str(data["shipCid"])
         if cid[:3] == "100":
             prefix = "S_NORMAL_"
@@ -180,14 +189,34 @@ class ShipTable(QTableWidget):
             thumbnail.setData(Qt.DecorationRole, img.scaled(78, 44))
             self.setItem(row, 0, thumbnail)
         else:
-            img = QPixmap()
-            img.load(get_data_path("src/assets/S/0v0.png"))
-            thumbnail = QTableWidgetItem()
-            thumbnail.setData(Qt.DecorationRole, img.scaled(78, 44))
+            tmp = QPixmap()
+            tmp.load(get_data_path("src/assets/S/0v0.png"))
+            tmp2 = QTableWidgetItem()
+            tmp2.setData(Qt.DecorationRole, tmp.scaled(78, 44))
+            self.setItem(row, 0, tmp2)
             err = "Image path does not exist: " + img_path
             logging.error(err)
             print(cid, data["title"])
             return None
+
+    def categorize_ship(self, cid):
+        if cid[-2:] == 11:
+            self.ships_S.append(cid)
+        elif cid[-2:] == 12:
+            self.ships_M.append(cid)
+        elif cid[-2:] == 13:
+            self.ships_L.append(cid)
+        else:
+            err = "Unrecognized cid pattern: " + str(cid)
+            logging.warn(err)
+
+        if cid[:3] == 100:
+            self.non_mods.append(cid)
+        elif cid[:3] == 110:
+            self.mods.append(cid)
+        else:
+            err = "Unrecognized cid pattern: " + str(cid)
+            logging.warn(err)
 
     def cid_to_id(self, cid):
         # TODO, implement the ship/size at data level
@@ -224,8 +253,17 @@ class TabShips(QWidget):
         scroll.setWidget(scroll_content)
 
         # only 20 out of 27 is used by the game at 5.0.0
-        self.ships = [[]] * 27
-        self.tables = [None] * 27
+        # self.ships = [[]] * 27    # binding to same list
+        self.ships = []
+        for i in range(27):
+            self.ships.append([])
+        # print(self.ships)
+        # self.tables = [None] * 27
+        ck = TopCheckboxes()
+        self.scroll_layout.addWidget(ck)
+        # TODO? https://github.com/WarshipGirls/WGViewer/issues/7
+        self.ship_table = ShipTable()
+        self.scroll_layout.addWidget(self.ship_table)
 
         if realrun == 0:
             self.test()
@@ -235,8 +273,6 @@ class TabShips(QWidget):
 
     def test(self):
         logging.debug("Starting tests")
-        ck = TopCheckboxes()
-        self.scroll_layout.addWidget(ck)
         import json
         p = get_data_path('api_getShipList.json')
         with open(p) as f:
@@ -245,26 +281,45 @@ class TabShips(QWidget):
 
     @pyqtSlot(dict)
     def on_received_shiplist(self, data):
-        if data != None:
+        if data == None:
+            logging.error("Invalid ship list data.")
+        else:
             for s in data["userShipVO"]:
+
                 self.ships[s["type"]].append(s)
+
+            # print(self.ships)
+            # for k, v in enumerate(self.ships):
+                # print(k, len(v))
+
+            # print(len(self.ships[0]))
+            # print(len(self.ships[1]))
+            # print(len(self.ships[2]))
+            # print(len(self.ships[3]))
+            # print(len(self.ships[4]))
+
+            count = 0
             for ship_type, ship_lists in enumerate(self.ships):
                 if ship_type not in CONST.ship_type:
                     continue
                 else:
                     # if len(ship_lists) != 0:
-                    continue
-                    if len(ship_lists) != 0 and ship_type==4:
-                        tb = ShipTable()
-                        self.tables[ship_type] = tb
-                        self.scroll_layout.addWidget(tb)
-                        print("=================================")
-                        print(ship_type, len(ship_lists))
-                        row = col = 0
+                    # continue
+                    if len(ship_lists) != 0:
+                        # tb = ShipTable()
+                        # self.tables[ship_type] = tb
+                        # self.scroll_layout.addWidget(tb)
+                        # print("=================================")
+                        # print(ship_type, len(ship_lists))
+                        # row = col = 0
                         for ship in ship_lists:
-                            tb.insertRow(row)
-                            tb.add_ship(row, ship)
-                            row += 1
+                        #     self.ship_table.insertRow(row)
+                        #     self.ship_table.add_ship(row, ship)
+                        #     row += 1
+                            self.ship_table.insertRow(count)
+                            self.ship_table.add_ship(count, ship)
+                            count += 1
+            self.ship_table.adjust_table_size()
 
 
 # End of File
