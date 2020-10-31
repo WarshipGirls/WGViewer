@@ -112,3 +112,4 @@ dmypy.json
 *.json
 example_json/
 env/
+*.un~
