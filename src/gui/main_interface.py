@@ -24,7 +24,6 @@ class MainInterface(QMainWindow):
 
     def __init__(self, server, channel, cookies, realrun=True):
         super().__init__()
-        # self.qss = qss
         self.server = server
         self.channel = channel
         self.cookies = cookies
@@ -33,7 +32,6 @@ class MainInterface(QMainWindow):
         # self.sess = Session()
         self.hlp = Helper()
 
-        # self.setStyleSheet(self.qss)
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         user_w = QDesktopWidget().screenGeometry(-1).width()
         user_h = QDesktopWidget().screenGeometry(-1).height()
@@ -99,7 +97,7 @@ class MainInterface(QMainWindow):
             return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
 
         msg = QMessageBox()
-        # msg.setStyleSheet(self.qss)
+        msg.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         msg.setWindowTitle("About")
         msg.setTextFormat(Qt.RichText)
 

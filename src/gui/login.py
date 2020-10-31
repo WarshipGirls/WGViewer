@@ -19,8 +19,6 @@ class LoginForm(QWidget):
     # LoginForm is derived from QWidget; there can be multiple inheritance
     def __init__(self):
         super().__init__()
-        # self.qss = qss
-        # self.setStyleSheet(self.qss)
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         
         user_w = QDesktopWidget().screenGeometry(-1).width()
@@ -102,7 +100,6 @@ class LoginForm(QWidget):
 
     def check_password(self):
         msg = QMessageBox()
-        # msg.setStyleSheet()
         msg.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         msg.setWindowTitle("Info")
 
