@@ -137,8 +137,8 @@ class ShipTable(QTableWidget):
         self.headers = ["", "Name", "ID", "Class", "Lv.", "HP", "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
         self.setColumnCount(len(self.headers))
         self.setHorizontalHeaderLabels(self.headers)
-        self.setShowGrid(False)
 
+        self.setShowGrid(False)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -147,13 +147,6 @@ class ShipTable(QTableWidget):
         self.ships_L = []
         self.non_mods = []
         self.mods = []
-
-    def adjust_table_size(self):
-        self.setMaximumSize(self.get_table_widget_size())
-        self.setMinimumSize(self.get_table_widget_size())
-
-        i = "table w = " + str(self.width()) + ", h = " + str(self.height())
-        logging.debug(i)    # 1904, 2367
 
     def add_ship(self, row, data):
         self.set_thumbnail(row, data)
@@ -209,16 +202,7 @@ class ShipTable(QTableWidget):
             tmp2.setData(Qt.DecorationRole, tmp.scaled(78, 44))
             self.setItem(row, 0, tmp2)
             err = "Image path does not exist: " + img_path
-            logging.warn(err)   
-
-    def get_table_widget_size(self):
-        w = self.verticalHeader().width() + 4  # +4 seems to be needed
-        for i in range(self.columnCount()):
-            w += self.columnWidth(i)  # seems to include gridline (on my machine)
-        h = self.horizontalHeader().height() + 4
-        for i in range(self.rowCount()):
-            h += self.rowHeight(i)
-        return QSize(w, h)
+            logging.warn(err)
 
 class TabShips(QWidget):
     def __init__(self, realrun):
@@ -246,6 +230,9 @@ class TabShips(QWidget):
         # TODO? https://github.com/WarshipGirls/WGViewer/issues/7
         self.ship_table = ShipTable()
         self.scroll_layout.addWidget(self.ship_table)
+
+        self.scroll_layout.setStretch(0, 1)
+        self.scroll_layout.setStretch(1, 10)   # Give space to the table as much as possible
 
         if realrun == 0:
             self.test()
@@ -276,7 +263,6 @@ class TabShips(QWidget):
                     for ship in ship_lists:
                         self.ship_table.insertRow(self.ship_table.rowCount())
                         self.ship_table.add_ship(self.ship_table.rowCount()-1, ship)
-            self.ship_table.adjust_table_size()
 
 
 # End of File
