@@ -14,11 +14,18 @@ The official sites of the mobile game, Warship Girls (R), are [here (CN server)]
 
 ### Contribution
 
-To start on Windows OS, run
+To contribute code,
+
+1. start a Python vitrual environment
+2. install required packages:
+
+> pip install -r requirements.txt
+
+To build executable on Windows OS, run
 
 > build.bat
 
-To start on Unix OS, run
+To build executable on Unix OS, run
 
 > pyinstaller --clean gui_main.spec
 
