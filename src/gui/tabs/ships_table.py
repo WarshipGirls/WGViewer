@@ -4,6 +4,7 @@ import logging
 
 from PyQt5.QtWidgets import QStyledItemDelegate
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt
 
@@ -45,6 +46,13 @@ class ShipTable(QTableWidget):
         self.ships_L = []
         self.non_mods = []
         self.mods = []
+
+        header = self.horizontalHeader()       
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
 
         self.init_icons()
 
