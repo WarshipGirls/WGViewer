@@ -122,6 +122,7 @@ class ShipTable(QTableWidget):
         self.setItem(args[0], 4, wig)
 
     def set_hp(self, *args):
+        # TODO TODO link checkbox status to table
         pass
 
 

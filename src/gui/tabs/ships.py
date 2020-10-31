@@ -67,7 +67,9 @@ class TabShips(QWidget):
         if data == None:
             logging.error("Invalid ship list data.")
         else:
-            for s in data["userShipVO"]:
+            # First sort by level, then sort by cid
+            sorted_ships = sorted(data["userShipVO"], key=lambda x: (x['level'], x['shipCid']), reverse=True)
+            for s in sorted_ships:
                 self.ships[s["type"]].append(s)
 
             for ship_type, ship_lists in enumerate(self.ships):
