@@ -1,8 +1,13 @@
 certifi==2020.6.20
 chardet==3.0.4
+helpdev==0.7.1
 idna==2.10
+importlib-metadata==2.0.0
 PyQt5==5.15.1
 PyQt5-sip==12.8.1
 pytz==2020.1
+QDarkStyle==2.8.1
+QtPy==1.9.0
 requests==2.24.0
 urllib3==1.25.11
+zipp==3.4.0
