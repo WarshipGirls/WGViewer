@@ -20,12 +20,16 @@ class AlignListView(QtWidgets.QTreeView):
         self.header().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.header().setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
 
-    def add_item(self, key, value, desc=None):
+    def add_item(self, key, value, desc=None, is_limited=False):
         # TODO: add function, when user clicked, pop up build/dev/repair etc
         first = QtGui.QStandardItem(key)
         first.setEditable(False)
         if desc != None:
             first.setToolTip(desc)
+        else:
+            pass
+        if is_limited != False:
+            first.setForeground(QtGui.QColor(255, 51, 51))
         else:
             pass
         second = QtGui.QStandardItem(value)

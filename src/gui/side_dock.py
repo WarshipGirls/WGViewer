@@ -296,7 +296,9 @@ class SideDock(QDockWidget):
 
     def count_down(self, counters, labels, timers, idx):
         counters[idx] -= 1
-        if counters[idx] <= 0:
+        if counters[idx] > 0:
+            pass
+        else:
             if counters == self.task_counters:
                 if idx < 2:
                     # refreshing daily/weekly timers
@@ -445,7 +447,16 @@ class SideDock(QDockWidget):
                 if '#' in desc:
                     # TODO: (lowest priority) how to find `#s10030711#n` ? looks like not the same ID in docks
                     desc = re.sub(r'\[[^]]*\]', i["title"], desc)
-                self.tasklist_view.add_item(i["title"], stat, desc)
+                else:
+                    pass
+                if i['end_time'] != "":
+                    desc += "\nEvent End On: " + i['end_time']
+                    lim_flag = True
+                else:
+                    lim_flag = False
+                prefix = CONST.task_type[i['type']]
+                title = "{}\t{}".format(prefix, i['title']) # {:15s} works on terminal but not PyQt...
+                self.tasklist_view.add_item(title, stat, desc, lim_flag)
 
             m = data["marketingData"]["activeList"]
             for i in m:

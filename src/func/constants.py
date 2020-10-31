@@ -125,6 +125,13 @@ build_type = {
     5: "?"
 }
 
+task_type = {
+    '1': "SINGLE",
+    '2': "DAILY",
+    '3': "WEEKLY",
+    '4': "LIMITED TIME"
+}
+
 air_control = {
     1: "Air Supremacy",
     2: "Air Superiority",

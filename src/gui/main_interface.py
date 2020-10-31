@@ -147,18 +147,16 @@ class MainInterface(QMainWindow):
         url = self.server + 'api/getShipList' + self.hlp.get_url_end(self.channel)
         raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
         data = json.loads(raw_data)
-        if not self.realrun:
-            with open('api_getShipList.json', 'w') as of:
-                json.dump(data, of)
+        with open('api_getShipList.json', 'w') as of:
+            json.dump(data, of)
         self.sig_getShipList.emit(data)
 
     def api_initGame(self):
         url = self.server + 'api/initGame?&crazy=1' + self.hlp.get_url_end(self.channel)
         raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
         data = json.loads(raw_data)
-        if not self.realrun:
-            with open('api_initGame.json', 'w') as of:
-                json.dump(data, of)
+        with open('api_initGame.json', 'w') as of:
+            json.dump(data, of)
         self.sig_initGame.emit(data)
 
     def pve_getPveData(self):
