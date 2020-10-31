@@ -1,3 +1,5 @@
+import qdarkstyle
+
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
 from PyQt5.QtWidgets import QDesktopWidget, QMessageBox
 from PyQt5.QtWidgets import QAction
@@ -20,9 +22,9 @@ class MainInterface(QMainWindow):
     sig_initGame = pyqtSignal(dict)
     sig_getShipList = pyqtSignal(dict)
 
-    def __init__(self, qss, server, channel, cookies, realrun=True):
+    def __init__(self, server, channel, cookies, realrun=True):
         super().__init__()
-        self.qss = qss
+        # self.qss = qss
         self.server = server
         self.channel = channel
         self.cookies = cookies
@@ -31,7 +33,8 @@ class MainInterface(QMainWindow):
         # self.sess = Session()
         self.hlp = Helper()
 
-        self.setStyleSheet(self.qss)
+        # self.setStyleSheet(self.qss)
+        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         user_w = QDesktopWidget().screenGeometry(-1).width()
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.resize(0.67*user_w, 0.67*user_h)
@@ -85,7 +88,7 @@ class MainInterface(QMainWindow):
 
     def init_side_dock(self):
         if self.side_dock_on == False:
-            self.side_dock = SideDock(self, self.qss, self.realrun)
+            self.side_dock = SideDock(self, self.realrun)
             self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
             self.side_dock_on = True
         else:
@@ -96,7 +99,7 @@ class MainInterface(QMainWindow):
             return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
 
         msg = QMessageBox()
-        msg.setStyleSheet(self.qss)
+        # msg.setStyleSheet(self.qss)
         msg.setWindowTitle("About")
         msg.setTextFormat(Qt.RichText)
 

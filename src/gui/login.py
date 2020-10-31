@@ -1,5 +1,6 @@
 # import sys
 import logging
+import qdarkstyle
 
 from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QLineEdit
 from PyQt5.QtWidgets import QComboBox, QMessageBox
@@ -16,10 +17,11 @@ from ..func import constants as constants
 
 class LoginForm(QWidget):
     # LoginForm is derived from QWidget; there can be multiple inheritance
-    def __init__(self, qss):
+    def __init__(self):
         super().__init__()
-        self.qss = qss
-        self.setStyleSheet(self.qss)
+        # self.qss = qss
+        # self.setStyleSheet(self.qss)
+        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         
         user_w = QDesktopWidget().screenGeometry(-1).width()
         user_h = QDesktopWidget().screenGeometry(-1).height()
@@ -100,7 +102,8 @@ class LoginForm(QWidget):
 
     def check_password(self):
         msg = QMessageBox()
-        msg.setStyleSheet(self.qss)
+        # msg.setStyleSheet()
+        msg.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         msg.setWindowTitle("Info")
 
         sess = Session()
@@ -123,7 +126,7 @@ class LoginForm(QWidget):
             msg.exec_()
             msg.close()
             cookies = account.get_cookies()
-            self.mi = MainInterface(self.qss, self.server, self.channel, cookies)
+            self.mi = MainInterface(self.server, self.channel, cookies)
             self.login_success()
         else:
             msg.setText("Incorrect Password.")

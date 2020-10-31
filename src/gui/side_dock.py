@@ -28,9 +28,9 @@ class SideDock(QDockWidget):
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
-    def __init__(self, parent, qss, realrun):
+    def __init__(self, parent, realrun):
         super(SideDock, self).__init__(parent)
-        self.qss = qss
+        # self.qss = qss
         self.user_screen_h = QDesktopWidget().screenGeometry(-1).height()
 
         self.init_attr()
@@ -46,8 +46,8 @@ class SideDock(QDockWidget):
     def test(self):
         self.init_ui()
         import json
-        qss_path = get_data_path('api_initGame.json')
-        with open(qss_path) as f:
+        file_path = get_data_path('api_initGame.json')
+        with open(file_path) as f:
             d = json.load(f)
         self.on_received_lists(d)
         self.on_received_resource(d)
@@ -76,7 +76,7 @@ class SideDock(QDockWidget):
 
     def init_ui(self):
         self.setFloating(False)
-        self.setStyleSheet(self.qss)
+        # self.setStyleSheet(self.qss)
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         # TODO: after selecting a row/cell, cannot be de-selected (highlight looks ugly)
         self.setMinimumWidth(0.4 * self.user_screen_h)

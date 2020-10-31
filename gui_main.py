@@ -27,17 +27,18 @@ if __name__ == '__main__':
     icon_path = get_data_path('src/assets/favicon.ico')
     set_icon(icon_path)
 
-    qss_path = get_data_path('src/assets/dark_style.qss')
-    qss_file = open(qss_path).read()
+    # qss_path = get_data_path('src/assets/dark_style.qss')
+    # qss_file = open(qss_path).read()
 
     if 0:   # user run
-        login_form = LoginForm(qss_file)
+        # login_form = LoginForm(qss_file)
+        login_form = LoginForm()
         login_form.show()
         login_form.raise_()
     else:   # test
         logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logging.info("WG Viewer started...")
-        mi = MainInterface(qss_file, 0, 0, 0, False)
+        mi = MainInterface(0, 0, 0, False)
         mi.show()
 
     sys.exit(app.exec_())
