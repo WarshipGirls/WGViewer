@@ -57,6 +57,7 @@ class TopCheckboxes(QWidget):
             self.layout.setColumnStretch(i, 1)
         self.init_dropdowns()
         self.init_ship_boxes()
+        self.resize(200,200)
 
     def init_dropdowns(self):
         lock_select = ["ALL", "YES", "NO"]
@@ -149,12 +150,12 @@ class MyWindow(QWidget):
 
         scroll_layout = QVBoxLayout(scroll_content)
         scroll_content.setLayout(scroll_layout)
-        x = MyTable(50)
-        y = MyTable(50)
+        # x = MyTable(50)
+        # y = MyTable(50)
         ck = TopCheckboxes()
         scroll_layout.addWidget(ck)
-        scroll_layout.addWidget(x)
-        scroll_layout.addWidget(y)
+        # scroll_layout.addWidget(x)
+        # scroll_layout.addWidget(y)
         scroll.setWidget(scroll_content)
         self.show()
 
@@ -173,8 +174,8 @@ class Window(QWidget):
         # qss_path = 'src/assets/dark_style.qss'
         # qss_file = open(qss_path).read()
         # self.setStyleSheet(qss_file)
-        import qdarkstyle
-        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        # import qdarkstyle
+        # self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         label2 = QLabel("Widget in Tab 2.")
         tabwidget = QTabWidget()
         tabwidget.addTab(win, "Tab 1")

@@ -20,8 +20,10 @@ class MainInterfaceTabs(QWidget):
     def __init__(self, parent, threadpool, realrun):
         super(QWidget, self).__init__(parent)
         self.realrun = realrun
+
         self.layout = QGridLayout()
         self.setLayout(self.layout)
+
         self.tab_ships = TabShips(self.realrun)
         label2 = QLabel("test")
         tabwidget = QTabWidget()

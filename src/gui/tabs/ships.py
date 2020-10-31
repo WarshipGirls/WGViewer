@@ -24,14 +24,22 @@ class TopCheckboxes(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QGridLayout(self)
-        self.layout.setContentsMargins(0,0,0,0)
+        # self.layout.setContentsMargins(0,0,0,0)
         # TODO: fix the size
-        # self.setGeometry(0,0, 1000, 100)
+        # self.setGeometry(0,0, 500, 100)
+        # self.resize(200, 200)
 
         for i in range(10):
             self.layout.setColumnStretch(i, 1)
         self.init_dropdowns()
         self.init_ship_boxes()
+        # self.layout.setRowMinimumHeight(0, 0)
+        self.layout.setRowStretch(0, 1)
+        self.layout.setRowStretch(1, 1)
+        self.layout.setRowStretch(2, 1)
+        self.setFixedHeight(100)
+        # self.setFixedWidth(1000)
+        print(self.width(), self.height())
 
     def init_dropdowns(self):
         lock_select = ["ALL", "YES", "NO"]
@@ -54,6 +62,8 @@ class TopCheckboxes(QWidget):
 
     def add_dropdown(self, label, choices, handler, x, y):
         w = QWidget()
+        w.setFixedHeight(40)
+        # w.setFixedWidth(200)
         wl = QHBoxLayout()
         w.setLayout(wl)
         l = QLabel(label)
@@ -64,7 +74,10 @@ class TopCheckboxes(QWidget):
         wl.addWidget(lc)
         wl.setStretch(0, 2)
         wl.setStretch(1, 8)
-        self.layout.addWidget(w, x, y, 1, 1)
+        # self.layout.addWidget(w, x, y, 1, 1)
+        print("dropdown")
+        print(w.width(), w.height())
+        self.layout.addWidget(w, x, y)
 
     def lock_handler(self, text):
         print(text)
@@ -99,14 +112,16 @@ class TopCheckboxes(QWidget):
         for k, v in enumerate(first_row_types):
             b = QCheckBox(v, self)
             self.first_boxes.append(b)
-            self.layout.addWidget(b, 1, k, 1, 1)
+            # self.layout.addWidget(b, 1, k, 1, 1)
+            self.layout.addWidget(b, 1, k)
             # https://stackoverflow.com/a/35821092
             self.first_boxes[k].stateChanged.connect(lambda _, b=self.first_boxes[k]: self.checkbox_handler(b))
         self.second_boxes = []
         for k, v in enumerate(second_row_types):
             b = QCheckBox(v, self)
             self.second_boxes.append(b)
-            self.layout.addWidget(b, 2, k, 1, 1)
+            # self.layout.addWidget(b, 2, k, 1, 1)
+            self.layout.addWidget(b, 2, k)
             self.second_boxes[k].stateChanged.connect(lambda _, b=self.second_boxes[k]: self.checkbox_handler(b))
 
     def checkbox_handler(self, cb):
@@ -135,8 +150,8 @@ class ShipTable(QTableWidget):
         # pass
         # self.setItem(row, 0, "")
         # "shipCid":10019311,
-        # self.set_thumbnail(row, data)
-        # self.set_name(row, data)
+        self.set_thumbnail(row, data)
+        self.set_name(row, data)
         pass
 
     def set_name(self, row, data):
@@ -214,16 +229,19 @@ class TabShips(QWidget):
 
         if realrun == 0:
             self.test()
+        print("tabships")
+        # self.setFixedHeight(200)
+        print(self.width(), self.height())
 
     def test(self):
         logging.debug("Starting tests")
         ck = TopCheckboxes()
         self.scroll_layout.addWidget(ck)
-        # import json
-        # p = get_data_path('api_getShipList.json')
-        # with open(p) as f:
-            # d = json.load(f)
-        # self.on_received_shiplist(d)
+        import json
+        p = get_data_path('api_getShipList.json')
+        with open(p) as f:
+            d = json.load(f)
+        self.on_received_shiplist(d)
 
     @pyqtSlot(dict)
     def on_received_shiplist(self, data):
