@@ -111,3 +111,4 @@ dmypy.json
 # End of https://www.gitignore.io/api/python
 *.json
 example_json/
+env/
