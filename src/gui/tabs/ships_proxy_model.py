@@ -42,9 +42,10 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         # TODO: fix; row 0 is missing
         if self.name_reg == None and self.lock_opt == None and self.level_opt == None:
             return True
+
         name_res = []
         if self.name_reg == None:
-            name_res.append(source_row)
+            name_res.append(source_row) if source_row != 0 else True
         else:
             print(source_row, source_parent)
             name = ""
@@ -61,12 +62,11 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             # https://docs.python.org/3/library/re.html#re.compile
             name_res.append(self.name_reg.search(name))
         res = all(name_res)
-        # TODO; after fixing row0, return early if false
+        # # TODO; after fixing row0, return early if false
 
-        # no source_row=0 passing into this method
         lock_res = []
         if self.lock_opt == None or self.lock_opt == 'ALL':
-            lock_res.append(source_row)
+            lock_res.append(source_row) if source_row != 0 else True
         else:
             lock_col = 2
             lock_index = self.sourceModel().index(source_row, lock_col, source_parent)
@@ -85,7 +85,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         level_res = []
         if self.level_opt == None or self.level_opt == 'ALL':
-            level_res.append(source_row)
+            level_res.append(source_row) if source_row != 0 else True
         else:
             level_col = 4
             level_index = self.sourceModel().index(source_row, level_col, source_parent)
@@ -107,7 +107,6 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                 pass
 
         res = res and all(level_res)
-
         return res
 
     def setFilterRegExp(self, string):
