@@ -1,12 +1,13 @@
 import sys
 import os
 import logging
+import re
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget, QLabel
 from PyQt5.QtWidgets import QVBoxLayout, QGridLayout, QScrollArea, QHBoxLayout
 from PyQt5.QtWidgets import QComboBox, QCheckBox, QTableView, QLineEdit
-from PyQt5.QtCore import Qt, pyqtSlot, QSortFilterProxyModel, QVariant
+from PyQt5.QtCore import Qt, pyqtSlot, QSortFilterProxyModel, QVariant, QRegExp
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
 from ...func import constants as CONST
@@ -20,6 +21,49 @@ def get_data_path(relative_path):
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
     return relative_path if not os.path.exists(res) else res
+
+
+class ShipSortFilterProxyModel(QSortFilterProxyModel):
+    def __init__(self, *args, **kwargs):
+        QSortFilterProxyModel.__init__(self, *args, **kwargs)
+        # self.name_reg = QRegExp()
+        # self.name_reg.setCaseSensitivity(Qt.CaseInsensitive)
+        # self.name_reg.setPatternSyntax(QRegExp.RegExp)
+        self.name_reg = None
+
+    def setNameFilter(self, regex):
+        '''
+        reg = string, auto mapped to QString in Py3
+        '''
+        if isinstance(regex, str):
+            regex = re.compile(regex)
+        # self.name_reg.setPattern(regex)
+        self.name_reg = regex
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, source_row, source_parent):
+        if not self.name_reg:
+            return True
+        # overwrite filterAcceptsRow()
+        results = []
+        name = ""
+        name_col = 1
+        name_index = self.sourceModel().index(source_row, name_col, source_parent)
+        if name_index.isValid():
+            # name = self.sourceModel().data(name_index, Qt.DisplayRole).toString()
+            name = self.sourceModel().data(name_index, Qt.DisplayRole)
+            if name == None:
+                name = ""
+            else:
+                pass
+        else:
+            pass
+        # results.append(self.name_reg.match(name))
+        # https://docs.python.org/3/library/re.html#re.compile
+        results.append(self.name_reg.search(name))
+        # results.append(self.name_reg.fullmatch(name))
+        return all(results)
+        # return all(results)
 
 
 class TabShips(QWidget):
@@ -67,7 +111,8 @@ class TabShips(QWidget):
         #             ]
         #         )
 
-        self.table_proxy = QSortFilterProxyModel(self)
+        # self.table_proxy = QSortFilterProxyModel(self)
+        self.table_proxy = ShipSortFilterProxyModel(self)
         self.table_proxy.setSourceModel(self.table_model)
 
         self.table_view.setModel(self.table_proxy)
@@ -87,7 +132,8 @@ class TabShips(QWidget):
         # self.search_box.textChanged.connect(self.table_view.on_search_textChanged)
         self.lineEdit       = QtWidgets.QLineEdit(self.lower_content_widget)
         self.lower_layout.addWidget(self.lineEdit, 0, 0, 1, 1)
-        self.lineEdit.textChanged.connect(self.on_lineEdit_textChanged)
+        # self.lineEdit.textChanged.connect(self.on_lineEdit_textChanged)
+        self.lineEdit.textChanged.connect(self.table_proxy.setNameFilter)
         if realrun == 0:
             self.test()
         print("tabships")
