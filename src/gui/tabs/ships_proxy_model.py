@@ -9,6 +9,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         QSortFilterProxyModel.__init__(self, *args, **kwargs)
         self.name_reg = None
         self.lock_opt = None
+        self.level_opt = None
         # self.lock_opt = 'ALL'
         self.int_sort_cols = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
         self.float_sort_cols = [15]
@@ -29,16 +30,23 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.lock_opt = is_lock
         self.invalidateFilter()
 
+    def setLevelFilter(self, level):
+        self.level_opt = level
+        self.invalidateFilter()
+
     def filterAcceptsRow(self, source_row, source_parent):
         '''
         overridden filterAcceptsRow(); virtual function
         return Boolean
         '''
         # TODO: fix; row 0 is missing
+        if self.name_reg == None and self.lock_opt == None and self.level_opt == None:
+            return True
         name_res = []
         if self.name_reg == None:
             name_res.append(source_row)
         else:
+            print(source_row, source_parent)
             name = ""
             name_col = 1
             name_index = self.sourceModel().index(source_row, name_col, source_parent)
@@ -53,14 +61,11 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             # https://docs.python.org/3/library/re.html#re.compile
             name_res.append(self.name_reg.search(name))
         res = all(name_res)
-        if res == False:
-            return res
-        else:
-            pass
-        # res = True
+        # TODO; after fixing row0, return early if false
 
+        # no source_row=0 passing into this method
         lock_res = []
-        if self.lock_opt == 'ALL':
+        if self.lock_opt == None or self.lock_opt == 'ALL':
             lock_res.append(source_row)
         else:
             lock_col = 2
@@ -71,8 +76,38 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                     lock_res.append(isinstance(lock, QIcon))
                 elif self.lock_opt == 'NO':
                     lock_res.append(not isinstance(lock, QIcon))
+                else:
+                    pass
+            else:
+                pass
 
         res = res and all(lock_res)
+
+        level_res = []
+        if self.level_opt == None or self.level_opt == 'ALL':
+            level_res.append(source_row)
+        else:
+            level_col = 4
+            level_index = self.sourceModel().index(source_row, level_col, source_parent)
+            if level_index.isValid():
+                level = self.sourceModel().data(level_index, Qt.DisplayRole)
+                if self.level_opt == 'Lv. 1':
+                    level_res.append(int(level) == 1)
+                elif self.level_opt == "> Lv. 1":
+                    level_res.append(int(level) > 1)
+                elif self.level_opt == "\u2265 Lv. 90":
+                    level_res.append(int(level) >= 90)
+                elif self.level_opt == "\u2265 Lv. 100":
+                    level_res.append(int(level) >= 100)
+                elif self.level_opt == "= Lv. 110":
+                    level_res.append(int(level) == 110)
+                else:
+                    pass
+            else:
+                pass
+
+        res = res and all(level_res)
+
         return res
 
     def setFilterRegExp(self, string):

@@ -16,7 +16,6 @@ class TopCheckboxes(QWidget):
         self.layout.setRowStretch(0, 1)
         self.layout.setRowStretch(1, 1)
         self.layout.setRowStretch(2, 1)
-        print(self.width(), self.height())
 
     def init_dropdowns(self):
         lock_select = ["ALL", "YES", "NO"]
@@ -27,9 +26,8 @@ class TopCheckboxes(QWidget):
         rarity_select = ["\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
         married_select = ["ALL", "Married Only", "Non Married Only"]
         size_select = ["ALL", "SMALL", "MIDIUM", "LARGE"]
-        # self.add_dropdown("LOCK", lock_select, self.lock_handler, 0, 0)
         self.add_dropdown("LOCK", lock_select, self.proxy.setLockFilter, 0, 0)
-        self.add_dropdown("LEVEL", level_select, self.level_handler, 0, 1)
+        self.add_dropdown("LEVEL", level_select, self.proxy.setLevelFilter, 0, 1)
         self.add_dropdown("VALUE", value_select, self.value_handler, 0, 2)
         self.add_dropdown("MOD.", mod_select, self.mod_handler, 0, 3)
         self.add_dropdown("Type (Size)", size_select, self.size_handler, 0, 4)
@@ -52,13 +50,7 @@ class TopCheckboxes(QWidget):
         wl.setStretch(1, 8)
         self.layout.addWidget(w, x, y)
 
-    def lock_handler(self, text):
-        print(text)
-
     def size_handler(self, text):
-        print(text)
-
-    def level_handler(self, text):
         print(text)
 
     def value_handler(self, text):
