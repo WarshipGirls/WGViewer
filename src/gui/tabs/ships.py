@@ -5,11 +5,12 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget, QLabel
 from PyQt5.QtWidgets import QVBoxLayout, QGridLayout, QScrollArea, QHBoxLayout
-from PyQt5.QtWidgets import QComboBox, QCheckBox, QTableView
-from PyQt5.QtCore import Qt, pyqtSlot, QSortFilterProxyModel
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtWidgets import QComboBox, QCheckBox, QTableView, QLineEdit
+from PyQt5.QtCore import Qt, pyqtSlot, QSortFilterProxyModel, QVariant
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
 from ...func import constants as CONST
+from ...func.helper_function import Helper
 from .ships_table import ShipTable, ShipTableDelegate
 from .ships_top_checkbox import TopCheckboxes
 
@@ -24,13 +25,13 @@ def get_data_path(relative_path):
 class TabShips(QWidget):
     def __init__(self, realrun):
         super().__init__()
+        self.hlp = Helper()
 
         scroll_box = QVBoxLayout(self)
         self.setLayout(scroll_box)
         scroll = QScrollArea(self)
         scroll_box.addWidget(scroll)
         scroll.setWidgetResizable(True)
-
 
         self.content_widget = QWidget(scroll)
         self.content_layout = QVBoxLayout(self.content_widget)
@@ -47,17 +48,24 @@ class TabShips(QWidget):
 
         ck = TopCheckboxes(self.upper_content_widget, 0)
 
+        # self.search_box = QLineEdit(self.lower_content_widget)
         self.table_view = QTableView(self.lower_content_widget)
         self.lower_layout = QGridLayout(self.lower_content_widget)
-        self.lower_layout.addWidget(self.table_view, 0, 0, 1, 20)
+        # self.lower_layout.addWidget(self.search_box, 0, 0, 1, 1)
+        self.lower_layout.addWidget(self.table_view, 1, 0, 1, 20)
         self.table_model = QStandardItemModel(self)
 
-        for rowName in range(15*10):
-            self.table_model.invisibleRootItem().appendRow(
-                [   QStandardItem("row {0} col {1}".format(rowName, column))    
-                    for column in range(20)
-                    ]
-                )
+
+        self.ships = []
+        for i in range(27):
+            self.ships.append([])
+        self.init_icons()
+        # for rowName in range(15*10):
+        #     self.table_model.invisibleRootItem().appendRow(
+        #         [   QStandardItem("row {0} col {1}".format(rowName, column))    
+        #             for column in range(20)
+        #             ]
+        #         )
 
         self.table_proxy = QSortFilterProxyModel(self)
         self.table_proxy.setSourceModel(self.table_model)
@@ -67,92 +75,136 @@ class TabShips(QWidget):
         self.table_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        # self.content_widget  = QtWidgets.QWidget(self)
-        # self.lineEdit       = QtWidgets.QLineEdit(self.content_widget)
-        # self.view           = QtWidgets.QTableView(self.content_widget)
-        # self.comboBox       = QtWidgets.QComboBox(self.content_widget)
-        # self.label          = QtWidgets.QLabel(self.content_widget)
+        self.ships_S = []
+        self.ships_M = []
+        self.ships_L = []
+        self.non_mods = []
+        self.mods = []
+        self.headers = ["", "Name", "ID", "Class", "Lv.", "HP", "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
+        self.table_model.setColumnCount(len(self.headers))
+        self.table_model.setHorizontalHeaderLabels(self.headers)
 
-        # self.gridLayout = QtWidgets.QGridLayout(self.content_widget)
-        # self.gridLayout.addWidget(self.lineEdit, 0, 1, 1, 1)
-        # self.gridLayout.addWidget(self.view, 1, 0, 1, 3)
-        # self.gridLayout.addWidget(self.comboBox, 0, 2, 1, 1)
-        # self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
-        # # self.setcontent_widget(self.content_widget)
-        # self.label.setText("Regex Filter")
-        # self.model = QtGui.QStandardItemModel(self)
-        # for rowName in range(3*5):
-        #     self.model.invisibleRootItem().appendRow(
-        #         [   QtGui.QStandardItem("row {0} col {1}".format(rowName, column))    
-        #             for column in range(3)
-        #             ]
-        #         )
+        # self.search_box.textChanged.connect(self.table_view.on_search_textChanged)
+        self.lineEdit       = QtWidgets.QLineEdit(self.lower_content_widget)
+        self.lower_layout.addWidget(self.lineEdit, 0, 0, 1, 1)
+        self.lineEdit.textChanged.connect(self.on_lineEdit_textChanged)
+        if realrun == 0:
+            self.test()
+        print("tabships")
+        # self.setFixedHeight(200)
+        print(self.width(), self.height())
 
-        # self.proxy = QtCore.QSortFilterProxyModel(self)
-        # self.proxy.setSourceModel(self.model)
+    @QtCore.pyqtSlot(str)
+    def on_lineEdit_textChanged(self, text):
+        # https://doc.qt.io/qt-5/qregexp.html#PatternSyntax-enum
+        # TODO, the regex filters from starts, I want filter "contains"
+        search = QtCore.QRegExp(    text,
+                                    QtCore.Qt.CaseInsensitive,
+                                    QtCore.QRegExp.RegExp
+                                    )
+        self.table_proxy.setFilterRegExp(search)
 
-        # self.view.setModel(self.proxy)
-        # self.comboBox.addItems(["Column {0}".format(x) for x in range(self.model.columnCount())])
+    def test(self):
+        logging.debug("Starting tests")
+        import json
+        p = get_data_path('api_getShipList.json')
+        with open(p) as f:
+            d = json.load(f)
+        self.on_received_shiplist(d)
+
+    @pyqtSlot(dict)
+    def on_received_shiplist(self, data):
+        if data == None:
+            logging.error("Invalid ship list data.")
+        else:
+            # First sort by level, then sort by cid
+            sorted_ships = sorted(data["userShipVO"], key=lambda x: (x['level'], x['shipCid']), reverse=True)
+            for s in sorted_ships:
+                self.ships[s["type"]].append(s)
+
+            for ship_type, ship_lists in enumerate(self.ships):
+                if (ship_type not in CONST.ship_type) and (len(ship_lists) != 0):
+                    continue
+                else:
+                    for ship in ship_lists:
+                        self.table_model.insertRow(self.table_model.rowCount())
+                        self.add_ship(self.table_model.rowCount()-1, ship)
 
 
-    #     list_box = QVBoxLayout(self)
-    #     self.setLayout(list_box)
+    def add_ship(self, row, data):
+        self.set_thumbnail(row, str(data["shipCid"]))
+        self.set_name(row, data["title"], data["married"], data["create_time"], data["marry_time"])
+        # self.set_id(row, data["id"], data["isLocked"])
+        # self.set_class(row, data["type"])
+        # self.set_level(row, data["level"], data["exp"], data["nextExp"])
+    def init_icons(self):
+        # To avoid repeatedly loading same icon, preload them
+        self.ring_icon = QIcon(get_data_path("src/assets/icons/ring_60.png"))
+        self.lock_icon = QIcon(get_data_path("src/assets/icons/lock_64.png"))
 
-    #     scroll = QScrollArea(self)
-    #     list_box.addWidget(scroll)
-    #     scroll.setWidgetResizable(True)
-    #     scroll_content = QWidget(scroll)
+    def add_ship(self, row, data):
+        self.set_thumbnail(row, str(data["shipCid"]))
+        self.set_name(row, data["title"], data["married"], data["create_time"], data["marry_time"])
+        # self.set_id(row, data["id"], data["isLocked"])
+        # self.set_class(row, data["type"])
+        # self.set_level(row, data["level"], data["exp"], data["nextExp"])
 
-    #     self.scroll_layout = QVBoxLayout(scroll_content)
-    #     scroll_content.setLayout(self.scroll_layout)
-    #     scroll.setWidget(scroll_content)
+    def set_thumbnail(self, row, cid):
+        ''' Column 0
+        Set ship image (thumbnail) and categorize ships by cid along the way.
+        '''
+        assert (len(cid) == 8)
 
-    #     # only 20 out of 27 is used by the game at 5.0.0
-    #     # self.ships = [[]] * 27    # this binds to same list
-    #     self.ships = []
-    #     for i in range(27):
-    #         self.ships.append([])
-    #     # TODO? https://github.com/WarshipGirls/WGViewer/issues/7
-    #     self.ship_table = ShipTable()
-    #     ck = TopCheckboxes(self.ship_table)
+        if cid[-2:] == "11":
+            self.ships_S.append(int(cid))
+        elif cid[-2:] == "12":
+            self.ships_M.append(int(cid))
+        elif cid[-2:] == "13":
+            self.ships_L.append(int(cid))
+        else:
+            err = "Unrecognized ship cid pattern: " + cid
+            logging.warning(err)
+            return None
 
-    #     self.scroll_layout.addWidget(ck)
-    #     self.scroll_layout.addWidget(self.ship_table)
+        if cid[:3] == "100":
+            prefix = "S_NORMAL_"
+            self.non_mods.append(cid)
+        elif cid[:3] == "110":
+            prefix = "S_NORMAL_1"
+            self.mods.append(cid)
+        else:
+            err = "Unrecognized ship cid pattern: " + cid
+            logging.warning(err)
+            return None
 
-    #     self.scroll_layout.setStretch(0, 1)
-    #     self.scroll_layout.setStretch(1, 10)   # Give space to the table as much as possible
+        # QTableWidgetItem requires unique assignment; thus, same pic cannot assign twice. Differ from QIcon
+        img_path = "src/assets/S/" + prefix + str(int(cid[3:6])) + ".png"
+        img = QPixmap()
+        is_loaded =  img.load(get_data_path(img_path))
+        if is_loaded:
+            thumbnail = QStandardItem()
+            # thumbnail.setData(Qt.DecorationRole, img.scaled(78, 44))
+            thumbnail.setData(QVariant(img.scaled(78, 44)), Qt.DecorationRole)
+            self.table_model.setItem(row, 0, thumbnail)
+        else:
+            tmp = QPixmap()
+            tmp.load(get_data_path("src/assets/S/0v0.png"))
+            tmp2 = QStandardItem()
+            tmp2.setData(QVariant(tmp.scaled(78, 44)), Qt.DecorationRole)
+            self.table_model.setItem(row, 0, tmp2)
+            err = "Image path does not exist: " + img_path
+            logging.warn(err)
 
-    #     if realrun == 0:
-    #         self.test()
-    #     print("tabships")
-    #     # self.setFixedHeight(200)
-    #     print(self.width(), self.height())
-
-    # def test(self):
-    #     logging.debug("Starting tests")
-    #     import json
-    #     p = get_data_path('api_getShipList.json')
-    #     with open(p) as f:
-    #         d = json.load(f)
-    #     self.on_received_shiplist(d)
-
-    # @pyqtSlot(dict)
-    # def on_received_shiplist(self, data):
-    #     if data == None:
-    #         logging.error("Invalid ship list data.")
-    #     else:
-    #         # First sort by level, then sort by cid
-    #         sorted_ships = sorted(data["userShipVO"], key=lambda x: (x['level'], x['shipCid']), reverse=True)
-    #         for s in sorted_ships:
-    #             self.ships[s["type"]].append(s)
-
-    #         for ship_type, ship_lists in enumerate(self.ships):
-    #             if (ship_type not in CONST.ship_type) and (len(ship_lists) != 0):
-    #                 continue
-    #             else:
-    #                 for ship in ship_lists:
-    #                     self.ship_table.insertRow(self.ship_table.rowCount())
-    #                     self.ship_table.add_ship(self.ship_table.rowCount()-1, ship)
+    def set_name(self, *args):
+        wig = QStandardItem(args[1])
+        s = "Met on " + self.hlp.ts_to_date(args[3])
+        if args[2] == 1:
+            wig.setIcon(self.ring_icon)
+            s += "\nMarried on " + self.hlp.ts_to_date(args[4])
+        else:
+            pass
+        wig.setToolTip(s)
+        self.table_model.setItem(args[0], 1, wig)
 
 
 # End of File
