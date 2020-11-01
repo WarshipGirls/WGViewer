@@ -59,9 +59,6 @@ class TopCheckboxes(QWidget):
         wl.addWidget(lc)
         wl.setStretch(0, 2)
         wl.setStretch(1, 8)
-        # self.layout.addWidget(w, x, y, 1, 1)
-        print("dropdown")
-        print(w.width(), w.height())
         self.layout.addWidget(w, x, y)
 
     def lock_handler(self, text):
