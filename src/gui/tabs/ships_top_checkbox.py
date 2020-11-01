@@ -4,24 +4,18 @@ from PyQt5.QtWidgets import QHBoxLayout, QGridLayout
 
 
 class TopCheckboxes(QWidget):
-    def __init__(self):
+    def __init__(self, parent, proxy):
         super().__init__()
-        self.layout = QGridLayout(self)
-        # self.layout.setContentsMargins(0,0,0,0)
-        # TODO: fix the size
-        # self.setGeometry(0,0, 500, 100)
-        # self.resize(200, 200)
+        self.layout = QGridLayout(parent)
+        self.proxy = proxy
 
         for i in range(10):
             self.layout.setColumnStretch(i, 1)
         self.init_dropdowns()
         self.init_ship_boxes()
-        # self.layout.setRowMinimumHeight(0, 0)
         self.layout.setRowStretch(0, 1)
         self.layout.setRowStretch(1, 1)
         self.layout.setRowStretch(2, 1)
-        # self.setFixedHeight(100)
-        # self.setFixedWidth(1000)  # not working as expected
         print(self.width(), self.height())
 
     def init_dropdowns(self):
@@ -33,7 +27,8 @@ class TopCheckboxes(QWidget):
         rarity_select = ["\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
         married_select = ["ALL", "Married Only", "Non Married Only"]
         size_select = ["ALL", "SMALL", "MIDIUM", "LARGE"]
-        self.add_dropdown("LOCK", lock_select, self.lock_handler, 0, 0)
+        # self.add_dropdown("LOCK", lock_select, self.lock_handler, 0, 0)
+        self.add_dropdown("LOCK", lock_select, self.proxy.setLockFilter, 0, 0)
         self.add_dropdown("LEVEL", level_select, self.level_handler, 0, 1)
         self.add_dropdown("VALUE", value_select, self.value_handler, 0, 2)
         self.add_dropdown("MOD.", mod_select, self.mod_handler, 0, 3)
@@ -45,8 +40,6 @@ class TopCheckboxes(QWidget):
 
     def add_dropdown(self, label, choices, handler, x, y):
         w = QWidget()
-        w.setFixedHeight(40)
-        # w.setFixedWidth(200)  # not working as expected
         wl = QHBoxLayout()
         w.setLayout(wl)
         l = QLabel(label)
@@ -57,9 +50,6 @@ class TopCheckboxes(QWidget):
         wl.addWidget(lc)
         wl.setStretch(0, 2)
         wl.setStretch(1, 8)
-        # self.layout.addWidget(w, x, y, 1, 1)
-        print("dropdown")
-        print(w.width(), w.height())
         self.layout.addWidget(w, x, y)
 
     def lock_handler(self, text):
