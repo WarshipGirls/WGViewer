@@ -27,6 +27,8 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
     def __init__(self, *args, **kwargs):
         QSortFilterProxyModel.__init__(self, *args, **kwargs)
         self.name_reg = None
+        self.lock_opt = None
+        # self.lock_opt = 'ALL'
         self.int_sort_cols = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
         self.float_sort_cols = [15]
         self.no_sort_cols = [0]
@@ -42,26 +44,53 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.name_reg = regex
         self.invalidateFilter()
 
+    def setLockFilter(self, is_lock):
+        self.lock_opt = is_lock
+        self.invalidateFilter()
+
     def filterAcceptsRow(self, source_row, source_parent):
-        # overridden filterAcceptsRow()
-        # virtual function
+        '''
+        overridden filterAcceptsRow(); virtual function
+        return Boolean
+        '''
+        name_res = []
         if self.name_reg == None:
-            return True
-        results = []
-        name = ""
-        name_col = 1
-        name_index = self.sourceModel().index(source_row, name_col, source_parent)
-        if name_index.isValid():
-            name = self.sourceModel().data(name_index, Qt.DisplayRole)
-            if name == None:
-                name = ""
+            name_res.append(source_row)
+        else:
+            name = ""
+            name_col = 1
+            name_index = self.sourceModel().index(source_row, name_col, source_parent)
+            if name_index.isValid():
+                name = self.sourceModel().data(name_index, Qt.DisplayRole)
+                if name == None:
+                    name = ""
+                else:
+                    pass
             else:
                 pass
+            # https://docs.python.org/3/library/re.html#re.compile
+            name_res.append(self.name_reg.search(name))
+        res = all(name_res)
+        if res == False:
+            return res
         else:
             pass
-        # https://docs.python.org/3/library/re.html#re.compile
-        results.append(self.name_reg.search(name))
-        return all(results)
+
+        lock_res = []
+        if self.lock_opt == 'ALL':
+            lock_res.append(source_row)
+        else:
+            lock_col = 2
+            lock_index = self.sourceModel().index(source_row, lock_col, source_parent)
+            if lock_index.isValid():
+                lock = self.sourceModel().data(lock_index, Qt.DecorationRole)   # Detect if have ICON
+                if self.lock_opt == 'YES':
+                    lock_res.append(isinstance(lock, QIcon))
+                elif self.lock_opt == 'NO':
+                    lock_res.append(not isinstance(lock, QIcon))
+
+        res = res and all(lock_res)
+        return res
 
     def setFilterRegExp(self, string):
         return super().setFilterRegExp(string)
@@ -110,7 +139,6 @@ class TabShips(QWidget):
         self.content_layout.setStretch(0, 1)
         self.content_layout.setStretch(1, 10)
 
-        ck = TopCheckboxes(self.upper_content_widget, 0)
 
         self.table_view = QTableView(self.lower_content_widget)
         self.lower_layout = QGridLayout(self.lower_content_widget)
@@ -125,9 +153,9 @@ class TabShips(QWidget):
             self.ships.append([])
         self.init_icons()
 
-        # self.table_proxy = QSortFilterProxyModel(self)
         self.table_proxy = ShipSortFilterProxyModel(self)
         self.table_proxy.setSourceModel(self.table_model)
+        ck = TopCheckboxes(self.upper_content_widget, self.table_proxy)
 
         self.table_view.setModel(self.table_proxy)
         self.table_view.setItemDelegate(ShipTableDelegate(self.table_view))
@@ -148,67 +176,7 @@ class TabShips(QWidget):
 
         if realrun == 0:
             self.test()
-        # self.horizontalHeader = self.table_view.horizontalHeader()
-        # self.horizontalHeader.sectionClicked.connect(self.on_view_horizontalHeader_sectionClicked)
-    '''
-    @QtCore.pyqtSlot(int)
-    def on_view_horizontalHeader_sectionClicked(self, logicalIndex):
-        if logicalIndex != 1:
-            return
-        self.logicalIndex   = logicalIndex
-        self.menuValues     = QtWidgets.QMenu(self)
-        self.signalMapper   = QtCore.QSignalMapper(self)  
 
-        # self.comboBox.blockSignals(True)
-        # self.comboBox.setCurrentIndex(self.logicalIndex)
-        # self.comboBox.blockSignals(True)
-
-        valuesUnique = [    self.table_model.item(row, self.logicalIndex).text()
-                            for row in range(self.table_model.rowCount())
-                            ]
-
-        actionAll = QtWidgets.QAction("All", self)
-        actionAll.triggered.connect(self.on_actionAll_triggered)
-        self.menuValues.addAction(actionAll)
-        self.menuValues.addSeparator()
-
-        for actionNumber, actionName in enumerate(sorted(list(set(valuesUnique)))):              
-            action = QtWidgets.QAction(actionName, self)
-            self.signalMapper.setMapping(action, actionNumber)  
-            action.triggered.connect(self.signalMapper.map)  
-            self.menuValues.addAction(action)
-
-        self.signalMapper.mapped.connect(self.on_signalMapper_mapped)  
-
-        headerPos = self.table_view.mapToGlobal(self.horizontalHeader.pos())        
-
-        posY = headerPos.y() + self.horizontalHeader.height()
-        posX = headerPos.x() + self.horizontalHeader.sectionPosition(self.logicalIndex)
-
-        self.menuValues.exec_(QtCore.QPoint(posX, posY))
-
-    @QtCore.pyqtSlot()
-    def on_actionAll_triggered(self):
-        filterColumn = self.logicalIndex
-        filterString = QtCore.QRegExp(  "",
-                                        QtCore.Qt.CaseInsensitive,
-                                        QtCore.QRegExp.RegExp
-                                        )
-        self.table_proxy.setFilterRegExp(filterString)
-        self.table_proxy.setFilterKeyColumn(filterColumn)
-
-    @QtCore.pyqtSlot(int)
-    def on_signalMapper_mapped(self, i):
-        stringAction = self.signalMapper.mapping(i).text()
-        filterColumn = self.logicalIndex
-        filterString = QtCore.QRegExp(  stringAction,
-                                        QtCore.Qt.CaseSensitive,
-                                        QtCore.QRegExp.FixedString
-                                        )
-
-        self.table_proxy.setFilterRegExp(filterString)
-        self.table_proxy.setFilterKeyColumn(filterColumn)
-    '''
     def test(self):
         logging.debug("Starting tests")
         import json
@@ -282,7 +250,6 @@ class TabShips(QWidget):
         is_loaded =  img.load(get_data_path(img_path))
         if is_loaded:
             thumbnail = QStandardItem()
-            # thumbnail.setData(Qt.DecorationRole, img.scaled(78, 44))
             thumbnail.setData(QVariant(img.scaled(78, 44)), Qt.DecorationRole)
             self.table_model.setItem(row, 0, thumbnail)
         else:
@@ -307,14 +274,10 @@ class TabShips(QWidget):
 
     def set_id(self, *args):
         wig = QStandardItem(str(args[1]))
-        # wig = QStandardItem(args[1])
-        # wig = QStandardItem()
-        # wig.setData(QVariant(args[1]))
         if args[2] == 1:
             wig.setIcon(self.lock_icon)
         else:
-            # TODO before find nice representation of lock/unlock pair. use only lock now
-            # wig.setIcon(QIcon(get_data_path("src/assets/icons/unlock_64.png")))
+            # No icon for unlock as we uses QIcon/None to detect lock/unlock
             pass
         self.table_model.setItem(args[0], 2, wig)
 
@@ -323,8 +286,6 @@ class TabShips(QWidget):
         self.table_model.setItem(args[0], 3, wig)
 
     def set_level(self, *args):
-        # wig = QStandardItem()
-        # wig.setData(args[1])
         wig = QStandardItem(str(args[1]))
 
         if args[3] != -1:
