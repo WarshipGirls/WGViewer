@@ -1,20 +1,12 @@
 import sys
 import os
 import logging
-# import re
 
-# from PyQt5 import QtCore, QtGui, QtWidgets
-# from PyQt5.QtWidgets import QWidget, QLabel
-# from PyQt5.QtWidgets import QScrollArea, QHBoxLayout
-# from PyQt5.QtWidgets import QComboBox, QCheckBox, QTableView, QLineEdit
 from PyQt5.QtCore import Qt, QVariant
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
 from ...func import constants as CONST
 from ...func.helper_function import Helper
-# from .ships_table import ShipTable, ShipTableDelegate
-# from .ships_proxy_model import ShipSortFilterProxyModel
-# from .ships_top_checkbox import TopCheckboxes
 
 def get_data_path(relative_path):
     # This needs to be in current file

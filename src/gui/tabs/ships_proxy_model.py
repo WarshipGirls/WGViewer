@@ -3,11 +3,6 @@ import re
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import  QIcon
 
-# from ...func import constants as CONST
-# from ...func.helper_function import Helper
-# from .ships_table import ShipTable, ShipTableDelegate
-# from .ships_proxy_model import ShipSortFilterProxyModel
-# from .ships_top_checkbox import TopCheckboxes
 
 class ShipSortFilterProxyModel(QSortFilterProxyModel):
     def __init__(self, *args, **kwargs):

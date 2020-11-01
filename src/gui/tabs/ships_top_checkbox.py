@@ -8,21 +8,14 @@ class TopCheckboxes(QWidget):
         super().__init__()
         self.layout = QGridLayout(parent)
         self.proxy = proxy
-        # self.layout.setContentsMargins(0,0,0,0)
-        # TODO: fix the size
-        # self.setGeometry(0,0, 500, 100)
-        # self.resize(200, 200)
 
         for i in range(10):
             self.layout.setColumnStretch(i, 1)
         self.init_dropdowns()
         self.init_ship_boxes()
-        # self.layout.setRowMinimumHeight(0, 0)
         self.layout.setRowStretch(0, 1)
         self.layout.setRowStretch(1, 1)
         self.layout.setRowStretch(2, 1)
-        # self.setFixedHeight(100)
-        # self.setFixedWidth(1000)  # not working as expected
         print(self.width(), self.height())
 
     def init_dropdowns(self):
@@ -47,8 +40,6 @@ class TopCheckboxes(QWidget):
 
     def add_dropdown(self, label, choices, handler, x, y):
         w = QWidget()
-        # w.setFixedHeight(40)
-        # w.setFixedWidth(200)  # not working as expected
         wl = QHBoxLayout()
         w.setLayout(wl)
         l = QLabel(label)
