@@ -112,5 +112,6 @@ dmypy.json
 *.json
 example_json/
 tools/S/
+tools/equip_512/
 env/
 *.un~
