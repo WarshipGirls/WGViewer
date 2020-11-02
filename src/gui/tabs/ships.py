@@ -51,14 +51,15 @@ class TabShips(QWidget):
 
         self.table_view = QTableView(self.lower_content_widget)
         self.search_line = QLineEdit(self.lower_content_widget)
-        self.lower_layout = QGridLayout(self.lower_content_widget)
-        self.lower_layout.addWidget(self.search_line, 0, 0, 1, 1)
-        self.lower_layout.addWidget(self.table_view, 1, 0, 1, 20)
 
         self.table_model = ShipModel(self)
         self.table_proxy = ShipSortFilterProxyModel(self)
         self.table_proxy.setSourceModel(self.table_model)
         ck = TopCheckboxes(self.upper_content_widget, self.table_model, self.table_proxy)
+
+        self.lower_layout = QGridLayout(self.lower_content_widget)
+        self.lower_layout.addWidget(self.search_line, 0, 0, 1, 1)
+        self.lower_layout.addWidget(self.table_view, 1, 0, 1, self.table_model.columnCount())
 
         self.table_view.setModel(self.table_proxy)
         self.table_view.setItemDelegate(ShipTableDelegate(self.table_view))

@@ -1,8 +1,10 @@
+import ast
 import re
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import  QIcon
 
+from . import ships_constant as SCONST
 
 class ShipSortFilterProxyModel(QSortFilterProxyModel):
     def __init__(self, *args, **kwargs):
@@ -11,9 +13,12 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.lock_opt = None
         self.level_opt = None
         # self.lock_opt = 'ALL'
-        self.int_sort_cols = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-        self.float_sort_cols = [15]
-        self.no_sort_cols = [0]
+        self.no_sort_cols = [0, 21, 22]
+        self.int_sort_cols = [1, 2, 3, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+        self.float_sort_cols = [4]
+        self.range_sort_col = [5]
+        self.resource_sort_cols = [7, 17, 18, 19]
+        self.slot_sort_col = [20]
 
     def setNameFilter(self, regex):
         '''
@@ -122,14 +127,26 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
     def lessThan(self, source_left, source_right):
         # TODO: sort hp xx/yy
-        if (source_left.isValid() and source_right.isValid):
+        if (source_left.isValid() and source_right.isValid()):
+            l = source_left.data()
+            r = source_right.data()
             if (source_left.column() in self.no_sort_cols):
-                # no sorting
                 pass
             elif (source_left.column() in self.int_sort_cols):
-                return int(source_left.data()) < int(source_right.data())
+                return int(l) < int(r)
             elif (source_left.column() in self.float_sort_cols):
-                return float(source_left.data()) < float(source_right.data())
+                return float(l) < float(r)
+            elif (source_left.column() in self.range_sort_col):
+                return SCONST._range[l] < SCONST._range[r]
+            elif (source_left.column() in self.resource_sort_cols):
+                if (isinstance(l, str) == True) and ("/" in l):
+                    return int(l[:l.find('/')]) < int(r[:r.find('/')]) 
+                else:
+                    return l < r
+            elif (source_left.column() in self.slot_sort_col):
+                    l = 0 if '-' in l else sum(ast.literal_eval(l))
+                    r = 0 if '-' in r else sum(ast.literal_eval(r))
+                    return l < r
             else:
                 pass
         else:

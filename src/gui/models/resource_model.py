@@ -2,8 +2,8 @@ import sys
 import os
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QStandardItem, QStandardItemModel
-from PyQt5.QtCore import QAbstractItemModel, QAbstractTableModel
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QAbstractTableModel
 
 
 def get_data_path(relative_path):
