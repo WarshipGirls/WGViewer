@@ -125,6 +125,13 @@ build_type = {
     5: "?"
 }
 
+range_type = {
+    1: "S",
+    2: "M",
+    3: "L",
+    4: "XL"
+}
+
 air_control = {
     1: "Air Supremacy",
     2: "Air Superiority",

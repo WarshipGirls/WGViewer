@@ -3,7 +3,7 @@ import os
 import logging
 
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon, QColor
 
 from . import ships_constant as SCONST
 from ...func import constants as CONST
@@ -65,7 +65,8 @@ class ShipModel(QStandardItemModel):
         self.set_class(row, d["type"])
         self.set_level(row, d["level"], d["exp"], d["nextExp"])
 
-        self.set_stats(row, d["battleProps"], d["battlePropsMax"], d["battlePropsBasic"])
+        # self.set_stats(row, d["battleProps"], , d["battlePropsBasic"])
+        self.set_stats(row, d["battleProps"], d["battlePropsMax"])
 
     def set_thumbnail(self, row, cid):
         ''' Column 0
@@ -165,27 +166,62 @@ class ShipModel(QStandardItemModel):
             _ship = next(i for i in self.ships_raw_data if i['id'] == _id)
 
             if self.value_opt == SCONST.value_select[0]:    # curr
+                s = str(_ship['battleProps']['hp']) + "/" + str(_ship['battlePropsMax']['hp'])
                 self.item(row, 5).setData(_ship['battleProps']['hp'], Qt.DisplayRole)
+                self.item(row, 6).setData(_ship['battleProps']['torpedo'], Qt.DisplayRole)
+                self.item(row, 7).setData(_ship['battleProps']['miss'], Qt.DisplayRole)
+                self.item(row, 8).setData(CONST.range_type[_ship['battleProps']['range']], Qt.DisplayRole)
+                self.item(row, 9).setData(_ship['battleProps']['antisub'], Qt.DisplayRole)
+                self.item(row, 10).setData(_ship['battleProps']['airDef'], Qt.DisplayRole)
+                self.item(row, 11).setData(_ship['battleProps']['atk'], Qt.DisplayRole)
+                self.item(row, 12).setData(_ship['battleProps']['def'], Qt.DisplayRole)
+                self.item(row, 13).setData(_ship['battleProps']['luck'], Qt.DisplayRole)
+                self.item(row, 14).setData(_ship['battleProps']['radar'], Qt.DisplayRole)
+                self.item(row, 15).setData(_ship['battleProps']['speed'], Qt.DisplayRole)
             elif self.value_opt == SCONST.value_select[1]:  # max
                 self.item(row, 5).setData(_ship['battlePropsMax']['hp'], Qt.DisplayRole)
+                self.item(row, 6).setData(_ship['battlePropsMax']['torpedo'], Qt.DisplayRole)
+                self.item(row, 7).setData(_ship['battlePropsMax']['miss'], Qt.DisplayRole)
+                self.item(row, 9).setData(_ship['battlePropsMax']['antisub'], Qt.DisplayRole)
+                self.item(row, 11).setData(_ship['battlePropsMax']['atk'], Qt.DisplayRole)
+                self.item(row, 12).setData(_ship['battlePropsMax']['def'], Qt.DisplayRole)
+                self.item(row, 13).setData(_ship['battlePropsMax']['luck'], Qt.DisplayRole)
+                self.item(row, 14).setData(_ship['battlePropsMax']['radar'], Qt.DisplayRole)
             elif self.value_opt == SCONST.value_select[2]:  # raw
                 self.item(row, 5).setData(_ship['battlePropsBasic']['hp'], Qt.DisplayRole)
+                self.item(row, 6).setData(_ship['battlePropsBasic']['torpedo'], Qt.DisplayRole)
+                self.item(row, 7).setData(_ship['battlePropsBasic']['miss'], Qt.DisplayRole)
+                self.item(row, 8).setData(CONST.range_type[_ship['battlePropsBasic']['range']], Qt.DisplayRole)
+                self.item(row, 9).setData(_ship['battlePropsBasic']['antisub'], Qt.DisplayRole)
+                self.item(row, 10).setData(_ship['battlePropsBasic']['airDef'], Qt.DisplayRole)
+                self.item(row, 11).setData(_ship['battlePropsBasic']['atk'], Qt.DisplayRole)
+                self.item(row, 12).setData(_ship['battlePropsBasic']['def'], Qt.DisplayRole)
+                self.item(row, 13).setData(_ship['battlePropsBasic']['luck'], Qt.DisplayRole)
+                self.item(row, 14).setData(_ship['battlePropsBasic']['radar'], Qt.DisplayRole)
+                self.item(row, 15).setData(_ship['battlePropsBasic']['speed'], Qt.DisplayRole)
             else:
                 pass
-
+    # "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
     def set_stats(self, *args):
-        wig = QStandardItem()
-
-        if self.value_opt == SCONST.value_select[0]:    # curr
-            wig.setData(str(args[1]['hp']), Qt.DisplayRole)
-        elif self.value_opt == SCONST.value_select[1]:  # max
-            wig.setData(str(args[2]['hp']), Qt.DisplayRole)
-        elif self.value_opt == SCONST.value_select[2]:  # raw
-            wig.setData(str(args[3]['hp']), Qt.DisplayRole)
-        else:
-            pass
-
+        # set current ship stats as default
+        
+        # Design thinking: I thought set eye-catching color for not-full hp. 
+        # but there will be dock in the future, so it is redundant to set color here
+        # also extra work of set/reset-ing color
+        s = str(args[1]['hp']) + "/" + str(args[2]['hp'])
+        wig = QStandardItem(s)
         self.setItem(args[0], 5, wig)
+
+        self.setItem(args[0], 6, QStandardItem(str(args[1]['torpedo'])))
+        self.setItem(args[0], 7, QStandardItem(str(args[1]['miss'])))
+        self.setItem(args[0], 8, QStandardItem(CONST.range_type[args[1]['range']]))
+        self.setItem(args[0], 9, QStandardItem(str(args[1]['antisub'])))
+        self.setItem(args[0], 10, QStandardItem(str(args[1]['airDef'])))
+        self.setItem(args[0], 11, QStandardItem(str(args[1]['atk'])))
+        self.setItem(args[0], 12, QStandardItem(str(args[1]['def'])))
+        self.setItem(args[0], 13, QStandardItem(str(args[1]['luck'])))
+        self.setItem(args[0], 14, QStandardItem(str(args[1]['radar'])))
+        self.setItem(args[0], 15, QStandardItem(str(args[1]['speed'])))
 
 
 

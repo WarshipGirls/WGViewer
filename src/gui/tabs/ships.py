@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import QVBoxLayout, QGridLayout, QScrollArea
 from PyQt5.QtWidgets import QHeaderView, QTableView
 from PyQt5.QtCore import Qt, pyqtSlot
 
-from ...func import constants as CONST
 from .ships_delegate import ShipTableDelegate
 from .ships_proxy_model import ShipSortFilterProxyModel
 from .ships_top_checkbox import TopCheckboxes
@@ -68,11 +67,9 @@ class TabShips(QWidget):
         self.table_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setShowGrid(False)
         header = self.table_view.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        for i in range(self.table_model.columnCount()):
+            # QHeaderView.Stretch
+            header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
 
         self.search_line.textChanged.connect(self.table_proxy.setNameFilter)
 
