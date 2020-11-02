@@ -2,11 +2,13 @@ import sys
 import os
 import logging
 
-from PyQt5.QtCore import Qt, QVariant
+from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
+from . import ships_constant as SCONST
 from ...func import constants as CONST
 from ...func.helper_function import Helper
+
 
 def get_data_path(relative_path):
     # This needs to be in current file
@@ -18,6 +20,7 @@ def get_data_path(relative_path):
 class ShipModel(QStandardItemModel):
     def __init__(self, *args, **kwargs):
         QStandardItemModel.__init__(self, *args, **kwargs)
+        # NOTE: `data()` is a method of `QStandardItemModel()`
         self.hlp = Helper()
 
         self.ships_S = []
@@ -25,7 +28,11 @@ class ShipModel(QStandardItemModel):
         self.ships_L = []
         self.non_mods = []
         self.mods = []
-        self.headers = ["", "Name", "ID", "Class", "Lv.", "HP", "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
+        self.ships_raw_data = None
+
+        self.value_opt = SCONST.value_select[0]
+
+        self.headers = SCONST._header
         self.setColumnCount(len(self.headers))
         self.setHorizontalHeaderLabels(self.headers)
         self.init_icons()
@@ -35,12 +42,30 @@ class ShipModel(QStandardItemModel):
         self.ring_icon = QIcon(get_data_path("src/assets/icons/ring_60.png"))
         self.lock_icon = QIcon(get_data_path("src/assets/icons/lock_64.png"))
 
-    def add_ship(self, row, data):
-        self.set_thumbnail(row, str(data["shipCid"]))
-        self.set_name(row, data["title"], data["married"], data["create_time"], data["marry_time"])
-        self.set_id(row, data["id"], data["isLocked"])
-        self.set_class(row, data["type"])
-        self.set_level(row, data["level"], data["exp"], data["nextExp"])
+    def set_data(self, _data):
+        self.ships_raw_data = _data
+
+        self.ships_data = []
+        for i in range(27):
+            self.ships_data.append([])
+        for s in self.ships_raw_data:
+            self.ships_data[s["type"]].append(s)
+        for ship_type, ship_lists in enumerate(self.ships_data):
+            if (ship_type not in CONST.ship_type) and (len(ship_lists) != 0):
+                continue
+            else:
+                for ship in ship_lists:
+                    self.insertRow(self.rowCount())
+                    self.add_ship(self.rowCount()-1, ship)
+
+    def add_ship(self, row, d):
+        self.set_thumbnail(row, str(d["shipCid"]))
+        self.set_name(row, d["title"], d["married"], d["create_time"], d["marry_time"])
+        self.set_id(row, d["id"], d["isLocked"])
+        self.set_class(row, d["type"])
+        self.set_level(row, d["level"], d["exp"], d["nextExp"])
+
+        self.set_stats(row, d["battleProps"], d["battlePropsMax"], d["battlePropsBasic"])
 
     def set_thumbnail(self, row, cid):
         ''' Column 0
@@ -120,6 +145,48 @@ class ShipModel(QStandardItemModel):
         else:
             pass
         self.setItem(args[0], 4, wig)
+
+    @pyqtSlot(str)
+    def on_stats_changed(self, *args):
+        '''
+        Getting check box update signal
+        '''
+        if args[0] in SCONST.value_select:
+            self.value_opt = args[0]
+        else:
+            pass
+
+        self.update_stats()
+
+    def update_stats(self, *args):
+        for row in range(self.rowCount()):
+            _id_idx = self.index(row, 2, QModelIndex())
+            _id = int(self.data(_id_idx, Qt.DisplayRole))
+            _ship = next(i for i in self.ships_raw_data if i['id'] == _id)
+
+            if self.value_opt == SCONST.value_select[0]:    # curr
+                self.item(row, 5).setData(_ship['battleProps']['hp'], Qt.DisplayRole)
+            elif self.value_opt == SCONST.value_select[1]:  # max
+                self.item(row, 5).setData(_ship['battlePropsMax']['hp'], Qt.DisplayRole)
+            elif self.value_opt == SCONST.value_select[2]:  # raw
+                self.item(row, 5).setData(_ship['battlePropsBasic']['hp'], Qt.DisplayRole)
+            else:
+                pass
+
+    def set_stats(self, *args):
+        wig = QStandardItem()
+
+        if self.value_opt == SCONST.value_select[0]:    # curr
+            wig.setData(str(args[1]['hp']), Qt.DisplayRole)
+        elif self.value_opt == SCONST.value_select[1]:  # max
+            wig.setData(str(args[2]['hp']), Qt.DisplayRole)
+        elif self.value_opt == SCONST.value_select[2]:  # raw
+            wig.setData(str(args[3]['hp']), Qt.DisplayRole)
+        else:
+            pass
+
+        self.setItem(args[0], 5, wig)
+
 
 
 # End of File

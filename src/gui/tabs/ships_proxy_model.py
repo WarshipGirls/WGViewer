@@ -49,17 +49,21 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             name = ""
             name_col = 1
             name_index = self.sourceModel().index(source_row, name_col, source_parent)
-            if name_index.isValid():
+            if name_index.isValid() == False:
+                pass
+            else:
                 name = self.sourceModel().data(name_index, Qt.DisplayRole)
                 if name == None:
                     name = ""
                 else:
                     pass
-            else:
-                pass
             # https://docs.python.org/3/library/re.html#re.compile
             name_res.append(self.name_reg.search(name))
         res = all(name_res)
+        if res == False:
+            return False
+        else:
+            pass
 
         lock_res = []
         if self.lock_opt == None or self.lock_opt == 'ALL':
@@ -67,7 +71,9 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         else:
             lock_col = 2
             lock_index = self.sourceModel().index(source_row, lock_col, source_parent)
-            if lock_index.isValid():
+            if lock_index.isValid() == False:
+                pass
+            else:
                 lock = self.sourceModel().data(lock_index, Qt.DecorationRole)   # Detect if have ICON
                 if self.lock_opt == 'YES':
                     lock_res.append(isinstance(lock, QIcon))
@@ -75,10 +81,12 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                     lock_res.append(not isinstance(lock, QIcon))
                 else:
                     pass
-            else:
-                pass
 
         res = res and all(lock_res)
+        if res == False:
+            return False
+        else:
+            pass
 
         level_res = []
         if self.level_opt == None or self.level_opt == 'ALL':
@@ -86,7 +94,9 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         else:
             level_col = 4
             level_index = self.sourceModel().index(source_row, level_col, source_parent)
-            if level_index.isValid():
+            if level_index.isValid() == False:
+                pass
+            else:
                 level = self.sourceModel().data(level_index, Qt.DisplayRole)
                 if self.level_opt == 'Lv. 1':
                     level_res.append(int(level) == 1)
@@ -100,8 +110,6 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                     level_res.append(int(level) == 110)
                 else:
                     pass
-            else:
-                pass
 
         res = res and all(level_res)
         return res
@@ -123,6 +131,8 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                 return int(source_left.data()) < int(source_right.data())
             elif (source_left.column() in self.float_sort_cols):
                 return float(source_left.data()) < float(source_right.data())
+            else:
+                pass
         else:
             pass
         return super().lessThan(source_left, source_right)

@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QStyledItemDelegate
 
+
 class ShipTableDelegate(QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         # Make only column 1 editable

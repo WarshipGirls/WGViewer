@@ -27,10 +27,6 @@ class TabShips(QWidget):
 
         self.init_ui()
 
-        self.ships = []
-        for i in range(27):
-            self.ships.append([])
-
         if realrun == 0:
             self.test()
 
@@ -63,7 +59,7 @@ class TabShips(QWidget):
         self.table_model = ShipModel(self)
         self.table_proxy = ShipSortFilterProxyModel(self)
         self.table_proxy.setSourceModel(self.table_model)
-        ck = TopCheckboxes(self.upper_content_widget, self.table_proxy)
+        ck = TopCheckboxes(self.upper_content_widget, self.table_model, self.table_proxy)
 
         self.table_view.setModel(self.table_proxy)
         self.table_view.setItemDelegate(ShipTableDelegate(self.table_view))
@@ -95,16 +91,7 @@ class TabShips(QWidget):
         else:
             # First sort by level, then sort by cid
             sorted_ships = sorted(data["userShipVO"], key=lambda x: (x['level'], x['shipCid']), reverse=True)
-            for s in sorted_ships:
-                self.ships[s["type"]].append(s)
-
-            for ship_type, ship_lists in enumerate(self.ships):
-                if (ship_type not in CONST.ship_type) and (len(ship_lists) != 0):
-                    continue
-                else:
-                    for ship in ship_lists:
-                        self.table_model.insertRow(self.table_model.rowCount())
-                        self.table_model.add_ship(self.table_model.rowCount()-1, ship)
+            self.table_model.set_data(sorted_ships)
 
 
 # End of File

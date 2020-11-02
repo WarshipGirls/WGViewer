@@ -1,12 +1,18 @@
 from PyQt5.QtWidgets import QWidget, QLabel
 from PyQt5.QtWidgets import QComboBox, QCheckBox
 from PyQt5.QtWidgets import QHBoxLayout, QGridLayout
+from PyQt5.QtCore import pyqtSignal
+
+from . import ships_constant as SCONST
 
 
 class TopCheckboxes(QWidget):
-    def __init__(self, parent, proxy):
+    sig_value_select = pyqtSignal(str)
+
+    def __init__(self, parent, model, proxy):
         super().__init__()
         self.layout = QGridLayout(parent)
+        self.model = model
         self.proxy = proxy
 
         for i in range(10):
@@ -17,24 +23,17 @@ class TopCheckboxes(QWidget):
         self.layout.setRowStretch(1, 1)
         self.layout.setRowStretch(2, 1)
 
+        self.sig_value_select.connect(self.model.on_stats_changed)
+
     def init_dropdowns(self):
-        lock_select = ["ALL", "YES", "NO"]
-        level_select = ["ALL", "Lv. 1", "> Lv. 1", "\u2265 Lv. 90", "\u2265 Lv. 100", "= Lv. 110"]
-        value_select = ["Equip. Incl.", "Raw Value"]
-        mod_select = ["ALL", "Non-mod. Only", "Mod I. Only"]
-        health_select = ["Current Value", "Max Only"]
-        rarity_select = ["\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
-        married_select = ["ALL", "Married Only", "Non Married Only"]
-        size_select = ["ALL", "SMALL", "MIDIUM", "LARGE"]
-        self.add_dropdown("LOCK", lock_select, self.proxy.setLockFilter, 0, 0)
-        self.add_dropdown("LEVEL", level_select, self.proxy.setLevelFilter, 0, 1)
-        self.add_dropdown("VALUE", value_select, self.value_handler, 0, 2)
-        self.add_dropdown("MOD.", mod_select, self.mod_handler, 0, 3)
-        self.add_dropdown("Type (Size)", size_select, self.size_handler, 0, 4)
-        self.add_dropdown("RARITY", rarity_select, self.rarity_handler, 0, 5)
+        self.add_dropdown("LOCK", SCONST.lock_select, self.proxy.setLockFilter, 0, 0)
+        self.add_dropdown("LEVEL", SCONST.level_select, self.proxy.setLevelFilter, 0, 1)
+        self.add_dropdown("VALUE", SCONST.value_select, self.value_handler, 0, 2)
+        self.add_dropdown("MOD.", SCONST.mod_select, self.mod_handler, 0, 3)
+        self.add_dropdown("Type (Size)", SCONST.size_select, self.size_handler, 0, 4)
+        self.add_dropdown("RARITY", SCONST.rarity_select, self.rarity_handler, 0, 5)
         # current = 30/60, max only = 60
-        self.add_dropdown("HEALTH", health_select, self.health_handler, 0, 6)
-        self.add_dropdown("MARRY", married_select, self.marry_handler, 0, 7)
+        self.add_dropdown("MARRY", SCONST.married_select, self.marry_handler, 0, 7)
 
     def add_dropdown(self, label, choices, handler, x, y):
         w = QWidget()
@@ -54,15 +53,12 @@ class TopCheckboxes(QWidget):
         print(text)
 
     def value_handler(self, text):
-        print(text)
+        self.sig_value_select.emit(text)
 
     def mod_handler(self, text):
         print(text)
 
     def rarity_handler(self, text):
-        print(text)
-
-    def health_handler(self, text):
         print(text)
 
     def marry_handler(self, text):
