@@ -121,8 +121,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         return super().setFilterKeyColumn(column)
 
     def lessThan(self, source_left, source_right):
-        self.headers = ["", "Name", "ID", "Class", "Lv.", "HP", "Torp.", "Eva.", "Range", "ASW", "AA", "Fire.", "Armor", "Luck", "LOS", "Speed", "Slot", "Equip.", "Tact."]
-        
+        # TODO: sort hp xx/yy
         if (source_left.isValid() and source_right.isValid):
             if (source_left.column() in self.no_sort_cols):
                 # no sorting

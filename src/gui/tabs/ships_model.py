@@ -3,7 +3,7 @@ import os
 import logging
 
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon, QColor
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
 from . import ships_constant as SCONST
 from ...func import constants as CONST
