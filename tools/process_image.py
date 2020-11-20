@@ -74,8 +74,10 @@ def resize_images():
             img = Image.open(src_path)
             # 512x512 -> 64x64
             w, h = img.size
-            new_w = int(w / 8)
-            new_h = int(h / 8)
+            # new_w = int(w / 8)
+            # new_h = int(h / 8)
+            new_w = 44
+            new_h = 44
             new_img = img.resize((new_w, new_h))
             res_path = res_dir + f
             new_img.save(res_path)

@@ -1,7 +1,10 @@
 import sys
 import os
+import traceback
 import logging
 
+from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
+from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
@@ -17,11 +20,60 @@ def get_data_path(relative_path):
     return relative_path if not os.path.exists(res) else res
 
 
+class EquipsArray(QWidget):
+    # def __init__(self, parent, equips_array):
+    def __init__(self):
+        super().__init__()
+
+        try:
+            # add your buttons
+            layout = QHBoxLayout(self)
+            print("FUCK MFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+
+            # adjust spacings to your needs
+            # layout.setContentsMargins(0,0,0,0)
+            # layout.setSpacing(0)
+
+            # prefix = "src/assets/E/equip_L_"
+            # # equips = list(map(int, equips_array))
+            # for e in equips_array:
+            #     e = str(e)
+            #     if e == '':
+            #         continue
+            #     else:
+            #         pass
+            #     try:
+            #         img_path = prefix + str(int(e[3:6])) + ".png"
+            #         img = QPixmap()
+            #         is_loaded = img.load(get_data_path(img_path))
+            #         if is_loaded:
+            #             # i = QStandardItem()
+            #             # i.setData(QVariant(img), Qt.DecorationRole)
+            #             l = QLabel(self)
+            #             l.setPixmap(img)
+            #             layout.addWidget(l)
+            #         else:
+            #             print("NOT LOADDDDDDDD")
+            #     except ValueError as e:
+            #         print(e)
+
+            layout.addWidget(QPushButton('fuck'))
+            # layout.addWidget(QPushButton('fuck'))
+            # layout.addWidget(QPushButton('fuck'))
+            # layout.addWidget(QPushButton('fuck'))
+
+            self.setLayout(layout)
+        except Exception as e:
+            logging.error(traceback.format_exc())
+            # Logs the error appropriately. 
+
+
 class ShipModel(QStandardItemModel):
-    def __init__(self, *args, **kwargs):
-        QStandardItemModel.__init__(self, *args, **kwargs)
+    def __init__(self, view):
+        super().__init__(view)
         # NOTE: `data()` is a method of `QStandardItemModel()`
         self.hlp = Helper()
+        self.view = view
 
         self.ships_S = []
         self.ships_M = []
@@ -65,9 +117,9 @@ class ShipModel(QStandardItemModel):
         self.set_class(row, d["type"])
         self.set_level(row, d["level"], d["exp"], d["nextExp"])
 
-        # self.set_stats(row, d["battleProps"], , d["battlePropsBasic"])
         self.set_stats(row, d["battleProps"], d["battlePropsMax"])
         self.set_slots(row, d["capacitySlotMax"], d["missileSlotMax"])
+        # self.set_equips(row, d["equipmentArr"])
 
     def set_thumbnail(self, row, cid):
         ''' Column 0
@@ -261,6 +313,14 @@ class ShipModel(QStandardItemModel):
 
         wig = QStandardItem(slot)
         self.setItem(args[0], 20, wig)
+
+
+    def set_equips(self, *args):
+        # self.view.setIndexWidget(self.index(args[0], 0), EquipsArray(self, args[1]))
+        self.view.setIndexWidget(self.index(args[0], 21), EquipsArray())
+        # self.view.setItemDelegateForColumn(21, )
+        # self.view.setIndexWidget(self.index(args[0], 21), QPushButton("button"))
+        # self.setItem(args[0], 21, EquipsArray(self, args[1]))
 
 
 # End of File

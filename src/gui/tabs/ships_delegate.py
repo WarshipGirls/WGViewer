@@ -7,7 +7,7 @@ class ShipTableDelegate(QStyledItemDelegate):
         if index.column() == 1:
             return super(ShipTableDelegate, self).createEditor(parent, option, index)
         else:
-            print("clicked " + str(index.column()))
+            print("clicked " + str(index.row()) + ", " + str(index.column()))
 
 
 # End of File
