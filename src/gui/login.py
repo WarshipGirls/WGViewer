@@ -1,5 +1,6 @@
 # import sys
 import logging
+import requests
 import qdarkstyle
 
 from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QLineEdit
