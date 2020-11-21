@@ -1,10 +1,9 @@
 import sys
-import logging
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-class EquipsArray(QWidget):
+class Buttons(QWidget):
     def __init__(self):
         super().__init__()
         layout = QHBoxLayout(self)
@@ -12,36 +11,25 @@ class EquipsArray(QWidget):
         layout.addWidget(QPushButton('btn2'))
         self.setLayout(layout)
 
-
 class MainWindow(QMainWindow):
-
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-
-        lo = QWidget()
-        lo_layout = QVBoxLayout(lo)
-
         tab = QTableView()
         sti = QStandardItemModel()
-        proxy = QSortFilterProxyModel()
-        proxy.setSourceModel(sti)
-        tab.setModel(proxy)
+        if True:    # This shows the buttons in a cell
+            tab.setModel(sti)
+        else:       # This does not show the buttons
+            proxy = QSortFilterProxyModel()
+            proxy.setSourceModel(sti)
+            tab.setModel(proxy)
         sti.appendRow([QStandardItem(str(i)) for i in range(5)])
-        sti.insertRow(sti.rowCount())
-        tab.setIndexWidget(sti.index(0, 0), QPushButton("fuck"))
-        sti.setItem(1, 0, QStandardItem("???"))
-        sti.setItem(1, 2, QStandardItem("???"))
-        tab.setIndexWidget(sti.index(1, 1), QPushButton("fuck"))
-        tab.setIndexWidget(sti.index(1, 2), QPushButton("fuck"))
-        sti.appendRow([QStandardItem(str(i)) for i in range(5)])
-        tab.setIndexWidget(sti.index(2, 1), EquipsArray())
-
-        lo_layout.addWidget(tab)
+        tab.setIndexWidget(sti.index(0, 0), QPushButton("hi"))
+        sti.appendRow([])
+        tab.setIndexWidget(sti.index(1, 2), Buttons())
         self.setCentralWidget(tab)
-
 
 app = QApplication(sys.argv)
 window = MainWindow()
 window.resize(1000, 600)
-window.show() # IMPORTANT!!!!! Windows are hidden by default.
+window.show()
 app.exec_()
