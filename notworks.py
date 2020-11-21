@@ -4,6 +4,14 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
+class EquipsArray(QWidget):
+    def __init__(self):
+        super().__init__()
+        layout = QHBoxLayout(self)
+        layout.addWidget(QPushButton('btn1'))
+        layout.addWidget(QPushButton('btn2'))
+        self.setLayout(layout)
+
 
 class MainWindow(QMainWindow):
 
@@ -15,7 +23,9 @@ class MainWindow(QMainWindow):
 
         tab = QTableView()
         sti = QStandardItemModel()
-        tab.setModel(sti)
+        proxy = QSortFilterProxyModel()
+        proxy.setSourceModel(sti)
+        tab.setModel(proxy)
         sti.appendRow([QStandardItem(str(i)) for i in range(5)])
         sti.insertRow(sti.rowCount())
         tab.setIndexWidget(sti.index(0, 0), QPushButton("fuck"))
@@ -24,7 +34,7 @@ class MainWindow(QMainWindow):
         tab.setIndexWidget(sti.index(1, 1), QPushButton("fuck"))
         tab.setIndexWidget(sti.index(1, 2), QPushButton("fuck"))
         sti.appendRow([QStandardItem(str(i)) for i in range(5)])
-        tab.setIndexWidget(sti.index(2, 1), QPushButton("fuck"))
+        tab.setIndexWidget(sti.index(2, 1), EquipsArray())
 
         lo_layout.addWidget(tab)
         self.setCentralWidget(tab)
