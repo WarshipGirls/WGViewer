@@ -15,6 +15,7 @@ class MainWindow(QMainWindow):
 
         tab = QTableView()
         sti = QStandardItemModel()
+        tab.setModel(sti)
         sti.appendRow([QStandardItem(str(i)) for i in range(5)])
         sti.insertRow(sti.rowCount())
         tab.setIndexWidget(sti.index(0, 0), QPushButton("fuck"))
@@ -24,7 +25,6 @@ class MainWindow(QMainWindow):
         tab.setIndexWidget(sti.index(1, 2), QPushButton("fuck"))
         sti.appendRow([QStandardItem(str(i)) for i in range(5)])
         tab.setIndexWidget(sti.index(2, 1), QPushButton("fuck"))
-        tab.setModel(sti)
 
         lo_layout.addWidget(tab)
         self.setCentralWidget(tab)
