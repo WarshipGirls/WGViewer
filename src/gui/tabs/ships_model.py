@@ -21,51 +21,39 @@ def get_data_path(relative_path):
 
 
 class EquipsArray(QWidget):
-    # def __init__(self, parent, equips_array):
-    def __init__(self):
+    def __init__(self, equips_array):
         super().__init__()
 
-        try:
-            # add your buttons
-            layout = QHBoxLayout(self)
-            print("FUCK MFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
 
-            # adjust spacings to your needs
-            # layout.setContentsMargins(0,0,0,0)
-            # layout.setSpacing(0)
+        layout = QHBoxLayout(self)
 
-            # prefix = "src/assets/E/equip_L_"
-            # # equips = list(map(int, equips_array))
-            # for e in equips_array:
-            #     e = str(e)
-            #     if e == '':
-            #         continue
-            #     else:
-            #         pass
-            #     try:
-            #         img_path = prefix + str(int(e[3:6])) + ".png"
-            #         img = QPixmap()
-            #         is_loaded = img.load(get_data_path(img_path))
-            #         if is_loaded:
-            #             # i = QStandardItem()
-            #             # i.setData(QVariant(img), Qt.DecorationRole)
-            #             l = QLabel(self)
-            #             l.setPixmap(img)
-            #             layout.addWidget(l)
-            #         else:
-            #             print("NOT LOADDDDDDDD")
-            #     except ValueError as e:
-            #         print(e)
+        # adjust spacings to your needs
+        layout.setContentsMargins(1,1,1,1)
+        layout.setSpacing(1)
 
-            layout.addWidget(QPushButton('fuck'))
-            # layout.addWidget(QPushButton('fuck'))
-            # layout.addWidget(QPushButton('fuck'))
-            # layout.addWidget(QPushButton('fuck'))
-
-            self.setLayout(layout)
-        except Exception as e:
-            logging.error(traceback.format_exc())
-            # Logs the error appropriately. 
+        prefix = "src/assets/E/equip_L_"
+        # equips = list(map(int, equips_array))
+        for e in equips_array:
+            e = str(e)
+            if e == '':
+                continue
+            else:
+                pass
+            try:
+                img_path = prefix + str(int(e[3:6])) + ".png"
+                img = QPixmap()
+                is_loaded = img.load(get_data_path(img_path))
+                if is_loaded:
+                    # i = QStandardItem()
+                    # i.setData(QVariant(img), Qt.DecorationRole)
+                    l = QLabel(self)
+                    l.setPixmap(img)
+                    layout.addWidget(l)
+                else:
+                    print("NOT LOADDDDDDDD")
+            except ValueError as e:
+                print(e)
+        self.setLayout(layout)
 
 
 class ShipModel(QStandardItemModel):
@@ -316,8 +304,7 @@ class ShipModel(QStandardItemModel):
 
 
     def set_equips(self, *args):
-        # self.view.setIndexWidget(self.index(args[0], 21), EquipsArray())
-        self.view.setIndexWidget(self.view.model().index(args[0], 21), QPushButton("hi"))
+        self.view.setIndexWidget(self.view.model().index(args[0], 21), EquipsArray(args[1]))
 
 
 # End of File
