@@ -126,7 +126,6 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         return super().setFilterKeyColumn(column)
 
     def lessThan(self, source_left, source_right):
-        # TODO: sort hp xx/yy
         if (source_left.isValid() and source_right.isValid()):
             l = source_left.data()
             r = source_right.data()

@@ -1,4 +1,3 @@
-import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -22,14 +21,19 @@ class MainWindow(QMainWindow):
             proxy = QSortFilterProxyModel()
             proxy.setSourceModel(sti)
             tab.setModel(proxy)
+        proxy = QSortFilterProxyModel()
+        proxy.setSourceModel(sti)
+        tab.setModel(proxy)
+
         sti.appendRow([QStandardItem(str(i)) for i in range(5)])
-        tab.setIndexWidget(sti.index(0, 0), QPushButton("hi"))
+        # tab.setIndexWidget(sti.index(0, 0), QPushButton("hi"))
+        tab.setIndexWidget(tab.model().index(0, 0), QPushButton("hi"))
         sti.appendRow([])
-        tab.setIndexWidget(sti.index(1, 2), Buttons())
+        tab.setIndexWidget(tab.model().index(1, 2), Buttons())
         self.setCentralWidget(tab)
 
-app = QApplication(sys.argv)
+app = QApplication([])
 window = MainWindow()
-window.resize(1000, 600)
+window.resize(800, 600)
 window.show()
 app.exec_()

@@ -119,7 +119,7 @@ class ShipModel(QStandardItemModel):
 
         self.set_stats(row, d["battleProps"], d["battlePropsMax"])
         self.set_slots(row, d["capacitySlotMax"], d["missileSlotMax"])
-        # self.set_equips(row, d["equipmentArr"])
+        self.set_equips(row, d["equipmentArr"])
 
     def set_thumbnail(self, row, cid):
         ''' Column 0
@@ -316,11 +316,8 @@ class ShipModel(QStandardItemModel):
 
 
     def set_equips(self, *args):
-        # self.view.setIndexWidget(self.index(args[0], 0), EquipsArray(self, args[1]))
-        self.view.setIndexWidget(self.index(args[0], 21), EquipsArray())
-        # self.view.setItemDelegateForColumn(21, )
-        # self.view.setIndexWidget(self.index(args[0], 21), QPushButton("button"))
-        # self.setItem(args[0], 21, EquipsArray(self, args[1]))
+        # self.view.setIndexWidget(self.index(args[0], 21), EquipsArray())
+        self.view.setIndexWidget(self.view.model().index(args[0], 21), QPushButton("hi"))
 
 
 # End of File

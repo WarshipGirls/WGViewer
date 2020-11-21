@@ -50,18 +50,17 @@ class TabShips(QWidget):
         self.content_layout.setStretch(1, 10)
 
         self.table_view = QTableView(self.lower_content_widget)
-        self.search_line = QLineEdit(self.lower_content_widget)
-
         self.table_model = ShipModel(self.table_view)
         self.table_proxy = ShipSortFilterProxyModel(self)
         self.table_proxy.setSourceModel(self.table_model)
+        self.table_view.setModel(self.table_proxy)
         ck = TopCheckboxes(self.upper_content_widget, self.table_model, self.table_proxy)
 
         self.lower_layout = QGridLayout(self.lower_content_widget)
+        self.search_line = QLineEdit(self.lower_content_widget)
         self.lower_layout.addWidget(self.search_line, 0, 0, 1, 1)
         self.lower_layout.addWidget(self.table_view, 1, 0, 1, self.table_model.columnCount())
 
-        self.table_view.setModel(self.table_proxy)
         self.table_view.setItemDelegate(ShipTableDelegate(self.table_view))
         self.table_view.setSortingEnabled(True)
         self.table_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -90,14 +89,6 @@ class TabShips(QWidget):
             # First sort by level, then sort by cid
             sorted_ships = sorted(data["userShipVO"], key=lambda x: (x['level'], x['shipCid']), reverse=True)
             self.table_model.set_data(sorted_ships)
-
-            print("adding buttons.......")
-            from PyQt5.QtWidgets import QPushButton
-            self.table_view.setIndexWidget(self.table_model.index(1, 20), QPushButton("aaaaaaaa"))
-            idx = self.table_model.index(2, 2)
-            print(idx)
-            self.table_view.setIndexWidget(idx, QPushButton("aaaaaaaaa"))
-
 
 
 # End of File
