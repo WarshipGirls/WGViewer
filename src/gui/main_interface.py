@@ -69,6 +69,8 @@ class MainInterface(QMainWindow):
         self.api_initGame()
 
         self.sig_getShipList.connect(self.table_widget.tab_ships.on_received_shiplist)
+
+        # self.getInitConfigs()
         self.api_getShipList()
         # self.pve_getPveData()
         # self.pve_getUserData()
@@ -129,6 +131,14 @@ class MainInterface(QMainWindow):
     # ================================
     # WGR APIs
     # ================================
+
+    # def getInitConfigs(self):
+    #     url = 'http://login.jr.moefantasy.com/index/getInitConfigs'
+    #     raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+    #     data = json.loads(raw_data)
+    #     with open('getInitConfigs.json', 'w') as of:
+    #         json.dump(data, of)
+
     '''
     useful for dock
     userShipVO loop
