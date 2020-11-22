@@ -4,11 +4,12 @@ import traceback
 import logging
 
 from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
-from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QPushButton, QMainWindow
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
 from . import ships_constant as SCONST
+from .ships_delegate import EquipmentDelegate
 from ...func import constants as CONST
 from ...func.helper_function import Helper
 
@@ -19,41 +20,20 @@ def get_data_path(relative_path):
     res = os.path.join(bundle_dir, relative_path)
     return relative_path if not os.path.exists(res) else res
 
+import qdarkstyle
 
-class EquipsArray(QWidget):
-    def __init__(self, equips_array):
+class EquipPopup(QMainWindow):
+    def __init__(self, parent=None):
         super().__init__()
+        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        self.setWindowTitle('WGViewer - Equipment Selection')
+        self.resize(400, 400)
 
-
-        layout = QHBoxLayout(self)
-
-        # adjust spacings to your needs
-        layout.setContentsMargins(1,1,1,1)
-        layout.setSpacing(1)
-
-        prefix = "src/assets/E/equip_L_"
-        # equips = list(map(int, equips_array))
-        for e in equips_array:
-            e = str(e)
-            if e == '':
-                continue
-            else:
-                pass
-            try:
-                img_path = prefix + str(int(e[3:6])) + ".png"
-                img = QPixmap()
-                is_loaded = img.load(get_data_path(img_path))
-                if is_loaded:
-                    # i = QStandardItem()
-                    # i.setData(QVariant(img), Qt.DecorationRole)
-                    l = QLabel(self)
-                    l.setPixmap(img)
-                    layout.addWidget(l)
-                else:
-                    print("NOT LOADDDDDDDD")
-            except ValueError as e:
-                print(e)
-        self.setLayout(layout)
+        '''
+        1. get current cid
+        2. get corresponding equipmentType in shipCard by cid
+        3. get all equipment in shipEquipmnt (yes, no 'e')
+        '''
 
 
 class ShipModel(QStandardItemModel):
@@ -144,12 +124,15 @@ class ShipModel(QStandardItemModel):
         if is_loaded:
             thumbnail = QStandardItem()
             thumbnail.setData(QVariant(img.scaled(78, 44)), Qt.DecorationRole)
+            # hidden cid as Qt.UserRole
+            thumbnail.setData(cid, Qt.UserRole)
             self.setItem(row, 0, thumbnail)
         else:
             tmp = QPixmap()
             tmp.load(get_data_path("src/assets/S/0v0.png"))
             tmp2 = QStandardItem()
             tmp2.setData(QVariant(tmp.scaled(78, 44)), Qt.DecorationRole)
+            tmp2.setData(cid, Qt.UserRole)
             self.setItem(row, 0, tmp2)
             err = "Image path does not exist: " + img_path
             logging.warn(err)
@@ -302,9 +285,43 @@ class ShipModel(QStandardItemModel):
         wig = QStandardItem(slot)
         self.setItem(args[0], 20, wig)
 
-
     def set_equips(self, *args):
-        self.view.setIndexWidget(self.view.model().index(args[0], 21), EquipsArray(args[1]))
+        # Issue #15
+        # self.view.setIndexWidget(self.view.model().index(args[0], 21), EquipsArray(args[1]))
+
+        col = 21
+        for e in args[1]:
+            e = str(e)
+            if e == '-1':
+                continue
+            else:
+                pass
+            raw_path = "src/assets/E/equip_L_" + str(int(e[3:6])) + ".png"
+            img_path = get_data_path(raw_path)
+            # self.view.setItemDelegateForColumn(col, EquipmentDelegate(self.view, args[0], img_path))
+            
+
+            img = QPixmap()
+            is_loaded =  img.load(img_path)
+            if is_loaded:
+                thumbnail = QStandardItem()
+                thumbnail.setData(QVariant(img), Qt.DecorationRole)
+                self.setItem(args[0], col, thumbnail)
+                # thumbnail.clicked.connect(self.change_equip)
+            else:
+                pass
+            col += 1
+
+    def change_equip(self):
+        print("???????????")
+
+    def set_tactics(self):
+         # "tactics":{
+         #    "1":"10000174",
+         #    "2":0,
+         #    "3":0
+         # },
+         pass
 
 
 # End of File

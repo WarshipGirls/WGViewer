@@ -86,6 +86,7 @@ class TopCheckboxes(QWidget):
             self.second_boxes[k].stateChanged.connect(lambda _, b=self.second_boxes[k]: self.checkbox_handler(b))
 
     def checkbox_handler(self, cb):
+        # TODO
         if cb.isChecked():
             print("checked " + cb.text())
         else:

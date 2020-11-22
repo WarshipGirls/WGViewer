@@ -61,17 +61,25 @@ class TabShips(QWidget):
         self.lower_layout.addWidget(self.search_line, 0, 0, 1, 1)
         self.lower_layout.addWidget(self.table_view, 1, 0, 1, self.table_model.columnCount())
 
-        self.table_view.setItemDelegate(ShipTableDelegate(self.table_view))
-        self.table_view.setSortingEnabled(True)
-        self.table_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.table_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.table_view.setShowGrid(False)
+        self.init_view_settings()
+
         header = self.table_view.horizontalHeader()
         for i in range(self.table_model.columnCount()):
             # QHeaderView.Stretch
             header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
 
         self.search_line.textChanged.connect(self.table_proxy.setNameFilter)
+
+    def init_view_settings(self):
+        # up to (not including) Equipment column
+        # for i in range(21):
+            # self.table_view.setItemDelegateForColumn(i, ShipTableDelegate(self.table_view))
+        self.table_view.setItemDelegate(ShipTableDelegate(self.table_view))
+
+        self.table_view.setSortingEnabled(True)
+        self.table_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.table_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.table_view.setShowGrid(False)
 
     def test(self):
         logging.debug("Starting tests")
