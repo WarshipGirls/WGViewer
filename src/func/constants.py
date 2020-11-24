@@ -52,6 +52,7 @@ repair_types = {
 }
 
 # expedition; unit = seconds
+# TODO: remove, got pveExplore.json
 exp_durations = {
     "10001": 900,
     "10002": 1800,
@@ -64,6 +65,7 @@ exp_durations = {
     "60001": 32400
 }
 
+# TODO: remove, got errorCode.json
 eid_codes = {
     "-1206": "fails getting login reward...",
     "-604": "fails starting explore...",
@@ -85,6 +87,7 @@ eid_codes = {
 
 war_eval = ['-', 'SS', 'S', 'A', 'B', 'C', 'D']
 
+# TODO: remove, got shipItem.json
 reward_type = {
     2: '油', 3: '弹', 4: '钢', 9: '铝', 10141: "CV-core", 10241: 'BB-core', 10341: 'CA-core', 10441: 'DD-core',
     10541: 'SS-core', 141: 'inst-build', 241: 'build-blueprint', 541: 'inst-repair', 741: 'equip-blueprint', 66641: 'dmg-ctrl',
