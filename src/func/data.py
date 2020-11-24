@@ -3,11 +3,17 @@
 import os
 import json
 import shutil
+import urllib
 import logging
 import platform
-import urllib.request
+import requests
 
 from pathlib import Path
+
+
+# ================================
+# getInitConfigs related
+# ================================
 
 
 def get_storage_dir():
@@ -34,27 +40,10 @@ def save_data_by_attr(storage_dir, data_dict, field):
         with open(p, 'w', encoding='utf-8') as fout:
             json.dump(data_dict[field], fout, ensure_ascii=False, indent=4)
 
-def _clear_cache():
-    _dir = get_storage_dir()
-    for filename in os.listdir(_dir):
-        file_path = os.path.join(_dir, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            logging.error('Failed to delete %s. Reason: %s' % (file_path, e))
-
 def check_data_ver(storage_dir):
     # Note: since getting raw data takes 20+ seconds, use this method minimally
     url = 'http://login.jr.moefantasy.com/index/getInitConfigs'
     try:
-        # with urllib.request.urlopen(url) as f:
-        #  print(f.read())
-        #  # d = json.loads(f.read().decode('utf-8'))
-        #  d = json.loads(f.read())
-        import requests
         d = requests.get(url).json()
     except (urllib.error.URLError, json.decoder.JSONDecodeError) as e:
         logging.error('Server connection error. Please try again later.')
@@ -92,12 +81,35 @@ def save_init_data():
     else:
         data = res[1]
         for k in data.keys():
-            save_data_by_attr(storage_dir, data, k)        
+            save_data_by_attr(storage_dir, data, k)
+
+
+# ================================
+# General
+# ================================
+
+
+def _clear_cache():
+    _dir = get_storage_dir()
+    for filename in os.listdir(_dir):
+        file_path = os.path.join(_dir, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            logging.error('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
+# ================================
+# Temporary
+# ================================
+
 
 def map_equip(equipable_type):
     with open('shipEquipmnt.json', encoding='utf-8') as f1:
         x = json.load(f1)
-
 
     type_to_id = {}
     for e in x:
@@ -125,7 +137,6 @@ def map_equip(equipable_type):
             else:
                 print(user_e)
 
-
 def type_equip_map(cid):
     with open('shipCard.json', encoding='utf-8') as f:
         x = json.load(f)
@@ -133,8 +144,4 @@ def type_equip_map(cid):
     ship = next((i for i in x if i['cid'] == cid))
     return ship['equipmentType']
 
-# fff = type_equip_map(10000213)
-# map_equip(fff)
-
-_clear_cache()
-save_init_data()
+# End of File
