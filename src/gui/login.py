@@ -112,7 +112,7 @@ class LoginForm(QWidget):
         try:
             res1 = account.first_login(_username, _password)
             res2 = account.second_login(self.server)
-        except (KeyError, requests.exceptions.ReadTimeout) as e:
+        except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(e)
             msg.setText("Logging failed.")
             msg.exec_()

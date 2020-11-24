@@ -1,3 +1,6 @@
+import json
+import logging
+import os
 import qdarkstyle
 
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
@@ -11,10 +14,8 @@ from .main_interface_tabs import MainInterfaceTabs
 
 # Functions
 # from ..func.worker_thread import Worker
+from ..func import data as wgr_data
 from ..func.helper_function import Helper
-
-import logging
-import json
 
 
 class MainInterface(QMainWindow):
@@ -132,21 +133,6 @@ class MainInterface(QMainWindow):
     # WGR APIs
     # ================================
 
-    '''
-    useful for dock
-    userShipVO loop
-      - lv, exp/nextExp, fleetId (fleed-belonging (0-8); don't need this, see initGame), equipment
-      - id, tactics, title(name), type(shiptype)
-      - love/loveMax, married
-      - skillType, skillLevel, skillId,   (need mapping)
-      - isLocked
-      - capacitySlot/capacitySlotMax, missileSlot/missileSlotMax
-      - equipmentArr?
-      - battlePropsBasic, battleProps, battlePropsMax
-          - hp, atk, def, torpedo, miss(evasion), antisub, speed, radar, range, luck
-          - hit （命中？), airDef, cost
-          - fuel, ammo, bauxite
-    '''
     def api_getShipList(self):
         url = self.server + 'api/getShipList' + self.hlp.get_url_end(self.channel)
         raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
@@ -164,6 +150,11 @@ class MainInterface(QMainWindow):
             with open('api_initGame.json', 'w') as of:
                 json.dump(data, of)
         self.sig_initGame.emit(data)
+
+        # save equipmentVo
+        p = os.path.join(wgr_data.get_user_dir(), 'equipmentVo.json')
+        with open(p, 'w') as f:
+            json.dump(data['equipmentVo'], f, ensure_ascii=False, indent=4)
 
     def pve_getPveData(self):
         url = self.server + 'pve/getPveData' + self.hlp.get_url_end(self.channel)

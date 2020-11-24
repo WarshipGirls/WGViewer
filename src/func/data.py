@@ -12,11 +12,11 @@ from pathlib import Path
 
 
 # ================================
-# getInitConfigs related
+# General
 # ================================
 
 
-def get_storage_dir():
+def _get_data_dir():
     # TODO: unix not tested
     # TODO: mac not tested
     plt = platform.system()
@@ -30,6 +30,40 @@ def get_storage_dir():
     else:
         _dir = str(Path.home())
     return os.path.join(_dir, 'WarshipGirlsViewer')
+
+def _clear_cache():
+    _dir = _get_data_dir()
+    for filename in os.listdir(_dir):
+        file_path = os.path.join(_dir, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            logging.error('Failed to delete %s. Reason: %s' % (file_path, e))
+
+def get_init_dir():
+    p = os.path.join(_get_data_dir(), 'init')
+    if not os.path.exists(p):
+        os.makedirs(p)
+    else:
+        pass
+    return p
+
+def get_user_dir():
+    p = os.path.join(_get_data_dir(), 'user')
+    if not os.path.exists(p):
+        os.makedirs(p)
+    else:
+        pass
+    return p
+
+
+# ================================
+# getInitConfigs related
+# ================================
+
 
 def save_data_by_attr(storage_dir, data_dict, field):
     filename = field + '.json'
@@ -69,11 +103,7 @@ def save_init_data():
     Updating data to the latest version
     '''
     # TODO: following need to be executed once for new user.
-    storage_dir = os.path.join(get_storage_dir(), 'init')
-    if not os.path.exists(storage_dir):
-        os.makedirs(storage_dir)
-    else:
-        pass
+    storage_dir = get_init_dir()
 
     res = check_data_ver(storage_dir)
     if res[0] == True:
@@ -85,30 +115,16 @@ def save_init_data():
 
 
 # ================================
-# General
+# Equipment related
 # ================================
 
 
-def _clear_cache():
-    _dir = get_storage_dir()
-    for filename in os.listdir(_dir):
-        file_path = os.path.join(_dir, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            logging.error('Failed to delete %s. Reason: %s' % (file_path, e))
-
-
-# ================================
-# Temporary
-# ================================
-
-
-def map_equip(equipable_type):
-    with open('shipEquipmnt.json', encoding='utf-8') as f1:
+def map_equip(equipable_types):
+    '''
+    Based on a ship equipable types, return all user owned equipment. 
+    '''
+    equip_path = os.path.join(get_init_dir(), 'shipEquipmnt.json')
+    with open(equip_path, encoding='utf-8') as f1:
         x = json.load(f1)
 
     type_to_id = {}
@@ -119,12 +135,12 @@ def map_equip(equipable_type):
             type_to_id[e['type']] = []
             type_to_id[e['type']].append(e['cid'])
 
-    # TODO: this is temp, get these from somewhere else
-    with open('../example_json/api_initgame_mainaccount.json', encoding='utf-8') as f2:
-        user_equips = json.load(f2)['equipmentVo']
+    user_equip_path = os.path.join(get_user_dir(), 'equipmentVo.json')
+    with open(user_equip_path, encoding='utf-8') as f2:
+        user_equips = json.load(f2)
 
-    # loop thru equipable_type
-    for t in equipable_type:
+    res = []
+    for t in equipable_types:
         # in each type, loop thru all equips
         for e in type_to_id[t]:
             # check the amount user owns in user_equips
@@ -135,13 +151,18 @@ def map_equip(equipable_type):
             if user_e['num'] == 0:
                 continue
             else:
-                print(user_e)
+                res.append(user_e)
+    return res
 
 def type_equip_map(cid):
-    with open('shipCard.json', encoding='utf-8') as f:
+    '''
+    Given a ship's cid, return the types of equipment it can equip.
+    '''
+    p = os.path.join(get_init_dir(), 'shipCard.json')
+    with open(p, encoding='utf-8') as f:
         x = json.load(f)
-
     ship = next((i for i in x if i['cid'] == cid))
     return ship['equipmentType']
+
 
 # End of File

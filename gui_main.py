@@ -1,7 +1,7 @@
-import sys
-import os
 import ctypes
 import logging
+import os
+import sys
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
