@@ -20,21 +20,6 @@ def get_data_path(relative_path):
     res = os.path.join(bundle_dir, relative_path)
     return relative_path if not os.path.exists(res) else res
 
-import qdarkstyle
-
-class EquipPopup(QMainWindow):
-    def __init__(self, parent=None):
-        super().__init__()
-        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
-        self.setWindowTitle('WGViewer - Equipment Selection')
-        self.resize(400, 400)
-
-        '''
-        1. get current cid
-        2. get corresponding equipmentType in shipCard by cid
-        3. get all equipment in shipEquipmnt (yes, no 'e')
-        '''
-
 
 class ShipModel(QStandardItemModel):
     def __init__(self, view):

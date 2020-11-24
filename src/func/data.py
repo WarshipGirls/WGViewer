@@ -1,12 +1,12 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-import os
 import json
-import shutil
-import urllib
 import logging
+import os
 import platform
 import requests
+import shutil
+import urllib
 
 from pathlib import Path
 
@@ -74,7 +74,7 @@ def save_data_by_attr(storage_dir, data_dict, field):
         with open(p, 'w', encoding='utf-8') as fout:
             json.dump(data_dict[field], fout, ensure_ascii=False, indent=4)
 
-def check_data_ver(storage_dir):
+def _check_data_ver(storage_dir):
     # Note: since getting raw data takes 20+ seconds, use this method minimally
     url = 'http://login.jr.moefantasy.com/index/getInitConfigs'
     try:
@@ -104,8 +104,7 @@ def save_init_data():
     '''
     # TODO: following need to be executed once for new user.
     storage_dir = get_init_dir()
-
-    res = check_data_ver(storage_dir)
+    res = _check_data_ver(storage_dir)
     if res[0] == True:
         pass
     else:
@@ -119,50 +118,81 @@ def save_init_data():
 # ================================
 
 
-def map_equip(equipable_types):
+def process_one_equip(equip):
+    res = {}
+    res['title'] = equip['title']
+    res['desc'] = equip['desc']
+    for key in equip.keys():
+        if isinstance(equip[key], int):
+            res[key] = equip[key]
+        else:
+            pass
+    garbage = ['type', 'picId', 'cid', 'boreType', 'handbookType', 'specialEffect', 'equipIndex', 'aluminiumUse']
+    for g in garbage:
+        try:
+            res.pop(g)
+        except KeyError:
+            pass
+    return res
+
+def _type_to_equips(equipable_types):
     '''
     Based on a ship equipable types, return all user owned equipment. 
     '''
+    # 2. get all equipment id in shipEquipmnt (yes, no 'e')
     equip_path = os.path.join(get_init_dir(), 'shipEquipmnt.json')
     with open(equip_path, encoding='utf-8') as f1:
-        x = json.load(f1)
+        all_equips = json.load(f1)
 
     type_to_id = {}
-    for e in x:
+    id_to_data = {}
+    for e in all_equips:
         if e['type'] in type_to_id:
-            type_to_id[e['type']].append(e['cid'])
+            pass
         else:
             type_to_id[e['type']] = []
-            type_to_id[e['type']].append(e['cid'])
+        type_to_id[e['type']].append(e['cid'])
+        id_to_data[e['cid']] = process_one_equip(e)
 
     user_equip_path = os.path.join(get_user_dir(), 'equipmentVo.json')
     with open(user_equip_path, encoding='utf-8') as f2:
         user_equips = json.load(f2)
 
+    # 3. get all user-owned equipment by equipment id
     res = []
     for t in equipable_types:
-        # in each type, loop thru all equips
         for e in type_to_id[t]:
-            # check the amount user owns in user_equips
             try:
                 user_e = next((i for i in user_equips if i['equipmentCid'] == e))
+                user_e.pop('uid')
             except StopIteration:
                 continue
             if user_e['num'] == 0:
                 continue
             else:
+                # can't pop `equipmentCid` since it needs to be reused
+                user_e['data'] = id_to_data[user_e['equipmentCid']]
                 res.append(user_e)
     return res
 
-def type_equip_map(cid):
+def get_ship_equips(cid):
     '''
-    Given a ship's cid, return the types of equipment it can equip.
+    Given a ship's cid (integer), return all user owned equipment. 
     '''
+    # 1. get corresponding equipmentType in shipCard by cid
     p = os.path.join(get_init_dir(), 'shipCard.json')
     with open(p, encoding='utf-8') as f:
         x = json.load(f)
-    ship = next((i for i in x if i['cid'] == cid))
-    return ship['equipmentType']
+    try:
+        ship = next((i for i in x if i['cid'] == cid))
+        types = ship['equipmentType']
+    except StopIteration:
+        return []
+
+    return _type_to_equips(types)
 
 
+r = get_ship_equips(10000213)
+for e in r:
+    print(e)
 # End of File
