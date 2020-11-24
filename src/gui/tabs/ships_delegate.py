@@ -1,43 +1,90 @@
 import qdarkstyle
+import sys
+import os
 
 from PyQt5.QtWidgets import QStyledItemDelegate
-from PyQt5.QtGui import QStandardItem, QPixmap
-from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex, QRect
+from PyQt5.QtGui import QStandardItem, QPixmap, QIcon
+from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex, QRect, pyqtSignal
 from PyQt5.QtWidgets import QLabel, QWidget, QMainWindow
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView
 
 from ...func import data as wgr_data
 
 
+def get_data_path(relative_path):
+    # This needs to be in current file
+    bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
+    res = os.path.join(bundle_dir, relative_path)
+    return relative_path if not os.path.exists(res) else res
+
+
 class EquipPopup(QMainWindow):
     # ALL temporary, testing
+    resized = pyqtSignal()
     def __init__(self, cid, parent=None):
         super().__init__()
+        self.width = 600
+        self.height = 600
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         self.setWindowTitle('WGViewer - Equipment Selection')
-        self.resize(400, 400)
-
+        self.resize(self.width, self.height)
+        self.lock_icon = QIcon(get_data_path("src/assets/icons/lock_64.png"))
         self.cid = int(cid)
         equips = wgr_data.get_ship_equips(self.cid)
 
-        tab = QTableWidget(self)
-        tab.setColumnCount(4)
+        self.tab = QTableWidget(self)
+        self.tab.setColumnCount(4)
         for e in equips:
-            self.addTableRow(tab, e)
+            self.addTableRow(self.tab, e)
         #Table will fit the screen horizontally 
-        tab.horizontalHeader().setStretchLastSection(True) 
-        tab.horizontalHeader().setSectionResizeMode( 
-            QHeaderView.Stretch)
-        tab.resize(400, 400)
+        self.tab.horizontalHeader().setStretchLastSection(True) 
+        self.tab.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.tab.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.tab.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.tab.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.tab.horizontalHeader().hide()
+        self.tab.resize(self.width, self.height)
+        self.tab.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.resized.connect(self.resize_table)
 
     def addTableRow(self, table, data):
         row = table.rowCount()
         table.setRowCount(row+1)
 
-        table.setItem(row, 0, QTableWidgetItem(data['data']['title']))
+        title = QTableWidgetItem(data['data']['title'])
+        if data['locked'] == 1:
+            title.setIcon(self.lock_icon)
+        else:
+            pass
+        table.setItem(row, 0, title)
         table.setItem(row, 1, QTableWidgetItem(str(data['num'])))
-        table.setItem(row, 2, QTableWidgetItem(str(data['locked'])))
-        table.setItem(row, 3, QTableWidgetItem(data['data']['desc']))
+        spec = self.get_spec(data['data'])
+        table.setItem(row, 2, QTableWidgetItem(spec))
+
+        desc = 'RARITY ' + str(data['data']['star'])
+        if data['data']['desc'] == "":
+            pass
+        else:
+            desc += ("\n" + data['data']['desc'])
+
+        table.setItem(row, 3, QTableWidgetItem(desc))
+
+    def get_spec(self, data):
+        res = []
+        for key in data:
+            if not isinstance(data[key], int):
+                pass
+            else:
+                res.append('{}\t{}'.format(key, data[key]))
+        return '\n'.join(res)
+
+    def resizeEvent(self, event):
+        self.resized.emit()
+        return super().resizeEvent(event)
+
+    def resize_table(self):
+        # TODO: this not working
+        self.tab.setGeometry(0, 0, self.width, self.height)
 
 
 class ShipTableDelegate(QStyledItemDelegate):

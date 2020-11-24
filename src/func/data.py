@@ -127,7 +127,8 @@ def process_one_equip(equip):
             res[key] = equip[key]
         else:
             pass
-    garbage = ['type', 'picId', 'cid', 'boreType', 'handbookType', 'specialEffect', 'equipIndex', 'aluminiumUse']
+    garbage = ['type', 'picId', 'cid', 'boreType', 'handbookType',
+               'specialEffect', 'equipIndex', 'aluminiumUse', 'airDefRate']
     for g in garbage:
         try:
             res.pop(g)
@@ -192,7 +193,4 @@ def get_ship_equips(cid):
     return _type_to_equips(types)
 
 
-r = get_ship_equips(10000213)
-for e in r:
-    print(e)
 # End of File
