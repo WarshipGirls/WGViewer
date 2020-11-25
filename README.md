@@ -4,6 +4,10 @@ This project is inspired by [Kancolle Viewer](https://github.com/poooi/poi) and 
 
 The official sites of the mobile game, Warship Girls (R), are [here (CN server)](http://www.jianniang.com/), [here (JP server)](http://ssr.moefantasy.co.jp/) and [here (International server)](http://www.warshipgirls.com/en/).
 
+## Screenshot
+
+Please see [at this directory](screenshots). Updating as work progresses.
+
 ## Development
 
 - [Python3](https://www.python.org/)
@@ -12,9 +16,9 @@ The official sites of the mobile game, Warship Girls (R), are [here (CN server)]
 	- Windows 10
 	- Ubuntu 20.04
 
-## Screenshot
+Nice tools to have:
 
-Please see [at this directory](screenshots). Updating as work progresses.
+- [Fiddler 4](https://www.telerik.com/fiddler)
 
 ### Contribution
 
@@ -25,6 +29,10 @@ To contribute code,
 
 > pip install -r requirements.txt
 
+3. make a pull request when your code is ready :)
+
+### Packing into executable
+
 To build executable on Windows OS, run
 
 > build.bat
@@ -32,8 +40,6 @@ To build executable on Windows OS, run
 To build executable on Unix OS, run
 
 > pyinstaller --clean gui_main.spec
-
-Please check [this Mega TODO issue](https://github.com/WarshipGirls/WGViewer/issues/2) if you are interested in this project!
 
 ## Licenses
 
