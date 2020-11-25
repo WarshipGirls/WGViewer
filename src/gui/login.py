@@ -3,10 +3,11 @@ import logging
 import requests
 import qdarkstyle
 
-from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QLineEdit
+from PyQt5.QtCore import QSettings, QVariant
+from PyQt5.QtWidgets import QPushButton, QLabel, QLineEdit
 from PyQt5.QtWidgets import QComboBox, QMessageBox, QCheckBox
+from PyQt5.QtWidgets import QWidget, QDesktopWidget
 from PyQt5.QtWidgets import QGridLayout
-from PyQt5.QtWidgets import QDesktopWidget
 
 from sys import platform as _platform
 
@@ -14,6 +15,7 @@ from .main_interface import MainInterface
 from ..func.session import Session
 from ..func.login import GameLogin
 from ..func import constants as constants
+from ..func import data as wgr_data
 
 
 class LoginForm(QWidget):
@@ -26,54 +28,103 @@ class LoginForm(QWidget):
         self.resize(0.26*user_w, 0.12*user_h)
 
         self.layout = QGridLayout()
+        self.settings = QSettings(wgr_data.get_settings_file(), QSettings.IniFormat)
+        # self.settings.clear()
 
-        self.init_name_field()
-        self.init_password_field()
-        self.init_platform_field()
-        self.init_server_field()
-        self.init_checkbox()
+        keys = self.settings.allKeys()
+        print(keys)
+        self.settings.beginGroup('Login')
+        val = self.settings.value("checked")
+        self.settings.endGroup()
+        if val == 'true':
+            self.settings.beginGroup('Login')
+            name = self.settings.value('username')
+            pswd = self.settings.value('password')
+            server = self.settings.value('server_text')
+            platform = self.settings.value('platform_text')
+            self.settings.endGroup()
+            # Don't change the order
+            self.init_name_field(name)
+            self.init_password_field(pswd)
+            self.init_server_field(server)
+            self.init_platform_field(platform)
+            self.init_checkbox(True)
+        else:
+            self.init_name_field()
+            self.init_password_field()
+            self.init_platform_field()
+            self.init_server_field()
+            self.init_checkbox()
         self.init_login_button(user_h)
 
         self.setLayout(self.layout)
         self.setWindowTitle('Warship Girls Viewer Login')
 
-    def init_name_field(self):
+    def init_name_field(self, text=''):
         label_name = self.create_qLabel('Username')
         self.lineEdit_username = QLineEdit()
-        self.lineEdit_username.setPlaceholderText('Please enter your username')
+        self.lineEdit_username.setClearButtonEnabled(True)
+
+        if text == '':
+            # self.lineEdit_password.setPlaceholderText(text)
+            self.lineEdit_username.setPlaceholderText('Please enter your username')
+        else:
+            self.lineEdit_username.setText(text)
+
         # addWidget(widget, row_number, col_number, row_span<opt>, col_span<opt>)
         self.layout.addWidget(label_name, 0, 0)
         self.layout.addWidget(self.lineEdit_username, 0, 1)
 
-    def init_password_field(self):
+    def init_password_field(self, text=''):
         label_password = self.create_qLabel('Password')
         self.lineEdit_password = QLineEdit()
+        self.lineEdit_password.setClearButtonEnabled(True)
         self.lineEdit_password.setEchoMode(QLineEdit.Password)
         # output = self.lineEdit_password.text()
-        self.lineEdit_password.setPlaceholderText('Please enter your password')
+
+        if text == '':
+            # self.lineEdit_password.setPlaceholderText(text)
+            self.lineEdit_password.setPlaceholderText('Please enter your password')
+        else:
+            self.lineEdit_password.setText(text)
+
         self.layout.addWidget(label_password, 1, 0)
         self.layout.addWidget(self.lineEdit_password, 1, 1)
 
-    def init_platform_field(self):
+    def init_platform_field(self, text=''):
         label_platform = self.create_qLabel('Platform')
-        combo_platform = QComboBox()
+        self.combo_platform = QComboBox()
         # platforms = ["Choose your platform", "CN-iOS", "CN-Android", "International", "JP"]
         platforms = ["Choose your platform", "CN-iOS"]
-        combo_platform.addItems(platforms)
-        combo_platform.currentTextChanged.connect(self.update_server_box)
-        self.layout.addWidget(label_platform, 2, 0)
-        self.layout.addWidget(combo_platform, 2, 1)
+        self.combo_platform.addItems(platforms)
+        self.combo_platform.currentTextChanged.connect(self.update_server_box)
 
-    def init_server_field(self):
+        if text == '':
+            pass
+        else:
+            self.combo_platform.setCurrentText(text)      
+
+        self.layout.addWidget(label_platform, 2, 0)
+        self.layout.addWidget(self.combo_platform, 2, 1)
+
+    def init_server_field(self, text=''):
         label_server = self.create_qLabel('Server')
         self.combo_server = QComboBox()
         self.combo_server.currentTextChanged.connect(self.update_server)
+
+        if text == '':
+            pass
+        else:
+            self.combo_server.setCurrentText(text)
+
         self.layout.addWidget(label_server, 3, 0)
         self.layout.addWidget(self.combo_server, 3, 1)
 
-    def init_checkbox(self):
-        self.check = QCheckBox('remember login info')
-        self.layout.addWidget(self.check, 4, 1)
+    def init_checkbox(self, checked=False):
+        self.checkbox = QCheckBox('remember login info')
+        self.checkbox.setChecked(checked)
+        self.checkbox.stateChanged.connect(self.on_check_clicked)
+        self.layout.addWidget(self.checkbox, 4, 1)
 
     def init_login_button(self, user_h):
         button_login = QPushButton('Login')
@@ -86,6 +137,27 @@ class LoginForm(QWidget):
         _str = '<font size="4"> ' + text + ' </font>'
         _res = QLabel(_str)
         return _res
+
+    def login_success(self):
+        # self.settings.endGroup()
+        self.mi = MainInterface(self.server, self.channel, cookies)
+        self.mi.show()
+        self.close()
+
+
+    # ================================
+    # Events
+    # ================================
+
+
+    def on_check_clicked(self):
+        self.settings.beginGroup('Login')
+        self.settings.setValue("checked", self.checkbox.isChecked())
+        self.settings.setValue("server_text", self.combo_server.currentText())
+        self.settings.setValue("platform_text", self.combo_platform.currentText())
+        self.settings.setValue("username", self.lineEdit_username.text())
+        self.settings.setValue("password", self.lineEdit_password.text())
+        self.settings.endGroup()
 
     def update_server_box(self, text):
         servers = []
@@ -123,6 +195,7 @@ class LoginForm(QWidget):
         # TODO: store user info securely
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()
+        self.on_check_clicked()
         # try:
         #     res1 = account.first_login(_username, _password)
         #     res2 = account.second_login(self.server)
@@ -139,15 +212,10 @@ class LoginForm(QWidget):
             msg.exec_()
             msg.close()
             cookies = account.get_cookies()
-            self.mi = MainInterface(self.server, self.channel, cookies)
             self.login_success()
         else:
             msg.setText("Incorrect Password.")
             msg.exec_()
-
-    def login_success(self):
-        self.mi.show()
-        self.close()
 
 
 # End of File

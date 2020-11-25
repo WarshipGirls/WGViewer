@@ -60,6 +60,9 @@ def get_user_dir():
         pass
     return p
 
+def get_settings_file():
+    return os.path.join(_get_data_dir(), 'wgviewer.ini')
+
 def find_index(lst, key, value):
     '''
     Given a list of dict, find index by key-value pair.
