@@ -125,6 +125,8 @@ class SideDock(QDockWidget):
         self.table_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table_view.setFocusPolicy(Qt.NoFocus)
+        self.table_view.setSelectionMode(QAbstractItemView.NoSelection)
         self.table_view.horizontalScrollBar().setEnabled(False)
         self.table_view.verticalScrollBar().setEnabled(False)
 
@@ -433,7 +435,6 @@ class SideDock(QDockWidget):
     def on_received_tasks(self, data):
         if data != None:
             t = data["taskVo"]
-            # TODO: future limited time task
             for i in t:
                 stat = str(i["condition"][0]["finishedAmount"]) + " / " + str(i["condition"][0]["totalAmount"])
                 desc = re.sub(r'\^.+?00000000', '', i["desc"])  # F**k MoeFantasy
