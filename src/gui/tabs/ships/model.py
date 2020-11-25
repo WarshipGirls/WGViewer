@@ -7,7 +7,7 @@ import traceback
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
-from . import ships_constant as SCONST
+from . import constant as SCONST
 from ....func import constants as CONST
 from ....func.helper_function import Helper
 from ....func import data as  wgr_data

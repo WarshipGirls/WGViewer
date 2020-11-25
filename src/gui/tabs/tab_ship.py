@@ -8,10 +8,10 @@ from PyQt5.QtWidgets import QVBoxLayout, QGridLayout, QScrollArea
 from PyQt5.QtWidgets import QHeaderView, QTableView
 from PyQt5.QtCore import Qt, pyqtSlot
 
-from .ships_delegate import ShipTableDelegate
-from .ships_proxy_model import ShipSortFilterProxyModel
-from .ships_top_checkbox import TopCheckboxes
-from .ships_model import ShipModel
+from .ships.delegate import ShipTableDelegate
+from .ships.proxy_model import ShipSortFilterProxyModel
+from .ships.top_checkbox import TopCheckboxes
+from .ships.model import ShipModel
 
 
 def get_data_path(relative_path):

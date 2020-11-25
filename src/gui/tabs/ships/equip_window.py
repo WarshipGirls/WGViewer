@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QWidget, QPushButton, QMainWindow
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from PyQt5.QtWidgets import QVBoxLayout, QHeaderView
 
-from . import ships_constant as SCONST
+from . import constant as SCONST
 from ....func import data as wgr_data
 
 
