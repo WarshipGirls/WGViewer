@@ -1,6 +1,7 @@
 import sys
 import os
 import logging
+import zipfile
 
 from PyQt5.QtWidgets import QWidget, QLineEdit
 from PyQt5.QtWidgets import QVBoxLayout, QGridLayout, QScrollArea
@@ -26,6 +27,7 @@ class TabShips(QWidget):
         self.api = api
 
         self.init_ui()
+        self.init_assets()
 
         if realrun == 0:
             self.test()
@@ -78,6 +80,23 @@ class TabShips(QWidget):
         self.table_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setShowGrid(False)
+
+    def init_assets(self):
+        # TODO: find drive that serves ppl in/out GFW
+        # s_link = 'https://drive.google.com/file/d/1v5VO1b_Phl66xJJgk4TAXjGa_XHjbl-k/view?usp=sharing'
+        # e_link = 'https://drive.google.com/file/d/1CeluorrRqqhrKeNUo18UelKXhTxE8dsU/view?usp=sharing'
+        logging.info('Loading necessary resource files...')
+        if os.path.isdir(get_data_path('src/assets/S')):
+            pass
+        else:
+            with zipfile.ZipFile(get_data_path('src/assets/S.zip'), 'r') as zip_ref:
+                zip_ref.extractall(get_data_path('src/assets'))
+
+        if os.path.isdir(get_data_path('src/assets/E')):
+            pass
+        else:
+            with zipfile.ZipFile(get_data_path('src/assets/E.zip'), 'r') as zip_ref:
+                zip_ref.extractall(get_data_path('src/assets'))
 
     def test(self):
         logging.debug("Starting tests")
