@@ -96,7 +96,7 @@ class LoginForm(QWidget):
         label_platform = self.create_qLabel('Platform')
         self.combo_platform = QComboBox()
         # platforms = ["Choose your platform", "CN-iOS", "CN-Android", "International", "JP"]
-        platforms = ["Choose your platform", "CN-iOS"]
+        platforms = ["Choose your platform", "CN-iOS", "CN-Android"]
         self.combo_platform.addItems(platforms)
         self.combo_platform.currentTextChanged.connect(self.update_server_box)
 
