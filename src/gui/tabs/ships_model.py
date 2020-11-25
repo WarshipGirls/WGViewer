@@ -274,7 +274,6 @@ class ShipModel(QStandardItemModel):
 
     def set_equips(self, *args):
 
-        # TODO hardcoding
         col = 21
         for e in args[1]:
             e = str(e)
@@ -297,7 +296,6 @@ class ShipModel(QStandardItemModel):
                 thumbnail.setData(e, Qt.UserRole)   # hide Equipment cid
                 self.setItem(args[0], col, thumbnail)
             else:
-                # TODO
                 logging.warning('Image for equipment {} is absent.'.format(e))
             col += 1
 
@@ -311,7 +309,7 @@ class ShipModel(QStandardItemModel):
     def update_one_equip(self, row, col, equip_id):
         ship_id = self.index(row, 2).data()
         unequip_id = self.index(row, col).data(Qt.UserRole)
-        equip_slot = col-21
+        equip_slot = col - 21
 
         if equip_id == "-1":
             # unequip; setItem deletes previous item
@@ -324,7 +322,6 @@ class ShipModel(QStandardItemModel):
         else:
             pass
 
-        # TODO: hardcoding
         res = self.api.boat_changeEquipment(ship_id, equip_id, equip_slot)
         if 'eid' not in res:
             # success
@@ -343,12 +340,7 @@ class ShipModel(QStandardItemModel):
             thumbnail.setData(equip_id, Qt.UserRole)
             self.setItem(row, col, thumbnail)
         else:
-            # TODO
             logging.warning('Image for equipment {} is absent.'.format(e))
-
-
-    def change_equip(self):
-        print("???????????")
 
     def set_tactics(self):
          # "tactics":{
