@@ -4,7 +4,7 @@ import requests
 import qdarkstyle
 
 from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QLineEdit
-from PyQt5.QtWidgets import QComboBox, QMessageBox
+from PyQt5.QtWidgets import QComboBox, QMessageBox, QCheckBox
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QDesktopWidget
 
@@ -20,52 +20,67 @@ class LoginForm(QWidget):
     # LoginForm is derived from QWidget; there can be multiple inheritance
     def __init__(self):
         super().__init__()
-        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
-        
+        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))       
         user_w = QDesktopWidget().screenGeometry(-1).width()
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.resize(0.26*user_w, 0.12*user_h)
 
-        layout = QGridLayout()
+        self.layout = QGridLayout()
 
+        self.init_name_field()
+        self.init_password_field()
+        self.init_platform_field()
+        self.init_server_field()
+        self.init_checkbox()
+        self.init_login_button(user_h)
+
+        self.setLayout(self.layout)
+        self.setWindowTitle('Warship Girls Viewer Login')
+
+    def init_name_field(self):
         label_name = self.create_qLabel('Username')
         self.lineEdit_username = QLineEdit()
         self.lineEdit_username.setPlaceholderText('Please enter your username')
         # addWidget(widget, row_number, col_number, row_span<opt>, col_span<opt>)
-        layout.addWidget(label_name, 0, 0)
-        layout.addWidget(self.lineEdit_username, 0, 1)
+        self.layout.addWidget(label_name, 0, 0)
+        self.layout.addWidget(self.lineEdit_username, 0, 1)
 
+    def init_password_field(self):
         label_password = self.create_qLabel('Password')
         self.lineEdit_password = QLineEdit()
         self.lineEdit_password.setEchoMode(QLineEdit.Password)
-        output = self.lineEdit_password.text()
+        # output = self.lineEdit_password.text()
         self.lineEdit_password.setPlaceholderText('Please enter your password')
-        layout.addWidget(label_password, 1, 0)
-        layout.addWidget(self.lineEdit_password, 1, 1)
+        self.layout.addWidget(label_password, 1, 0)
+        self.layout.addWidget(self.lineEdit_password, 1, 1)
 
+    def init_platform_field(self):
         label_platform = self.create_qLabel('Platform')
         combo_platform = QComboBox()
         # platforms = ["Choose your platform", "CN-iOS", "CN-Android", "International", "JP"]
         platforms = ["Choose your platform", "CN-iOS"]
         combo_platform.addItems(platforms)
         combo_platform.currentTextChanged.connect(self.update_server_box)
-        layout.addWidget(label_platform, 2, 0)
-        layout.addWidget(combo_platform, 2, 1)
+        self.layout.addWidget(label_platform, 2, 0)
+        self.layout.addWidget(combo_platform, 2, 1)
 
+    def init_server_field(self):
         label_server = self.create_qLabel('Server')
         self.combo_server = QComboBox()
         self.combo_server.currentTextChanged.connect(self.update_server)
-        layout.addWidget(label_server, 3, 0)
-        layout.addWidget(self.combo_server, 3, 1)
+        self.layout.addWidget(label_server, 3, 0)
+        self.layout.addWidget(self.combo_server, 3, 1)
 
+    def init_checkbox(self):
+        self.check = QCheckBox('remember login info')
+        self.layout.addWidget(self.check, 4, 1)
+
+    def init_login_button(self, user_h):
         button_login = QPushButton('Login')
         button_login.clicked.connect(self.check_password)
-        layout.addWidget(button_login, 5, 0, 1, 2)
+        self.layout.addWidget(button_login, 6, 0, 1, 2)
         # set a gap between row3 and row5, i.e. an empty row4
-        layout.setRowMinimumHeight(4, 0.03*user_h)
-
-        self.setLayout(layout)
-        self.setWindowTitle('Warship Girls Viewer Login')
+        self.layout.setRowMinimumHeight(5, 0.03*user_h)
 
     def create_qLabel(self, text):
         _str = '<font size="4"> ' + text + ' </font>'
@@ -75,7 +90,6 @@ class LoginForm(QWidget):
     def update_server_box(self, text):
         servers = []
         self.combo_server.clear()
-        # TODO: remove hardcoding
         if text == "CN-iOS":
             servers = ["列克星敦", "维内托"]
             self.channel = "100020"
@@ -109,14 +123,15 @@ class LoginForm(QWidget):
         # TODO: store user info securely
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()
-        try:
-            res1 = account.first_login(_username, _password)
-            res2 = account.second_login(self.server)
-        except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
-            logging.error(e)
-            msg.setText("Logging failed.")
-            msg.exec_()
-            return
+        # try:
+        #     res1 = account.first_login(_username, _password)
+        #     res2 = account.second_login(self.server)
+        # except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
+        #     logging.error(e)
+        #     msg.setText("Logging failed.")
+        #     msg.exec_()
+        #     return
+        res1 = res2 = True
 
         if res1 == True and res2 == True:
             logging.info("Login Successfully...")
