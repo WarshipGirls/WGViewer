@@ -12,6 +12,10 @@ The official sites of the mobile game, Warship Girls (R), are [here (CN server)]
 	- Windows 10
 	- Ubuntu 20.04
 
+## Screenshot
+
+Please see [at this directory](screenshots). Updating as work progresses.
+
 ### Contribution
 
 To contribute code,
