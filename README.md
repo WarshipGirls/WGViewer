@@ -19,6 +19,7 @@ Please see [at this directory](screenshots). Updating as work progresses.
 Nice tools to have:
 
 - [Fiddler 4](https://www.telerik.com/fiddler)
+- [Python debugger](https://docs.python.org/3/library/pdb.html)
 
 ### Contribution
 

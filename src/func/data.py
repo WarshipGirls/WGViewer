@@ -9,6 +9,7 @@ import shutil
 import urllib
 
 from pathlib import Path
+from time import sleep
 
 
 # ================================
@@ -59,6 +60,18 @@ def get_user_dir():
         pass
     return p
 
+def get_settings_file():
+    return os.path.join(_get_data_dir(), 'wgviewer.ini')
+
+def get_key_path(key_file):
+    return os.path.join(_get_data_dir(), key_file)
+
+def is_key_exists(key_file):
+    return os.path.exists(os.path.join(_get_data_dir(), key_file))
+
+def _del_key_file(key_file):
+    os.remove(os.path.join(_get_data_dir(), key_file))
+
 def find_index(lst, key, value):
     '''
     Given a list of dict, find index by key-value pair.
@@ -75,28 +88,41 @@ def find_all_indices(lst, key, value):
             res.append(i)
     return res
 
+
 # ================================
 # getInitConfigs related
 # ================================
 
 
 def save_data_by_attr(storage_dir, data_dict, field):
-    filename = field + '.json'
-    p = os.path.join(storage_dir, filename)
-    if os.path.exists(p):
-        pass
-    else:
-        with open(p, 'w', encoding='utf-8') as fout:
-            json.dump(data_dict[field], fout, ensure_ascii=False, indent=4)
+    try:
+        filename = field + '.json'
+        p = os.path.join(storage_dir, filename)
+        if os.path.exists(p):
+            pass
+        else:
+            with open(p, 'w', encoding='utf-8') as fout:
+                json.dump(data_dict[field], fout, ensure_ascii=False, indent=4)
+    except Exception as e:
+        logging.error(e)
+        return False
+    return True
+
+def save_all_attr(storage_dir, data):
+    res = True
+    for k in data.keys():
+        res &= save_data_by_attr(storage_dir, data, k)
+    return res
 
 def _check_data_ver(storage_dir):
     # Note: since getting raw data takes 20+ seconds, use this method minimally
+    # TODO: this is Chinese data; is there a link for English counterpart?
     url = 'http://login.jr.moefantasy.com/index/getInitConfigs'
     try:
         d = requests.get(url).json()
     except (urllib.error.URLError, json.decoder.JSONDecodeError) as e:
         logging.error('Server connection error. Please try again later.')
-        logging.error(e)
+        return [False, d]
 
     path = os.path.join(storage_dir, 'DataVersion.json')
     if not os.path.exists(path):
@@ -117,15 +143,19 @@ def save_init_data():
     '''
     Updating data to the latest version
     '''
-    # TODO: following need to be executed once for new user.
+    logging.info('Initializing data for first-time user... This may take 30+ seconds...')
     storage_dir = get_init_dir()
-    res = _check_data_ver(storage_dir)
-    if res[0] == True:
-        pass
-    else:
-        data = res[1]
-        for k in data.keys():
-            save_data_by_attr(storage_dir, data, k)
+    res = [False]
+    while not res[0]:
+        try:
+            res = _check_data_ver(storage_dir)
+            if res[0] == True:
+                pass
+            else:
+                res[0] = save_all_attr(storage_dir, res[1])
+        except (TimeoutError, requests.exceptions.ConnectionError) as e:
+            logging.error('Data initializing failed. Trying again...')
+            sleep(5)
 
 
 # ================================
@@ -295,6 +325,22 @@ def get_user_tactics():
     with open(path, encoding='utf-8') as f:
         t = json.load(f)
     return t
+
+
+# ================================
+# Data processing
+# ================================
+
+
+def _process_shipItem():
+    path = os.path.join(get_init_dir(), 'shipItem.json')
+    with open(path, encoding='utf-8') as f:
+        t = json.load(f)
+    
+    res = {}
+    for i in t:
+        res[i['cid']] = i['title']
+    return res
 
 
 # End of File
