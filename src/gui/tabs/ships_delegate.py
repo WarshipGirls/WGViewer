@@ -21,16 +21,14 @@ def get_data_path(relative_path):
 
 
 class EquipPopup(QMainWindow):
-    # ALL temporary, testing
-    # TODO: selection signal sent back to main table
-
-    def __init__(self, parent, row, col, cid):
+    def __init__(self, parent, row, col, cid, button_enable):
         super().__init__()
         print(self)
         self.parent = parent
         self._row = row
         self._col = col
         self.cid = int(cid)
+        self.button_enable = button_enable
 
         self.width = 600
         self.height = 600
@@ -39,19 +37,23 @@ class EquipPopup(QMainWindow):
         self.trans = SCONST._equip_spec
 
         self.init_ui()
+        if self.button_enable == True:
+            pass
+        else:
+            self.button.setEnabled(False)
 
     def init_ui(self):
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         self.setWindowTitle('WGViewer - Equipment Selection')
         self.resize(self.width, self.height)
 
-        button = QPushButton('Unequip Current Equipment')
-        button.clicked.connect(self.button_click_event)
+        self.button = QPushButton('Unequip Current Equipment')
+        self.button.clicked.connect(self.unequip)
 
         self.tab = QTableWidget()
         self.tab.setColumnCount(4)
         equips = wgr_data.get_ship_equips(self.cid)
-        # print(equips)
+
         for e in equips:
             self.addTableRow(self.tab, e)
         self.tab.horizontalHeader().setStretchLastSection(True)
@@ -66,11 +68,11 @@ class EquipPopup(QMainWindow):
         self.tab.setSelectionBehavior(QTableWidget.SelectRows)
         self.tab.setSelectionMode(QTableWidget.SingleSelection)
 
-        self.tab.doubleClicked.connect(self.click_event)
+        self.tab.doubleClicked.connect(self.update_equip)
 
         content_layout = QVBoxLayout()
-        # TODO disable button if no equipped
-        content_layout.addWidget(button)
+
+        content_layout.addWidget(self.button)
         content_layout.addWidget(self.tab)
         window = QWidget()
         window.setLayout(content_layout)
@@ -111,13 +113,13 @@ class EquipPopup(QMainWindow):
                 res.append('{}\t{}'.format(self.trans[key], data[key]))
         return '\n'.join(res)
 
-    def click_event(self, index):
-        # index is QModelIndex() object
+    def update_equip(self, index):
         e_id = self.id_list[index.row()]
-        self.parent.fuck_you(self._row, self._col, e_id)
+        self.parent.handle_event(self._row, self._col, e_id)
+        self.button.setEnabled(True)
 
-    def button_click_event(self, index):
-        self.parent.fuck_you(self._row, self._col, -1)
+    def unequip(self):
+        self.parent.handle_event(self._row, self._col, -1)
 
 
 class ShipTableDelegate(QStyledItemDelegate):
@@ -130,49 +132,22 @@ class ShipTableDelegate(QStyledItemDelegate):
             # Make only column 1 editable
             return super(ShipTableDelegate, self).createEditor(parent, option, index)
         elif 21 <= index.column() <= 24: 
-            # THIS is probably NOT the way it should be done.
-            # but I don't know how to do it otherwise
+            # THIS is probably NOT the way it should be done. but I don't know how to do it otherwise
             print("clicked equip " + str(index.row()) + ", " + str(index.column()))
             cid = index.sibling(index.row(), 0).data(Qt.UserRole)
-            self._equip_popup(index.row(), index.column(), cid)
+            btn_on = True if int(index.data(Qt.UserRole)) > 0 else False
+            self._equip_popup(index.row(), index.column(), cid, btn_on)
         else:
             print("clicked " + str(index.row()) + ", " + str(index.column()))
-            # print(index.sibling())
 
-    def setEditorData(self, editor, index):
-        print("????????????")
-
-    def setModelData(self, editor, model, index):
-        print("!!!!!!!!!!!!!")
-
-    def _equip_popup(self, row, col, cid):
-        self.w = EquipPopup(self, row, col, cid)
+    def _equip_popup(self, row, col, cid, btn_on):
+        self.w = EquipPopup(self, row, col, cid, btn_on)
         self.w.show()
 
-    def fuck_you(self, row, col, eid):
+    def handle_event(self, row, col, eid):
         # the chain of following is disgusting
         self._view.model().sourceModel().update_one_equip(row, col, str(eid))
         self.w.close()
-
-
-class EquipmentDelegate(QStyledItemDelegate):
-    def __init__(self, parent, row, img_path):
-        super().__init__(parent)
-        self.row = row
-        self.img_path = img_path
-
-    # def createEditor(self, parent, option, index):
-    #     img = QPixmap()
-    #     is_loaded = img.load(self.img_path)
-    #     if is_loaded:
-    #         l = QLabel(parent)
-    #         # thumbnail = QStandardItem()
-    #         # thumbnail.setData(QVariant(img), Qt.DecorationRole)
-    #         l.setPixmap(img)
-    #     else:
-    #         pass
-    #     return l
-
 
 
 # End of File

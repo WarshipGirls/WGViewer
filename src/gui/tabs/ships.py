@@ -72,9 +72,6 @@ class TabShips(QWidget):
         self.search_line.textChanged.connect(self.table_proxy.setNameFilter)
 
     def init_view_settings(self):
-        # up to (not including) Equipment column
-        # for i in range(21):
-            # self.table_view.setItemDelegateForColumn(i, ShipTableDelegate(self.table_view))
         self.table_view.setItemDelegate(ShipTableDelegate(self.table_view))
 
         self.table_view.setSortingEnabled(True)

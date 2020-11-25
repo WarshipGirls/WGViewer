@@ -138,6 +138,7 @@ def process_one_equip(equip):
             pass
     return res
 
+""" Following implementation is not used because MF's bug
 def _type_to_equips(equipable_types):
     '''
     Based on a ship equipable types, return all user owned equipment. 
@@ -180,31 +181,28 @@ def _type_to_equips(equipable_types):
                 res.append(user_e)
     return res
 
-# def get_ship_equips(cid):
-#     '''
-#     Given a ship's cid (integer), return all user owned equipment. 
-#     '''
-#     # 1. get corresponding equipmentType in shipCard by cid
-#     p = os.path.join(get_init_dir(), 'shipCard.json')
-#     with open(p, encoding='utf-8') as f:
-#         x = json.load(f)
-#     try:
-#         ship = next((i for i in x if i['cid'] == cid))
-#         # TOFIX
-#         types = ship['equipmentType']
-#     except StopIteration:
-#         return []
+def get_ship_equips(cid):
+    '''
+    Given a ship's cid (integer), return all user owned equipment. 
+    '''
+    # 1. get corresponding equipmentType in shipCard by cid
+    p = os.path.join(get_init_dir(), 'shipCard.json')
+    with open(p, encoding='utf-8') as f:
+        x = json.load(f)
+    try:
+        ship = next((i for i in x if i['cid'] == cid))
+        # TOFIX
+        types = ship['equipmentType']
+    except StopIteration:
+        return []
 
-#     return _type_to_equips(types)
-
-
-
-
-# 1. find ship type
-# 2. loop thru all equips' shipType
-#   3. if ship type in shipType, add equipment cid
+    return _type_to_equips(types)
+"""
 
 def get_ship_equips(cid):
+    '''
+    Given a ship's cid, find all user owned equipment.
+    '''
     p = os.path.join(get_init_dir(), 'shipCard.json')
     with open(p, encoding='utf-8') as f:
         x = json.load(f)
@@ -248,26 +246,16 @@ def get_ship_equips(cid):
     return res
 
 def find_index(lst, key, value):
-    # print('\n')
-    # print(type(lst))
-    # print(type(key))
-    # print(type(value))
-    # print(lst)
-    # print(key)
-    # print(value)
-    # print('\n')
+    '''
+    Given a list of dict, find index by key-value pair.
+    '''
     for i, dic in enumerate(lst):
         if dic[key] == value:
             return i
     return -1
 
-# 3 types,
-# 1->1 Done
-# 1->0 Done
-# 0->1 Done by block user interaction with non
 def update_equipment_amount(equipped, unequipped):
     # both input are cids (int)
-    print("?????????????????????????????????????????????????????")
     equipped = int(equipped)
     unequipped = int(unequipped)
     user_equip_path = os.path.join(get_user_dir(), 'equipmentVo.json')
@@ -283,22 +271,6 @@ def update_equipment_amount(equipped, unequipped):
     user_equips[idx_2]['num'] += 1
     with open(user_equip_path, 'w', encoding='utf-8') as fout:
         json.dump(user_equips, fout, ensure_ascii=False, indent=4)
-
-# fff = test(10039012)
-# for k in fff:
-#     print(k)
-#     print('--------------')
-
-# fff = get_ship_equips(10039012)
-# for k in fff:
-#     print(k)
-#     print('--------------')
-
-
-# update_equipment_amount(10000121, 10002021)
-# update_equipment_amount(10002021, 10000121)
-# print(get_ship_equips(10039012))
-# update_equipment_amount(-1, 10000121)
 
 
 # End of File

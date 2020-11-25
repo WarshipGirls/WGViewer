@@ -273,8 +273,6 @@ class ShipModel(QStandardItemModel):
         self.setItem(args[0], 20, wig)
 
     def set_equips(self, *args):
-        # Issue #15
-        # self.view.setIndexWidget(self.view.model().index(args[0], 21), EquipsArray(args[1]))
 
         # TODO hardcoding
         col = 21
@@ -290,7 +288,6 @@ class ShipModel(QStandardItemModel):
                 pass
             raw_path = "src/assets/E/equip_L_" + str(int(e[3:6])) + ".png"
             img_path = get_data_path(raw_path)
-            # self.view.setItemDelegateForColumn(col, EquipmentDelegate(self.view, args[0], img_path))
 
             img = QPixmap()
             is_loaded =  img.load(img_path)
@@ -299,7 +296,6 @@ class ShipModel(QStandardItemModel):
                 thumbnail.setData(QVariant(img), Qt.DecorationRole)
                 thumbnail.setData(e, Qt.UserRole)   # hide Equipment cid
                 self.setItem(args[0], col, thumbnail)
-                # thumbnail.clicked.connect(self.change_equip)
             else:
                 # TODO
                 logging.warning('Image for equipment {} is absent.'.format(e))
