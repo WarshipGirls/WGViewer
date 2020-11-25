@@ -19,11 +19,16 @@ class AlignListView(QTreeView):
 
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.setFocusPolicy(Qt.NoFocus)
-        self.setSelectionMode(QAbstractItemView.NoSelection)    # TODO: need to allow click event
+        self.setSelectionMode(QAbstractItemView.NoSelection)
 
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+
+        self.doubleClicked.connect(self.on_click)
+
+    def on_click(self, index):
+        pass
 
     def add_item(self, key, value, desc=None, is_limited=False):
         # TODO: add function, when user clicked, pop up build/dev/repair etc
@@ -45,6 +50,47 @@ class AlignListView(QTreeView):
 
     def update_item(self, row, col, val):
         self.model().item(row, col).setText(str(val))
+
+
+class BathListView(AlignListView):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def on_click(self, index):
+        print('bbbbbbbbbbbbbbaaaaaaaaaaa')
+        # TODO
+
+
+class BuildListView(AlignListView):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def on_click(self, index):
+        print('bbbbbbbbbbbbbb')
+
+
+class DevListView(AlignListView):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def on_click(self, index):
+        print('dddddddddddd')
+
+
+class ExpListView(AlignListView):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def on_click(self, index):
+        print('eeeeeeeeeeee')
+
+
+class TaskListView(AlignListView):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def on_click(self, index):
+        print('tttttttttttt')
 
 
 # End of File
