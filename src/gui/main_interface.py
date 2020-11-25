@@ -136,27 +136,24 @@ class MainInterface(QMainWindow):
     # ================================
 
     def api_getShipList(self):
-        url = self.server + 'api/getShipList' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        if not self.realrun:
-            with open('api_getShipList.json', 'w') as of:
-                json.dump(data, of)
+        data = self.api.api_getShipList()
+        with open('api_getShipList.json', 'w') as of:
+            json.dump(data, of)
         self.sig_getShipList.emit(data)
 
     def api_initGame(self):
-        url = self.server + 'api/initGame?&crazy=1' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        if not self.realrun:
-            with open('api_initGame.json', 'w') as of:
-                json.dump(data, of)
+        data = self.api.api_initGame()
+        with open('api_initGame.json', 'w') as of:
+            json.dump(data, of)
         self.sig_initGame.emit(data)
 
-        # save equipmentVo
-        p = os.path.join(wgr_data.get_user_dir(), 'equipmentVo.json')
-        with open(p, 'w') as f:
+        # save necessary data
+        user_dir = wgr_data.get_user_dir()
+        with open(os.path.join(user_dir, 'equipmentVo.json'), 'w') as f:
             json.dump(data['equipmentVo'], f, ensure_ascii=False, indent=4)
+
+        with open(os.path.join(user_dir, 'tactics.json'), 'w') as f:
+            json.dump(data['tactics'], f, ensure_ascii=False, indent=4)
 
     def pve_getPveData(self):
         url = self.server + 'pve/getPveData' + self.hlp.get_url_end(self.channel)

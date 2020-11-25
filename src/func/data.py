@@ -59,6 +59,21 @@ def get_user_dir():
         pass
     return p
 
+def find_index(lst, key, value):
+    '''
+    Given a list of dict, find index by key-value pair.
+    '''
+    for i, dic in enumerate(lst):
+        if dic[key] == value:
+            return i
+    return -1
+
+def find_all_indices(lst, key, value):
+    res = []
+    for i, dic in enumerate(lst):
+        if dic[key] == value:
+            res.append(i)
+    return res
 
 # ================================
 # getInitConfigs related
@@ -245,15 +260,6 @@ def get_ship_equips(cid):
             continue
     return res
 
-def find_index(lst, key, value):
-    '''
-    Given a list of dict, find index by key-value pair.
-    '''
-    for i, dic in enumerate(lst):
-        if dic[key] == value:
-            return i
-    return -1
-
 def update_equipment_amount(equipped, unequipped):
     # both input are cids (int)
     equipped = int(equipped)
@@ -271,6 +277,24 @@ def update_equipment_amount(equipped, unequipped):
     user_equips[idx_2]['num'] += 1
     with open(user_equip_path, 'w', encoding='utf-8') as fout:
         json.dump(user_equips, fout, ensure_ascii=False, indent=4)
+
+
+# ================================
+# Tactics related
+# ================================
+
+
+def get_tactics_json():
+    path = os.path.join(get_init_dir(), 'ShipTactics.json')
+    with open(path, encoding='utf-8') as f:
+        t = json.load(f)
+    return t
+
+def get_user_tactics():
+    path = os.path.join(get_user_dir(), 'tactics.json')
+    with open(path, encoding='utf-8') as f:
+        t = json.load(f)
+    return t
 
 
 # End of File

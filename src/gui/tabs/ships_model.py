@@ -1,7 +1,8 @@
-import sys
-import os
-import traceback
 import logging
+import os
+import re
+import sys
+import traceback
 
 from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PyQt5.QtWidgets import QPushButton, QMainWindow
@@ -9,7 +10,6 @@ from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
 from . import ships_constant as SCONST
-from .ships_delegate import EquipmentDelegate
 from ...func import constants as CONST
 from ...func.helper_function import Helper
 from ...func import data as  wgr_data
@@ -43,11 +43,16 @@ class ShipModel(QStandardItemModel):
         self.setColumnCount(len(self.headers))
         self.setHorizontalHeaderLabels(self.headers)
         self.init_icons()
+        self.init_json()
 
     def init_icons(self):
         # To avoid repeatedly loading same icon, preload them
         self.ring_icon = QIcon(get_data_path("src/assets/icons/ring_60.png"))
         self.lock_icon = QIcon(get_data_path("src/assets/icons/lock_64.png"))
+
+    def init_json(self):
+        self.tactics_json = wgr_data.get_tactics_json()
+        self.user_tactics = wgr_data.get_user_tactics()
 
     def set_data(self, _data):
         self.ships_raw_data = _data
@@ -75,6 +80,7 @@ class ShipModel(QStandardItemModel):
         self.set_stats(row, d["battleProps"], d["battlePropsMax"])
         self.set_slots(row, d["capacitySlotMax"], d["missileSlotMax"])
         self.set_equips(row, d["equipmentArr"])
+        self.set_tactics(row, d['tactics'])
 
     def set_thumbnail(self, row, cid):
         ''' Column 0
@@ -342,13 +348,41 @@ class ShipModel(QStandardItemModel):
         else:
             logging.warning('Image for equipment {} is absent.'.format(e))
 
-    def set_tactics(self):
-         # "tactics":{
-         #    "1":"10000174",
-         #    "2":0,
-         #    "3":0
-         # },
-         pass
+    def set_tactics(self, *args):
+        # stupid MoeFantasy makes it inefficient; can't access tactics LV by ship data
+
+        col = 25
+        ship_id = self.index(args[0], 2).data()
+        indices = wgr_data.find_all_indices(self.user_tactics, 'boat_id', ship_id)
+        if len(indices) == 0:
+            return
+        else:
+            pass
+
+        for key in args[1]:
+            t_id = int(args[1][key])
+            if t_id == 0:
+                pass
+            else:
+                for idx in indices:
+                    if str(t_id) == str(self.user_tactics[idx]['cid'])[:-1]:
+                        i = wgr_data.find_index(self.tactics_json, 'cid', self.user_tactics[idx]['cid'])
+                        t = self.tactics_json[i]
+                        title = t['title'] + " " + str(t['level'])
+                        d1 = re.sub(r'\^.+?00000000', '', t["desc"])
+                        d2 = re.sub(r'\^.+?00000000', '', t["desc2"])
+                        desc = d1 + "\n" + d2
+
+                        item = QStandardItem(title)
+                        item.setToolTip(desc)
+                        self.setItem(args[0], col, item)
+                    else:
+                        pass
+            col += 1
+
+    def set_skill(self):
+        pass
+         
 
 
 # End of File

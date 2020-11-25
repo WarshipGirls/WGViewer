@@ -11,7 +11,7 @@ _header = [ "", "Name", "ID", "Class", "Speed",
             "Torp.", "Acc.", "Eva.", "LOS", "AA",
             "AS", "Luck", "Fuel", "Ammo.", "Baux.",
             "Slot", "Equip.", "", "", "",
-            "Tact."]
+            "Tact.", "", ""]
 _equip_header = ['Name', 'Amount', 'Specification', 'Description']
 _range_to_int = {"XL": 4, "L": 3, "M": 2, "S": 1}
 _range_to_str = {4: "X-Long", 3: "Long", 2: "Medium", 1: "Short"}
