@@ -297,4 +297,20 @@ def get_user_tactics():
     return t
 
 
+# ================================
+# Data processing
+# ================================
+
+
+def _process_shipItem():
+    path = os.path.join(get_init_dir(), 'shipItem.json')
+    with open(path, encoding='utf-8') as f:
+        t = json.load(f)
+    
+    res = {}
+    for i in t:
+        res[i['cid']] = i['title']
+    return res
+
+
 # End of File

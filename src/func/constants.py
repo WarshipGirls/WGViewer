@@ -1,7 +1,4 @@
-
 version = "5.0.0"
-
-pvp_attempt_limit = 20
 
 header = {
     'Accept-Encoding': 'identity',
@@ -51,48 +48,7 @@ repair_types = {
     2: "Heavy Damage Rapair"
 }
 
-# expedition; unit = seconds
-# TODO: remove, got pveExplore.json
-exp_durations = {
-    "10001": 900,
-    "10002": 1800,
-    "10003": 1800,
-    "10004": 3600,
-    "20001": 7200,
-    "20002": 2700,
-    "30001": 14400,
-    "40001": 14400,
-    "60001": 32400
-}
-
-# TODO: remove, got errorCode.json
-eid_codes = {
-    "-1206": "fails getting login reward...",
-    "-604": "fails starting explore...",
-    "-602": "fails getting current running explore...",
-    "-601": "fails getting empty explore...",
-    "-906": "no warReport...err occur when try to do 2nd pvp",
-    "-905": "no warReport...err occur when try to do friend pvp",
-    "-103": "no warReport...Maybe map/opponent is not accessible OR sortie too fast",
-    "-401": "fail to access unavailable map",
-    "-408": "NO SUPPLY!!",
-    "-215": "FULL DOCK!!",
-    "-209": "cannot find war report...",
-    "-1": "FAIL to instant repair!!",
-    "-9993":"link not exist??",
-    "-2505": "shop re-roll failed",
-    "-1608": "ship kiss failed",
-    "-127": "Logging failed"
-}
-
 war_eval = ['-', 'SS', 'S', 'A', 'B', 'C', 'D']
-
-# TODO: remove, got shipItem.json
-reward_type = {
-    2: '油', 3: '弹', 4: '钢', 9: '铝', 10141: "CV-core", 10241: 'BB-core', 10341: 'CA-core', 10441: 'DD-core',
-    10541: 'SS-core', 141: 'inst-build', 241: 'build-blueprint', 541: 'inst-repair', 741: 'equip-blueprint', 66641: 'dmg-ctrl',
-    11042: '港区周年藏品'
-}
 
 # 26 CB 大型巡洋舰
 # https://en.wikipedia.org/wiki/Hull_classification_symbol
