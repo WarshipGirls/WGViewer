@@ -27,7 +27,7 @@ if __name__ == '__main__':
     icon_path = get_data_path('src/assets/favicon.ico')
     set_icon(icon_path)
 
-    if 0:   # user run
+    if 1:   # user run
         login_form = LoginForm()
         login_form.show()
         login_form.raise_()
