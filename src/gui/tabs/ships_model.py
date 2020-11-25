@@ -307,8 +307,9 @@ class ShipModel(QStandardItemModel):
 
         rest = 4-len(args[1])
         for i in range(rest):
-            # TODO: disable selecting
-            self.setItem(args[0], col, QStandardItem('/'))
+            item = QStandardItem('X')
+            item.setFlags(Qt.NoItemFlags)
+            self.setItem(args[0], col, item)
             col += 1
 
     def update_one_equip(self, row, col, equip_id):
