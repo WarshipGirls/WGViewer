@@ -4,7 +4,7 @@ This project is inspired by [Kancolle Viewer](https://github.com/poooi/poi) and 
 
 The official sites of the mobile game, Warship Girls (R), are [here (CN server)](http://www.jianniang.com/), [here (JP server)](http://ssr.moefantasy.co.jp/) and [here (International server)](http://www.warshipgirls.com/en/).
 
-## Screenshot
+## Screenshots
 
 Please see [at this directory](screenshots). Updating as work progresses.
 
