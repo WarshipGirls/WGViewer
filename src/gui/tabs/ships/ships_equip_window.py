@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from PyQt5.QtWidgets import QVBoxLayout, QHeaderView
 
 from . import ships_constant as SCONST
-from ...func import data as wgr_data
+from ....func import data as wgr_data
 
 
 def get_data_path(relative_path):
@@ -16,6 +16,7 @@ def get_data_path(relative_path):
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
     return relative_path if not os.path.exists(res) else res
+
 
 class EquipPopup(QMainWindow):
     def __init__(self, parent, row, col, cid, button_enable):
