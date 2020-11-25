@@ -23,18 +23,21 @@ def get_data_path(relative_path):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    assert(len(sys.argv) == 2)
+
+    app = QApplication([])
     icon_path = get_data_path('src/assets/favicon.ico')
     set_icon(icon_path)
 
-    if 1:   # user run
+    # python gui_main.py 0/1
+    if int(sys.argv[1]):   # user run
         login_form = LoginForm()
         login_form.show()
         login_form.raise_()
     else:   # test
         # NOTE!! In test run, api call to server won't work
         logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        logging.info("WG Viewer started...")
+        logging.info("Warship Girls Viewer started...")
         mi = MainInterface("0", "0", "0", False)
         mi.show()
 
