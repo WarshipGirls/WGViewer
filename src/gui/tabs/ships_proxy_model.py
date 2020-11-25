@@ -6,6 +6,7 @@ from PyQt5.QtGui import  QIcon
 
 from . import ships_constant as SCONST
 
+
 class ShipSortFilterProxyModel(QSortFilterProxyModel):
     def __init__(self, *args, **kwargs):
         QSortFilterProxyModel.__init__(self, *args, **kwargs)

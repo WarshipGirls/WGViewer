@@ -4,8 +4,6 @@ import re
 import sys
 import traceback
 
-from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
-from PyQt5.QtWidgets import QPushButton, QMainWindow
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
@@ -350,7 +348,7 @@ class ShipModel(QStandardItemModel):
 
     def set_tactics(self, *args):
         # stupid MoeFantasy makes it inefficient; can't access tactics LV by ship data
-
+        # TODO: switch tactics like equip
         col = 25
         ship_id = self.index(args[0], 2).data()
         indices = wgr_data.find_all_indices(self.user_tactics, 'boat_id', ship_id)

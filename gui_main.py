@@ -34,7 +34,7 @@ if __name__ == '__main__':
     else:   # test
         logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logging.info("WG Viewer started...")
-        mi = MainInterface(0, 0, 0, False)
+        mi = MainInterface("0", "0", "0", False)
         mi.show()
 
     sys.exit(app.exec_())

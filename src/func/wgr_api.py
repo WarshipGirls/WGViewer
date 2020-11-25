@@ -34,5 +34,69 @@ class WGR_API:
         data = json.loads(raw_data)
         return data
 
+    def pve_getPveData(self):
+        url = self.server + 'pve/getPveData' + self.hlp.get_url_end(self.channel)
+        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        data = json.loads(raw_data)
+        with open('pve_getPveData.json', 'w') as of:
+            json.dump(data, of)
+
+    def pevent_getPveData(self):
+        url = self.server + 'pevent/getPveData' + self.hlp.get_url_end(self.channel)
+        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        data = json.loads(raw_data)
+        with open('pevent_getPveData.json', 'w') as of:
+            json.dump(data, of)
+
+    def bsea_getData(self):
+        url = self.server + 'bsea/getData' + self.hlp.get_url_end(self.channel)
+        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        data = json.loads(raw_data)
+        with open('bsea_getData.json', 'w') as of:
+            json.dump(data, of)
+
+    def live_getUserInfo(self):
+        url = self.server + 'live/getUserInfo' + self.hlp.get_url_end(self.channel)
+        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        data = json.loads(raw_data)
+        with open('live_getUserInfo.json', 'w') as of:
+            json.dump(data, of)
+
+    # useless
+    def six_getFleetInfo(self):
+        url = self.server + 'six/getFleetInfo' + self.hlp.get_url_end(self.channel)
+        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        data = json.loads(raw_data)
+        with open('six_getFleetInfo.json', 'w') as of:
+            json.dump(data, of)
+
+    def pve_getUserData(self):
+        url = self.server + 'pve/getUserData' + self.hlp.get_url_end(self.channel)
+        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        data = json.loads(raw_data)
+        with open('pve_getUserData.json', 'w') as of:
+            json.dump(data, of)
+
+    def active_getUserData(self):
+        url = self.server + 'active/getUserData' + self.hlp.get_url_end(self.channel)
+        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        data = json.loads(raw_data)
+        with open('active_getUserData.json', 'w') as of:
+            json.dump(data, of)
+
+    def task_getAchievementList(self):
+        url = self.server + 'task/getAchievementList' + self.hlp.get_url_end(self.channel)
+        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        data = json.loads(raw_data)
+        with open('task_getAchievementList.json', 'w') as of:
+            json.dump(data, of)
+
+    def campaign_getUserData(self):
+        url = self.server + 'campaign/getUserData' + self.hlp.get_url_end(self.channel)
+        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        data = json.loads(raw_data)
+        with open('campaign_getUserData.json', 'w') as of:
+            json.dump(data, of)
+
 
 # End of File

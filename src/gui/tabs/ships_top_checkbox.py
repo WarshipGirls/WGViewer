@@ -1,5 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QLabel
-from PyQt5.QtWidgets import QComboBox, QCheckBox
+from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QCheckBox
 from PyQt5.QtWidgets import QHBoxLayout, QGridLayout
 from PyQt5.QtCore import pyqtSignal
 
