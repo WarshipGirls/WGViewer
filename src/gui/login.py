@@ -22,21 +22,10 @@ class LoginForm(QWidget):
     # LoginForm is derived from QWidget; there can be multiple inheritance
     def __init__(self):
         super().__init__()
-        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))       
-        user_w = QDesktopWidget().screenGeometry(-1).width()
-        user_h = QDesktopWidget().screenGeometry(-1).height()
-        self.resize(0.26*user_w, 0.12*user_h)
-
         self.layout = QGridLayout()
         self.settings = QSettings(wgr_data.get_settings_file(), QSettings.IniFormat)
-        # self.settings.clear()
 
-        keys = self.settings.allKeys()
-        print(keys)
-        self.settings.beginGroup('Login')
-        val = self.settings.value("checked")
-        self.settings.endGroup()
-        if val == 'true':
+        if self.settings.value("Login/checked") == 'true':
             self.settings.beginGroup('Login')
             name = self.settings.value('username')
             pswd = self.settings.value('password')
@@ -55,9 +44,16 @@ class LoginForm(QWidget):
             self.init_platform_field()
             self.init_server_field()
             self.init_checkbox()
-        self.init_login_button(user_h)
 
         self.setLayout(self.layout)
+        self.init_ui_settings()
+
+    def init_ui_settings(self):
+        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))       
+        user_w = QDesktopWidget().screenGeometry(-1).width()
+        user_h = QDesktopWidget().screenGeometry(-1).height()
+        self.resize(0.26*user_w, 0.12*user_h)
+        self.init_login_button(user_h)
         self.setWindowTitle('Warship Girls Viewer Login')
 
     def init_name_field(self, text=''):
@@ -66,7 +62,6 @@ class LoginForm(QWidget):
         self.lineEdit_username.setClearButtonEnabled(True)
 
         if text == '':
-            # self.lineEdit_password.setPlaceholderText(text)
             self.lineEdit_username.setPlaceholderText('Please enter your username')
         else:
             self.lineEdit_username.setText(text)
@@ -80,10 +75,8 @@ class LoginForm(QWidget):
         self.lineEdit_password = QLineEdit()
         self.lineEdit_password.setClearButtonEnabled(True)
         self.lineEdit_password.setEchoMode(QLineEdit.Password)
-        # output = self.lineEdit_password.text()
 
         if text == '':
-            # self.lineEdit_password.setPlaceholderText(text)
             self.lineEdit_password.setPlaceholderText('Please enter your password')
         else:
             self.lineEdit_password.setText(text)
