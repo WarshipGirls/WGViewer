@@ -94,7 +94,6 @@ reward_type = {
     11042: '港区周年藏品'
 }
 
-
 # 26 CB 大型巡洋舰
 # https://en.wikipedia.org/wiki/Hull_classification_symbol
 ship_type = {

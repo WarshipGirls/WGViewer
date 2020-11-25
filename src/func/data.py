@@ -155,6 +155,8 @@ def _type_to_equips(equipable_types):
         type_to_id[e['type']].append(e['cid'])
         id_to_data[e['cid']] = process_one_equip(e)
 
+    print(type_to_id)
+
     user_equip_path = os.path.join(get_user_dir(), 'equipmentVo.json')
     with open(user_equip_path, encoding='utf-8') as f2:
         user_equips = json.load(f2)
@@ -176,21 +178,82 @@ def _type_to_equips(equipable_types):
                 res.append(user_e)
     return res
 
+# def get_ship_equips(cid):
+#     '''
+#     Given a ship's cid (integer), return all user owned equipment. 
+#     '''
+#     # 1. get corresponding equipmentType in shipCard by cid
+#     p = os.path.join(get_init_dir(), 'shipCard.json')
+#     with open(p, encoding='utf-8') as f:
+#         x = json.load(f)
+#     try:
+#         ship = next((i for i in x if i['cid'] == cid))
+#         # TOFIX
+#         types = ship['equipmentType']
+#     except StopIteration:
+#         return []
+
+#     return _type_to_equips(types)
+
+
+
+
+# 1. find ship type
+# 2. loop thru all equips' shipType
+#   3. if ship type in shipType, add equipment cid
+
 def get_ship_equips(cid):
-    '''
-    Given a ship's cid (integer), return all user owned equipment. 
-    '''
-    # 1. get corresponding equipmentType in shipCard by cid
     p = os.path.join(get_init_dir(), 'shipCard.json')
     with open(p, encoding='utf-8') as f:
         x = json.load(f)
     try:
-        ship = next((i for i in x if i['cid'] == cid))
-        types = ship['equipmentType']
+        ship = next((i for i in x if i['cid']==cid))
     except StopIteration:
         return []
 
-    return _type_to_equips(types)
+    target_type = ship['type']
+
+    equip_path = os.path.join(get_init_dir(), 'shipEquipmnt.json')
+    with open(equip_path, encoding='utf-8') as f1:
+        all_equips = json.load(f1)
+
+    equips = []
+    id_to_data = {}
+    for e in all_equips:
+        if target_type in e['shipType']:
+            equips.append(e['cid'])
+            id_to_data[e['cid']] = process_one_equip(e)
+        else:
+            pass
+
+    user_equip_path = os.path.join(get_user_dir(), 'equipmentVo.json')
+    with open(user_equip_path, encoding='utf-8') as f2:
+        user_equips = json.load(f2)
+
+    res = []
+    for e in equips:
+        try:
+            user_e = next((i for i in user_equips if i['equipmentCid'] == e))
+            user_e.pop('uid')
+        except StopIteration:
+            continue
+
+        if user_e['num'] == 0:
+            continue
+        else:
+            user_e['data'] = id_to_data[user_e['equipmentCid']]
+            res.append(user_e)
+    return res
+
+# fff = test(10039012)
+# for k in fff:
+#     print(k)
+#     print('--------------')
+
+# fff = get_ship_equips(10039012)
+# for k in fff:
+#     print(k)
+#     print('--------------')
 
 
 # End of File
