@@ -34,11 +34,10 @@ class LoginForm(QWidget):
             server = self.settings.value('server_text')
             platform = self.settings.value('platform_text')
             self.settings.endGroup()
-            pswd = self._get_password()
-            print(pswd)
+
             # Don't change the order
             self.init_name_field(name)
-            self.init_password_field(pswd)
+            self.init_password_field(self._get_password())
             self.init_server_field(server)
             self.init_platform_field(platform)
             self.init_checkbox(True)
@@ -136,8 +135,6 @@ class LoginForm(QWidget):
         return _res
 
     def login_success(self):
-        # self.settings.endGroup()
-        self.mi = MainInterface(self.server, self.channel, cookies)
         self.mi.show()
         self.close()
 
@@ -226,7 +223,7 @@ class LoginForm(QWidget):
             msg.setText('Success')
             msg.exec_()
             msg.close()
-            cookies = account.get_cookies()
+            self.mi = MainInterface(self.server, self.channel, account.get_cookies())
             self.login_success()
         else:
             msg.setText("Incorrect Password.")
