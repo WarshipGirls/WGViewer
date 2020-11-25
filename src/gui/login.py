@@ -142,48 +142,13 @@ class LoginForm(QWidget):
         self.close()
 
     def _get_password(self):
-
-        '''
-        1. no key, no password saved
-            -> user enter
-        2. no key, raw password saved
-            -> should NOT happen
-        3. no key, encrypt password saved
-            -> key loss, ask user re-enter
-            -> save key, save encrypted password
-        4. yes key, no password saved
-            -> user enter
-            -> encrypt and save pswd
-        5. yes key, raw password saved
-            -> should NOT happen
-        6. yes key, encrypt password saved
-            -> decrypt key, direct login
-        '''
-        if wgr_data.is_key_exists(self.key_filename) == False:
-            res = ''
+        if wgr_data.is_key_exists(self.key_filename) and self.settings.contains('Login/password'):
+            key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
+            res = self.encryptor.decrypt_data(key, self.settings.value('Login/password')).decode("utf-8")
         else:
-            if self.settings.contains('Login/password') == False:
-                res = ''
-            else:
-                key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
-                res = self.encryptor.decrypt_data(key, self.settings.value('Login/password')).decode("utf-8")
+            res = ''
         return res
 
-        # if self.checkbox.isChecked() == True:
-        #     if wgr_data.is_key_exists(self.key_filename) == False:
-        #         key = self.encryptor.gen_key()
-        #         self.encryptor.save_key(wgr_data.get_key_path(self.key_filename))
-        #     else:
-        #         key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
-        #     res = self.encryptor.encrypt_str(key, self.lineEdit_username.text())
-        # else:
-        #     if wgr_data.is_key_exists(self.key_filename) == False:
-        #         key = self.encryptor.gen_key()
-        #         self.encryptor.save_key(wgr_data.get_key_path(self.key_filename))
-        #     else:
-        #         key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
-        #     res = self.encryptor.decrypt_data(key, self.settings.value('Login/password'))
-        # return res
 
     # ================================
     # Events
@@ -191,13 +156,17 @@ class LoginForm(QWidget):
 
 
     def on_check_clicked(self):
-        self.settings.beginGroup('Login')
-        self.settings.setValue("checked", self.checkbox.isChecked())
-        self.settings.setValue("server_text", self.combo_server.currentText())
-        self.settings.setValue("platform_text", self.combo_platform.currentText())
-        self.settings.setValue("username", self.lineEdit_username.text())
-        self.settings.setValue("password", self._get_password())
-        self.settings.endGroup()
+        if self.checkbox.isChecked():
+            self.settings.beginGroup('Login')
+            self.settings.setValue("checked", self.checkbox.isChecked())
+            self.settings.setValue("server_text", self.combo_server.currentText())
+            self.settings.setValue("platform_text", self.combo_platform.currentText())
+            self.settings.setValue("username", self.lineEdit_username.text())
+            self.settings.setValue("password", self._get_password())
+            self.settings.endGroup()
+        else:
+            self.settings.remove("Login")
+            wgr_data._del_key_file(self.key_filename)
 
     def update_server_box(self, text):
         servers = []

@@ -69,6 +69,9 @@ def get_key_path(key_file):
 def is_key_exists(key_file):
     return os.path.exists(os.path.join(_get_data_dir(), key_file))
 
+def _del_key_file(key_file):
+    os.remove(os.path.join(_get_data_dir(), key_file))
+
 def find_index(lst, key, value):
     '''
     Given a list of dict, find index by key-value pair.
