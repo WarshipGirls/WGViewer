@@ -2,7 +2,7 @@ import sys
 import os
 
 from PyQt5.QtWidgets import QWidget, QTabWidget, QLabel, QPushButton
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout
 from PyQt5.QtCore import QTimer, pyqtSlot
 
 from .tabs.advance_functions import TabAdvanceFunctions
@@ -17,42 +17,20 @@ def get_data_path(relative_path):
 
 
 class MainInterfaceTabs(QWidget):
-    ''' Tentative plans
-        Tab 1 = Sortie
-        Tab 2 = 1-8 Fleets
-        Tab 3 = All Ships
-        Tab 4 = All Equips
-        Tab 5 = All tactics
-        Tab n = Extra functions
-    '''
-    def __init__(self, parent, threadpool, realrun):
+    def __init__(self, parent, api, threadpool, realrun):
         super(QWidget, self).__init__(parent)
-        self.threadpool = threadpool
+        self.api = api
         self.realrun = realrun
 
-        self.main_layout = QVBoxLayout(self)
-        self.resize(1000, 1)    # TODO: this seems not working
+        self.layout = QGridLayout()
+        self.setLayout(self.layout)
 
-        self.init_tab_bar()
-        
-        # Create first tab
-        self.tab1.layout = QVBoxLayout(self)
-        self.pushButton1 = QPushButton("PyQt5 button")
-
-        self.l = QLabel("Start")
-        self.counter = 0
-        self.timer = QTimer()
-        self.timer.setInterval(1000)
-        self.timer.timeout.connect(self.recurring_timer)
-        self.timer.start()
-
-        self.tab1.layout.addWidget(self.pushButton1)
-        self.tab1.layout.addWidget(self.l)
-        self.tab1.setLayout(self.tab1.layout)
-        
-        # Add tabs to widget
-        self.main_layout.addWidget(self.tabs)
-        self.setLayout(self.main_layout)
+        self.tab_ships = TabShips(self.api, self.realrun)
+        label2 = QLabel("test")
+        tabwidget = QTabWidget()
+        tabwidget.addTab(self.tab_ships, "  Ship  ")
+        tabwidget.addTab(label2, "  Tab2  ")
+        self.layout.addWidget(tabwidget, 0, 0)
 
         if self.realrun == False:
             self.test()
@@ -76,9 +54,9 @@ class MainInterfaceTabs(QWidget):
         self.tab_advance = TabAdvanceFunctions(self)
 
         # Add tabs
+        self.tabs.addTab(self.tab_ships,"  Ships  ")
         self.tabs.addTab(self.tab1,"  Sortie  ")
         self.tabs.addTab(self.tab2,"  Fleets  ")
-        self.tabs.addTab(self.tab_ships,"  Ships  ")
         self.tabs.addTab(self.tab4,"  Equipment  ")
         self.tabs.addTab(self.tab5,"  Tactics  ")
         self.tabs.addTab(self.tab_advance,"  Advance Functions  ")

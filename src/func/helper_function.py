@@ -2,6 +2,8 @@ import time
 import zlib
 import hashlib
 
+from datetime import datetime, timedelta
+
 from .session import Session
 from . import constants as constants
 
@@ -42,6 +44,12 @@ class Helper():
         for index, key in arg.items():
             new_arg[index] = str(key)
         return new_arg
+
+    def ts_to_date(self, ts):
+        return datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
+    def ts_to_countdown(self, seconds):
+        return str(timedelta(seconds=t))
 
 
 # End of File
