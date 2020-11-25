@@ -12,8 +12,9 @@ from PyQt5.QtWidgets import QGridLayout
 from sys import platform as _platform
 
 from .main_interface import MainInterface
-from ..func.session import Session
+from ..func.encryptor import Encryptor
 from ..func.login import GameLogin
+from ..func.session import Session
 from ..func import constants as constants
 from ..func import data as wgr_data
 
@@ -24,14 +25,17 @@ class LoginForm(QWidget):
         super().__init__()
         self.layout = QGridLayout()
         self.settings = QSettings(wgr_data.get_settings_file(), QSettings.IniFormat)
+        self.encryptor = Encryptor()
+        self.key_filename = '.wgr.key'
 
         if self.settings.value("Login/checked") == 'true':
             self.settings.beginGroup('Login')
             name = self.settings.value('username')
-            pswd = self.settings.value('password')
             server = self.settings.value('server_text')
             platform = self.settings.value('platform_text')
             self.settings.endGroup()
+            pswd = self._get_password()
+            print(pswd)
             # Don't change the order
             self.init_name_field(name)
             self.init_password_field(pswd)
@@ -137,6 +141,49 @@ class LoginForm(QWidget):
         self.mi.show()
         self.close()
 
+    def _get_password(self):
+
+        '''
+        1. no key, no password saved
+            -> user enter
+        2. no key, raw password saved
+            -> should NOT happen
+        3. no key, encrypt password saved
+            -> key loss, ask user re-enter
+            -> save key, save encrypted password
+        4. yes key, no password saved
+            -> user enter
+            -> encrypt and save pswd
+        5. yes key, raw password saved
+            -> should NOT happen
+        6. yes key, encrypt password saved
+            -> decrypt key, direct login
+        '''
+        if wgr_data.is_key_exists(self.key_filename) == False:
+            res = ''
+        else:
+            if self.settings.contains('Login/password') == False:
+                res = ''
+            else:
+                key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
+                res = self.encryptor.decrypt_data(key, self.settings.value('Login/password')).decode("utf-8")
+        return res
+
+        # if self.checkbox.isChecked() == True:
+        #     if wgr_data.is_key_exists(self.key_filename) == False:
+        #         key = self.encryptor.gen_key()
+        #         self.encryptor.save_key(wgr_data.get_key_path(self.key_filename))
+        #     else:
+        #         key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
+        #     res = self.encryptor.encrypt_str(key, self.lineEdit_username.text())
+        # else:
+        #     if wgr_data.is_key_exists(self.key_filename) == False:
+        #         key = self.encryptor.gen_key()
+        #         self.encryptor.save_key(wgr_data.get_key_path(self.key_filename))
+        #     else:
+        #         key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
+        #     res = self.encryptor.decrypt_data(key, self.settings.value('Login/password'))
+        # return res
 
     # ================================
     # Events
@@ -149,7 +196,7 @@ class LoginForm(QWidget):
         self.settings.setValue("server_text", self.combo_server.currentText())
         self.settings.setValue("platform_text", self.combo_platform.currentText())
         self.settings.setValue("username", self.lineEdit_username.text())
-        self.settings.setValue("password", self.lineEdit_password.text())
+        self.settings.setValue("password", self._get_password())
         self.settings.endGroup()
 
     def update_server_box(self, text):
@@ -179,16 +226,24 @@ class LoginForm(QWidget):
             self.server = "http://s108.jr.moefantasy.com/"
 
     def check_password(self):
+        self.on_check_clicked()
         msg = QMessageBox()
         msg.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         msg.setWindowTitle("Info")
 
         sess = Session()
         account = GameLogin(constants.version, self.channel, sess)
-        # TODO: store user info securely
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()
-        self.on_check_clicked()
+
+        if wgr_data.is_key_exists(self.key_filename) == False:
+            key = self.encryptor.gen_key()
+            self.encryptor.save_key(key, wgr_data.get_key_path(self.key_filename))
+            self.settings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
+        else:
+            key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
+            self.settings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
+
         # try:
         #     res1 = account.first_login(_username, _password)
         #     res2 = account.second_login(self.server)
