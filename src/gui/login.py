@@ -243,7 +243,6 @@ class LoginForm(QWidget):
             msg.exec_()
             return
         if res1 == True and res2 == True:
-        if False:
             logging.info("Login Successfully...")
             msg.setText('Success')
             msg.exec_()
