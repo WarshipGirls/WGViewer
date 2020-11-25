@@ -115,6 +115,8 @@ def save_init_data():
 
 # ================================
 # Equipment related
+# shipEquipmnt.json contains the equipment you own;
+# the `num` excludes those on ship
 # ================================
 
 
@@ -246,22 +248,41 @@ def get_ship_equips(cid):
     return res
 
 def find_index(lst, key, value):
+    # print('\n')
+    # print(type(lst))
+    # print(type(key))
+    # print(type(value))
+    # print(lst)
+    # print(key)
+    # print(value)
+    # print('\n')
     for i, dic in enumerate(lst):
         if dic[key] == value:
             return i
     return -1
 
+# 3 types,
+# 1->1 Done
+# 1->0 Done
+# 0->1 Done by block user interaction with non
 def update_equipment_amount(equipped, unequipped):
     # both input are cids (int)
+    print("?????????????????????????????????????????????????????")
+    equipped = int(equipped)
+    unequipped = int(unequipped)
     user_equip_path = os.path.join(get_user_dir(), 'equipmentVo.json')
-    with open(user_equip_path, encoding='utf-8') as f2:
-        user_equips = json.load(f2)
+    with open(user_equip_path, encoding='utf-8') as f:
+        user_equips = json.load(f)
+    if equipped == -1:      # unequip
+        pass
+    else:
+        idx_1 = find_index(user_equips, 'equipmentCid', equipped)
+        user_equips[idx_1]['num'] -= 1
 
-    i = find_index(user_equips, equipmentCid, equipped)
-    j = find_index(user_equips, equipmentCid, unequipped)
-
-    user_equips[i]['num'] -= 1
-    user_equips[j]['num'] += 1
+    idx_2 = find_index(user_equips, 'equipmentCid', unequipped)
+    user_equips[idx_2]['num'] += 1
+    with open(user_equip_path, 'w', encoding='utf-8') as fout:
+        json.dump(user_equips, fout, ensure_ascii=False, indent=4)
 
 # fff = test(10039012)
 # for k in fff:
@@ -272,6 +293,12 @@ def update_equipment_amount(equipped, unequipped):
 # for k in fff:
 #     print(k)
 #     print('--------------')
+
+
+# update_equipment_amount(10000121, 10002021)
+# update_equipment_amount(10002021, 10000121)
+# print(get_ship_equips(10039012))
+# update_equipment_amount(-1, 10000121)
 
 
 # End of File

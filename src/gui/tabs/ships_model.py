@@ -281,6 +281,10 @@ class ShipModel(QStandardItemModel):
         for e in args[1]:
             e = str(e)
             if e == '-1':
+                item = QStandardItem()
+                item.setData(-1, Qt.UserRole)
+                self.setItem(args[0], col, item)
+                col += 1
                 continue
             else:
                 pass
@@ -301,19 +305,36 @@ class ShipModel(QStandardItemModel):
                 logging.warning('Image for equipment {} is absent.'.format(e))
             col += 1
 
-    def update_one_equip(self, row, col, equip_id):
+        rest = 4-len(args[1])
+        for i in range(rest):
+            # TODO: disable selecting
+            self.setItem(args[0], col, QStandardItem('/'))
+            col += 1
 
+    def update_one_equip(self, row, col, equip_id):
         ship_id = self.index(row, 2).data()
-        # TODO: hardcoding
+        unequip_id = self.index(row, col).data(Qt.UserRole)
         equip_slot = col-21
+
+        if equip_id == "-1":
+            # unequip; setItem deletes previous item
+            item = QStandardItem()
+            item.setData(-1, Qt.UserRole)
+            self.setItem(row, col, item)
+            wgr_data.update_equipment_amount(-1, unequip_id)
+            self.api.boat_removeEquipment(ship_id, equip_slot)
+            return
+        else:
+            pass
+
+        # TODO: hardcoding
         res = self.api.boat_changeEquipment(ship_id, equip_id, equip_slot)
         if 'eid' not in res:
             # success
-            unequip_id = index(row, col).data(Qt.UserRole)
             wgr_data.update_equipment_amount(equip_id, unequip_id)
         else:
             logging.error('Equipment change is failed.')
-            continue
+            return
 
         raw_path = "src/assets/E/equip_L_" + str(int(equip_id[3:6])) + ".png"
         img_path = get_data_path(raw_path)
@@ -322,6 +343,7 @@ class ShipModel(QStandardItemModel):
         if is_loaded:
             thumbnail = QStandardItem()
             thumbnail.setData(QVariant(img), Qt.DecorationRole)
+            thumbnail.setData(equip_id, Qt.UserRole)
             self.setItem(row, col, thumbnail)
         else:
             # TODO

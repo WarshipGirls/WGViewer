@@ -7,7 +7,7 @@ from PyQt5.QtGui import QStandardItem, QPixmap, QIcon
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex, QRect, pyqtSignal
 from PyQt5.QtWidgets import QLabel, QWidget, QMainWindow
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton
 
 from . import ships_constant as SCONST
 from ...func import data as wgr_data
@@ -26,6 +26,7 @@ class EquipPopup(QMainWindow):
 
     def __init__(self, parent, row, col, cid):
         super().__init__()
+        print(self)
         self.parent = parent
         self._row = row
         self._col = col
@@ -44,9 +45,13 @@ class EquipPopup(QMainWindow):
         self.setWindowTitle('WGViewer - Equipment Selection')
         self.resize(self.width, self.height)
 
+        button = QPushButton('Unequip Current Equipment')
+        button.clicked.connect(self.button_click_event)
+
         self.tab = QTableWidget()
         self.tab.setColumnCount(4)
         equips = wgr_data.get_ship_equips(self.cid)
+        # print(equips)
         for e in equips:
             self.addTableRow(self.tab, e)
         self.tab.horizontalHeader().setStretchLastSection(True)
@@ -64,6 +69,8 @@ class EquipPopup(QMainWindow):
         self.tab.doubleClicked.connect(self.click_event)
 
         content_layout = QVBoxLayout()
+        # TODO disable button if no equipped
+        content_layout.addWidget(button)
         content_layout.addWidget(self.tab)
         window = QWidget()
         window.setLayout(content_layout)
@@ -108,6 +115,9 @@ class EquipPopup(QMainWindow):
         # index is QModelIndex() object
         e_id = self.id_list[index.row()]
         self.parent.fuck_you(self._row, self._col, e_id)
+
+    def button_click_event(self, index):
+        self.parent.fuck_you(self._row, self._col, -1)
 
 
 class ShipTableDelegate(QStyledItemDelegate):
