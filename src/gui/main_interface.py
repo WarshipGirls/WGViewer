@@ -31,34 +31,21 @@ class MainInterface(QMainWindow):
         self.cookies = cookies
         self.realrun = realrun
 
+        self.threadpool = QThreadPool()
         self.hlp = Helper()
         self.api = WGR_API(self.server, self.channel, self.cookies)
-
-        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
-        user_w = QDesktopWidget().screenGeometry(-1).width()
-        user_h = QDesktopWidget().screenGeometry(-1).height()
-        self.resize(0.67*user_w, 0.67*user_h)
-
-        layout = QHBoxLayout()
         self.bar = self.menuBar()
-        self.add_file_menu()
-
-        # # Multi-Threading
-        self.threadpool = QThreadPool()
-        logging.info("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
-        print(self.threadpool.activeThreadCount())
-
-
-        # UI layout - top/L/R/bottom docks and central widget
-        # https://doc.qt.io/archives/4.6/mainwindow.html
-        self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.realrun)
-        self.setCentralWidget(self.table_widget)
 
         self.side_dock_on = False
+
+        self.init_data_files()
+        self.init_ui()
+        self.init_menu()
         self.init_side_dock()
 
-        self.setLayout(layout)
-        self.setWindowTitle('Warship Girls Viewer')
+        # # Multi-Threading
+        logging.info("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+        print(self.threadpool.activeThreadCount())
 
         if self.realrun:
             self._realrun()
@@ -73,9 +60,25 @@ class MainInterface(QMainWindow):
         self.sig_getShipList.connect(self.table_widget.tab_ships.on_received_shiplist)
         self.api_getShipList()
 
-    @pyqtSlot()
-    def on_dock_closed(self):
-        self.side_dock_on = False
+
+    # ================================
+    # Initialization
+    # ================================
+
+
+    def init_ui(self):
+        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        user_w = QDesktopWidget().screenGeometry(-1).width()
+        user_h = QDesktopWidget().screenGeometry(-1).height()
+        self.resize(0.67*user_w, 0.67*user_h)
+
+        # UI layout - top/L/R/bottom docks and central widget
+        # https://doc.qt.io/archives/4.6/mainwindow.html
+        self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.realrun)
+        self.setCentralWidget(self.table_widget)
+
+        self.setLayout(QHBoxLayout())
+        self.setWindowTitle('Warship Girls Viewer')
 
     def init_side_dock(self):
         if self.side_dock_on == False:
@@ -85,22 +88,15 @@ class MainInterface(QMainWindow):
         else:
             pass
 
-    def open_author_info(self):
-        def get_hyperlink(link, text):
-            return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
+    def init_data_files(self):
+        num = len(os.listdir(wgr_data.get_init_dir()))
+        # As of 5.0.0, there should be 30 files
+        if num != 30:
+            wgr_data.save_init_data()
+        else:
+            pass
 
-        msg = QMessageBox()
-        msg.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
-        msg.setWindowTitle("About")
-        msg.setTextFormat(Qt.RichText)
-
-        msg_str = '<h1>Warship Girls Viewer</h1>'
-        msg_str += "\n"
-        msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
-        msg.setText(msg_str)
-        msg.exec_()
-
-    def add_file_menu(self):
+    def init_menu(self):
         file_menu = self.bar.addMenu("File")
         file_menu.addAction("New")
         file_menu.addAction("save")
@@ -117,6 +113,31 @@ class MainInterface(QMainWindow):
         about_action = QAction("&About Warship Girls Viewer", self)
         about_action.triggered.connect(self.open_author_info)
         help_menu.addAction(about_action)
+
+
+    # ================================
+    # Events
+    # ================================
+
+
+    @pyqtSlot()
+    def on_dock_closed(self):
+        self.side_dock_on = False
+
+    def open_author_info(self):
+        def get_hyperlink(link, text):
+            return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
+
+        msg = QMessageBox()
+        msg.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        msg.setWindowTitle("About")
+        msg.setTextFormat(Qt.RichText)
+
+        msg_str = '<h1>Warship Girls Viewer</h1>'
+        msg_str += "\n"
+        msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
+        msg.setText(msg_str)
+        msg.exec_()
 
 
     # ================================
