@@ -17,14 +17,15 @@ def get_data_path(relative_path):
 
 
 class MainInterfaceTabs(QWidget):
-    def __init__(self, parent, threadpool, realrun):
+    def __init__(self, parent, api, threadpool, realrun):
         super(QWidget, self).__init__(parent)
+        self.api = api
         self.realrun = realrun
 
         self.layout = QGridLayout()
         self.setLayout(self.layout)
 
-        self.tab_ships = TabShips(self.realrun)
+        self.tab_ships = TabShips(self.api, self.realrun)
         label2 = QLabel("test")
         tabwidget = QTabWidget()
         tabwidget.addTab(self.tab_ships, "  Ship  ")

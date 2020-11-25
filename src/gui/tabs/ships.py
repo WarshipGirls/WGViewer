@@ -21,8 +21,9 @@ def get_data_path(relative_path):
 
 
 class TabShips(QWidget):
-    def __init__(self, realrun):
+    def __init__(self, api, realrun):
         super().__init__()
+        self.api = api
 
         self.init_ui()
 
@@ -50,7 +51,7 @@ class TabShips(QWidget):
         self.content_layout.setStretch(1, 10)
 
         self.table_view = QTableView(self.lower_content_widget)
-        self.table_model = ShipModel(self.table_view)
+        self.table_model = ShipModel(self.table_view, self.api)
         self.table_proxy = ShipSortFilterProxyModel(self)
         self.table_proxy.setSourceModel(self.table_model)
         self.table_view.setModel(self.table_proxy)

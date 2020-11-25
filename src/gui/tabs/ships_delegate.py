@@ -27,19 +27,17 @@ class EquipPopup(QMainWindow):
     def __init__(self, parent, row, col, cid):
         super().__init__()
         self.parent = parent
-        self.cid = int(cid)
         self._row = row
         self._col = col
+        self.cid = int(cid)
+
         self.width = 600
         self.height = 600
         self.id_list = []
-
-        self.init_member()
-        self.init_ui()
-
-    def init_member(self):
         self.lock_icon = QIcon(get_data_path("src/assets/icons/lock_64.png"))
         self.trans = SCONST._equip_spec
+
+        self.init_ui()
 
     def init_ui(self):
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))

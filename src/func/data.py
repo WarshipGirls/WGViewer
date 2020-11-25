@@ -238,12 +238,30 @@ def get_ship_equips(cid):
         except StopIteration:
             continue
 
-        if user_e['num'] == 0:
-            continue
-        else:
+        if user_e['num'] > 0:
             user_e['data'] = id_to_data[user_e['equipmentCid']]
             res.append(user_e)
+        else:
+            continue
     return res
+
+def find_index(lst, key, value):
+    for i, dic in enumerate(lst):
+        if dic[key] == value:
+            return i
+    return -1
+
+def update_equipment_amount(equipped, unequipped):
+    # both input are cids (int)
+    user_equip_path = os.path.join(get_user_dir(), 'equipmentVo.json')
+    with open(user_equip_path, encoding='utf-8') as f2:
+        user_equips = json.load(f2)
+
+    i = find_index(user_equips, equipmentCid, equipped)
+    j = find_index(user_equips, equipmentCid, unequipped)
+
+    user_equips[i]['num'] -= 1
+    user_equips[j]['num'] += 1
 
 # fff = test(10039012)
 # for k in fff:

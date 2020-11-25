@@ -12,6 +12,7 @@ from . import ships_constant as SCONST
 from .ships_delegate import EquipmentDelegate
 from ...func import constants as CONST
 from ...func.helper_function import Helper
+from ...func import data as  wgr_data
 
 
 def get_data_path(relative_path):
@@ -22,11 +23,12 @@ def get_data_path(relative_path):
 
 
 class ShipModel(QStandardItemModel):
-    def __init__(self, view):
+    def __init__(self, view, api):
         super().__init__(view)
         # NOTE: `data()` is a method of `QStandardItemModel()`
         self.hlp = Helper()
         self.view = view
+        self.api = api
 
         self.ships_S = []
         self.ships_M = []
@@ -274,6 +276,7 @@ class ShipModel(QStandardItemModel):
         # Issue #15
         # self.view.setIndexWidget(self.view.model().index(args[0], 21), EquipsArray(args[1]))
 
+        # TODO hardcoding
         col = 21
         for e in args[1]:
             e = str(e)
@@ -290,6 +293,7 @@ class ShipModel(QStandardItemModel):
             if is_loaded:
                 thumbnail = QStandardItem()
                 thumbnail.setData(QVariant(img), Qt.DecorationRole)
+                thumbnail.setData(e, Qt.UserRole)   # hide Equipment cid
                 self.setItem(args[0], col, thumbnail)
                 # thumbnail.clicked.connect(self.change_equip)
             else:
@@ -298,6 +302,19 @@ class ShipModel(QStandardItemModel):
             col += 1
 
     def update_one_equip(self, row, col, equip_id):
+
+        ship_id = self.index(row, 2).data()
+        # TODO: hardcoding
+        equip_slot = col-21
+        res = self.api.boat_changeEquipment(ship_id, equip_id, equip_slot)
+        if 'eid' not in res:
+            # success
+            unequip_id = index(row, col).data(Qt.UserRole)
+            wgr_data.update_equipment_amount(equip_id, unequip_id)
+        else:
+            logging.error('Equipment change is failed.')
+            continue
+
         raw_path = "src/assets/E/equip_L_" + str(int(equip_id[3:6])) + ".png"
         img_path = get_data_path(raw_path)
         img = QPixmap()

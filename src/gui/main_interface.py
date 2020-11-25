@@ -15,6 +15,7 @@ from .main_interface_tabs import MainInterfaceTabs
 # Functions
 # from ..func.worker_thread import Worker
 from ..func import data as wgr_data
+from ..func.wgr_api import WGR_API
 from ..func.helper_function import Helper
 
 
@@ -32,6 +33,7 @@ class MainInterface(QMainWindow):
 
         # self.sess = Session()
         self.hlp = Helper()
+        self.api = WGR_API(self.server, self.channel, self.cookies)
 
         self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         user_w = QDesktopWidget().screenGeometry(-1).width()
@@ -50,7 +52,7 @@ class MainInterface(QMainWindow):
 
         # UI layout - top/L/R/bottom docks and central widget
         # https://doc.qt.io/archives/4.6/mainwindow.html
-        self.table_widget = MainInterfaceTabs(self, self.threadpool, self.realrun)
+        self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.realrun)
         self.setCentralWidget(self.table_widget)
 
         self.side_dock_on = False
