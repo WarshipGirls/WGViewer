@@ -20,7 +20,6 @@ from ..func import data as wgr_data
 
 
 class LoginForm(QWidget):
-    # LoginForm is derived from QWidget; there can be multiple inheritance
     def __init__(self):
         super().__init__()
         self.layout = QGridLayout()
@@ -51,12 +50,18 @@ class LoginForm(QWidget):
         self.setLayout(self.layout)
         self.init_ui_settings()
 
+
+    # ================================
+    # Initialization
+    # ================================
+
+
     def init_ui_settings(self):
-        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))       
         user_w = QDesktopWidget().screenGeometry(-1).width()
         user_h = QDesktopWidget().screenGeometry(-1).height()
-        self.resize(0.26*user_w, 0.12*user_h)
         self.init_login_button(user_h)
+        self.resize(0.26*user_w, 0.12*user_h)
+        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))       
         self.setWindowTitle('Warship Girls Viewer Login')
 
     def init_name_field(self, text=''):
@@ -91,7 +96,7 @@ class LoginForm(QWidget):
         label_platform = self.create_qLabel('Platform')
         self.combo_platform = QComboBox()
         # platforms = ["Choose your platform", "CN-iOS", "CN-Android", "International", "JP"]
-        platforms = ["Choose your platform", "CN-iOS"]
+        platforms = ["Choose your platform", "CN-iOS", "CN-Android"]
         self.combo_platform.addItems(platforms)
         self.combo_platform.currentTextChanged.connect(self.update_server_box)
 
@@ -123,11 +128,17 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.checkbox, 4, 1)
 
     def init_login_button(self, user_h):
-        button_login = QPushButton('Login')
-        button_login.clicked.connect(self.check_password)
-        self.layout.addWidget(button_login, 6, 0, 1, 2)
-        # set a gap between row3 and row5, i.e. an empty row4
+        self.button_login = QPushButton('Login')
+        self.button_login.clicked.connect(self.check_password)
+        # set an empty gap row
+        self.layout.addWidget(self.button_login, 6, 0, 1, 2)
         self.layout.setRowMinimumHeight(5, 0.03*user_h)
+
+
+    # ================================
+    # General
+    # ================================
+
 
     def create_qLabel(self, text):
         _str = '<font size="4"> ' + text + ' </font>'
@@ -171,8 +182,8 @@ class LoginForm(QWidget):
         if text == "CN-iOS":
             servers = ["列克星敦", "维内托"]
             self.channel = "100020"
-        # elif text == "CN-Android":
-        #     servers = ["胡德", "俾斯麦", "昆西", "长春", "NOT TESTED!"]
+        elif text == "CN-Android":
+            servers = ["胡德", "俾斯麦", "昆西", "长春"]
         #     self.channel = "100015"
         # elif text == "International":
         #     servers = ["server1", "NOT TESTED!"]
@@ -190,9 +201,22 @@ class LoginForm(QWidget):
             self.server = "http://s101.jr.moefantasy.com/"
         elif text == "维内托":
             self.server = "http://s108.jr.moefantasy.com/"
+        elif text == "胡德":
+            self.server = "http://s2.jr.moefantasy.com/"
+        elif text == "俾斯麦":
+            self.server = "http://s4.jr.moefantasy.com/"
+        elif text == "昆西":
+            self.server = "http://s13.jr.moefantasy.com/"
+        elif text == "长春":
+            self.server = "http://s14.jr.moefantasy.com/"
+        else:
+            logging.error("Invalid server name.")
 
     def check_password(self):
+        self.button_login.setText('Connecting to server...')
+        self.button_login.setEnabled(False)
         self.on_check_clicked()
+
         msg = QMessageBox()
         msg.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
         msg.setWindowTitle("Info")
@@ -205,14 +229,14 @@ class LoginForm(QWidget):
         if wgr_data.is_key_exists(self.key_filename) == False:
             key = self.encryptor.gen_key()
             self.encryptor.save_key(key, wgr_data.get_key_path(self.key_filename))
-            self.settings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
         else:
             key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
-            self.settings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
+        self.settings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
 
         try:
             res1 = account.first_login(_username, _password)
             res2 = account.second_login(self.server)
+            self.button_login.setText('Loading & Initializing...')
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(e)
             msg.setText("Logging failed.")
@@ -228,6 +252,8 @@ class LoginForm(QWidget):
         else:
             msg.setText("Incorrect Password.")
             msg.exec_()
+            self.button_login.setEnabled(True)
+            self.button_login.setText('Login')
 
 
 # End of File
