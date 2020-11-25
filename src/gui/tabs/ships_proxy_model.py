@@ -136,7 +136,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             elif (source_left.column() in self.float_sort_cols):
                 return float(l) < float(r)
             elif (source_left.column() in self.range_sort_col):
-                return SCONST._range[l] < SCONST._range[r]
+                return SCONST._range_to_int[l] < SCONST._range_to_int[r]
             elif (source_left.column() in self.resource_sort_cols):
                 if (isinstance(l, str) == True) and ("/" in l):
                     return int(l[:l.find('/')]) < int(r[:r.find('/')]) 
