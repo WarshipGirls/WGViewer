@@ -24,35 +24,29 @@ class GameLogin:
             'User-Agent': 'okhttp/3.4.1',
             "Content-Type": "application/json; charset=UTF-8"
         }
-        self.init_data_version = "0"
         self.hm_login_server = ""
         self.portHead = ""
         self.key = constants.login_key
         self.login_server = ""
-        self.res = ""
 
         self.version = game_version
         self.channel = game_channel
         self.session = game_session
         self.cookies = None
-        self.server_list = []
-        self.defaultServer = 0
         self.uid = None
 
         self.hlp = Helper(self.session)
 
     def first_login(self, username, pwd):
         url_version = f'http://version.jr.moefantasy.com/index/checkVer/{self.version}/{self.channel}/2&version={self.version}&channel={self.channel}&market=2'
-        self.res = 'http://loginios.jr.moefantasy.com/index/getInitConfigs/'
         self.portHead = "881d3SlFucX5R5hE"
         # -------------------------------------------------------------------------------------------
         # Pull version Info
         response_version = self.session.get(url=url_version, headers=constants.header, timeout=10)
-        response_version = response_version.text
-        response_version = json.loads(response_version)
+        response_version = json.loads(response_version.text)
 
         # Pull version number, login address
-        self.version = response_version["version"]["newVersionId"]
+        # self.version = response_version["version"]["newVersionId"]
         self.login_server = response_version["loginServer"]
         self.hm_login_server = response_version["hmLoginServer"]
 
@@ -63,8 +57,8 @@ class GameLogin:
         if server_data == False:
             return False
 
-        self.defaultServer = int(server_data["defaultServer"])
-        self.server_list = server_data["serverList"]
+        # self.defaultServer = int(server_data["defaultServer"])
+        # self.server_list = server_data["serverList"]
         self.uid = server_data["userId"]
 
         return True
@@ -88,21 +82,23 @@ class GameLogin:
         data_dict["udid"] = str(random.randint(100000000000000, 999999999999999))
         data_dict["t"] = now_time
         data_dict["e"] = self.hlp.get_url_end(self.channel, now_time)
-
         random.seed()
-        # Pull decisive data
-        login_url_tmp = host + 'index/login/' + self.uid + '?&' + urllib.parse.urlencode(data_dict)
-        self.session.get(url=login_url_tmp, headers=constants.header, cookies=self.cookies, timeout=10)
+        try:
+            # Pull decisive data
+            login_url_tmp = host + 'index/login/' + self.uid + '?&' + urllib.parse.urlencode(data_dict)
+            self.session.get(url=login_url_tmp, headers=constants.header, cookies=self.cookies, timeout=10)
 
-        # TODO, process following data
-        # TODO, update to latest API
-        self.cheat_sess(host, 'pevent/getPveData/')
-        self.cheat_sess(host, 'shop/canBuy/1/')
-        self.cheat_sess(host, 'live/getUserInfo')
-        self.cheat_sess(host, 'live/getMusicList/')
-        self.cheat_sess(host, 'bsea/getData/')
-        self.cheat_sess(host, 'active/getUserData')
-        self.cheat_sess(host, 'pve/getUserData/')
+            # TODO, process following data
+            # TODO, update to latest API
+            self.cheat_sess(host, 'pevent/getPveData/')
+            self.cheat_sess(host, 'shop/canBuy/1/')
+            self.cheat_sess(host, 'live/getUserInfo')
+            self.cheat_sess(host, 'live/getMusicList/')
+            self.cheat_sess(host, 'bsea/getData/')
+            self.cheat_sess(host, 'active/getUserData')
+            self.cheat_sess(host, 'pve/getUserData/')
+        except Exception as e:
+            return False
 
         return True
 
@@ -119,8 +115,8 @@ class GameLogin:
 
         self.refresh_headers(url_login)
 
-        login_response = self.session.post(url=url_login, data=json.dumps(data).replace(" ", ""), headers=self.pastport_headers, timeout=10).text
-        login_response = json.loads(login_response)
+        login_response = self.session.post(url=url_login, data=json.dumps(data).replace(" ", ""), headers=self.pastport_headers, timeout=10)
+        login_response = json.loads(login_response.text)
 
         if "error" in login_response and int(login_response["error"]) != 0:
             return False

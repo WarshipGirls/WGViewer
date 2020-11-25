@@ -118,6 +118,7 @@ def _check_data_ver(storage_dir):
     # Note: since getting raw data takes 20+ seconds, use this method minimally
     # TODO: this is Chinese data; is there a link for English counterpart?
     url = 'http://login.jr.moefantasy.com/index/getInitConfigs'
+    # url = 'http://loginios.jr.moefantasy.com/index/getInitConfigs'
     try:
         d = requests.get(url).json()
     except (urllib.error.URLError, json.decoder.JSONDecodeError) as e:
