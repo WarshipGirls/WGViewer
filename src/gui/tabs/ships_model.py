@@ -284,7 +284,6 @@ class ShipModel(QStandardItemModel):
             raw_path = "src/assets/E/equip_L_" + str(int(e[3:6])) + ".png"
             img_path = get_data_path(raw_path)
             # self.view.setItemDelegateForColumn(col, EquipmentDelegate(self.view, args[0], img_path))
-            
 
             img = QPixmap()
             is_loaded =  img.load(img_path)
@@ -294,8 +293,23 @@ class ShipModel(QStandardItemModel):
                 self.setItem(args[0], col, thumbnail)
                 # thumbnail.clicked.connect(self.change_equip)
             else:
-                pass
+                # TODO
+                logging.warning('Image for equipment {} is absent.'.format(e))
             col += 1
+
+    def update_one_equip(self, row, col, equip_id):
+        raw_path = "src/assets/E/equip_L_" + str(int(equip_id[3:6])) + ".png"
+        img_path = get_data_path(raw_path)
+        img = QPixmap()
+        is_loaded =  img.load(img_path)
+        if is_loaded:
+            thumbnail = QStandardItem()
+            thumbnail.setData(QVariant(img), Qt.DecorationRole)
+            self.setItem(row, col, thumbnail)
+        else:
+            # TODO
+            logging.warning('Image for equipment {} is absent.'.format(e))
+
 
     def change_equip(self):
         print("???????????")
