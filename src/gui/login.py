@@ -213,16 +213,14 @@ class LoginForm(QWidget):
             key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
             self.settings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
 
-        # try:
-        #     res1 = account.first_login(_username, _password)
-        #     res2 = account.second_login(self.server)
-        # except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
-        #     logging.error(e)
-        #     msg.setText("Logging failed.")
-        #     msg.exec_()
-        #     return
-        res1 = res2 = True
-
+        try:
+            res1 = account.first_login(_username, _password)
+            res2 = account.second_login(self.server)
+        except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
+            logging.error(e)
+            msg.setText("Logging failed.")
+            msg.exec_()
+            return
         if res1 == True and res2 == True:
             logging.info("Login Successfully...")
             msg.setText('Success')
