@@ -182,8 +182,8 @@ class LoginForm(QWidget):
         if text == "CN-iOS":
             servers = ["列克星敦", "维内托"]
             self.channel = "100020"
-        # elif text == "CN-Android":
-        #     servers = ["胡德", "俾斯麦", "昆西", "长春", "NOT TESTED!"]
+        elif text == "CN-Android":
+            servers = ["胡德", "俾斯麦", "昆西", "长春"]
         #     self.channel = "100015"
         # elif text == "International":
         #     servers = ["server1", "NOT TESTED!"]
@@ -201,6 +201,16 @@ class LoginForm(QWidget):
             self.server = "http://s101.jr.moefantasy.com/"
         elif text == "维内托":
             self.server = "http://s108.jr.moefantasy.com/"
+        elif text == "胡德":
+            self.server = "http://s2.jr.moefantasy.com/"
+        elif text == "俾斯麦":
+            self.server = "http://s4.jr.moefantasy.com/"
+        elif text == "昆西":
+            self.server = "http://s13.jr.moefantasy.com/"
+        elif text == "长春":
+            self.server = "http://s14.jr.moefantasy.com/"
+        else:
+            logging.error("Invalid server name.")
 
     def check_password(self):
         self.button_login.setText('Connecting to server...')
