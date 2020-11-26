@@ -13,7 +13,7 @@ from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QRect, QSize, QTimer
 from PyQt5.QtGui import QIcon
 
 from .models.resource_model import ResourceTableModel
-from .models.side_dock_list_view import AlignListView
+from .models.side_dock_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 from ..func import constants as CONST
 
 
@@ -125,6 +125,8 @@ class SideDock(QDockWidget):
         self.table_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table_view.setFocusPolicy(Qt.NoFocus)
+        self.table_view.setSelectionMode(QAbstractItemView.NoSelection)
         self.table_view.horizontalScrollBar().setEnabled(False)
         self.table_view.verticalScrollBar().setEnabled(False)
 
@@ -132,7 +134,7 @@ class SideDock(QDockWidget):
         self.bathlist_view_widget = QWidget(self)
         self.bathlist_view_layout = QVBoxLayout(self.bathlist_view_widget)
         self.bathlist_view_layout.setContentsMargins(0,0,0,0)
-        self.bathlist_view = AlignListView(self)
+        self.bathlist_view = BathListView(self)
         _, self.bath_counter_labels[0] = self.bathlist_view.add_item("Repairing Dock Locked", "")
         _, self.bath_counter_labels[1] = self.bathlist_view.add_item("Repairing Dock Locked", "")
         _, self.bath_counter_labels[2] = self.bathlist_view.add_item("Repairing Dock Locked", "")
@@ -151,21 +153,21 @@ class SideDock(QDockWidget):
         self.triple_list_view.addWidget(self.explist_view)
 
     def init_construction_info(self):
-        self.buildlist_view = AlignListView(self)
+        self.buildlist_view = BuildListView(self)
         _, self.build_counter_labels[0] = self.buildlist_view.add_item("Constr. Slot", "Locked")
         _, self.build_counter_labels[1] = self.buildlist_view.add_item("Constr. Slot", "Locked")
         _, self.build_counter_labels[2] = self.buildlist_view.add_item("Constr. Slot", "Locked")
         _, self.build_counter_labels[3] = self.buildlist_view.add_item("Constr. Slot", "Locked")
 
     def init_development_info(self):
-        self.devlist_view = AlignListView(self)
+        self.devlist_view = DevListView(self)
         _, self.dev_counter_labels[0] = self.devlist_view.add_item("Dev. Slot", "Locked")
         _, self.dev_counter_labels[1] = self.devlist_view.add_item("Dev. Slot", "Locked")
         _, self.dev_counter_labels[2] = self.devlist_view.add_item("Dev. Slot", "Locked")
         _, self.dev_counter_labels[3] = self.devlist_view.add_item("Dev. Slot", "Locked")
 
     def init_expedition_info(self):
-        self.explist_view = AlignListView(self)
+        self.explist_view = ExpListView(self)
         _, self.exp_counter_labels[0] = self.explist_view.add_item("Exped. Fleet", "Idling")
         _, self.exp_counter_labels[1] = self.explist_view.add_item("Exped. Fleet", "Idling")
         _, self.exp_counter_labels[2] = self.explist_view.add_item("Exped. Fleet", "Idling")
@@ -182,7 +184,7 @@ class SideDock(QDockWidget):
 
     def init_task_info(self):
         # Tasks view can be scrolled
-        self.tasklist_view = AlignListView(self)
+        self.tasklist_view = TaskListView(self)
 
     def init_countdowns(self):
         # TODO? design problem now the most suitable count is 4, 5 would be max
@@ -433,7 +435,6 @@ class SideDock(QDockWidget):
     def on_received_tasks(self, data):
         if data != None:
             t = data["taskVo"]
-            # TODO: future limited time task
             for i in t:
                 stat = str(i["condition"][0]["finishedAmount"]) + " / " + str(i["condition"][0]["totalAmount"])
                 desc = re.sub(r'\^.+?00000000', '', i["desc"])  # F**k MoeFantasy

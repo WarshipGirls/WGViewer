@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QCheckBox
 from PyQt5.QtWidgets import QHBoxLayout, QGridLayout
 from PyQt5.QtCore import pyqtSignal
 
-from . import ships_constant as SCONST
+from . import constant as SCONST
 
 
 class TopCheckboxes(QWidget):

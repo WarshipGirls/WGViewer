@@ -1,7 +1,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QStyledItemDelegate
 
-from .ships_equip_window import EquipPopup
+from .equip_window import EquipPopup
 
 
 class ShipTableDelegate(QStyledItemDelegate):

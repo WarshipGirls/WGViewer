@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout
 from PyQt5.QtCore import QTimer, pyqtSlot
 
 from .tabs.advance_functions import TabAdvanceFunctions
-from .tabs.ships import TabShips
+from .tabs.tab_ship import TabShips
 
 
 def get_data_path(relative_path):

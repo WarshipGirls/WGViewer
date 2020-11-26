@@ -4,7 +4,7 @@ import re
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import  QIcon
 
-from . import ships_constant as SCONST
+from . import constant as SCONST
 
 
 class ShipSortFilterProxyModel(QSortFilterProxyModel):
