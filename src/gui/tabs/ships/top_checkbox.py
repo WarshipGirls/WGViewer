@@ -30,7 +30,7 @@ class TopCheckboxes(QWidget):
         self.add_dropdown("VALUE", SCONST.value_select, self.value_handler, 0, 2)
         self.add_dropdown("MOD.", SCONST.mod_select, self.proxy.setModFilter, 0, 3)
         self.add_dropdown("Type/Size", SCONST.type_size_select, self.proxy.setTypeSizeFilter, 0, 4)
-        self.add_dropdown("RARITY", SCONST.rarity_select, self.rarity_handler, 0, 5)
+        self.add_dropdown("RARITY", SCONST.rarity_select, self.proxy.setRarityFilter, 0, 5)
         # current = 30/60, max only = 60
         self.add_dropdown("MARRY", SCONST.married_select, self.marry_handler, 0, 7)
 
@@ -50,9 +50,6 @@ class TopCheckboxes(QWidget):
 
     def value_handler(self, text):
         self.sig_value_select.emit(text)
-
-    def rarity_handler(self, text):
-        print(text)
 
     def marry_handler(self, text):
         print(text)

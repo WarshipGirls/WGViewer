@@ -59,6 +59,14 @@ def get_user_dir():
         pass
     return p
 
+def get_temp_dir():
+    p = os.path.join(_get_data_dir(), 'temp')
+    if not os.path.exists(p):
+        os.makedirs(p)
+    else:
+        pass
+    return p
+
 def get_settings_file():
     return os.path.join(_get_data_dir(), 'wgviewer.ini')
 
@@ -341,6 +349,37 @@ def _process_shipItem():
     for i in t:
         res[i['cid']] = i['title']
     return res
+'''
+def _ship_id_to_rarity(cid):
+    path = os.path.join(get_init_dir(), 'shipCard.json')
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+
+    res = -1
+    try:
+        x = next((i for i in data if i['cid'] == cid))
+        res = x['star']
+    except StopIteration:
+        pass
+    return res
+'''
+def ship_id_to_rarity(cid):
+    path = os.path.join(get_temp_dir(), 'ship_id_to_rarity.json')
+    if os.path.exists(path):
+        with open(path, encoding='utf-8') as f:
+            data = json.load(f)
+    else:
+        data = {}
+        card_path = os.path.join(get_init_dir(), 'shipCard.json')
+        with open(card_path, encoding='utf-8') as f:
+            cards = json.load(f)
+        for c in cards:
+            data[c['cid']] = c['star']
+        with open(path, 'w', encoding='utf-8') as fout:
+            json.dump(data, fout, ensure_ascii=False, indent=4)
+
+    return data[str(cid)]
+
 
 
 # End of File

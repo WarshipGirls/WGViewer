@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import  QIcon
 
 from . import constant as SCONST
+from ....func import data as wgr_data
 
 
 class ShipSortFilterProxyModel(QSortFilterProxyModel):
@@ -15,6 +16,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.level_opt = None
         self.mod_opt = None
         self.type_size_opt = None
+        self.rarity_opt = None
 
         self.no_sort_cols = [0, 1, 3, 21, 22, 23, 24, 25, 26, 27]
         self.int_sort_cols = [2, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
@@ -48,6 +50,10 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
     def setTypeSizeFilter(self, type_size):
         self.type_size_opt = type_size
+        self.invalidateFilter()
+
+    def setRarityFilter(self, rarity):
+        self.rarity_opt = rarity
         self.invalidateFilter()
 
     def _customFilterAcceptsRow(self, source_row, source_parent, opt, col, func):
@@ -149,6 +155,29 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             return r
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
+    def rarityFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        def f(o, i):
+            res = []
+            cid = self.sourceModel().data(i, Qt.UserRole)
+            rarity = wgr_data.ship_id_to_rarity(int(cid))
+            o = o[-1:]
+            if o == "1":
+                res.append(rarity == 1)
+            elif o == "2":
+                res.append(rarity == 2)
+            elif o == "3":
+                res.append(rarity == 3)
+            elif o == "4":
+                res.append(rarity == 4)
+            elif o == "5":
+                res.append(rarity == 5)
+            elif o == "6":
+                res.append(rarity == 6)
+            else:
+                res.append(True)
+            return res
+        return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
+
     def filterAcceptsRow(self, source_row, source_parent):
         '''
         overridden filterAcceptsRow(); virtual function
@@ -182,7 +211,12 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         size_res = self.sizeFilterAcceptsRow(source_row, source_parent, self.type_size_opt, 0)
         type_res = self.typeFilterAcceptsRow(source_row, source_parent, self.type_size_opt, 3)
         type_size_res = all(size_res) and all(type_res)
-        return type_size_res
+        if type_size_res == False:
+            return False
+        else:
+            pass
+        rarity_res = self.rarityFilterAcceptsRow(source_row, source_parent, self.rarity_opt, 0)
+        return all(rarity_res)
 
     def setFilterRegExp(self, string):
         return super().setFilterRegExp(string)
