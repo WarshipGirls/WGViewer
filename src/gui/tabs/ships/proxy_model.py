@@ -200,25 +200,43 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         # columns are HARDCODING
         name_res = self.nameFilterAcceptsRow(source_row, source_parent, self.name_reg, 1)
-        if all(name_res) == False: return False else: pass
+        if all(name_res) == False:
+            return False
+        else:
+            pass
 
         lock_res = self.lockFilterAcceptsRow(source_row, source_parent, self.lock_opt, 2)
-        if all(lock_res) == False: return False else: pass
+        if all(lock_res) == False:
+            return False
+        else:
+            pass
 
         level_res = self.levelFilterAcceptsRow(source_row, source_parent, self.level_opt, 6)
-        if all(level_res) == False: return False else: pass
+        if all(level_res) == False:
+            return False
+        else:
+            pass
 
         mod_res = self.modFilterAcceptsRow(source_row, source_parent, self.mod_opt, 0)
-        if all(mod_res) == False: return False else: pass
+        if all(mod_res) == False:
+            return False
+        else:
+            pass
 
         size_res = self.sizeFilterAcceptsRow(source_row, source_parent, self.type_size_opt, 0)
         type_res = self.typeFilterAcceptsRow(source_row, source_parent, self.type_size_opt, 3)
         type_size_res = all(size_res) and all(type_res)
 
-        if type_size_res == False: return False else: pass
+        if type_size_res == False:
+            return False
+        else:
+            pass
         rarity_res = self.rarityFilterAcceptsRow(source_row, source_parent, self.rarity_opt, 0)
 
-        if all(rarity_res) == False: return False else: pass
+        if all(rarity_res) == False:
+            return False
+        else:
+            pass
 
         # marryFilter shares same code as lockFilter
         marry_res = self.lockFilterAcceptsRow(source_row, source_parent, self.marry_opt, 1)

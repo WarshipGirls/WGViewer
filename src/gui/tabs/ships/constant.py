@@ -6,7 +6,7 @@ mod_select = ["ALL", "Non-mod.", "Mod. I"]
 rarity_select = ["ALL", "\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
 married_select = ["ALL", "YES", "NO"]
 type_size_select = ["ALL", "SMALL", "MEDIUM", "LARGE", "FLAGSHIP", "ESCORT", "SUB"]
-# TODO: country select, zhuli-huwei
+# TODO: country select
 flagships = ['BB', 'BBV', 'BC', 'BBG', 'CB', 'CV', 'AV', 'ASDG']
 escorts = ['CVL', 'CA', 'CL', 'CLT', 'CAV', 'BM', 'DD', 'AADG', 'AP']
 subs = ['SS', 'SC', 'SSV']
