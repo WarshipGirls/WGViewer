@@ -5,8 +5,11 @@ value_select = ["Curr. (w/ Equip.)", "Max. (w/ Equip.)", "Raw (w/o Equip.)"]
 mod_select = ["ALL", "Non-mod.", "Mod. I"]
 rarity_select = ["\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
 married_select = ["ALL", "Married Only", "Non Married Only"]
-size_select = ["ALL", "SMALL", "MEDIUM", "LARGE"]
+type_size_select = ["ALL", "SMALL", "MEDIUM", "LARGE", "FLAGSHIP", "ESCORT", "SUB"]
 # TODO: country select, zhuli-huwei
+flagships = ['BB', 'BBV', 'BC', 'BBG', 'CB', 'CV', 'AV', 'ASDG']
+escorts = ['CVL', 'CA', 'CL', 'CLT', 'CAV', 'BM', 'DD', 'AADG', 'AP']
+subs = ['SS', 'SC', 'SSV']
 # Whenever changed `_header`, double check hardcoding columns
 _header = [ "", "Name", "ID", "Class", "Speed",
             "Range", "Lv.", "HP", "FP", "Armor",

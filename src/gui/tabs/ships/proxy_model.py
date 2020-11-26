@@ -14,7 +14,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.lock_opt = None
         self.level_opt = None
         self.mod_opt = None
-        self.type_opt = None
+        self.type_size_opt = None
 
         self.no_sort_cols = [0, 1, 3, 21, 22, 23, 24, 25, 26, 27]
         self.int_sort_cols = [2, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
@@ -46,8 +46,8 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.mod_opt = mod
         self.invalidateFilter()
 
-    def setTypeFilter(self, _type):
-        self.type_opt = _type
+    def setTypeSizeFilter(self, type_size):
+        self.type_size_opt = type_size
         self.invalidateFilter()
 
     def _customFilterAcceptsRow(self, source_row, source_parent, opt, col, func):
@@ -119,19 +119,31 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             return r
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
+    def sizeFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        def f(o, i):
+            r = []
+            s = self.sourceModel().data(i, Qt.UserRole)[-2:]
+            if o == "SMALL":
+                r.append(s == "11")
+            elif o == "MEDIUM":
+                r.append(s == "12")
+            elif o == "LARGE":
+                r.append(s == "13")
+            else:
+                r.append(True)
+            return r
+        return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
+
     def typeFilterAcceptsRow(self, source_row, source_parent, opt, col):
         def f(o, i):
             r = []
-            t = self.sourceModel().data(i, Qt.UserRole)
-            print(t)
-            t = t[-2:]
-            print(t)
-            if o == "SMALL":
-                r.append(t == "11")
-            elif o == "MEDIUM":
-                r.append(t == "12")
-            elif o == "LARGE":
-                r.append(t == "13")
+            t = self.sourceModel().data(i, Qt.DisplayRole)
+            if o == "FLAGSHIP":
+                r.append(t in SCONST.flagships)
+            elif o == "ESCORT":
+                r.append(t in SCONST.escorts)
+            elif o == "SUB":
+                r.append(t in SCONST.subs)
             else:
                 r.append(True)
             return r
@@ -143,7 +155,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         return Boolean
         '''
         # Ensure all are `None`
-        if False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_opt]):
+        if False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt]):
             return True
 
         # columns are HARDCODING
@@ -167,8 +179,10 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             return False
         else:
             pass
-        type_res = self.typeFilterAcceptsRow(source_row, source_parent, self.type_opt, 0)
-        return all(type_res)
+        size_res = self.sizeFilterAcceptsRow(source_row, source_parent, self.type_size_opt, 0)
+        type_res = self.typeFilterAcceptsRow(source_row, source_parent, self.type_size_opt, 3)
+        type_size_res = all(size_res) and all(type_res)
+        return type_size_res
 
     def setFilterRegExp(self, string):
         return super().setFilterRegExp(string)
