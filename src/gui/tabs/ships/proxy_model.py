@@ -33,7 +33,13 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.slot_sort_col = [20]
 
         # TODO? multi-processing following command
-        wgr_data.init_ships_temp()
+        self._info = wgr_data.init_ships_temp()
+
+    def ship_id_to_rarity(self, cid):
+        return self._info[str(cid)]['rarity']
+
+    def ship_id_to_country(self, cid):
+        return self._info[str(cid)]['country']
 
     def setNameFilter(self, regex):
         '''
@@ -177,7 +183,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         def f(o, i):
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
-            rarity = wgr_data.ship_id_to_rarity(int(cid))
+            rarity = self.ship_id_to_rarity(int(cid))
             o = o[-1:]
             if o == "1":
                 res.append(rarity == 1)
@@ -200,7 +206,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         def f(o, i):
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
-            country = wgr_data.ship_id_to_country(int(cid))
+            country = self.ship_id_to_country(int(cid))
             o = o[:2] if o != "" else ""
             if o == "JP":
                 res.append(country == 1)
@@ -251,11 +257,13 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             return res
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
+
+    # ================================================================
+    # QSortFilterProxyModel virtual functions
+    # ================================================================
+
+
     def filterAcceptsRow(self, source_row, source_parent):
-        '''
-        overridden filterAcceptsRow(); virtual function
-        return Boolean
-        '''
         if False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt, self.marry_opt, self.country_opt]):
             return True
         else:
