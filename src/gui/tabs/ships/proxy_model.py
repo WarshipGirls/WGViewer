@@ -19,6 +19,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.type_size_opt = None
         self.rarity_opt = None
         self.marry_opt = None
+        self.country_opt = None
 
         # LESSON: Unlike C++, Python have no reference to a variable, so following will create self.all_opts points to [None, ...]
         #    which will remain unchanged and will fail filtering
@@ -64,6 +65,10 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
     def setMarryFilter(self, married):
         self.marry_opt = married
+        self.invalidateFilter()
+
+    def setCountryFilter(self, country):
+        self.country_opt = country
         self.invalidateFilter()
 
     def _customFilterAcceptsRow(self, source_row, source_parent, opt, col, func):
@@ -188,12 +193,67 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             return res
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
+    def countryFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        def f(o, i):
+            res = []
+            cid = self.sourceModel().data(i, Qt.UserRole)
+            country = wgr_data.ship_id_to_country(int(cid))
+            o = o[:2] if o != "" else ""
+            if o == "JP":
+                res.append(country == 1)
+            elif o == "DE":
+                res.append(country == 2)
+            elif o == "GB":
+                res.append(country == 3)
+            elif o == "US":
+                res.append(country == 4)
+            elif o == "IT":
+                res.append(country == 5)
+            elif o == "FR":
+                res.append(country == 6)
+            elif o == "RU":
+                res.append(country == 7)
+            elif o == "CN":
+                res.append(country == 8)
+            elif o == "TR":
+                res.append(country == 9)
+            elif o == "NL":
+                res.append(country == 12)
+            elif o == "SE":
+                res.append(country == 13)
+            elif o == "TH":
+                res.append(country == 14)
+            elif o == "AU":
+                res.append(country == 15)
+            elif o == "CA":
+                res.append(country == 16)
+            elif o == "MN":
+                res.append(country == 17)
+            elif o == "IS":
+                res.append(country == 18)
+            elif o == "CL":
+                res.append(country == 19)
+            elif o == "FI":
+                res.append(country == 20)
+            elif o == "PL":
+                res.append(country == 21)
+            elif o == "AH":
+                res.append(country == 22)
+            elif o == "GR":
+                res.append(country == 23)
+            elif o == "ES":
+                res.append(country == 24)
+            else:
+                res.append(True)
+            return res
+        return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
+
     def filterAcceptsRow(self, source_row, source_parent):
         '''
         overridden filterAcceptsRow(); virtual function
         return Boolean
         '''
-        if False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt, self.marry_opt]):
+        if False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt, self.marry_opt, self.country_opt]):
             return True
         else:
             pass
@@ -226,13 +286,12 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         size_res = self.sizeFilterAcceptsRow(source_row, source_parent, self.type_size_opt, 0)
         type_res = self.typeFilterAcceptsRow(source_row, source_parent, self.type_size_opt, 3)
         type_size_res = all(size_res) and all(type_res)
-
         if type_size_res == False:
             return False
         else:
             pass
-        rarity_res = self.rarityFilterAcceptsRow(source_row, source_parent, self.rarity_opt, 0)
 
+        rarity_res = self.rarityFilterAcceptsRow(source_row, source_parent, self.rarity_opt, 0)
         if all(rarity_res) == False:
             return False
         else:
@@ -240,7 +299,13 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         # marryFilter shares same code as lockFilter
         marry_res = self.lockFilterAcceptsRow(source_row, source_parent, self.marry_opt, 1)
-        return all(marry_res)
+        if all(marry_res) == False:
+            return False
+        else:
+            pass
+
+        country_res = self.countryFilterAcceptsRow(source_row, source_parent, self.country_opt, 0)
+        return all(country_res)
 
     def setFilterRegExp(self, string):
         return super().setFilterRegExp(string)

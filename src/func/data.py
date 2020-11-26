@@ -349,7 +349,7 @@ def _process_shipItem():
     for i in t:
         res[i['cid']] = i['title']
     return res
-'''
+''' Takes too Long
 def _ship_id_to_rarity(cid):
     path = os.path.join(get_init_dir(), 'shipCard.json')
     with open(path, encoding='utf-8') as f:
@@ -380,6 +380,30 @@ def ship_id_to_rarity(cid):
 
     return data[str(cid)]
 
+def ship_id_to_country(cid):
+    path = os.path.join(get_temp_dir(), 'ship_id_to_country.json')
+    all_co = {}
+    if os.path.exists(path):
+        with open(path, encoding='utf-8') as f:
+            data = json.load(f)
+    else:
+        data = {}
+        card_path = os.path.join(get_init_dir(), 'shipCard.json')
+        with open(card_path, encoding='utf-8') as f:
+            cards = json.load(f)
+        for c in cards:
+            data[c['cid']] = c['country']
+            if c['country'] not in all_co:
+                all_co[c['country']] = []
+            all_co[c['country']].append(c['title'])
+        with open(path, 'w', encoding='utf-8') as fout:
+            json.dump(data, fout, ensure_ascii=False, indent=4)
 
+    print(all_co)
+    return data[str(cid)]
+    # return data[cid]
+
+
+print(ship_id_to_country(10000113))
 
 # End of File
