@@ -98,9 +98,13 @@ class MainInterface(QMainWindow):
 
     def init_menu(self):
         file_menu = self.bar.addMenu("File")
-        file_menu.addAction("New")
-        file_menu.addAction("save")
-        file_menu.addAction("quit")
+        cache_open_action = QAction("Open Cache Folder", self)
+        cache_open_action.triggered.connect(self.open_cache_folder)
+        file_menu.addAction(cache_open_action)
+
+        # cache_clear_action = QAction("Clear Cache Folder", self)
+        # cache_clear_action.triggered.connect(self.clear_cache_folder)
+        # file_menu.addAction(cache_clear_action)
 
         view_menu = self.bar.addMenu("View")
         sidedock_action = QAction("&Open Navy Base Overview", self)
@@ -123,6 +127,13 @@ class MainInterface(QMainWindow):
     @pyqtSlot()
     def on_dock_closed(self):
         self.side_dock_on = False
+
+    def open_cache_folder(self):
+        path = wgr_data._get_data_dir()
+        os.startfile(path)
+
+    # def clear_cache_folder(self):
+    #     wgr_data._clear_cache()
 
     def open_author_info(self):
         def get_hyperlink(link, text):

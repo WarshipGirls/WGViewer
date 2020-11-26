@@ -32,8 +32,7 @@ def _get_data_dir():
         _dir = str(Path.home())
     return os.path.join(_dir, 'WarshipGirlsViewer')
 
-def _clear_cache():
-    _dir = _get_data_dir()
+def _clear_dir(_dir):
     for filename in os.listdir(_dir):
         file_path = os.path.join(_dir, filename)
         try:
