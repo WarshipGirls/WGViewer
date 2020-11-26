@@ -6,6 +6,7 @@ rarity_select = ["\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u
 married_select = ["ALL", "Married Only", "Non Married Only"]
 size_select = ["ALL", "SMALL", "MIDIUM", "LARGE"]
 # TODO: country select, zhuli-huwei
+# Whenever changed `_header`, double check hardcoding columns
 _header = [ "", "Name", "ID", "Class", "Speed",
             "Range", "Lv.", "HP", "FP", "Armor",
             "Torp.", "Acc.", "Eva.", "LOS", "AA",
