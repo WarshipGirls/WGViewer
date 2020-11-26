@@ -363,47 +363,67 @@ def _ship_id_to_rarity(cid):
         pass
     return res
 '''
-def ship_id_to_rarity(cid):
-    path = os.path.join(get_temp_dir(), 'ship_id_to_rarity.json')
+
+def init_ships_temp():
+    path = os.path.join(get_temp_dir(), 'ship_id_to_info.json')
     if os.path.exists(path):
-        with open(path, encoding='utf-8') as f:
-            data = json.load(f)
+        pass
     else:
         data = {}
         card_path = os.path.join(get_init_dir(), 'shipCard.json')
         with open(card_path, encoding='utf-8') as f:
             cards = json.load(f)
         for c in cards:
-            data[c['cid']] = c['star']
+            data[c['cid']] = {}
+            data[c['cid']]['rarity'] = c['star']
+            data[c['cid']]['country'] = c['country']
+
         with open(path, 'w', encoding='utf-8') as fout:
             json.dump(data, fout, ensure_ascii=False, indent=4)
 
-    return data[str(cid)]
+
+def ship_id_to_rarity(cid):
+    path = os.path.join(get_temp_dir(), 'ship_id_to_info.json')
+    # if os.path.exists(path):
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+    # else:
+        # init_ships_temp()
+        # data = {}
+        # card_path = os.path.join(get_init_dir(), 'shipCard.json')
+        # with open(card_path, encoding='utf-8') as f:
+        #     cards = json.load(f)
+        # for c in cards:
+        #     data[c['cid']] = c['star']
+        # with open(path, 'w', encoding='utf-8') as fout:
+        #     json.dump(data, fout, ensure_ascii=False, indent=4)
+
+    return data[str(cid)]['rarity']
 
 def ship_id_to_country(cid):
-    path = os.path.join(get_temp_dir(), 'ship_id_to_country.json')
-    all_co = {}
-    if os.path.exists(path):
-        with open(path, encoding='utf-8') as f:
-            data = json.load(f)
-    else:
-        data = {}
-        card_path = os.path.join(get_init_dir(), 'shipCard.json')
-        with open(card_path, encoding='utf-8') as f:
-            cards = json.load(f)
-        for c in cards:
-            data[c['cid']] = c['country']
-            if c['country'] not in all_co:
-                all_co[c['country']] = []
-            all_co[c['country']].append(c['title'])
-        with open(path, 'w', encoding='utf-8') as fout:
-            json.dump(data, fout, ensure_ascii=False, indent=4)
+    path = os.path.join(get_temp_dir(), 'ship_id_to_info.json')
+    # all_co = {}
+    # if os.path.exists(path):
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+    # else:
+    #     data = {}
+    #     card_path = os.path.join(get_init_dir(), 'shipCard.json')
+    #     with open(card_path, encoding='utf-8') as f:
+    #         cards = json.load(f)
+    #     for c in cards:
+    #         data[c['cid']] = c['country']
+    #         if c['country'] not in all_co:
+    #             all_co[c['country']] = []
+    #         all_co[c['country']].append(c['title'])
+    #     with open(path, 'w', encoding='utf-8') as fout:
+    #         json.dump(data, fout, ensure_ascii=False, indent=4)
 
-    print(all_co)
-    return data[str(cid)]
+    # print(all_co)
+    return data[str(cid)]['country']
     # return data[cid]
 
 
-print(ship_id_to_country(10000113))
+# print(ship_id_to_country(10000113))
 
 # End of File

@@ -32,6 +32,9 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.resource_sort_cols = [7, 17, 18, 19]
         self.slot_sort_col = [20]
 
+        # TODO? multi-processing following command
+        wgr_data.init_ships_temp()
+
     def setNameFilter(self, regex):
         '''
         reg = string, auto mapped to QString in Py3
