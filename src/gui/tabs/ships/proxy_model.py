@@ -18,8 +18,10 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.mod_opt = None
         self.type_size_opt = None
         self.rarity_opt = None
+        self.marry_opt = None
 
-        self.all_opts = [self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt]
+        self.all_opts = [self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt, self.marry_opt]
+        # self.all_opts = [self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt]
 
         self.no_sort_cols = [0, 1, 3, 21, 22, 23, 24, 25, 26, 27]
         self.int_sort_cols = [2, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
@@ -59,6 +61,10 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.rarity_opt = rarity
         self.invalidateFilter()
 
+    def setMarryFilter(self, married):
+        self.marry_opt = married
+        self.invalidateFilter()
+
     def _customFilterAcceptsRow(self, source_row, source_parent, opt, col, func):
         res = []
         if opt == None:
@@ -72,6 +78,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         return res
 
     def nameFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        logging.debug(source_row)
         def f(o, i):
             r = []
             name = self.sourceModel().data(i, Qt.DisplayRole)
@@ -181,13 +188,32 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             return res
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
+    def marryFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        # This can be combined with lockFilter, same code
+        def f(o, i):
+            res = []
+            married = self.sourceModel().data(i, Qt.DecorationRole)
+            if o == 'YES':
+                r.append(isinstance(married, QIcon))
+            elif o == 'NO':
+                r.append(not isinstance(married, QIcon))
+            else:
+                r.append(True)
+            return res
+        return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
+
     def filterAcceptsRow(self, source_row, source_parent):
         '''
         overridden filterAcceptsRow(); virtual function
         return Boolean
         '''
         if False == any(self.all_opts):
+            # logging.debug('??????????????????????????????????')
+            logging.debug(self.all_opts)
             return True
+        else:
+            logging.debug('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+
 
         # columns are HARDCODING
         name_res = self.nameFilterAcceptsRow(source_row, source_parent, self.name_reg, 1)
@@ -218,7 +244,12 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         else:
             pass
         rarity_res = self.rarityFilterAcceptsRow(source_row, source_parent, self.rarity_opt, 0)
-        return all(rarity_res)
+        if all(rarity_res) == False:
+            return False
+        else:
+            pass
+        marry_res = self.marryFilterAcceptsRow(source_row, source_parent, self.marry_opt, 1)
+        return all(marry_res)
 
     def setFilterRegExp(self, string):
         return super().setFilterRegExp(string)

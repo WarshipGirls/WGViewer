@@ -105,6 +105,8 @@ class TabShips(QWidget):
         p = get_data_path('api_getShipList.json')
         with open(p) as f:
             d = json.load(f)
+        # logging.error(len(d['userShipVO']))
+        d['userShipVO'] = d['userShipVO'][:5]
         self.on_received_shiplist(d)
 
     @pyqtSlot(dict)
