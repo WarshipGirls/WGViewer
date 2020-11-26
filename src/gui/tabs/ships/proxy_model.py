@@ -184,20 +184,10 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
             rarity = self.ship_id_to_rarity(int(cid))
-            o = o[-1:]
-            if o == "1":
-                res.append(rarity == 1)
-            elif o == "2":
-                res.append(rarity == 2)
-            elif o == "3":
-                res.append(rarity == 3)
-            elif o == "4":
-                res.append(rarity == 4)
-            elif o == "5":
-                res.append(rarity == 5)
-            elif o == "6":
-                res.append(rarity == 6)
-            else:
+            try:
+                o = int(o[-1:])
+                res.append(o == rarity)
+            except ValueError:
                 res.append(True)
             return res
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
