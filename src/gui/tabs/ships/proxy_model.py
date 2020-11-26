@@ -1,4 +1,5 @@
 import ast
+import logging
 import re
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
@@ -17,6 +18,8 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.mod_opt = None
         self.type_size_opt = None
         self.rarity_opt = None
+
+        self.all_opts = [self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt]
 
         self.no_sort_cols = [0, 1, 3, 21, 22, 23, 24, 25, 26, 27]
         self.int_sort_cols = [2, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
@@ -183,8 +186,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         overridden filterAcceptsRow(); virtual function
         return Boolean
         '''
-        # Ensure all are `None`
-        if False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt]):
+        if False == any(self.all_opts):
             return True
 
         # columns are HARDCODING
