@@ -45,6 +45,86 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.mod_opt = mod
         self.invalidateFilter()
 
+    def nameFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        res = []
+        if opt == None:
+            res.append(source_row if source_row != 0 else True)
+        else:
+            name = ""
+            idx = self.sourceModel().index(source_row, col, source_parent)
+            if idx.isValid() == False:
+                pass
+            else:
+                name = self.sourceModel().data(idx, Qt.DisplayRole)
+                if name == None:
+                    name = ""
+                else:
+                    pass
+            # https://docs.python.org/3/library/re.html#re.compile
+            res.append(opt.search(name))
+        return res
+
+    def lockFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        res = []
+        if opt == None or opt == 'ALL':
+            res.append(source_row if source_row != 0 else True)
+        else:
+            idx = self.sourceModel().index(source_row, col, source_parent)
+            if idx.isValid() == False:
+                pass
+            else:
+                lock = self.sourceModel().data(idx, Qt.DecorationRole)   # Detect if have ICON
+                if opt == 'YES':
+                    res.append(isinstance(lock, QIcon))
+                elif opt == 'NO':
+                    res.append(not isinstance(lock, QIcon))
+                else:
+                    pass
+        return res
+
+    def levelFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        res = []
+        if opt == None or opt == 'ALL':
+            res.append(source_row if source_row != 0 else True)
+        else:
+            idx = self.sourceModel().index(source_row, col, source_parent)
+            if idx.isValid() == False:
+                pass
+            else:
+                level = self.sourceModel().data(idx, Qt.DisplayRole)
+                if opt == 'Lv. 1':
+                    res.append(int(level) == 1)
+                elif opt == "> Lv. 1":
+                    res.append(int(level) > 1)
+                elif opt == "\u2265 Lv. 90":
+                    res.append(int(level) >= 90)
+                elif opt == "\u2265 Lv. 100":
+                    res.append(int(level) >= 100)
+                elif opt == "= Lv. 110":
+                    res.append(int(level) == 110)
+                else:
+                    pass
+        return res
+
+    def modFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        res = []
+        if opt == None or opt == 'ALL':
+            res.append(source_row if source_row != 0 else True)
+        else:
+            idx = self.sourceModel().index(source_row, col, source_parent)
+            if idx.isValid() == False:
+                pass
+            else:
+                mod = self.sourceModel().data(idx, Qt.UserRole)
+                if opt == "Non-mod.":
+                    res.append(mod[:3] == "100")
+                elif opt == "Mod. I":
+                    res.append(mod[:3] == "110")
+                else:
+                    pass
+        return res
+
+
     def filterAcceptsRow(self, source_row, source_parent):
         '''
         overridden filterAcceptsRow(); virtual function
@@ -54,102 +134,29 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         if False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt]):
             return True
 
-        name_res = []
-        if self.name_reg == None:
-            name_res.append(source_row if source_row != 0 else True)
-        else:
-            name = ""
-            name_col = 1    # HARDCODING
-            name_index = self.sourceModel().index(source_row, name_col, source_parent)
-            if name_index.isValid() == False:
-                pass
-            else:
-                name = self.sourceModel().data(name_index, Qt.DisplayRole)
-                if name == None:
-                    name = ""
-                else:
-                    pass
-            # https://docs.python.org/3/library/re.html#re.compile
-            name_res.append(self.name_reg.search(name))
-
+        # columns are HARDCODING
+        name_res = self.nameFilterAcceptsRow(source_row, source_parent, self.name_reg, 1)
         res = all(name_res)
         if res == False:
             return False
         else:
             pass
 
-        lock_res = []
-        if self.lock_opt == None or self.lock_opt == 'ALL':
-            lock_res.append(source_row if source_row != 0 else True)
-        else:
-            lock_col = 2
-            lock_index = self.sourceModel().index(source_row, lock_col, source_parent)
-            if lock_index.isValid() == False:
-                pass
-            else:
-                lock = self.sourceModel().data(lock_index, Qt.DecorationRole)   # Detect if have ICON
-                if self.lock_opt == 'YES':
-                    lock_res.append(isinstance(lock, QIcon))
-                elif self.lock_opt == 'NO':
-                    lock_res.append(not isinstance(lock, QIcon))
-                else:
-                    pass
-
+        lock_res = self.lockFilterAcceptsRow(source_row, source_parent, self.lock_opt, 2)
         res = res and all(lock_res)
         if res == False:
             return False
         else:
             pass
 
-        level_res = []
-        if self.level_opt == None or self.level_opt == 'ALL':
-            level_res.append(source_row if source_row != 0 else True)
-        else:
-            level_col = 6
-            level_index = self.sourceModel().index(source_row, level_col, source_parent)
-            if level_index.isValid() == False:
-                pass
-            else:
-                level = self.sourceModel().data(level_index, Qt.DisplayRole)
-                if self.level_opt == 'Lv. 1':
-                    level_res.append(int(level) == 1)
-                elif self.level_opt == "> Lv. 1":
-                    level_res.append(int(level) > 1)
-                elif self.level_opt == "\u2265 Lv. 90":
-                    level_res.append(int(level) >= 90)
-                elif self.level_opt == "\u2265 Lv. 100":
-                    level_res.append(int(level) >= 100)
-                elif self.level_opt == "= Lv. 110":
-                    level_res.append(int(level) == 110)
-                else:
-                    pass
-
+        level_res = self.levelFilterAcceptsRow(source_row, source_parent, self.level_opt, 6)
         res = res and all(level_res)
         if res == False:
             return False
         else:
             pass
 
-        mod_res = []
-        if self.mod_opt == None or self.mod_opt == 'ALL':
-            mod_res.append(source_row if source_row != 0 else True)
-        else:
-            mod_col = 0 # hidden cid
-            mod_index = self.sourceModel().index(source_row, mod_col, source_parent)
-            if mod_index.isValid() == False:
-                pass
-            else:
-                mod = self.sourceModel().data(mod_index, Qt.UserRole)
-                print(mod)
-                print(mod[:3])
-                if self.mod_opt == "Non-mod.":
-                    mod_res.append(mod[:3] == "100")
-                elif self.mod_opt == "Mod. I":
-                    mod_res.append(mod[:3] == "110")
-                else:
-                    pass
-
-
+        mod_res = self.modFilterAcceptsRow(source_row, source_parent, self.mod_opt, 0)
         res = res and all(mod_res)
         return res
 
