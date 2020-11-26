@@ -14,7 +14,7 @@ from .main_interface_tabs import MainInterfaceTabs
 
 # Functions
 # from ..func.worker_thread import Worker
-from ..func import data as wgr_data
+from ..data import data as wgr_data
 from ..func.wgr_api import WGR_API
 from ..func.helper_function import Helper
 

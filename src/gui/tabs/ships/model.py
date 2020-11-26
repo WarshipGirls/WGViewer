@@ -10,7 +10,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 from . import constant as SCONST
 from ....func import constants as CONST
 from ....func.helper_function import Helper
-from ....func import data as  wgr_data
+from ....data import data as  wgr_data
 
 
 def get_data_path(relative_path):

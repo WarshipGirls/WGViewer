@@ -16,7 +16,7 @@ from ..func.encryptor import Encryptor
 from ..func.login import GameLogin
 from ..func.session import Session
 from ..func import constants as constants
-from ..func import data as wgr_data
+from ..data import data as wgr_data
 
 
 class LoginForm(QWidget):
