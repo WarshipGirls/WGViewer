@@ -13,9 +13,9 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.name_reg = None
         self.lock_opt = None
         self.level_opt = None
-        # self.lock_opt = 'ALL'
-        self.no_sort_cols = [0, 21, 22, 23, 24, 25, 26, 27]
-        self.int_sort_cols = [1, 2, 3, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
+        self.no_sort_cols = [0, 1, 3, 21, 22, 23, 24, 25, 26, 27]
+        self.int_sort_cols = [2, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
         self.float_sort_cols = [4]
         self.range_sort_col = [5]
         self.resource_sort_cols = [7, 17, 18, 19]
@@ -53,7 +53,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             name_res.append(source_row if source_row != 0 else True)
         else:
             name = ""
-            name_col = 1
+            name_col = 1    # HARDCODING
             name_index = self.sourceModel().index(source_row, name_col, source_parent)
             if name_index.isValid() == False:
                 pass
@@ -98,7 +98,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         if self.level_opt == None or self.level_opt == 'ALL':
             level_res.append(source_row if source_row != 0 else True)
         else:
-            level_col = 4
+            level_col = 6
             level_index = self.sourceModel().index(source_row, level_col, source_parent)
             if level_index.isValid() == False:
                 pass
