@@ -13,6 +13,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.name_reg = None
         self.lock_opt = None
         self.level_opt = None
+        self.mod_opt = None
 
         self.no_sort_cols = [0, 1, 3, 21, 22, 23, 24, 25, 26, 27]
         self.int_sort_cols = [2, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
@@ -40,12 +41,17 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.level_opt = level
         self.invalidateFilter()
 
+    def setModFilter(self, mod):
+        self.mod_opt = mod
+        self.invalidateFilter()
+
     def filterAcceptsRow(self, source_row, source_parent):
         '''
         overridden filterAcceptsRow(); virtual function
         return Boolean
         '''
-        if self.name_reg == None and self.lock_opt == None and self.level_opt == None:
+        # Ensure all are `None`
+        if False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt]):
             return True
 
         name_res = []
@@ -65,6 +71,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                     pass
             # https://docs.python.org/3/library/re.html#re.compile
             name_res.append(self.name_reg.search(name))
+
         res = all(name_res)
         if res == False:
             return False
@@ -118,6 +125,32 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                     pass
 
         res = res and all(level_res)
+        if res == False:
+            return False
+        else:
+            pass
+
+        mod_res = []
+        if self.mod_opt == None or self.mod_opt == 'ALL':
+            mod_res.append(source_row if source_row != 0 else True)
+        else:
+            mod_col = 0 # hidden cid
+            mod_index = self.sourceModel().index(source_row, mod_col, source_parent)
+            if mod_index.isValid() == False:
+                pass
+            else:
+                mod = self.sourceModel().data(mod_index, Qt.UserRole)
+                print(mod)
+                print(mod[:3])
+                if self.mod_opt == "Non-mod.":
+                    mod_res.append(mod[:3] == "100")
+                elif self.mod_opt == "Mod. I":
+                    mod_res.append(mod[:3] == "110")
+                else:
+                    pass
+
+
+        res = res and all(mod_res)
         return res
 
     def setFilterRegExp(self, string):

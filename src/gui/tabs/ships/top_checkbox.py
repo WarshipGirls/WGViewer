@@ -28,7 +28,7 @@ class TopCheckboxes(QWidget):
         self.add_dropdown("LOCK", SCONST.lock_select, self.proxy.setLockFilter, 0, 0)
         self.add_dropdown("LEVEL", SCONST.level_select, self.proxy.setLevelFilter, 0, 1)
         self.add_dropdown("VALUE", SCONST.value_select, self.value_handler, 0, 2)
-        self.add_dropdown("MOD.", SCONST.mod_select, self.mod_handler, 0, 3)
+        self.add_dropdown("MOD.", SCONST.mod_select, self.proxy.setModFilter, 0, 3)
         self.add_dropdown("Type (Size)", SCONST.size_select, self.size_handler, 0, 4)
         self.add_dropdown("RARITY", SCONST.rarity_select, self.rarity_handler, 0, 5)
         # current = 30/60, max only = 60
@@ -53,9 +53,6 @@ class TopCheckboxes(QWidget):
 
     def value_handler(self, text):
         self.sig_value_select.emit(text)
-
-    def mod_handler(self, text):
-        print(text)
 
     def rarity_handler(self, text):
         print(text)
