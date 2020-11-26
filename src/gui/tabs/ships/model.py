@@ -28,11 +28,6 @@ class ShipModel(QStandardItemModel):
         self.view = view
         self.api = api
 
-        self.ships_S = []
-        self.ships_M = []
-        self.ships_L = []
-        self.non_mods = []
-        self.mods = []
         self.ships_raw_data = None
 
         self.value_opt = SCONST.value_select[0]
@@ -86,23 +81,10 @@ class ShipModel(QStandardItemModel):
         '''
         assert (len(cid) == 8)
 
-        if cid[-2:] == "11":
-            self.ships_S.append(int(cid))
-        elif cid[-2:] == "12":
-            self.ships_M.append(int(cid))
-        elif cid[-2:] == "13":
-            self.ships_L.append(int(cid))
-        else:
-            err = "Unrecognized ship cid pattern: " + cid
-            logging.warning(err)
-            return None
-
         if cid[:3] == "100":
             prefix = "S_NORMAL_"
-            self.non_mods.append(cid)
         elif cid[:3] == "110":
             prefix = "S_NORMAL_1"
-            self.mods.append(cid)
         else:
             err = "Unrecognized ship cid pattern: " + cid
             logging.warning(err)

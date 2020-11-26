@@ -61,6 +61,7 @@ class TabShips(QWidget):
 
         self.lower_layout = QGridLayout(self.lower_content_widget)
         self.search_line = QLineEdit(self.lower_content_widget)
+        self.search_line.setPlaceholderText('Search ship by name. To reset, type whitespace and delete it.')
         self.lower_layout.addWidget(self.search_line, 0, 0, 1, 1)
         self.lower_layout.addWidget(self.table_view, 1, 0, 1, self.table_model.columnCount())
 
