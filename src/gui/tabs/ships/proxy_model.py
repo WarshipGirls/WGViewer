@@ -45,85 +45,73 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.mod_opt = mod
         self.invalidateFilter()
 
-    def nameFilterAcceptsRow(self, source_row, source_parent, opt, col):
+    def _customFilterAcceptsRow(self, source_row, source_parent, opt, col, func):
         res = []
         if opt == None:
             res.append(source_row if source_row != 0 else True)
         else:
-            name = ""
             idx = self.sourceModel().index(source_row, col, source_parent)
             if idx.isValid() == False:
                 pass
             else:
-                name = self.sourceModel().data(idx, Qt.DisplayRole)
-                if name == None:
-                    name = ""
-                else:
-                    pass
-            # https://docs.python.org/3/library/re.html#re.compile
-            res.append(opt.search(name))
+                res = func(opt, idx)
         return res
+
+    def nameFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        def f(o, i):
+            r = []
+            name = self.sourceModel().data(i, Qt.DisplayRole)
+            if name == None:
+                r.append(False)
+            else:
+                r.append(o.search(name))
+            return r
+        return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def lockFilterAcceptsRow(self, source_row, source_parent, opt, col):
-        res = []
-        if opt == None or opt == 'ALL':
-            res.append(source_row if source_row != 0 else True)
-        else:
-            idx = self.sourceModel().index(source_row, col, source_parent)
-            if idx.isValid() == False:
-                pass
+        def f(o, i):
+            r = []
+            lock = self.sourceModel().data(i, Qt.DecorationRole)   # Detect if have ICON
+            if o == 'YES':
+                r.append(isinstance(lock, QIcon))
+            elif o == 'NO':
+                r.append(not isinstance(lock, QIcon))
             else:
-                lock = self.sourceModel().data(idx, Qt.DecorationRole)   # Detect if have ICON
-                if opt == 'YES':
-                    res.append(isinstance(lock, QIcon))
-                elif opt == 'NO':
-                    res.append(not isinstance(lock, QIcon))
-                else:
-                    pass
-        return res
+                r.append(True)
+            return r
+        return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def levelFilterAcceptsRow(self, source_row, source_parent, opt, col):
-        res = []
-        if opt == None or opt == 'ALL':
-            res.append(source_row if source_row != 0 else True)
-        else:
-            idx = self.sourceModel().index(source_row, col, source_parent)
-            if idx.isValid() == False:
-                pass
+        def f(o, i):
+            r = []
+            level = self.sourceModel().data(i, Qt.DisplayRole)
+            if o == 'Lv. 1':
+                r.append(int(level) == 1)
+            elif o == "> Lv. 1":
+                r.append(int(level) > 1)
+            elif o == "\u2265 Lv. 90":
+                r.append(int(level) >= 90)
+            elif o == "\u2265 Lv. 100":
+                r.append(int(level) >= 100)
+            elif o == "= Lv. 110":
+                r.append(int(level) == 110)
             else:
-                level = self.sourceModel().data(idx, Qt.DisplayRole)
-                if opt == 'Lv. 1':
-                    res.append(int(level) == 1)
-                elif opt == "> Lv. 1":
-                    res.append(int(level) > 1)
-                elif opt == "\u2265 Lv. 90":
-                    res.append(int(level) >= 90)
-                elif opt == "\u2265 Lv. 100":
-                    res.append(int(level) >= 100)
-                elif opt == "= Lv. 110":
-                    res.append(int(level) == 110)
-                else:
-                    pass
-        return res
+                r.append(True)
+            return r
+        return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def modFilterAcceptsRow(self, source_row, source_parent, opt, col):
-        res = []
-        if opt == None or opt == 'ALL':
-            res.append(source_row if source_row != 0 else True)
-        else:
-            idx = self.sourceModel().index(source_row, col, source_parent)
-            if idx.isValid() == False:
-                pass
+        def f(o, i):
+            r = []
+            mod = self.sourceModel().data(i, Qt.UserRole)
+            if o == "Non-mod.":
+                r.append(mod[:3] == "100")
+            elif o == "Mod. I":
+                r.append(mod[:3] == "110")
             else:
-                mod = self.sourceModel().data(idx, Qt.UserRole)
-                if opt == "Non-mod.":
-                    res.append(mod[:3] == "100")
-                elif opt == "Mod. I":
-                    res.append(mod[:3] == "110")
-                else:
-                    pass
-        return res
-
+                r.append(True)
+            return r
+        return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def filterAcceptsRow(self, source_row, source_parent):
         '''
