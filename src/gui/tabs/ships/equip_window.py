@@ -27,6 +27,7 @@ class EquipPopup(QMainWindow):
         self.cid = int(cid)
         self.button_enable = button_enable
 
+        # TODO hardcoding
         self.width = 600
         self.height = 600
         self.id_list = []

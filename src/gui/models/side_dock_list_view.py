@@ -57,7 +57,7 @@ class BathListView(AlignListView):
         super().__init__()
 
     def on_click(self, index):
-        print('bbbbbbbbbbbbbbaaaaaaaaaaa')
+        pass
         # boat/repair/{ship cid}/{slot}
         # boat/rubdown/{ship cid}
         # TODO: instant repair
@@ -68,7 +68,7 @@ class BuildListView(AlignListView):
         super().__init__()
 
     def on_click(self, index):
-        print('bbbbbbbbbbbbbb')
+        pass
         # dock/buildBoat/{slot}/{fuel}/{ammo}/{steel}/{baux}
         # dock/getBoat/{slot}
         # TODO: build 10 boats
@@ -82,7 +82,7 @@ class DevListView(AlignListView):
         super().__init__()
 
     def on_click(self, index):
-        print('dddddddddddd')
+        pass
         # dock/buildEquipment/{slot}/{fuel}/{ammo}/{steel}/{baux}
         # dock/dismantleEquipment       # I'm suprised, how do we know which to dismantle?
         # dock/getEquipment/2/
@@ -95,7 +95,7 @@ class ExpListView(AlignListView):
         super().__init__()
 
     def on_click(self, index):
-        print('eeeeeeeeeeee')
+        pass
         # explore/getResult/{exp_map}
         # explore/Start/{fleet}/{exp_map}
         # TODO: cancel exp
@@ -107,7 +107,7 @@ class TaskListView(AlignListView):
         super().__init__()
 
     def on_click(self, index):
-        print('tttttttttttt')
+        pass
         # task/getAward/{task_cid}
 
 
