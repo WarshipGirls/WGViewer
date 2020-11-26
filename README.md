@@ -1,6 +1,6 @@
 # Warship Girls Viewer
 
-This project is inspired by [Kancolle Viewer](https://github.com/poooi/poi) and [one of Warship Girls auto scripts](https://github.com/ProtectorMoe). The goal of this non-profitable open-source project is to create a cross-platform (Windows/Mac/Unix) game viewer and automation tool.
+This project, WGViewer, is inspired by [Kancolle Viewer](https://github.com/poooi/poi) and [one of Warship Girls auto scripts](https://github.com/ProtectorMoe). The goal of the project is to create a cross-platform (Windows/Mac/Unix) game viewer and automation tool.
 
 The official sites of the mobile game, Warship Girls (R), are [here (CN server)](http://www.jianniang.com/), [here (JP server)](http://ssr.moefantasy.co.jp/) and [here (International server)](http://www.warshipgirls.com/en/).
 
@@ -16,10 +16,7 @@ Please see [at this directory](screenshots). Updating as work progresses.
 	- Windows 10
 	- Ubuntu 20.04
 
-Nice tools to have:
-
-- [Fiddler 4](https://www.telerik.com/fiddler)
-- [Python debugger](https://docs.python.org/3/library/pdb.html)
+Nice tools to have: [Fiddler 4](https://www.telerik.com/fiddler), [Python debugger](https://docs.python.org/3/library/pdb.html).
 
 ### Contribution
 
@@ -42,8 +39,14 @@ To build executable on Unix OS, run
 
 > pyinstaller --clean gui_main.spec
 
+## Disclaimer
+
+Warship Girls Viewer (as "WGViewer") is not a representative and is not associated with Warship Girls (as "the game"), Warship Girls R (as "the game"), or [Moefantasy 幻萌网络](https://www.moefantasy.com/). The copyright of the shipgirl art resources used in the WGViewer belong to Moefantasy.
+
+WGViewer is intended for educational purposes only. Botting is in violation of the User Agreement of the game; prolonged usage of WGViewer may result in your game account being banned. The developer of WGViewer takes no responsibility for repercussions related to the usage of WGViewer.
+
+Although unlikely, users may sink ships and lose equipment when using WGViewer to conduct combat sorties. While WGViewer has been painstakingly designed to reduce chances of such occurence, the developer of WGViewer does not take responsibility for any loss of ships and/or resources.
+
 ## Licenses
 
-The copyright of the shipgirl art resources used in this project belongs to [MoeFantasy 幻萌网络](https://www.moefantasy.com/).
-
-The code is licensed under [The MIT License](https://github.com/WarshipGirls/WGViewer/blob/master/LICENSE.txt).
+The code is licensed under [The MIT License](https://github.com/WarshipGirls/WGViewer/blob/master/LICENSE)
