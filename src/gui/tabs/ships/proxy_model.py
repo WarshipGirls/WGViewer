@@ -13,15 +13,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.name_reg = None
         self.lock_opt = None
         self.level_opt = None
-        # self.lock_opt = 'ALL'
-        '''
-        no, no, int, no, float
-        range, int, res, int, int
-        int, int, int, int, int
-        int, int, res, res, res
-        slot, no, no, no, no
-        no, no, no
-        '''
+
         self.no_sort_cols = [0, 1, 3, 21, 22, 23, 24, 25, 26, 27]
         self.int_sort_cols = [2, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
         self.float_sort_cols = [4]
