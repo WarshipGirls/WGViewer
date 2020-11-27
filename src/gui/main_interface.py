@@ -5,8 +5,7 @@ import qdarkstyle
 
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QThreadPool, QTimer, QSettings
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
-from PyQt5.QtWidgets import QDesktopWidget, QMessageBox
-from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QDesktopWidget
 
 # GUI
 from .side_dock import SideDock
@@ -14,9 +13,9 @@ from .main_interface_tabs import MainInterfaceTabs
 
 # Functions
 # from ..func.worker_thread import Worker
+from .main_interface_menubar import MainInterfaceMenuBar
 from ..data import data as wgr_data
 from ..func.wgr_api import WGR_API
-from ..func.helper_function import Helper
 
 
 class MainInterface(QMainWindow):
@@ -30,18 +29,15 @@ class MainInterface(QMainWindow):
         self.channel = channel
         self.cookies = cookies
         self.realrun = realrun
-
-        self.qsettings = QSettings(wgr_data.get_settings_file(), QSettings.IniFormat)
-        self.threadpool = QThreadPool()
-        self.hlp = Helper()
-        self.api = WGR_API(self.server, self.channel, self.cookies)
-        self.bar = self.menuBar()
-
         self.side_dock_on = False
+
+        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
+        self.threadpool = QThreadPool()
+        self.api = WGR_API(self.server, self.channel, self.cookies)
+        self.setMenuBar(MainInterfaceMenuBar(self))
 
         self.init_data_files()
         self.init_ui()
-        self.init_menu()
 
         if self.qsettings.contains("UI/init_side_dock"):
             if self.qsettings.value("UI/init_side_dock") == "true":
@@ -52,7 +48,7 @@ class MainInterface(QMainWindow):
             self.qsettings.setValue("UI/init_side_dock", False)
             self.init_side_dock()
 
-        # # Multi-Threading
+        # # Multi-Threading TODO?
         logging.info("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
         print(self.threadpool.activeThreadCount())
 
@@ -74,9 +70,11 @@ class MainInterface(QMainWindow):
     # Initialization
     # ================================
 
+    def set_color_scheme(self):
+        self.setStyleSheet(wgr_data.get_color_scheme())
 
     def init_ui(self):
-        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        self.set_color_scheme()
         user_w = QDesktopWidget().screenGeometry(-1).width()
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.resize(0.67*user_w, 0.67*user_h)
@@ -105,28 +103,6 @@ class MainInterface(QMainWindow):
         else:
             pass
 
-    def init_menu(self):
-        file_menu = self.bar.addMenu("File")
-        cache_open_action = QAction("Open Cache Folder", self)
-        cache_open_action.triggered.connect(self.open_cache_folder)
-        file_menu.addAction(cache_open_action)
-
-        # cache_clear_action = QAction("Clear Cache Folder", self)
-        # cache_clear_action.triggered.connect(self.clear_cache_folder)
-        # file_menu.addAction(cache_clear_action)
-
-        view_menu = self.bar.addMenu("View")
-        sidedock_action = QAction("&Open Navy Base Overview", self)
-        sidedock_action.setShortcut("Ctrl+O")
-        # sidedock_action.setStatusTip("...")
-        sidedock_action.triggered.connect(self.init_side_dock)
-        view_menu.addAction(sidedock_action)
-
-        help_menu = self.bar.addMenu("Help")
-        about_action = QAction("&About Warship Girls Viewer", self)
-        about_action.triggered.connect(self.open_author_info)
-        help_menu.addAction(about_action)
-
 
     # ================================
     # Events
@@ -136,22 +112,6 @@ class MainInterface(QMainWindow):
     @pyqtSlot()
     def on_dock_closed(self):
         self.side_dock_on = False
-
-    def open_cache_folder(self):
-        path = wgr_data._get_data_dir()
-        os.startfile(path)
-
-    # def clear_cache_folder(self):
-    #     wgr_data._clear_cache()
-
-    def open_author_info(self):
-        def get_hyperlink(link, text):
-            return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
-
-        msg_str = '<h1>Warship Girls Viewer</h1>'
-        msg_str += "\n"
-        msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
-        QMessageBox.about(self, "About", msg_str)
 
 
     # ================================

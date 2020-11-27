@@ -1,4 +1,3 @@
-import qdarkstyle
 import sys
 import os
 
@@ -41,7 +40,7 @@ class EquipPopup(QMainWindow):
             self.button.setEnabled(False)
 
     def init_ui(self):
-        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        self.setStyleSheet(wgr_data.get_color_scheme())
         self.setWindowTitle('WGViewer - Equipment Selection')
         self.resize(self.width, self.height)
 
@@ -118,3 +117,6 @@ class EquipPopup(QMainWindow):
 
     def unequip(self):
         self.parent.handle_event(self._row, self._col, -1)
+
+
+# End of File

@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import logging
 import os
 import pytz
-import qdarkstyle
 import re
 import sys
 import time
@@ -29,6 +28,7 @@ def get_data_path(relative_path):
 
 
 class SideDock(QDockWidget):
+    # TODO TODO code simplification, OOP
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
@@ -57,7 +57,7 @@ class SideDock(QDockWidget):
 
     def init_attr(self):
         self.user_screen_h = QDesktopWidget().screenGeometry(-1).height()
-        self.qsettings = QSettings(wgr_data.get_settings_file(), QSettings.IniFormat)
+        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
 
         # index 0 for daily, 1 for weekly, 2+ for tasks/events
         self.task_counter_desc_labels = []
@@ -467,7 +467,6 @@ class SideDock(QDockWidget):
     # Events
     # ================================
 
-
     def resizeEvent(self, event):
         # overriding resizeEvent() method
         self.sig_resized.emit()
@@ -476,7 +475,8 @@ class SideDock(QDockWidget):
     def closeEvent(self, event):
         cb = QCheckBox('Do not show on start-up.')
         box = QMessageBox(QMessageBox.Question, "INFO", "Do you want to close side dock?\n(Can re-open in View menu)", QMessageBox.Yes | QMessageBox.No, self)
-        box.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+
+        box.setStyleSheet(wgr_data.get_color_scheme())
         box.setDefaultButton(QMessageBox.No)
         box.setCheckBox(cb)
 
