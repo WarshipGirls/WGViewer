@@ -7,6 +7,7 @@ from PyQt5.QtCore import QTimer, pyqtSlot
 
 from .tabs.advance_functions import TabAdvanceFunctions
 from .tabs.tab_ship import TabShips
+from .tabs.tab_expedition import TabExpedition
 
 
 def get_data_path(relative_path):
@@ -26,10 +27,11 @@ class MainInterfaceTabs(QWidget):
         self.setLayout(self.layout)
 
         self.tab_ships = TabShips(self.api, self.realrun)
-        label2 = QLabel("test")
+        self.tab_exp = TabExpedition()
+
         tabwidget = QTabWidget()
-        tabwidget.addTab(self.tab_ships, "  Ship  ")
-        tabwidget.addTab(label2, "  Tab2  ")
+        tabwidget.addTab(self.tab_exp, "  Expedition  ")
+        tabwidget.addTab(self.tab_ships, "  Dock  ")
         self.layout.addWidget(tabwidget, 0, 0)
 
         if self.realrun == False:
