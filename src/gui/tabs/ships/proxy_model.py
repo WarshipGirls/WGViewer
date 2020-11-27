@@ -81,7 +81,10 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.invalidateFilter()
 
     def setCheckBoxFilter(self, x):
-        self.checkboxes_opt[x.text()] = x.isChecked()
+        if x == None:
+            self.checkboxes_opt = {}
+        else:
+            self.checkboxes_opt[x.text()] = x.isChecked()
         self.invalidateFilter()
 
     def _customFilterAcceptsRow(self, source_row, source_parent, opt, col, func):
