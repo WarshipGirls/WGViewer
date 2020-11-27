@@ -1,5 +1,4 @@
 import ctypes
-import logging
 import os
 import sys
 
@@ -7,7 +6,6 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon, QFontDatabase
 
 from src.gui.login import LoginForm
-from src.gui.main_interface import MainInterface
 
 
 def get_data_path(relative_path):
@@ -45,6 +43,8 @@ if __name__ == '__main__':
         login_form.raise_()
     else:   # test
         # NOTE!! In test run, api call to server won't work
+        import logging
+        from src.gui.main_interface import MainInterface
         logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logging.info("Warship Girls Viewer started...")
         mi = MainInterface("0", "0", "0", False)
