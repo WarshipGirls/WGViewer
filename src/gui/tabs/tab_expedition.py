@@ -118,9 +118,9 @@ class ExpTable(QWidget):
                 count += 1
             else:
                 pass
+            res += tmp[tmp_sorted[l]]
             l += 1
             r += 1
-            res += tmp[tmp_sorted[l]]
             if count != n:
                 pass
             else:
