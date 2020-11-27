@@ -390,5 +390,11 @@ def init_ships_temp():
 
     return data
 
+def get_big_success_rate():
+    path = os.path.join(get_user_dir(), 'userVo.json')
+    with open(path, encoding='utf-8') as f:
+        t = json.load(f)
+    res = int(t['detailInfo']['exploreBigSuccessNum']) / int(t['detailInfo']['exploreNum'])
+    return round(res, 4)
 
 # End of File

@@ -81,7 +81,6 @@ class SideDock(QDockWidget):
     def init_ui(self):
         self.setFloating(False)
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        # TODO: after selecting a row/cell, cannot be de-selected (highlight looks ugly)
         self.setMinimumWidth(0.4 * self.user_screen_h)
         self.setWindowTitle("Navy Base Overview")
 

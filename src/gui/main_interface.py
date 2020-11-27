@@ -139,5 +139,8 @@ class MainInterface(QMainWindow):
         with open(os.path.join(user_dir, 'tactics.json'), 'w') as f:
             json.dump(data['tactics'], f, ensure_ascii=False, indent=4)
 
+        with open(os.path.join(user_dir, 'userVo.json'), 'w') as f:
+            json.dump(data['userVo'], f, ensure_ascii=False, indent=4)
+
 
 # End of File
