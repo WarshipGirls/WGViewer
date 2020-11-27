@@ -1,5 +1,6 @@
 import os
 
+from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from ..data import data as wgr_data
@@ -15,28 +16,24 @@ class MainInterfaceMenuBar(QMenuBar):
         self.init_preferences_menu()
         self.init_help_menu()
 
+    def create_action(self, text, handler, shortcut=None):
+        q = QAction(text, self)
+        q.triggered.connect(handler)
+        if shortcut != None:
+            q.setShortcut(shortcut)
+        else:
+            pass
+        return q
+
     def init_file_menu(self):
         menu = self.addMenu("File")
-        cache_open_action = QAction("Open Cache Folder", self)
-        cache_open_action.triggered.connect(self.open_cache_folder)
-        menu.addAction(cache_open_action)
-
-        # cache_clear_action = QAction("Clear Cache Folder", self)
-        # cache_clear_action.triggered.connect(self.clear_cache_folder)
-        # menu.addAction(cache_clear_action)
-
+        menu.addAction(self.create_action("Open Cache Folder", self.open_cache_folder))
         menu.addSeparator()
-
-        menu.addAction("Quit")
-        # https://stackoverflow.com/q/38283705/14561914
+        menu.addAction(self.create_action("Quit", self.quit_application))
 
     def init_view_menu(self):
         menu = self.addMenu("View")
-        sidedock_action = QAction("&Open Navy Base Overview", self)
-        sidedock_action.setShortcut("Ctrl+O")
-        # sidedock_action.setStatusTip("...")
-        sidedock_action.triggered.connect(self.parent.init_side_dock)
-        menu.addAction(sidedock_action)
+        menu.addAction(self.create_action("&Open Navy Base Overview", self.parent.init_side_dock, "Ctrl+O"))
 
     def init_preferences_menu(self):
         menu = self.addMenu("Preferences")
@@ -47,15 +44,17 @@ class MainInterfaceMenuBar(QMenuBar):
 
     def init_help_menu(self):
         menu = self.addMenu("Help")
-        about_action = QAction("&About Warship Girls Viewer", self)
-        about_action.triggered.connect(self.open_author_info)
-        menu.addAction(about_action)
+        menu.addAction(self.create_action("&About Warship Girls Viewer", self.open_author_info))
 
 
     # ================================
     # QActions
     # ================================
 
+
+    def quit_application(self):
+        # TODO: in the future, inform user and/or save unfinished tasks
+        QCoreApplication.exit()
 
     def open_cache_folder(self):
         path = wgr_data._get_data_dir()
