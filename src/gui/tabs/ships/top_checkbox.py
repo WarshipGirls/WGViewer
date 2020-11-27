@@ -1,6 +1,7 @@
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QCheckBox
 from PyQt5.QtWidgets import QHBoxLayout, QGridLayout
-from PyQt5.QtCore import pyqtSignal
 
 from . import constant as SCONST
 
@@ -51,12 +52,14 @@ class TopCheckboxes(QWidget):
         lc = QComboBox()
         lc.addItems(choices)
         lc.currentIndexChanged.connect(handler)
+        lc.setFont(QFont('Consolas'))
         self._add_dropdown(label, lc, x, y, y_span)
 
     def add_dropdown_on_text(self, label, choices, handler, x, y, y_span=1):
         lc = QComboBox()
         lc.addItems(choices)
         lc.currentTextChanged.connect(handler)
+        lc.setFont(QFont('Consolas'))
         self._add_dropdown(label, lc, x, y, y_span)
 
     def value_handler(self, text):
