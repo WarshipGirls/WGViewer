@@ -20,6 +20,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.marry_opt = None
         self.country_opt = None
 
+        self.checkboxes_opt={}
         # LESSON: Unlike C++, Python have no reference to a variable, so following will create self.all_opts points to [None, ...]
         #    which will remain unchanged and will fail filtering
         # self.all_opts = [self.name_reg, ...]
@@ -79,6 +80,10 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.country_opt = country
         self.invalidateFilter()
 
+    def setCheckBoxFilter(self, x):
+        self.checkboxes_opt[x.text()] = x.isChecked()
+        self.invalidateFilter()
+
     def _customFilterAcceptsRow(self, source_row, source_parent, opt, col, func):
         res = []
         if opt == None:
@@ -89,6 +94,22 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                 pass
             else:
                 res = func(opt, idx)
+        return res
+
+    def checkboxFilterAcceptsRow(self, source_row, source_parent, opt, col):
+        res = []
+        if any(opt) == False:
+            res.append(source_row if source_row != 0 else True)
+        else:
+            idx = self.sourceModel().index(source_row, col, source_parent)
+            if idx.isValid() == False:
+                pass
+            else:
+                ship_class = self.sourceModel().data(idx, Qt.DisplayRole)
+                if ship_class not in opt:
+                    res.append(False)
+                else:
+                    res.append(opt[ship_class] == True)
         return res
 
     def nameFilterAcceptsRow(self, source_row, source_parent, opt, col):
@@ -209,8 +230,17 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
 
     def filterAcceptsRow(self, source_row, source_parent):
-        if False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt, self.marry_opt, self.country_opt]):
+
+        cond1 = False == any(self.checkboxes_opt)
+        cond2 = False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt, self.marry_opt, self.country_opt])
+        if cond1 and cond2:
             return True
+        else:
+            pass
+
+        checkbox_res = self.checkboxFilterAcceptsRow(source_row, source_parent, self.checkboxes_opt, 3)
+        if all(checkbox_res) == False:
+            return False
         else:
             pass
 

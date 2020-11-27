@@ -75,24 +75,15 @@ class TopCheckboxes(QWidget):
         for k, v in enumerate(first_row_types):
             b = QCheckBox(v, self)
             self.first_boxes.append(b)
-            # self.layout.addWidget(b, 1, k, 1, 1)
             self.layout.addWidget(b, 1, k)
             # https://stackoverflow.com/a/35821092
-            self.first_boxes[k].stateChanged.connect(lambda _, b=self.first_boxes[k]: self.checkbox_handler(b))
+            self.first_boxes[k].stateChanged.connect(lambda _, b=self.first_boxes[k]: self.proxy.setCheckBoxFilter(b))
         self.second_boxes = []
         for k, v in enumerate(second_row_types):
             b = QCheckBox(v, self)
             self.second_boxes.append(b)
-            # self.layout.addWidget(b, 2, k, 1, 1)
             self.layout.addWidget(b, 2, k)
-            self.second_boxes[k].stateChanged.connect(lambda _, b=self.second_boxes[k]: self.checkbox_handler(b))
-
-    def checkbox_handler(self, cb):
-        # TODO TODO
-        if cb.isChecked():
-            print("checked " + cb.text())
-        else:
-            print("unchecked " + cb.text())
+            self.second_boxes[k].stateChanged.connect(lambda _, b=self.second_boxes[k]: self.proxy.setCheckBoxFilter(b))
 
 
 # End of File
