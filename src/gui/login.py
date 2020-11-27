@@ -23,7 +23,7 @@ class LoginForm(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QGridLayout()
-        self.qsettings = Qqsettings(wgr_data.get_qsettings_file(), Qqsettings.IniFormat)
+        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.encryptor = Encryptor()
         self.key_filename = '.wgr.key'
 
