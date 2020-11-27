@@ -195,7 +195,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
             country = self.ship_id_to_country(int(cid))
-            if o == 0:
+            if o in [0, 9, 10]:
                 res.append(True)
             else:
                 res.append(o == country)
