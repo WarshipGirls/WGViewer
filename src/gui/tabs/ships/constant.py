@@ -9,10 +9,10 @@ type_size_select = ["ALL", "SMALL", "MEDIUM", "LARGE", "FLAGSHIP", "ESCORT", "SU
 # Some countries have different navy name in different times; for simplicity, only keep the last one
 # The index of country name matches json data, so DO NOT CHANGE the order
 country_select = ["ALL", "JP | 大日本帝国海軍","DE | Bundesmarine","GB | Royal Navy","US | United States Navy",
-"IT | Regia Marina","FR | Marine nationale française","RU | ВМФ СССР","CN | 中国人民解放军海军",
+"IT | Regia Marina","FR | Marine nationale","RU | ВМФ СССР","CN | 中国人民解放军海军",
 "","","TR | Türk Deniz Kuvvetleri","NL | Koninklijke Marine","SE | Svenska marinen","TH | กองทัพเรือ",
 "AU | Royal Australian Navy","CA | Royal Canadian Navy","MN | Монгол улсын цэргийн",
-"IS | Landhelgisgæsla Íslands","CL | Armada de Chile","FI | Merivoimat","PL | Okręt Rzeczypospolitej Polskiej",
+"IS | Landhelgisgæsla Íslands","CL | Armada de Chile","FI | Merivoimat","PL | Marynarka Wojenna",
 "AH | K.u.K. Kriegsmarine","GR | Πολεμικό Ναυτικό","ES | Armada Española"]
 flagships = ['BB', 'BBV', 'BC', 'BBG', 'CB', 'CV', 'AV', 'ASDG']
 escorts = ['CVL', 'CA', 'CL', 'CLT', 'CAV', 'BM', 'DD', 'AADG', 'AP']
