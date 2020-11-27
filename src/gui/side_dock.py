@@ -29,6 +29,7 @@ def get_data_path(relative_path):
 
 
 class SideDock(QDockWidget):
+    # TODO TODO code simplification, OOP
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
