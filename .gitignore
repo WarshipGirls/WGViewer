@@ -118,3 +118,4 @@ env/
 *.csv
 *.jpg
 *.png
+*.csv~

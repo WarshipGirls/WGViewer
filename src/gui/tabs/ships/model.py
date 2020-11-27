@@ -4,7 +4,7 @@ import re
 import sys
 import traceback
 
-from PyQt5.QtCore import Qt, QVariant, pyqtSlot, QModelIndex
+from PyQt5.QtCore import Qt, QVariant, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
 from . import constant as SCONST
@@ -158,7 +158,7 @@ class ShipModel(QStandardItemModel):
 
     def update_stats(self, *args):
         for row in range(self.rowCount()):
-            _id_idx = self.index(row, 2, QModelIndex())
+            _id_idx = self.index(row, 2)
             _id = int(self.data(_id_idx, Qt.DisplayRole))
             _ship = next(i for i in self.ships_raw_data if i['id'] == _id)
 
