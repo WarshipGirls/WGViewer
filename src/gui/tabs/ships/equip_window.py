@@ -1,8 +1,6 @@
-import qdarkstyle
 import sys
 import os
 
-from PyQt5.QtCore import QSettings
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QWidget, QPushButton, QMainWindow
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
@@ -42,12 +40,7 @@ class EquipPopup(QMainWindow):
             self.button.setEnabled(False)
 
     def init_ui(self):
-        s = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat).value("style")
-        if s == "native":
-            self.setStyleSheet("")
-        else:
-            self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
-
+        self.setStyleSheet(wgr_data.get_color_scheme())
         self.setWindowTitle('WGViewer - Equipment Selection')
         self.resize(self.width, self.height)
 

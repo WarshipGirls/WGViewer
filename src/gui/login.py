@@ -27,12 +27,7 @@ class LoginForm(QWidget):
         self.encryptor = Encryptor()
         self.key_filename = '.wgr.key'
 
-        s = self.qsettings.value("style") if self.qsettings.contains("style") else "qdarkstyle"
-        if s == "native":
-            self.style_sheet = ""
-        else:
-            self.style_sheet = qdarkstyle.load_stylesheet(qt_api='pyqt5')
-            self.qsettings.setValue("style", "qdarkstyle")
+        self.style_sheet = wgr_data.get_color_scheme()
 
         if self.qsettings.value("Login/checked") == 'true':
             self.qsettings.beginGroup('Login')

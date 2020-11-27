@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import logging
 import os
 import pytz
-import qdarkstyle
 import re
 import sys
 import time
@@ -477,13 +476,7 @@ class SideDock(QDockWidget):
         cb = QCheckBox('Do not show on start-up.')
         box = QMessageBox(QMessageBox.Question, "INFO", "Do you want to close side dock?\n(Can re-open in View menu)", QMessageBox.Yes | QMessageBox.No, self)
 
-        s = self.qsettings.value("style")
-        if s == "native":
-            box.setStyleSheet("")
-        else:
-            box.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
-
-        box.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        box.setStyleSheet(wgr_data.get_color_scheme())
         box.setDefaultButton(QMessageBox.No)
         box.setCheckBox(cb)
 

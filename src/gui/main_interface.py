@@ -71,13 +71,7 @@ class MainInterface(QMainWindow):
     # ================================
 
     def set_color_scheme(self):
-        # style should be set at Login Form, following one-liner is kept while by-passing Login
-        s = self.qsettings.value("style") if self.qsettings.contains("style") else "qdarkstyle"
-        if s == "native":
-            self.setStyleSheet("")
-        else:
-            self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
-            self.qsettings.setValue("style", "qdarkstyle")
+        self.setStyleSheet(wgr_data.get_color_scheme())
 
     def init_ui(self):
         self.set_color_scheme()
