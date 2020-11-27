@@ -4,9 +4,12 @@ import json
 import logging
 import os
 import platform
+import qdarkstyle
 import requests
 import shutil
 import urllib
+
+from PyQt5.QtCore import QSettings
 
 from pathlib import Path
 from time import sleep
@@ -82,6 +85,15 @@ def find_all_indices(lst, key, value):
         if dic[key] == value:
             res.append(i)
     return res
+
+def get_color_scheme():
+    qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
+    s = qsettings.value("style") if qsettings.contains("style") else "qdarkstyle"
+    if s == "native":
+        return ""
+    else:
+        qsettings.setValue("style", "qdarkstyle")
+        return qdarkstyle.load_stylesheet(qt_api='pyqt5')
 
 
 # ================================
