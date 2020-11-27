@@ -394,7 +394,9 @@ def get_big_success_rate():
     path = os.path.join(get_user_dir(), 'userVo.json')
     with open(path, encoding='utf-8') as f:
         t = json.load(f)
-    res = int(t['detailInfo']['exploreBigSuccessNum']) / int(t['detailInfo']['exploreNum'])
-    return round(res, 4)
+    n = t['detailInfo']['exploreBigSuccessNum']
+    d = t['detailInfo']['exploreNum']
+    res = round(int(n)/int(d), 4)
+    return [res, n, d]
 
 # End of File
