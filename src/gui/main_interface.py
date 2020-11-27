@@ -3,7 +3,7 @@ import logging
 import os
 import qdarkstyle
 
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QThreadPool, QTimer
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QThreadPool, QTimer, QSettings
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
 from PyQt5.QtWidgets import QDesktopWidget, QMessageBox
 from PyQt5.QtWidgets import QAction
@@ -31,6 +31,7 @@ class MainInterface(QMainWindow):
         self.cookies = cookies
         self.realrun = realrun
 
+        self.qsettings = QSettings(wgr_data.get_settings_file(), QSettings.IniFormat)
         self.threadpool = QThreadPool()
         self.hlp = Helper()
         self.api = WGR_API(self.server, self.channel, self.cookies)
@@ -41,7 +42,15 @@ class MainInterface(QMainWindow):
         self.init_data_files()
         self.init_ui()
         self.init_menu()
-        self.init_side_dock()
+
+        if self.qsettings.contains("UI/init_side_dock"):
+            if self.qsettings.value("UI/init_side_dock") == "true":
+                pass
+            else:
+                self.init_side_dock()
+        else:
+            self.qsettings.setValue("UI/init_side_dock", False)
+            self.init_side_dock()
 
         # # Multi-Threading
         logging.info("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
@@ -81,7 +90,6 @@ class MainInterface(QMainWindow):
         self.setWindowTitle('Warship Girls Viewer')
 
     def init_side_dock(self):
-        # TODO: add status to QSetting
         if self.side_dock_on == False:
             self.side_dock = SideDock(self, self.realrun)
             self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
@@ -140,16 +148,10 @@ class MainInterface(QMainWindow):
         def get_hyperlink(link, text):
             return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
 
-        msg = QMessageBox()
-        msg.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
-        msg.setWindowTitle("About")
-        msg.setTextFormat(Qt.RichText)
-
         msg_str = '<h1>Warship Girls Viewer</h1>'
         msg_str += "\n"
         msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
-        msg.setText(msg_str)
-        msg.exec_()
+        QMessageBox.about(self, "About", msg_str)
 
 
     # ================================

@@ -1,20 +1,24 @@
 from datetime import datetime, timedelta
-import logging
-import sys
-import os
-import re
-import pytz, time
 
+import logging
+import os
+import pytz
+import qdarkstyle
+import re
+import sys
+import time
+
+from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QRect, QSize, QTimer, QSettings
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QTableView, QAbstractItemView
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
-from PyQt5.QtWidgets import QDockWidget, QWidget, QLabel, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QDockWidget, QWidget, QLabel, QLineEdit, QMessageBox, QCheckBox
 from PyQt5.QtWidgets import QDesktopWidget
-from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QRect, QSize, QTimer
-from PyQt5.QtGui import QIcon
 
 from .models.resource_model import ResourceTableModel
 from .models.side_dock_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 from ..func import constants as CONST
+from ..data import data as wgr_data
 
 
 def get_data_path(relative_path):
@@ -30,7 +34,6 @@ class SideDock(QDockWidget):
 
     def __init__(self, parent, realrun):
         super(SideDock, self).__init__(parent)
-        self.user_screen_h = QDesktopWidget().screenGeometry(-1).height()
         self.init_attr()
 
         self.sig_resized.connect(self.update_geometry)
@@ -53,6 +56,9 @@ class SideDock(QDockWidget):
         self.on_received_tasks(d)
 
     def init_attr(self):
+        self.user_screen_h = QDesktopWidget().screenGeometry(-1).height()
+        self.qsettings = QSettings(wgr_data.get_settings_file(), QSettings.IniFormat)
+
         # index 0 for daily, 1 for weekly, 2+ for tasks/events
         self.task_counter_desc_labels = []
         self.task_counter_labels = []
@@ -468,13 +474,19 @@ class SideDock(QDockWidget):
         return super(SideDock, self).resizeEvent(event)
 
     def closeEvent(self, event):
-        reply = QMessageBox.question(self, 'Message',
-            "Do you want to close side dock?\n(Can re-open in view menu)", QMessageBox.Yes, QMessageBox.No)
-        if reply == QMessageBox.Yes:
+        cb = QCheckBox('Do not show on start-up.')
+        box = QMessageBox(QMessageBox.Question, "INFO", "Do you want to close side dock?\n(Can re-open in View menu)", QMessageBox.Yes | QMessageBox.No, self)
+        box.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        box.setDefaultButton(QMessageBox.No)
+        box.setCheckBox(cb)
+
+        if (box.exec() == QMessageBox.Yes):
             event.accept()
             self.sig_closed.emit()
         else:
             event.ignore()
+
+        self.qsettings.setValue("UI/init_side_dock", cb.isChecked())
 
     def update_geometry(self):
         y = 0.03 * self.user_screen_h

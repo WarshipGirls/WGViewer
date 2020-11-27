@@ -3,10 +3,10 @@ import os
 import logging
 import zipfile
 
+from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QLineEdit
 from PyQt5.QtWidgets import QVBoxLayout, QGridLayout, QScrollArea
 from PyQt5.QtWidgets import QHeaderView, QTableView
-from PyQt5.QtCore import Qt, pyqtSlot
 
 from .ships.delegate import ShipTableDelegate
 from .ships.proxy_model import ShipSortFilterProxyModel

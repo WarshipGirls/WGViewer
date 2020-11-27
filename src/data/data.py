@@ -89,7 +89,7 @@ def find_all_indices(lst, key, value):
 # ================================
 
 
-def get_settings_file():
+def get_qsettings_file():
     return os.path.join(_get_data_dir(), 'wgviewer.ini')
 
 def get_key_path(key_file):
@@ -99,7 +99,10 @@ def is_key_exists(key_file):
     return os.path.exists(os.path.join(_get_data_dir(), key_file))
 
 def _del_key_file(key_file):
-    os.remove(os.path.join(_get_data_dir(), key_file))
+    if is_key_exists(key_file):
+        os.remove(os.path.join(_get_data_dir(), key_file))
+    else:
+        pass
 
 
 # ================================
