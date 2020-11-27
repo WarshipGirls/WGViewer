@@ -1,5 +1,4 @@
 import ast
-import logging
 import re
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
@@ -69,7 +68,6 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.invalidateFilter()
 
     def setRarityFilter(self, rarity):
-        logging.info("how many times is this called?")
         self.rarity_opt = rarity
         self.invalidateFilter()
 
