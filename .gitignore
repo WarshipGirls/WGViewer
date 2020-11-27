@@ -115,3 +115,6 @@ tools/S/
 tools/equip_512/
 env/
 *.un~
+*.csv
+*.jpg
+*.png
