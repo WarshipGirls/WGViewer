@@ -50,7 +50,7 @@ repair_types = {
 
 war_eval = ['-', 'SS', 'S', 'A', 'B', 'C', 'D']
 
-# 26 CB 大型巡洋舰
+# 26 CB 大型巡洋舰 (same as BG)
 # https://en.wikipedia.org/wiki/Hull_classification_symbol
 ship_type = {
     1: "CV",

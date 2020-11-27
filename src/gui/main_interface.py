@@ -14,7 +14,7 @@ from .main_interface_tabs import MainInterfaceTabs
 
 # Functions
 # from ..func.worker_thread import Worker
-from ..func import data as wgr_data
+from ..data import data as wgr_data
 from ..func.wgr_api import WGR_API
 from ..func.helper_function import Helper
 
@@ -81,6 +81,7 @@ class MainInterface(QMainWindow):
         self.setWindowTitle('Warship Girls Viewer')
 
     def init_side_dock(self):
+        # TODO: add status to QSetting
         if self.side_dock_on == False:
             self.side_dock = SideDock(self, self.realrun)
             self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
