@@ -16,23 +16,23 @@ from ..func.encryptor import Encryptor
 from ..func.login import GameLogin
 from ..func.session import Session
 from ..func import constants as constants
-from ..func import data as wgr_data
+from ..data import data as wgr_data
 
 
 class LoginForm(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QGridLayout()
-        self.settings = QSettings(wgr_data.get_settings_file(), QSettings.IniFormat)
+        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.encryptor = Encryptor()
         self.key_filename = '.wgr.key'
 
-        if self.settings.value("Login/checked") == 'true':
-            self.settings.beginGroup('Login')
-            name = self.settings.value('username')
-            server = self.settings.value('server_text')
-            platform = self.settings.value('platform_text')
-            self.settings.endGroup()
+        if self.qsettings.value("Login/checked") == 'true':
+            self.qsettings.beginGroup('Login')
+            name = self.qsettings.value('username')
+            server = self.qsettings.value('server_text')
+            platform = self.qsettings.value('platform_text')
+            self.qsettings.endGroup()
 
             # Don't change the order
             self.init_name_field(name)
@@ -48,7 +48,7 @@ class LoginForm(QWidget):
             self.init_checkbox()
 
         self.setLayout(self.layout)
-        self.init_ui_settings()
+        self.init_ui_qsettings()
 
 
     # ================================
@@ -56,7 +56,7 @@ class LoginForm(QWidget):
     # ================================
 
 
-    def init_ui_settings(self):
+    def init_ui_qsettings(self):
         user_w = QDesktopWidget().screenGeometry(-1).width()
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.init_login_button(user_h)
@@ -150,9 +150,9 @@ class LoginForm(QWidget):
         self.close()
 
     def _get_password(self):
-        if wgr_data.is_key_exists(self.key_filename) and self.settings.contains('Login/password'):
+        if wgr_data.is_key_exists(self.key_filename) and self.qsettings.contains('Login/password'):
             key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
-            res = self.encryptor.decrypt_data(key, self.settings.value('Login/password')).decode("utf-8")
+            res = self.encryptor.decrypt_data(key, self.qsettings.value('Login/password')).decode("utf-8")
         else:
             res = ''
         return res
@@ -165,15 +165,15 @@ class LoginForm(QWidget):
 
     def on_check_clicked(self):
         if self.checkbox.isChecked():
-            self.settings.beginGroup('Login')
-            self.settings.setValue("checked", self.checkbox.isChecked())
-            self.settings.setValue("server_text", self.combo_server.currentText())
-            self.settings.setValue("platform_text", self.combo_platform.currentText())
-            self.settings.setValue("username", self.lineEdit_username.text())
-            self.settings.setValue("password", self._get_password())
-            self.settings.endGroup()
+            self.qsettings.beginGroup('Login')
+            self.qsettings.setValue("checked", self.checkbox.isChecked())
+            self.qsettings.setValue("server_text", self.combo_server.currentText())
+            self.qsettings.setValue("platform_text", self.combo_platform.currentText())
+            self.qsettings.setValue("username", self.lineEdit_username.text())
+            self.qsettings.setValue("password", self._get_password())
+            self.qsettings.endGroup()
         else:
-            self.settings.remove("Login")
+            self.qsettings.remove("Login")
             wgr_data._del_key_file(self.key_filename)
 
     def update_server_box(self, text):
@@ -231,7 +231,7 @@ class LoginForm(QWidget):
             self.encryptor.save_key(key, wgr_data.get_key_path(self.key_filename))
         else:
             key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
-        self.settings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
+        self.qsettings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
 
         try:
             res1 = account.first_login(_username, _password)

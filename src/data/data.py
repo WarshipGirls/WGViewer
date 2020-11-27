@@ -32,8 +32,7 @@ def _get_data_dir():
         _dir = str(Path.home())
     return os.path.join(_dir, 'WarshipGirlsViewer')
 
-def _clear_cache():
-    _dir = _get_data_dir()
+def _clear_dir(_dir):
     for filename in os.listdir(_dir):
         file_path = os.path.join(_dir, filename)
         try:
@@ -60,17 +59,13 @@ def get_user_dir():
         pass
     return p
 
-def get_settings_file():
-    return os.path.join(_get_data_dir(), 'wgviewer.ini')
-
-def get_key_path(key_file):
-    return os.path.join(_get_data_dir(), key_file)
-
-def is_key_exists(key_file):
-    return os.path.exists(os.path.join(_get_data_dir(), key_file))
-
-def _del_key_file(key_file):
-    os.remove(os.path.join(_get_data_dir(), key_file))
+def get_temp_dir():
+    p = os.path.join(_get_data_dir(), 'temp')
+    if not os.path.exists(p):
+        os.makedirs(p)
+    else:
+        pass
+    return p
 
 def find_index(lst, key, value):
     '''
@@ -90,7 +85,28 @@ def find_all_indices(lst, key, value):
 
 
 # ================================
-# getInitConfigs related
+# QSettings
+# ================================
+
+
+def get_qsettings_file():
+    return os.path.join(_get_data_dir(), 'wgviewer.ini')
+
+def get_key_path(key_file):
+    return os.path.join(_get_data_dir(), key_file)
+
+def is_key_exists(key_file):
+    return os.path.exists(os.path.join(_get_data_dir(), key_file))
+
+def _del_key_file(key_file):
+    if is_key_exists(key_file):
+        os.remove(os.path.join(_get_data_dir(), key_file))
+    else:
+        pass
+
+
+# ================================
+# getInitConfigs
 # ================================
 
 
@@ -160,7 +176,7 @@ def save_init_data():
 
 
 # ================================
-# Equipment related
+# Equipment
 # shipEquipmnt.json contains the equipment you own;
 # the `num` excludes those on ship
 # ================================
@@ -311,7 +327,7 @@ def update_equipment_amount(equipped, unequipped):
 
 
 # ================================
-# Tactics related
+# Tactics
 # ================================
 
 
@@ -342,6 +358,25 @@ def _process_shipItem():
     for i in t:
         res[i['cid']] = i['title']
     return res
+
+def init_ships_temp():
+    data = {}
+    path = os.path.join(get_temp_dir(), 'ship_id_to_info.json')
+    if os.path.exists(path):
+        with open(path, encoding='utf-8') as f:
+            data = json.load(f)
+    else:
+        card_path = os.path.join(get_init_dir(), 'shipCard.json')
+        with open(card_path, encoding='utf-8') as f:
+            cards = json.load(f)
+        for c in cards:
+            data[c['cid']] = {}
+            data[c['cid']]['rarity'] = c['star']
+            data[c['cid']]['country'] = c['country']
+        with open(path, 'w', encoding='utf-8') as fout:
+            json.dump(data, fout, ensure_ascii=False, indent=4)
+
+    return data
 
 
 # End of File

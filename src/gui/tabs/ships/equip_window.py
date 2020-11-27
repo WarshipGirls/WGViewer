@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from PyQt5.QtWidgets import QVBoxLayout, QHeaderView
 
 from . import constant as SCONST
-from ....func import data as wgr_data
+from ....data import data as wgr_data
 
 
 def get_data_path(relative_path):

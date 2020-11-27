@@ -18,6 +18,7 @@ a = Analysis(['gui_main.py'],
              noarchive=False)
 
 a.datas += [
+('src/assets/fonts/Consolas.ttf','D:\\github\\WGViewer\\src\\assets\\fonts\\Consolas.ttf','DATA'),
 ('src/assets/E.zip','D:\\github\\WGViewer\\src\\assets\\E.zip','DATA'),
 ('src/assets/favicon.ico','D:\\github\\WGViewer\\src\\assets\\favicon.ico','DATA'),
 ('src/assets/S.zip','D:\\github\\WGViewer\\src\\assets\\S.zip','DATA'),
