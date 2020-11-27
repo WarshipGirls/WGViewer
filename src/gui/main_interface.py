@@ -31,7 +31,7 @@ class MainInterface(QMainWindow):
         self.cookies = cookies
         self.realrun = realrun
 
-        self.qsettings = QSettings(wgr_data.get_settings_file(), QSettings.IniFormat)
+        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.threadpool = QThreadPool()
         self.hlp = Helper()
         self.api = WGR_API(self.server, self.channel, self.cookies)

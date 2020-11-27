@@ -122,7 +122,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.combo_server, 3, 1)
 
     def init_checkbox(self, checked=False):
-        self.checkbox = QCheckBox('remember login info')
+        self.checkbox = QCheckBox('remember login info (secured by encryption)')
         self.checkbox.setChecked(checked)
         self.checkbox.stateChanged.connect(self.on_check_clicked)
         self.layout.addWidget(self.checkbox, 4, 1)

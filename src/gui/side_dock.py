@@ -57,7 +57,7 @@ class SideDock(QDockWidget):
 
     def init_attr(self):
         self.user_screen_h = QDesktopWidget().screenGeometry(-1).height()
-        self.qsettings = QSettings(wgr_data.get_settings_file(), QSettings.IniFormat)
+        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
 
         # index 0 for daily, 1 for weekly, 2+ for tasks/events
         self.task_counter_desc_labels = []
