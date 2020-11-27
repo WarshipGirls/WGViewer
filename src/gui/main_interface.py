@@ -81,6 +81,7 @@ class MainInterface(QMainWindow):
         self.setWindowTitle('Warship Girls Viewer')
 
     def init_side_dock(self):
+        # TODO: add status to QSetting
         if self.side_dock_on == False:
             self.side_dock = SideDock(self, self.realrun)
             self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)

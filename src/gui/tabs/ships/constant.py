@@ -6,12 +6,14 @@ mod_select = ["ALL", "Non-mod.", "Mod. I"]
 rarity_select = ["ALL", "\u2606 1", "\u2606 2", "\u2606 3", "\u2606 4", "\u2606 5", "\u2606 6"]
 married_select = ["ALL", "YES", "NO"]
 type_size_select = ["ALL", "SMALL", "MEDIUM", "LARGE", "FLAGSHIP", "ESCORT", "SUB"]
-country_select = ["ALL", "JP | 大日本帝国海軍","DE | Kaiserliche Marine/Kriegsmarine/Bundesmarine","GB | Royal Navy","US | United States Navy",
-"IT | Regia Marina","FR | Marine nationale française","RU | Российский императорский флот/Военно-морской флот СССР","CN | 中华民国海军/中国人民解放军海军",
+# Some countries have different navy name in different times; for simplicity, only keep the last one
+# The index of country name matches json data, so DO NOT CHANGE the order
+country_select = ["ALL", "JP | 大日本帝国海軍","DE | Bundesmarine","GB | Royal Navy","US | United States Navy",
+"IT | Regia Marina","FR | Marine nationale française","RU | ВМФ СССР","CN | 中国人民解放军海军",
 "","","TR | Türk Deniz Kuvvetleri","NL | Koninklijke Marine","SE | Svenska marinen","TH | กองทัพเรือ",
-"AU | Royal Australian Navy","CA | Royal Canadian Navy - Marine Royale Canadienne","MN | Монгол улсын цэргийн",
+"AU | Royal Australian Navy","CA | Royal Canadian Navy","MN | Монгол улсын цэргийн",
 "IS | Landhelgisgæsla Íslands","CL | Armada de Chile","FI | Merivoimat","PL | Okręt Rzeczypospolitej Polskiej",
-"AH | Kaiserliche und königliche Kriegsmarine","GR | Πολεμικό Ναυτικό","ES | Armada Española"]
+"AH | K.u.K. Kriegsmarine","GR | Πολεμικό Ναυτικό","ES | Armada Española"]
 flagships = ['BB', 'BBV', 'BC', 'BBG', 'CB', 'CV', 'AV', 'ASDG']
 escorts = ['CVL', 'CA', 'CL', 'CLT', 'CAV', 'BM', 'DD', 'AADG', 'AP']
 subs = ['SS', 'SC', 'SSV']
@@ -25,35 +27,6 @@ _header = [ "", "Name", "ID", "Class", "Speed",
 _equip_header = ['Name', 'Amount', 'Specification', 'Description']
 _range_to_int = {"XL": 4, "L": 3, "M": 2, "S": 1}
 _range_to_str = {4: "X-Long", 3: "Long", 2: "Medium", 1: "Short"}
-
-
-# {
-# 1:"JP | 大日本帝国海軍",
-# 2:"DE | Kaiserliche Marine/Kriegsmarine/Bundesmarine",
-# 3:"GB | Royal Navy",
-# 4:"US | United States Navy",
-# 5:"IT | Regia Marina",
-# 6:"FR | Marine nationale française",
-# 7:"RU | Российский императорский флот/Военно-морской флот СССР",
-# 8:"CN | 中华民国海军/中国人民解放军海军",
-# 9:"???",
-# 10:"Enemy",
-# 11:"TR | Türk Deniz Kuvvetleri",
-# 12:"NL | Koninklijke Marine",
-# 13:"SE | Svenska marinen",
-# 14:"TH | กองทัพเรือ",
-# 15:"AU | Royal Australian Navy",
-# 16:"CA | Royal Canadian Navy - Marine Royale Canadienne",
-# 17:"MN | Монгол улсын цэргийн",
-# 18:"IS | Landhelgisgæsla Íslands",
-# 19:"CL | Armada de Chile",
-# 20:"FI | Merivoimat",
-# 21:"PL | Okręt Rzeczypospolitej Polskiej",
-# 22:"AH | Kaiserliche und königliche Kriegsmarine",
-# 23:"GR | Πολεμικό Ναυτικό",
-# 24:"ES | Armada Española",
-# "0":"Enemy",
-# }
 
 _equip_spec = {
     'hp': 'HP',

@@ -14,6 +14,7 @@ class TopCheckboxes(QWidget):
         self.model = model
         self.proxy = proxy
 
+        # HARDCODING
         for i in range(10):
             self.layout.setColumnStretch(i, 1)
         self.init_dropdowns()
@@ -25,17 +26,17 @@ class TopCheckboxes(QWidget):
         self.sig_value_select.connect(self.model.on_stats_changed)
 
     def init_dropdowns(self):
-        self.add_dropdown_on_index("COUNTRY", SCONST.country_select, self.proxy.setCountryFilter, 0, 0)
-        self.add_dropdown_on_index("RARITY", SCONST.rarity_select, self.proxy.setRarityFilter, 0, 1)
-        self.add_dropdown_on_text("Type/Size", SCONST.type_size_select, self.proxy.setTypeSizeFilter, 0, 2)
-        self.add_dropdown_on_text("LEVEL", SCONST.level_select, self.proxy.setLevelFilter, 0, 3)
-        self.add_dropdown_on_text("LOCK", SCONST.lock_select, self.proxy.setLockFilter, 0, 4)
+        self.add_dropdown_on_index("COUNTRY", SCONST.country_select, self.proxy.setCountryFilter, 0, 0, 2)
+        self.add_dropdown_on_index("RARITY", SCONST.rarity_select, self.proxy.setRarityFilter, 0, 2)
+        self.add_dropdown_on_text("TYPE", SCONST.type_size_select, self.proxy.setTypeSizeFilter, 0, 3)
+        self.add_dropdown_on_text("LEVEL", SCONST.level_select, self.proxy.setLevelFilter, 0, 4)
+        self.add_dropdown_on_text("LOCK", SCONST.lock_select, self.proxy.setLockFilter, 0, 5)
         # current = 30/60, max only = 60
-        self.add_dropdown_on_text("MARRY", SCONST.married_select, self.proxy.setMarryFilter, 0, 5)
-        self.add_dropdown_on_text("MOD.", SCONST.mod_select, self.proxy.setModFilter, 0, 6)
-        self.add_dropdown_on_text("VALUE", SCONST.value_select, self.value_handler, 0, 7)
+        self.add_dropdown_on_text("MARRY", SCONST.married_select, self.proxy.setMarryFilter, 0, 6)
+        self.add_dropdown_on_text("MOD.", SCONST.mod_select, self.proxy.setModFilter, 0, 7)
+        self.add_dropdown_on_text("VALUE", SCONST.value_select, self.value_handler, 0, 8, 2)
 
-    def _add_dropdown(self, label, combobox, x, y):
+    def _add_dropdown(self, label, combobox, x, y, y_span):
         w = QWidget()
         wl = QHBoxLayout()
         w.setLayout(wl)
@@ -44,21 +45,22 @@ class TopCheckboxes(QWidget):
         wl.addWidget(combobox)
         wl.setStretch(0, 2)
         wl.setStretch(1, 8)
-        self.layout.addWidget(w, x, y)
+        self.layout.addWidget(w, x, y, 1, y_span)
 
-    def add_dropdown_on_index(self, label, choices, handler, x, y):
+    def add_dropdown_on_index(self, label, choices, handler, x, y, y_span=1):
         lc = QComboBox()
         lc.addItems(choices)
         lc.currentIndexChanged.connect(handler)
-        self._add_dropdown(label, lc, x, y)
+        self._add_dropdown(label, lc, x, y, y_span)
 
-    def add_dropdown_on_text(self, label, choices, handler, x, y):
+    def add_dropdown_on_text(self, label, choices, handler, x, y, y_span=1):
         lc = QComboBox()
         lc.addItems(choices)
         lc.currentTextChanged.connect(handler)
-        self._add_dropdown(label, lc, x, y)
+        self._add_dropdown(label, lc, x, y, y_span)
 
     def value_handler(self, text):
+        # TODO https://github.com/WarshipGirls/WGViewer/issues/21
         self.sig_value_select.emit(text)
 
     def init_ship_boxes(self):
@@ -83,7 +85,7 @@ class TopCheckboxes(QWidget):
             self.second_boxes[k].stateChanged.connect(lambda _, b=self.second_boxes[k]: self.checkbox_handler(b))
 
     def checkbox_handler(self, cb):
-        # TODO
+        # TODO TODO
         if cb.isChecked():
             print("checked " + cb.text())
         else:
