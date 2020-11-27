@@ -4,7 +4,7 @@ import os
 import qdarkstyle
 
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QThreadPool, QTimer, QSettings
-from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QMenuBar
 from PyQt5.QtWidgets import QDesktopWidget, QMessageBox
 from PyQt5.QtWidgets import QAction
 
@@ -17,6 +17,48 @@ from .main_interface_tabs import MainInterfaceTabs
 from ..data import data as wgr_data
 from ..func.wgr_api import WGR_API
 from ..func.helper_function import Helper
+
+class MainInterfaceMenuBar(QMenuBar):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+
+        file_menu = self.addMenu("File")
+        cache_open_action = QAction("Open Cache Folder", self)
+        cache_open_action.triggered.connect(self.open_cache_folder)
+        file_menu.addAction(cache_open_action)
+
+        # cache_clear_action = QAction("Clear Cache Folder", self)
+        # cache_clear_action.triggered.connect(self.clear_cache_folder)
+        # file_menu.addAction(cache_clear_action)
+
+        view_menu = self.addMenu("View")
+        sidedock_action = QAction("&Open Navy Base Overview", self)
+        sidedock_action.setShortcut("Ctrl+O")
+        # sidedock_action.setStatusTip("...")
+        sidedock_action.triggered.connect(parent.init_side_dock)
+        view_menu.addAction(sidedock_action)
+
+        help_menu = self.addMenu("Help")
+        about_action = QAction("&About Warship Girls Viewer", self)
+        about_action.triggered.connect(self.open_author_info)
+        help_menu.addAction(about_action)
+
+    def open_cache_folder(self):
+        path = wgr_data._get_data_dir()
+        os.startfile(path)
+
+    # def clear_cache_folder(self):
+    #     wgr_data._clear_cache()
+
+    def open_author_info(self):
+        def get_hyperlink(link, text):
+            return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
+
+        msg_str = '<h1>Warship Girls Viewer</h1>'
+        msg_str += "\n"
+        msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
+        QMessageBox.about(self, "About", msg_str)
 
 
 class MainInterface(QMainWindow):
@@ -35,13 +77,12 @@ class MainInterface(QMainWindow):
         self.threadpool = QThreadPool()
         self.hlp = Helper()
         self.api = WGR_API(self.server, self.channel, self.cookies)
-        self.bar = self.menuBar()
+        self.setMenuBar(MainInterfaceMenuBar(self))
 
         self.side_dock_on = False
 
         self.init_data_files()
         self.init_ui()
-        self.init_menu()
 
         if self.qsettings.contains("UI/init_side_dock"):
             if self.qsettings.value("UI/init_side_dock") == "true":
@@ -105,28 +146,6 @@ class MainInterface(QMainWindow):
         else:
             pass
 
-    def init_menu(self):
-        file_menu = self.bar.addMenu("File")
-        cache_open_action = QAction("Open Cache Folder", self)
-        cache_open_action.triggered.connect(self.open_cache_folder)
-        file_menu.addAction(cache_open_action)
-
-        # cache_clear_action = QAction("Clear Cache Folder", self)
-        # cache_clear_action.triggered.connect(self.clear_cache_folder)
-        # file_menu.addAction(cache_clear_action)
-
-        view_menu = self.bar.addMenu("View")
-        sidedock_action = QAction("&Open Navy Base Overview", self)
-        sidedock_action.setShortcut("Ctrl+O")
-        # sidedock_action.setStatusTip("...")
-        sidedock_action.triggered.connect(self.init_side_dock)
-        view_menu.addAction(sidedock_action)
-
-        help_menu = self.bar.addMenu("Help")
-        about_action = QAction("&About Warship Girls Viewer", self)
-        about_action.triggered.connect(self.open_author_info)
-        help_menu.addAction(about_action)
-
 
     # ================================
     # Events
@@ -136,22 +155,6 @@ class MainInterface(QMainWindow):
     @pyqtSlot()
     def on_dock_closed(self):
         self.side_dock_on = False
-
-    def open_cache_folder(self):
-        path = wgr_data._get_data_dir()
-        os.startfile(path)
-
-    # def clear_cache_folder(self):
-    #     wgr_data._clear_cache()
-
-    def open_author_info(self):
-        def get_hyperlink(link, text):
-            return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
-
-        msg_str = '<h1>Warship Girls Viewer</h1>'
-        msg_str += "\n"
-        msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
-        QMessageBox.about(self, "About", msg_str)
 
 
     # ================================
