@@ -69,6 +69,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.invalidateFilter()
 
     def setRarityFilter(self, rarity):
+        logging.info("how many times is this called?")
         self.rarity_opt = rarity
         self.invalidateFilter()
 
@@ -180,70 +181,26 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def rarityFilterAcceptsRow(self, source_row, source_parent, opt, col):
-        def f(o, i):
+        def f(o, i):    # o is QComboBox index
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
             rarity = self.ship_id_to_rarity(int(cid))
-            try:
-                o = int(o[-1:])
-                res.append(o == rarity)
-            except ValueError:
+            if o == 0:
                 res.append(True)
+            else:
+                res.append(o == rarity)
             return res
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def countryFilterAcceptsRow(self, source_row, source_parent, opt, col):
-        def f(o, i):
+        def f(o, i):    # o is QComboBox index
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
             country = self.ship_id_to_country(int(cid))
-            o = o[:2] if o != "" else ""
-            if o == "JP":
-                res.append(country == 1)
-            elif o == "DE":
-                res.append(country == 2)
-            elif o == "GB":
-                res.append(country == 3)
-            elif o == "US":
-                res.append(country == 4)
-            elif o == "IT":
-                res.append(country == 5)
-            elif o == "FR":
-                res.append(country == 6)
-            elif o == "RU":
-                res.append(country == 7)
-            elif o == "CN":
-                res.append(country == 8)
-            elif o == "TR":
-                res.append(country == 9)
-            elif o == "NL":
-                res.append(country == 12)
-            elif o == "SE":
-                res.append(country == 13)
-            elif o == "TH":
-                res.append(country == 14)
-            elif o == "AU":
-                res.append(country == 15)
-            elif o == "CA":
-                res.append(country == 16)
-            elif o == "MN":
-                res.append(country == 17)
-            elif o == "IS":
-                res.append(country == 18)
-            elif o == "CL":
-                res.append(country == 19)
-            elif o == "FI":
-                res.append(country == 20)
-            elif o == "PL":
-                res.append(country == 21)
-            elif o == "AH":
-                res.append(country == 22)
-            elif o == "GR":
-                res.append(country == 23)
-            elif o == "ES":
-                res.append(country == 24)
-            else:
+            if o == 0:
                 res.append(True)
+            else:
+                res.append(o == country)
             return res
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
