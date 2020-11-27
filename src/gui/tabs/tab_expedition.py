@@ -32,29 +32,6 @@ class TabExpedition(QWidget):
         main_layout.addWidget(self.table)
         self.setLayout(main_layout)
 
-        # scroll_box = QVBoxLayout(self)
-        # self.setLayout(scroll_box)
-        # scroll = QScrollArea(self)
-        # scroll_box.addWidget(scroll)
-        # scroll.setWidgetResizable(True)
-
-        # self.content_widget = QWidget(scroll)
-        # self.content_layout = QVBoxLayout(self.content_widget)
-        # self.content_layout.setContentsMargins(0,0,0,0)
-        # self.content_widget.setLayout(self.content_layout)
-        # scroll.setWidget(self.content_widget)
-
-        # self.upper_content_widget = QWidget(self.content_widget)
-        # self.lower_content_widget = QWidget(self.content_widget)
-
-        # self.content_layout.addWidget(self.upper_content_widget)
-        # self.content_layout.addWidget(self.lower_content_widget)
-        # tmp = QtWidgets.QLabel('hhhhh', self.lower_content_widget)
-        # self.content_layout.setStretch(0, 10)
-        # self.content_layout.setStretch(1, 1)
-
-        # self.exp_table_widget = MyWindow(self.upper_content_widget, csv_path)
-
 
 class ExpTable(QtWidgets.QWidget):
     def __init__(self, parent, fileName):
@@ -137,24 +114,7 @@ class ExpTable(QtWidgets.QWidget):
         with open(csv_path, "r") as f:
             for row in csv.reader(f): 
                 items = [QtGui.QStandardItem(field) for field in row]
-                t=items[0].text()
-                print(t[:1]+'-'+t[-1:])
                 self.table_model.appendRow(items)
-
-    '''
-    def writeCsv(self, fileName):
-        with open(fileName, "w") as fileOutput:
-            writer = csv.writer(fileOutput)
-            for rowNumber in range(self.table_model.rowCount()):
-                fields = [
-                    self.table_model.data(
-                        self.table_model.index(rowNumber, columnNumber),
-                        QtCore.Qt.DisplayRole
-                    )
-                    for columnNumber in range(self.table_model.columnCount())
-                ]
-                writer.writerow(fields)
-    '''
 
 
 # End of File
