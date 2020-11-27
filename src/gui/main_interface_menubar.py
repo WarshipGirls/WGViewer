@@ -1,4 +1,5 @@
 import os
+import webbrowser
 
 from PyQt5.QtCore import QCoreApplication, QSettings
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
@@ -27,24 +28,26 @@ class MainInterfaceMenuBar(QMenuBar):
         return q
 
     def init_file_menu(self):
-        menu = self.addMenu("File")
-        menu.addAction(self.create_action("Open Cache Folder", self.open_cache_folder))
+        # The ampersand in the menu item's text sets Alt+F as a shortcut for this menu.
+        menu = self.addMenu(self.tr("&File"))
+        menu.addAction(self.create_action("Open &Cache Folder", self.open_cache_folder))
         menu.addSeparator()
         menu.addAction(self.create_action("Quit", self.quit_application))
 
     def init_view_menu(self):
-        menu = self.addMenu("View")
+        menu = self.addMenu(self.tr("&View"))
         menu.addAction(self.create_action("&Open Navy Base Overview", self.parent.init_side_dock, "Ctrl+O"))
 
     def init_preferences_menu(self):
-        menu = self.addMenu("Preferences")
+        menu = self.addMenu(self.tr("&Preferences"))
         scheme = menu.addMenu("Color Scheme")
-        # TODO
         scheme.addAction(self.create_action("Dark", self.use_qdarkstyle))
         scheme.addAction(self.create_action("Native Bright", self.use_native_style))
 
     def init_help_menu(self):
-        menu = self.addMenu("Help")
+        menu = self.addMenu(self.tr("&Help"))
+        menu.addAction(self.create_action("&Report a bug", self.submit_issue))
+        menu.addSeparator()
         menu.addAction(self.create_action("&About Warship Girls Viewer", self.open_author_info))
 
 
@@ -79,6 +82,13 @@ class MainInterfaceMenuBar(QMenuBar):
     # ================================
     # Help QActions
     # ================================
+
+    def submit_issue(self):
+        reply = QMessageBox.question(self, 'Report', "Do you want to submit a bug or make an suggestion?", QMessageBox.Yes, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            webbrowser.open_new('https://github.com/WarshipGirls/WGViewer/issues/new')
+        else:
+            pass
 
     def open_author_info(self):
         def get_hyperlink(link, text):
