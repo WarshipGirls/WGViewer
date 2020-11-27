@@ -11,8 +11,8 @@ from ....data import data as wgr_data
 
 class ExpTable(QWidget):
     # Long term TODO: max coeff. by iter thru user's engineering bay stats
-    def __init__(self, parent, filename):
-        super(ExpTable, self).__init__(parent)
+    def __init__(self, filename):
+        super().__init__()
         self.filename = filename
 
         self.table_model = QStandardItemModel(self)
@@ -50,10 +50,12 @@ class ExpTable(QWidget):
 
     def init_ui(self):
         self.merge_cells()
+        self.init_header_ui()
         self.highlight_data([3,4,5,6], highlight_color=None, bold=True)
         self.highlight_data([7,8,9,10], highlight_color=QColor(128, 159, 255), bold=True)
         self.highlight_data([11,12,13,14], highlight_color=QColor(0, 153, 51), bold=True)
 
+        self.table_view.setShowGrid(False)
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.table_view.horizontalHeader().hide()
         self.table_view.verticalHeader().hide()
@@ -64,6 +66,16 @@ class ExpTable(QWidget):
             # HARDCODING
             self.table_view.setRowHeight(i, 20)
 
+    def init_header_ui(self):
+        for c in [3,7,11]:
+            item = self.table_model.itemFromIndex(self.table_model.index(0, c))
+            f = item.font()
+            f.setBold(True)
+            item.setFont(f)
+        for c in range(self.get_col_count()):
+            item = self.table_model.itemFromIndex(self.table_model.index(1, c))
+            item.setBackground(QColor(89, 89, 89))
+
     def merge_cells(self):
         self.table_view.setSpan(0,0,1,3)
         self.table_view.setSpan(0,3,1,4)
@@ -72,9 +84,9 @@ class ExpTable(QWidget):
 
     def highlight_data(self, cols, highlight_color=None, bold=False):
         idxs = []
-        maps = set()
         for col in cols:
             idxs += self.get_n_max_val_idx_by_col(col)
+        maps = set()
         for i in idxs:
             item = self.table_model.itemFromIndex(i)
             if isinstance(highlight_color, QColor):

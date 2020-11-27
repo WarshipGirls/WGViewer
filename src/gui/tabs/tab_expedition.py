@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QLabel
 from PyQt5.QtWidgets import QGridLayout
 
 from .expedition.table import ExpTable
-
+from .expedition.summary import DailySummary
 
 def get_data_path(relative_path):
     # This needs to be in current file
@@ -24,12 +24,15 @@ class TabExpedition(QWidget):
 
         csv_path = get_data_path('src/assets/data/exp_data.csv')
 
-        self.table = ExpTable(self, csv_path)
+        self.table = ExpTable(csv_path)
         main_layout.addWidget(self.table, 0, 0, self.table.get_row_count(), self.table.get_col_count())
+
 
         test = QLabel("asdf")
         main_layout.addWidget(test, 0, self.table.get_col_count(), 1, 1)
 
+        self.summary = DailySummary(10)
+        main_layout.addWidget(self.summary, self.table.get_row_count(), 0, 5, 10)
         self.setLayout(main_layout)
 
 
