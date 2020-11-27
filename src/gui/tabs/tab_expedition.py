@@ -31,7 +31,7 @@ class TabExpedition(QWidget):
         test = QLabel("asdf")
         main_layout.addWidget(test, 0, self.table.get_col_count(), 1, 1)
 
-        self.summary = DailySummary(10)
+        self.summary = DailySummary()
         main_layout.addWidget(self.summary, self.table.get_row_count(), 0, 5, 10)
         self.setLayout(main_layout)
 

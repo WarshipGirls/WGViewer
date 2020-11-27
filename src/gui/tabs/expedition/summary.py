@@ -1,39 +1,56 @@
-from PyQt5.QtWidgets import QWidget, QLabel
-from PyQt5.QtWidgets import QGridLayout
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QHBoxLayout
+from PyQt5.QtWidgets import QTableView, QHeaderView, QAbstractScrollArea
+
 
 class DailySummary(QWidget):
-    def __init__(self, cols_lim):
+    def __init__(self):
         super().__init__()
-        self.cols_lim = cols_lim
 
-        self.main_layout = QGridLayout(self)
-        for i in range(5):
-            for j in range(10):
-                self.main_layout.addWidget(QLabel(str([i,j])), i, j)
+        self.init_table()
+        self.init_ui()
 
-        header = QLabel("DAILY SUMMARY")
-        self.main_layout.addWidget(QLabel("DAILY SUMMARY"), 0, 0, 1, 4)
-        self.main_layout.addWidget(QLabel("WEEKLY SUMMARY"), 0, 4, 1, 4)
+        self.layout = QHBoxLayout()
+        self.layout.addWidget(self.tab)
+        self.setLayout(self.layout)
+
+    def init_table(self):
+        self.tab = QTableWidget()
+        self.tab.setColumnCount(8)
+        self.tab.setRowCount(5)
+
+        self.tab.setItem(0, 0, QTableWidgetItem("DAILY SUMMARY"))
+        self.tab.setItem(0, 4, QTableWidgetItem("WEEKLY SUMMARY"))
+        self.tab.setSpan(0, 0, 1, 4)
+        self.tab.setSpan(0, 4, 1, 4)
 
         labels_col1 = ["Fuel","Ammo.","Steel","Bauxite"]
         labels_col2 = ["Inst. Repair","Inst. Build.","Ship Blueprint","Equip. Blueprint"]
-
         self.set_labels(labels_col1, 0)
         self.set_labels(labels_col2, 2)
         self.set_labels(labels_col1, 4)
         self.set_labels(labels_col2, 6)
 
-        self.update_val(0, 1, 0)
+    def init_ui(self):
+        self.tab.setShowGrid(False)
+        self.tab.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.tab.horizontalHeader().hide()
+        self.tab.verticalHeader().hide()
+        self.tab.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.tab.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.tab.setEditTriggers(QTableView.NoEditTriggers)
+        self.tab.setFocusPolicy(Qt.NoFocus)
+        self.tab.setSelectionMode(QTableView.NoSelection)
+        self.tab.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
     def set_labels(self, labels, col):
         for row in range(1, 5):
-            self.main_layout.addWidget(QLabel(labels[row-1]), row, col, 1, 1)
+            self.tab.setItem(row, col, QTableWidgetItem(labels[row-1]))
 
     def update_val(self, data, row, col):
-        item = self.main_layout.itemAtPosition(row, col).widget()
-        print(item)
-        # print(item.data())
-        print(item.text())
+        item = self.tab.item(row, col)
+        self.tab.setItem(row, col, QTableWidgetItem(str(data)))
 
 
 # End of File
