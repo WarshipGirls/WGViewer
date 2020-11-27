@@ -27,6 +27,13 @@ class LoginForm(QWidget):
         self.encryptor = Encryptor()
         self.key_filename = '.wgr.key'
 
+        s = self.qsettings.value("style") if self.qsettings.contains("style") else "qdarkstyle"
+        if s == "native":
+            self.style_sheet = ""
+        else:
+            self.style_sheet = qdarkstyle.load_stylesheet(qt_api='pyqt5')
+            self.qsettings.setValue("style", "qdarkstyle")
+
         if self.qsettings.value("Login/checked") == 'true':
             self.qsettings.beginGroup('Login')
             name = self.qsettings.value('username')
@@ -61,7 +68,7 @@ class LoginForm(QWidget):
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.init_login_button(user_h)
         self.resize(0.26*user_w, 0.12*user_h)
-        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))       
+        self.setStyleSheet(self.style_sheet)
         self.setWindowTitle('Warship Girls Viewer Login')
 
     def init_name_field(self, text=''):
@@ -218,7 +225,7 @@ class LoginForm(QWidget):
         self.on_check_clicked()
 
         msg = QMessageBox()
-        msg.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        msg.setStyleSheet(self.style_sheet)
         msg.setWindowTitle("Info")
 
         sess = Session()

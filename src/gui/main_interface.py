@@ -16,7 +16,6 @@ from .main_interface_tabs import MainInterfaceTabs
 from .main_interface_menubar import MainInterfaceMenuBar
 from ..data import data as wgr_data
 from ..func.wgr_api import WGR_API
-from ..func.helper_function import Helper
 
 
 class MainInterface(QMainWindow):
@@ -30,14 +29,12 @@ class MainInterface(QMainWindow):
         self.channel = channel
         self.cookies = cookies
         self.realrun = realrun
+        self.side_dock_on = False
 
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.threadpool = QThreadPool()
-        self.hlp = Helper()
         self.api = WGR_API(self.server, self.channel, self.cookies)
         self.setMenuBar(MainInterfaceMenuBar(self))
-
-        self.side_dock_on = False
 
         self.init_data_files()
         self.init_ui()
@@ -51,7 +48,7 @@ class MainInterface(QMainWindow):
             self.qsettings.setValue("UI/init_side_dock", False)
             self.init_side_dock()
 
-        # # Multi-Threading
+        # # Multi-Threading TODO?
         logging.info("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
         print(self.threadpool.activeThreadCount())
 
@@ -73,9 +70,17 @@ class MainInterface(QMainWindow):
     # Initialization
     # ================================
 
+    def set_color_scheme(self):
+        # style should be set at Login Form, following one-liner is kept while by-passing Login
+        s = self.qsettings.value("style") if self.qsettings.contains("style") else "qdarkstyle"
+        if s == "native":
+            self.setStyleSheet("")
+        else:
+            self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+            self.qsettings.setValue("style", "qdarkstyle")
 
     def init_ui(self):
-        self.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+        self.set_color_scheme()
         user_w = QDesktopWidget().screenGeometry(-1).width()
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.resize(0.67*user_w, 0.67*user_h)

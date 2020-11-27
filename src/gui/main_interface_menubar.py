@@ -1,6 +1,6 @@
 import os
 
-from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtCore import QCoreApplication, QSettings
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from ..data import data as wgr_data
@@ -8,8 +8,9 @@ from ..data import data as wgr_data
 
 class MainInterfaceMenuBar(QMenuBar):
     def __init__(self, parent):
-        super().__init__(parent)
+        super().__init__()
         self.parent = parent
+        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
 
         self.init_file_menu()
         self.init_view_menu()
@@ -39,8 +40,8 @@ class MainInterfaceMenuBar(QMenuBar):
         menu = self.addMenu("Preferences")
         scheme = menu.addMenu("Color Scheme")
         # TODO
-        scheme.addAction("Bright (Native)")
-        scheme.addAction("Dark")
+        scheme.addAction(self.create_action("Dark", self.use_qdarkstyle))
+        scheme.addAction(self.create_action("Native Bright", self.use_native_style))
 
     def init_help_menu(self):
         menu = self.addMenu("Help")
@@ -48,7 +49,7 @@ class MainInterfaceMenuBar(QMenuBar):
 
 
     # ================================
-    # QActions
+    # File QActions
     # ================================
 
 
@@ -62,6 +63,22 @@ class MainInterfaceMenuBar(QMenuBar):
 
     # def clear_cache_folder(self):
     #     wgr_data._clear_cache()
+
+    # ================================
+    # Preferences QActions
+    # ================================
+
+    def use_native_style(self):
+        self.qsettings.setValue("style", "native")
+        self.parent.set_color_scheme()
+
+    def use_qdarkstyle(self):
+        self.qsettings.setValue("style", "qdarkstyle")
+        self.parent.set_color_scheme()
+
+    # ================================
+    # Help QActions
+    # ================================
 
     def open_author_info(self):
         def get_hyperlink(link, text):
