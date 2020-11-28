@@ -95,6 +95,9 @@ def get_color_scheme():
         qsettings.setValue("style", "qdarkstyle")
         return qdarkstyle.load_stylesheet(qt_api='pyqt5')
 
+def clear_cache_folder():
+    _clear_dir(_get_data_dir())
+
 
 # ================================
 # QSettings
@@ -339,7 +342,7 @@ def update_equipment_amount(equipped, unequipped):
 
 
 # ================================
-# Tactics
+# Json getter
 # ================================
 
 
@@ -351,6 +354,12 @@ def get_tactics_json():
 
 def get_user_tactics():
     path = os.path.join(get_user_dir(), 'tactics.json')
+    with open(path, encoding='utf-8') as f:
+        t = json.load(f)
+    return t
+
+def get_user_fleets():
+    path = os.path.join(get_user_dir(), 'fleetVo.json')
     with open(path, encoding='utf-8') as f:
         t = json.load(f)
     return t
@@ -398,5 +407,30 @@ def get_big_success_rate():
     d = t['detailInfo']['exploreNum']
     res = round(int(n)/int(d), 4)
     return [res, n, d]
+
+
+def get_exp_fleets():
+    # return a list of int
+    fleets = get_user_fleets()
+    exp_ids = ["5","6","7","8"]
+    res = {}
+    for fleet in fleets:
+        if fleet['id'] in exp_ids:
+            res[fleet['id']] = fleet['ships']
+        else:
+            continue
+    return res
+
+def save_processed_userShipVo(data):
+    path = os.path.join(get_user_dir(), 'proc_userShipVo.json')
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+def get_processed_userShipVo():
+    path = os.path.join(get_user_dir(), 'proc_userShipVo.json')
+    with open(path, encoding='utf-8') as f:
+        t = json.load(f)
+    return t
+
 
 # End of File
