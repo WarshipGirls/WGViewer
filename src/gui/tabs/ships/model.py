@@ -38,6 +38,28 @@ class ShipModel(QStandardItemModel):
         self.init_icons()
         self.init_json()
 
+    def save_table_data(self):
+        all_ships = {}
+        for row in range(self.rowCount()):
+            # Qt.DisplayRole (default), Qt.UserRole (hidden), Qt.DecorationRole (icon)
+            s = {}
+            s['cid'] = int(self.index(row, 0).data(Qt.UserRole))
+            s['Name'] = self.index(row, 1).data()
+            # Lesson: JSON keys have to be strings; json.dump() will convert int-key to str type
+            all_ships[self.index(row, 2).data()] = s
+            for col in range(3, 21):        # str and str representation of int, float, list of int, int/int
+                s[SCONST._header[col]] = self.index(row, col).data()
+            equips = []                     # equips cid (int), may contain None
+            for col in range(21, 25):
+                equips.append(self.index(row, col).data(Qt.UserRole))
+            s['equips'] = equips
+            tacts = []                      # tactics cid (int), may contain None
+            for col in range(25, 28):
+                tacts.append(self.index(row, col).data(Qt.UserRole))
+            s['tactics'] = tacts
+            # TODO skill cid after implementing skill
+        wgr_data.save_processed_userShipVo(all_ships)
+
     def init_icons(self):
         # To avoid repeatedly loading same icon, preload them
         self.ring_icon = QIcon(get_data_path("src/assets/icons/ring_60.png"))
@@ -354,6 +376,7 @@ class ShipModel(QStandardItemModel):
                         desc = d1 + "\n" + d2
 
                         item = QStandardItem(title)
+                        item.setData(self.user_tactics[idx]['cid'], Qt.UserRole)
                         item.setToolTip(desc)
                         self.setItem(args[0], col, item)
                     else:
@@ -361,8 +384,8 @@ class ShipModel(QStandardItemModel):
             col += 1
 
     def set_skill(self):
+        # TODO
         pass
-         
 
 
 # End of File
