@@ -40,35 +40,19 @@ class WGR_API:
         return data
 
     def api_getShipList(self):
-        # url = self.server + 'api/getShipList' + self.hlp.get_url_end(self.channel)
-        # raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        # data = json.loads(raw_data)
-        # return data
         link = 'api/getShipList'
         return self._api_call(link)
 
     def api_initGame(self):
         link = 'api/initGame?&crazy=1'
-        # url = self.server + 'api/initGame?&crazy=1' + self.hlp.get_url_end(self.channel)
-        # raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        # data = json.loads(raw_data)
-        # return data
         return self._api_call(link)
 
     def boat_changeEquipment(self, ship_id, equip_id, equip_slot):
         link = '/boat/changeEquipment/' + str(ship_id) + '/' + str(equip_id) + '/' + str(equip_slot)
-        # url = self.server + '/boat/changeEquipment/' + str(ship_id) + '/' + str(equip_id) + '/' + str(equip_slot) + self.hlp.get_url_end(self.channel)
-        # raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        # data = json.loads(raw_data)
-        # return data
         return self._api_call(link)
 
     def boat_removeEquipment(self, ship_id, equip_slot):
         link = '/boat/removeEquipment/' + str(ship_id) + '/' + str(equip_slot)
-        # url = self.server + '/boat/removeEquipment/' + str(ship_id) + '/' + str(equip_slot) + self.hlp.get_url_end(self.channel)
-        # raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        # data = json.loads(raw_data)
-        # return data
         return self._api_call(link)
 
     # FOLLOWING ARE NOT USED YET

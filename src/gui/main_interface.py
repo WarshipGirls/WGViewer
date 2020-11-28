@@ -4,8 +4,10 @@ import os
 import qdarkstyle
 
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QThreadPool, QTimer, QSettings
-from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
-from PyQt5.QtWidgets import QDesktopWidget
+from PyQt5.QtWidgets import (
+    QMainWindow, QHBoxLayout,
+    QDesktopWidget
+)
 
 # GUI
 from .side_dock import SideDock
@@ -21,7 +23,6 @@ from ..func.wgr_api import WGR_API
 class MainInterface(QMainWindow):
     # https://stackoverflow.com/questions/2970312/pyqt4-qtcore-pyqtsignal-object-has-no-attribute-connect
     sig_initGame = pyqtSignal(dict)
-    # sig_getShipList = pyqtSignal(dict)
 
     def __init__(self, server, channel, cookies, realrun=True):
         super().__init__()
@@ -40,8 +41,8 @@ class MainInterface(QMainWindow):
         # TODO TODO multi-threading
         self.init_data_files()
         game_data = self.api_initGame()
-        # ships_data = self.api_getShipList()
 
+        self.init_ui()
         self.init_side_dock()
         if self.is_realrun:
             self.sig_initGame.connect(self.side_dock.on_received_resource)
@@ -50,32 +51,7 @@ class MainInterface(QMainWindow):
             self.sig_initGame.connect(self.side_dock.on_received_lists)
             self.sig_initGame.emit(game_data)
         else:
-            pass
-
-        self.init_ui()
-
-        # if self.is_realrun:
-            # pass
-            # self._realrun(game_data, ships_data)
-            # self._realrun(game_data)
-        # else:
-            # self._testrun()
-        # self.init_ui()
-        # self.init_side_dock()
-
-    def _realrun(self, game_data, ships_data):
-    # def _realrun(self, game_data):
-        self.sig_initGame.connect(self.side_dock.on_received_resource)
-        self.sig_initGame.connect(self.side_dock.on_received_name)
-        self.sig_initGame.connect(self.side_dock.on_received_tasks)
-        self.sig_initGame.connect(self.side_dock.on_received_lists)
-        self.sig_initGame.emit(game_data)
-
-        # self.sig_getShipList.connect(self.table_widget.tab_ships.on_received_shiplist)
-        # self.sig_getShipList.emit(ships_data)
-
-    def _testrun(self):
-        game_data = self.api_initGame()
+            pass       
 
 
     # ================================
@@ -142,20 +118,8 @@ class MainInterface(QMainWindow):
     # WGR APIs
     # ================================
 
-
-    # def api_getShipList(self):
-    #     test_json = 'example_json/api_getShipList.json'
-    #     if self.is_realrun:
-    #         data = self.api.api_getShipList()
-    #         with open(test_json, 'w', encoding='utf-8') as f:
-    #             json.dump(data, f, ensure_ascii=False, indent=4)
-    #     else:
-    #         with open(test_json, encoding='utf-8') as f:
-    #             data = json.load(f)
-    #     return data
-
     def api_initGame(self):
-        test_json = 'example_json/api_initGame.json'
+        test_json = os.path.join(wgr_data.get_temp_dir(), 'api_initGame.json')
         if self.is_realrun:
             data = self.api.api_initGame()
             with open(test_json, 'w', encoding='utf-8') as f:

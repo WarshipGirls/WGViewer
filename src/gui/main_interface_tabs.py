@@ -28,7 +28,6 @@ class MainInterfaceTabs(QWidget):
         # do NOT change the order of creation
         self.layout = QGridLayout()
         self.tab_ships = TabShips(self.api, self.is_realrun)
-        # TODO TODO fix the data problem
         self.tab_exp = TabExpedition()
         tabwidget = QTabWidget()
 
@@ -37,19 +36,6 @@ class MainInterfaceTabs(QWidget):
 
         self.layout.addWidget(tabwidget, 0, 0)
         self.setLayout(self.layout)
-
-        if self.is_realrun:
-            pass
-        else:
-            self._testrun()
-
-    def _testrun(self):
-        pass
-        # import json
-        # p = get_data_path('api_getShipList.json')
-        # with open(p) as f:
-        #     d = json.load(f)
-        # self.on_received_shiplist(d)
 
     def init_tab_bar(self):
         # Initialize tab screen
@@ -68,12 +54,6 @@ class MainInterfaceTabs(QWidget):
         self.tabs.addTab(self.tab4,"  Equipment  ")
         self.tabs.addTab(self.tab5,"  Tactics  ")
         self.tabs.addTab(self.tab_advance,"  Advance Functions  ")
-
-    # def recurring_timer(self):
-    #     self.counter +=1
-    #     print("I'm in " + os.path.basename(__file__))
-    #     print("active thread = " + str(self.threadpool.activeThreadCount()))
-    #     self.l.setText("Counter: %d" % self.counter)
 
 
 # End of File

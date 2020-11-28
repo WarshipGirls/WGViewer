@@ -243,7 +243,7 @@ class LoginForm(QWidget):
             res2 = account.second_login(self.server)
             self.login_button.setText('Loading and Initializing...')
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
-            logging.error(e)
+            logging.error(f"LOGIN - {e}")
             self.login_button.setEnabled(True)
             self.login_button.setText('Login')
             msg.setText("Logging failed.")
@@ -251,8 +251,8 @@ class LoginForm(QWidget):
             return
 
         if res1 == True and res2 == True:
-            logging.info("Login Successfully...")
-            msg.setText('Success')
+            logging.info("LOGIN - SUCCESS!")
+            msg.setText('Login Success')
             msg.exec_()
             msg.close()
             self.mi = MainInterface(self.server, self.channel, account.get_cookies())

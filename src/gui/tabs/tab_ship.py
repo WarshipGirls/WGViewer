@@ -13,6 +13,7 @@ from .ships.delegate import ShipTableDelegate
 from .ships.model import ShipModel
 from .ships.proxy_model import ShipSortFilterProxyModel
 from .ships.top_checkbox import TopCheckboxes
+from ...data import data as wgr_data
 
 
 def get_data_path(relative_path):
@@ -37,16 +38,20 @@ class TabShips(QWidget):
             self._testrun()
 
     def _realrun(self):
-        test_json = 'example_json/api_getShipList.json'
-        # if self.is_realrun:
+        test_json = os.path.join(wgr_data.get_temp_dir(), 'api_getShipList.json')
         data = self.api.api_getShipList()
         with open(test_json, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         self.on_received_shiplist(data)
-        # else:
-        #     with open(test_json, encoding='utf-8') as f:
-        #         data = json.load(f)
-        # return data
+
+    def _testrun(self):
+        logging.debug("SHIPS - Starting tests...")
+        p = os.path.join(wgr_data.get_temp_dir(), 'api_getShipList.json')
+        with open(p, encoding='utf-8') as f:
+            d = json.load(f)
+        # logging.error(len(d['userShipVO']))
+        # d['userShipVO'] = d['userShipVO'][:5]
+        self.on_received_shiplist(d)
 
     def init_ui(self):
         scroll_box = QVBoxLayout(self)
@@ -111,18 +116,6 @@ class TabShips(QWidget):
             with zipfile.ZipFile(get_data_path('src/assets/E.zip'), 'r') as zip_ref:
                 zip_ref.extractall(get_data_path('src/assets'))
 
-    # def _realrun(self):
-        # ships_data = self.api_getShipList()
-
-    def _testrun(self):
-        logging.debug("SHIPS - Starting tests...")
-        p = get_data_path('example_json/api_getShipList.json')
-        with open(p, encoding='utf-8') as f:
-            d = json.load(f)
-        # logging.error(len(d['userShipVO']))
-        # d['userShipVO'] = d['userShipVO'][:5]
-        self.on_received_shiplist(d)
-
     @pyqtSlot(dict)
     def on_received_shiplist(self, data):
         if data == None:
@@ -132,7 +125,7 @@ class TabShips(QWidget):
             sorted_ships = sorted(data["userShipVO"], key=lambda x: (x['level'], x['shipCid']), reverse=True)
             self.table_model.set_data(sorted_ships)
             self.table_model.save_table_data()
-            logging.info("SHIPS - Success initialized table and save table data.")
+            logging.info("SHIPS - Success initialized table and saved table data.")
 
 
 # End of File

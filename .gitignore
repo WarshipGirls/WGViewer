@@ -121,3 +121,4 @@ env/
 *.csv~
 *.py~
 test.py
+init.zip

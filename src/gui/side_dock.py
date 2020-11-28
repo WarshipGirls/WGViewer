@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 import logging
 import os
 import pytz
@@ -7,12 +5,16 @@ import re
 import sys
 import time
 
+from datetime import datetime, timedelta
+
 from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QRect, QSize, QTimer, QSettings
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QTableView, QAbstractItemView
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
-from PyQt5.QtWidgets import QDockWidget, QWidget, QLabel, QLineEdit, QMessageBox, QCheckBox
-from PyQt5.QtWidgets import QDesktopWidget
+from PyQt5.QtWidgets import (
+    QTableView, QAbstractItemView,
+    QVBoxLayout, QHBoxLayout,
+    QDesktopWidget, QDockWidget, QWidget,
+    QLabel, QLineEdit, QMessageBox, QCheckBox
+)
 
 from .models.resource_model import ResourceTableModel
 from .models.side_dock_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
@@ -39,16 +41,16 @@ class SideDock(QDockWidget):
         self.sig_resized.connect(self.update_geometry)
         self.sig_closed.connect(parent.on_dock_closed)
 
+        self.init_ui()
         if is_realrun == False:
             self._testrun()
         else:
-            self.init_ui()
+            pass
 
     def _testrun(self):
-        self.init_ui()
         import json
-        file_path = get_data_path('example_json/api_initGame.json')
-        with open(file_path, encoding='utf-8') as f:
+        test_json = os.path.join(wgr_data.get_temp_dir(), 'api_initGame.json')
+        with open(test_json, encoding='utf-8') as f:
             d = json.load(f)
         self.on_received_lists(d)
         self.on_received_resource(d)
@@ -111,7 +113,8 @@ class SideDock(QDockWidget):
     def init_sign_info(self):
         self.sign_widget = QLineEdit(self)
         icon_path = get_data_path('src/assets/icons/sign_16.png')
-        self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition);
+        self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition)
+        self.sign_widget.setFocusPolicy
 
     def init_resource_info(self):
         data = [

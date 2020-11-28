@@ -122,6 +122,8 @@ def _del_key_file(key_file):
 
 # ================================
 # getInitConfigs
+# TODO: maybe add init.zip to cloud, and use script to auto update it.
+# https://drive.google.com/file/d/19L7UB00C1oSqYEshP3gRiraTTnzlH19b/view?usp=sharing
 # ================================
 
 
