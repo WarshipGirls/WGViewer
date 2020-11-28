@@ -1,3 +1,5 @@
+import logging
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem
 from PyQt5.QtWidgets import QHBoxLayout,QVBoxLayout
@@ -50,13 +52,15 @@ class ExpFleets(QWidget):
     def get_fleets(self):
         self.fleets = wgr_data.get_exp_fleets()
         self.ships_info = wgr_data.get_processed_userShipVo()
-        print(self.ships_info)
+        # print(self.ships_info)
         for fleet_id in self.fleets:
             for ship_id in self.fleets[fleet_id]:
                 try:
                     info = self.ships_info[str(ship_id)]
-                    print(info['name'], ship_id, info['Lv.'], info['Class'])
+                    # TODO show data on the table
+                    print(info['Name'], ship_id, info['Lv.'], info['Class'])
                 except KeyError as e:
-                    print('out-dated json {}'.format(ship_id))
+                    logging.error(e)
+
 
 # End of FIle

@@ -32,23 +32,23 @@ class SideDock(QDockWidget):
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
-    def __init__(self, parent, realrun):
+    def __init__(self, parent, is_realrun):
         super(SideDock, self).__init__(parent)
         self.init_attr()
 
         self.sig_resized.connect(self.update_geometry)
         self.sig_closed.connect(parent.on_dock_closed)
 
-        if realrun == False:
-            self.test()
+        if is_realrun == False:
+            self._testrun()
         else:
             self.init_ui()
 
-    def test(self):
+    def _testrun(self):
         self.init_ui()
         import json
-        file_path = get_data_path('api_initGame.json')
-        with open(file_path) as f:
+        file_path = get_data_path('example_json/api_initGame.json')
+        with open(file_path, encoding='utf-8') as f:
             d = json.load(f)
         self.on_received_lists(d)
         self.on_received_resource(d)

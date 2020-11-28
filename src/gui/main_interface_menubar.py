@@ -58,15 +58,18 @@ class MainInterfaceMenuBar(QMenuBar):
 
 
     def quit_application(self):
-        # TODO: in the future, inform user and/or save unfinished tasks
+        # TODO: in the future, save unfinished tasks
         QCoreApplication.exit()
 
     def open_cache_folder(self):
-        path = wgr_data._get_data_dir()
-        os.startfile(path)
+        os.startfile(wgr_data._get_data_dir())
 
     def clear_cache_folder(self):
-        wgr_data._clear_cache()
+        reply = QMessageBox.question(self, 'Warning', "Do you want to clear all caches?\n(Re-caching takes time)", QMessageBox.Yes, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            wgr_data._clear_cache()
+        else:
+            pass
 
     # ================================
     # Preferences QActions

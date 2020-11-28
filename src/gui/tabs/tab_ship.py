@@ -101,8 +101,8 @@ class TabShips(QWidget):
     def _testrun(self):
         logging.debug("Starting tests")
         import json
-        p = get_data_path('api_getShipList.json')
-        with open(p) as f:
+        p = get_data_path('example_json/api_getShipList.json')
+        with open(p, encoding='utf-8') as f:
             d = json.load(f)
         # logging.error(len(d['userShipVO']))
         # d['userShipVO'] = d['userShipVO'][:5]
