@@ -21,54 +21,67 @@ from ..func.wgr_api import WGR_API
 class MainInterface(QMainWindow):
     # https://stackoverflow.com/questions/2970312/pyqt4-qtcore-pyqtsignal-object-has-no-attribute-connect
     sig_initGame = pyqtSignal(dict)
-    sig_getShipList = pyqtSignal(dict)
+    # sig_getShipList = pyqtSignal(dict)
 
     def __init__(self, server, channel, cookies, realrun=True):
         super().__init__()
         self.server = server
         self.channel = channel
         self.cookies = cookies
-        self.realrun = realrun
+        self.is_realrun = realrun
         self.side_dock_on = False
 
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.threadpool = QThreadPool()
         self.api = WGR_API(self.server, self.channel, self.cookies)
-        self.setMenuBar(MainInterfaceMenuBar(self))
+        
+        # !!! all DATA initialization must occur before any UI initialization !!!
 
+        # TODO TODO multi-threading
         self.init_data_files()
+        game_data = self.api_initGame()
+        # ships_data = self.api_getShipList()
+
+        self.init_side_dock()
+        if self.is_realrun:
+            self.sig_initGame.connect(self.side_dock.on_received_resource)
+            self.sig_initGame.connect(self.side_dock.on_received_name)
+            self.sig_initGame.connect(self.side_dock.on_received_tasks)
+            self.sig_initGame.connect(self.side_dock.on_received_lists)
+            self.sig_initGame.emit(game_data)
+        else:
+            pass
+
         self.init_ui()
 
-        if self.qsettings.contains("UI/init_side_dock"):
-            if self.qsettings.value("UI/init_side_dock") == "true":
-                pass
-            else:
-                self.init_side_dock()
-        else:
-            self.qsettings.setValue("UI/init_side_dock", False)
-            self.init_side_dock()
+        # if self.is_realrun:
+            # pass
+            # self._realrun(game_data, ships_data)
+            # self._realrun(game_data)
+        # else:
+            # self._testrun()
+        # self.init_ui()
+        # self.init_side_dock()
 
-        # # Multi-Threading TODO?
-        logging.info("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
-        print(self.threadpool.activeThreadCount())
-
-        if self.realrun:
-            self._realrun()
-
-    def _realrun(self):
+    def _realrun(self, game_data, ships_data):
+    # def _realrun(self, game_data):
         self.sig_initGame.connect(self.side_dock.on_received_resource)
         self.sig_initGame.connect(self.side_dock.on_received_name)
         self.sig_initGame.connect(self.side_dock.on_received_tasks)
         self.sig_initGame.connect(self.side_dock.on_received_lists)
-        self.api_initGame()
+        self.sig_initGame.emit(game_data)
 
-        self.sig_getShipList.connect(self.table_widget.tab_ships.on_received_shiplist)
-        self.api_getShipList()
+        # self.sig_getShipList.connect(self.table_widget.tab_ships.on_received_shiplist)
+        # self.sig_getShipList.emit(ships_data)
+
+    def _testrun(self):
+        game_data = self.api_initGame()
 
 
     # ================================
     # Initialization
     # ================================
+
 
     def set_color_scheme(self):
         self.setStyleSheet(wgr_data.get_color_scheme())
@@ -79,21 +92,32 @@ class MainInterface(QMainWindow):
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.resize(0.67*user_w, 0.67*user_h)
 
-        # UI layout - top/L/R/bottom docks and central widget
-        # https://doc.qt.io/archives/4.6/mainwindow.html
-        self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.realrun)
+        self.menu_bar = MainInterfaceMenuBar(self)
+        self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.is_realrun)
+
+        self.setMenuBar(self.menu_bar)
         self.setCentralWidget(self.table_widget)
 
         self.setLayout(QHBoxLayout())
         self.setWindowTitle('Warship Girls Viewer')
 
     def init_side_dock(self):
-        if self.side_dock_on == False:
-            self.side_dock = SideDock(self, self.realrun)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
-            self.side_dock_on = True
+        def _create_side_dock():
+            if self.side_dock_on == False:
+                self.side_dock = SideDock(self, self.is_realrun)
+                self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
+                self.side_dock_on = True
+            else:
+                pass
+
+        if self.qsettings.contains("UI/init_side_dock"):
+            if self.qsettings.value("UI/init_side_dock") == "true":
+                pass
+            else:
+                _create_side_dock()
         else:
-            pass
+            self.qsettings.setValue("UI/init_side_dock", False)
+            _create_side_dock()
 
     def init_data_files(self):
         num = len(os.listdir(wgr_data.get_init_dir()))
@@ -119,28 +143,42 @@ class MainInterface(QMainWindow):
     # ================================
 
 
-    def api_getShipList(self):
-        data = self.api.api_getShipList()
-        with open('api_getShipList.json', 'w') as of:
-            json.dump(data, of)
-        self.sig_getShipList.emit(data)
+    # def api_getShipList(self):
+    #     test_json = 'example_json/api_getShipList.json'
+    #     if self.is_realrun:
+    #         data = self.api.api_getShipList()
+    #         with open(test_json, 'w', encoding='utf-8') as f:
+    #             json.dump(data, f, ensure_ascii=False, indent=4)
+    #     else:
+    #         with open(test_json, encoding='utf-8') as f:
+    #             data = json.load(f)
+    #     return data
 
     def api_initGame(self):
-        data = self.api.api_initGame()
-        with open('api_initGame.json', 'w') as of:
-            json.dump(data, of)
-        self.sig_initGame.emit(data)
+        test_json = 'example_json/api_initGame.json'
+        if self.is_realrun:
+            data = self.api.api_initGame()
+            with open(test_json, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+        else:
+            with open(test_json, encoding='utf-8') as f:
+                data = json.load(f)
 
-        # save necessary data
+        # save necessary data; this should be done before any child UI creation!
         user_dir = wgr_data.get_user_dir()
-        with open(os.path.join(user_dir, 'equipmentVo.json'), 'w') as f:
+        with open(os.path.join(user_dir, 'equipmentVo.json'), 'w', encoding='utf-8') as f:
             json.dump(data['equipmentVo'], f, ensure_ascii=False, indent=4)
 
-        with open(os.path.join(user_dir, 'tactics.json'), 'w') as f:
+        with open(os.path.join(user_dir, 'tactics.json'), 'w', encoding='utf-8') as f:
             json.dump(data['tactics'], f, ensure_ascii=False, indent=4)
 
-        with open(os.path.join(user_dir, 'userVo.json'), 'w') as f:
+        with open(os.path.join(user_dir, 'userVo.json'), 'w', encoding='utf-8') as f:
             json.dump(data['userVo'], f, ensure_ascii=False, indent=4)
+
+        with open(os.path.join(user_dir, 'fleetVo.json'), 'w', encoding='utf-8') as f:
+            json.dump(data['fleetVo'], f, ensure_ascii=False, indent=4)
+
+        return data
 
 
 # End of File

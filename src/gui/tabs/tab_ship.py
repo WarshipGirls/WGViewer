@@ -1,6 +1,7 @@
-import sys
-import os
+import json
 import logging
+import os
+import sys
 import zipfile
 
 from PyQt5.QtCore import Qt, pyqtSlot
@@ -9,9 +10,9 @@ from PyQt5.QtWidgets import QVBoxLayout, QGridLayout, QScrollArea
 from PyQt5.QtWidgets import QHeaderView, QTableView
 
 from .ships.delegate import ShipTableDelegate
+from .ships.model import ShipModel
 from .ships.proxy_model import ShipSortFilterProxyModel
 from .ships.top_checkbox import TopCheckboxes
-from .ships.model import ShipModel
 
 
 def get_data_path(relative_path):
@@ -31,9 +32,21 @@ class TabShips(QWidget):
         self.init_assets()
 
         if is_realrun:
-            pass
+            self._realrun()
         else:
             self._testrun()
+
+    def _realrun(self):
+        test_json = 'example_json/api_getShipList.json'
+        # if self.is_realrun:
+        data = self.api.api_getShipList()
+        with open(test_json, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        self.on_received_shiplist(data)
+        # else:
+        #     with open(test_json, encoding='utf-8') as f:
+        #         data = json.load(f)
+        # return data
 
     def init_ui(self):
         scroll_box = QVBoxLayout(self)
@@ -98,9 +111,11 @@ class TabShips(QWidget):
             with zipfile.ZipFile(get_data_path('src/assets/E.zip'), 'r') as zip_ref:
                 zip_ref.extractall(get_data_path('src/assets'))
 
+    # def _realrun(self):
+        # ships_data = self.api_getShipList()
+
     def _testrun(self):
-        logging.debug("Starting tests")
-        import json
+        logging.debug("SHIPS - Starting tests...")
         p = get_data_path('example_json/api_getShipList.json')
         with open(p, encoding='utf-8') as f:
             d = json.load(f)

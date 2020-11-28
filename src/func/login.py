@@ -18,8 +18,17 @@ class GameLogin:
     1st login: channal cookie version server_list
     2nd login: return nothing; init data
     """
-    def __init__(self, game_version, game_channel, game_session):
+    def __init__(self, game_version, game_channel, game_session, login_button):
+        self.version = game_version
+        self.channel = game_channel
+        self.session = game_session
+        self.login_button = login_button
 
+        self.init_attr()
+
+        self.hlp = Helper(self.session)
+
+    def init_attr(self):
         self.pastport_headers = {
             "Accept-Encoding": "gzip",
             'User-Agent': 'okhttp/3.4.1',
@@ -29,14 +38,8 @@ class GameLogin:
         self.portHead = ""
         self.key = constants.login_key
         self.login_server = ""
-
-        self.version = game_version
-        self.channel = game_channel
-        self.session = game_session
         self.cookies = None
         self.uid = None
-
-        self.hlp = Helper(self.session)
 
     def first_login(self, username, pwd):
         logging.info("LOGIN - first server fetching...")
@@ -66,6 +69,9 @@ class GameLogin:
         return True
 
     def cheat_sess(self, host, link):
+        # TODO the text is not get set in this file!
+        self.login_button.setText(link)
+
         time.sleep(0.5)
         url_cheat = host + link + self.hlp.get_url_end(self.channel)
         self.session.get(url=url_cheat, headers=constants.header, cookies=self.cookies, timeout=10)

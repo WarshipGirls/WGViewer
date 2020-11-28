@@ -130,10 +130,10 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.checkbox, 4, 1)
 
     def init_login_button(self, user_h):
-        self.button_login = QPushButton('Login')
-        self.button_login.clicked.connect(self.check_password)
+        self.login_button = QPushButton('Login')
+        self.login_button.clicked.connect(self.check_password)
         # set an empty gap row
-        self.layout.addWidget(self.button_login, 6, 0, 1, 2)
+        self.layout.addWidget(self.login_button, 6, 0, 1, 2)
         self.layout.setRowMinimumHeight(5, 0.03*user_h)
 
 
@@ -218,8 +218,8 @@ class LoginForm(QWidget):
 
     def check_password(self):
         # TODO: #30
-        self.button_login.setText('Connecting to server...')
-        self.button_login.setEnabled(False)
+        self.login_button.setText('Connecting to server...')
+        self.login_button.setEnabled(False)
         self.on_check_clicked()
 
         msg = QMessageBox()
@@ -227,7 +227,7 @@ class LoginForm(QWidget):
         msg.setWindowTitle("Info")
 
         sess = Session()
-        account = GameLogin(constants.version, self.channel, sess)
+        account = GameLogin(constants.version, self.channel, sess, self.login_button)
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()
 
@@ -241,11 +241,11 @@ class LoginForm(QWidget):
         try:
             res1 = account.first_login(_username, _password)
             res2 = account.second_login(self.server)
-            self.button_login.setText('Loading and Initializing...')
+            self.login_button.setText('Loading and Initializing...')
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(e)
-            self.button_login.setEnabled(True)
-            self.button_login.setText('Login')
+            self.login_button.setEnabled(True)
+            self.login_button.setText('Login')
             msg.setText("Logging failed.")
             msg.exec_()
             return
@@ -258,10 +258,11 @@ class LoginForm(QWidget):
             self.mi = MainInterface(self.server, self.channel, account.get_cookies())
             self.login_success()
         else:
+            logging.debug(_password)
             msg.setText("Incorrect Password.")
             msg.exec_()
-            self.button_login.setEnabled(True)
-            self.button_login.setText('Login')
+            self.login_button.setEnabled(True)
+            self.login_button.setText('Login')
 
 
 # End of File

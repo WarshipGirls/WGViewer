@@ -1,4 +1,8 @@
 import json
+import logging
+
+from requests import exceptions
+from time import sleep
 
 from .helper_function import Helper
 
@@ -8,32 +12,67 @@ class WGR_API:
         self.server = server
         self.channel = channel
         self.cookies = cookies
+
         self.hlp = Helper()
+        self.max_retry = 10
+        self.sleep_time = 5
+
+    def _api_call(self, link):
+        data = None
+        url = self.server + link + self.hlp.get_url_end(self.channel)
+        res = False
+        tries = 0
+        while not res:
+            try:
+                raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+                data = json.loads(raw_data)
+                res = True
+            except (TimeoutError, exceptions.ReadTimeout) as e:
+                logging.error(e)
+                logging.warn('Trying reconnecting...')
+                sleep(self.sleep_time)
+            tries += 1
+            if tries >= self.max_retry:
+                logging.warn(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
+                break
+            else:
+                pass
+        return data
 
     def api_getShipList(self):
-        url = self.server + 'api/getShipList' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        return data
+        # url = self.server + 'api/getShipList' + self.hlp.get_url_end(self.channel)
+        # raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        # data = json.loads(raw_data)
+        # return data
+        link = 'api/getShipList'
+        return self._api_call(link)
 
     def api_initGame(self):
-        url = self.server + 'api/initGame?&crazy=1' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        return data
+        link = 'api/initGame?&crazy=1'
+        # url = self.server + 'api/initGame?&crazy=1' + self.hlp.get_url_end(self.channel)
+        # raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        # data = json.loads(raw_data)
+        # return data
+        return self._api_call(link)
 
     def boat_changeEquipment(self, ship_id, equip_id, equip_slot):
-        url = self.server + '/boat/changeEquipment/' + str(ship_id) + '/' + str(equip_id) + '/' + str(equip_slot) + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        return data
+        link = '/boat/changeEquipment/' + str(ship_id) + '/' + str(equip_id) + '/' + str(equip_slot)
+        # url = self.server + '/boat/changeEquipment/' + str(ship_id) + '/' + str(equip_id) + '/' + str(equip_slot) + self.hlp.get_url_end(self.channel)
+        # raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        # data = json.loads(raw_data)
+        # return data
+        return self._api_call(link)
 
     def boat_removeEquipment(self, ship_id, equip_slot):
-        url = self.server + '/boat/removeEquipment/' + str(ship_id) + '/' + str(equip_slot) + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        return data
+        link = '/boat/removeEquipment/' + str(ship_id) + '/' + str(equip_slot)
+        # url = self.server + '/boat/removeEquipment/' + str(ship_id) + '/' + str(equip_slot) + self.hlp.get_url_end(self.channel)
+        # raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+        # data = json.loads(raw_data)
+        # return data
+        return self._api_call(link)
 
+    # FOLLOWING ARE NOT USED YET
+    '''
     def pve_getPveData(self):
         url = self.server + 'pve/getPveData' + self.hlp.get_url_end(self.channel)
         raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
@@ -97,6 +136,7 @@ class WGR_API:
         data = json.loads(raw_data)
         with open('campaign_getUserData.json', 'w') as of:
             json.dump(data, of)
+    '''
 
 
 # End of File

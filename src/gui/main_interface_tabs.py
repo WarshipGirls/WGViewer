@@ -1,9 +1,10 @@
-import sys
+import logging
 import os
+import sys
 
+from PyQt5.QtCore import QTimer, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QTabWidget, QLabel, QPushButton
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout
-from PyQt5.QtCore import QTimer, pyqtSlot
 
 from .tabs.advance_functions import TabAdvanceFunctions
 from .tabs.tab_ship import TabShips
@@ -18,26 +19,31 @@ def get_data_path(relative_path):
 
 
 class MainInterfaceTabs(QWidget):
-    def __init__(self, parent, api, threadpool, realrun):
-        super(QWidget, self).__init__(parent)
+    def __init__(self, parent, api, threadpool, is_realrun):
+        super().__init__()
+        logging.info("Creating Main Interface Tabs...")
         self.api = api
-        self.realrun = realrun
+        self.is_realrun = is_realrun
 
+        # do NOT change the order of creation
         self.layout = QGridLayout()
-        self.setLayout(self.layout)
-
-        self.tab_ships = TabShips(self.api, self.realrun)
+        self.tab_ships = TabShips(self.api, self.is_realrun)
+        # TODO TODO fix the data problem
         self.tab_exp = TabExpedition()
-
         tabwidget = QTabWidget()
+
         tabwidget.addTab(self.tab_exp, "  Expedition  ")
         tabwidget.addTab(self.tab_ships, "  Dock  ")
+
         self.layout.addWidget(tabwidget, 0, 0)
+        self.setLayout(self.layout)
 
-        if self.realrun == False:
-            self.test()
+        if self.is_realrun:
+            pass
+        else:
+            self._testrun()
 
-    def test(self):
+    def _testrun(self):
         pass
         # import json
         # p = get_data_path('api_getShipList.json')
@@ -50,7 +56,7 @@ class MainInterfaceTabs(QWidget):
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
         self.tab2 = QWidget()
-        self.tab_ships = TabShips(self, self.realrun)
+        self.tab_ships = TabShips(self, self.is_realrun)
         self.tab4 = QWidget()
         self.tab5 = QWidget()
         self.tab_advance = TabAdvanceFunctions(self)
@@ -63,11 +69,11 @@ class MainInterfaceTabs(QWidget):
         self.tabs.addTab(self.tab5,"  Tactics  ")
         self.tabs.addTab(self.tab_advance,"  Advance Functions  ")
 
-    def recurring_timer(self):
-        self.counter +=1
-        print("I'm in " + os.path.basename(__file__))
-        print("active thread = " + str(self.threadpool.activeThreadCount()))
-        self.l.setText("Counter: %d" % self.counter)
+    # def recurring_timer(self):
+    #     self.counter +=1
+    #     print("I'm in " + os.path.basename(__file__))
+    #     print("active thread = " + str(self.threadpool.activeThreadCount()))
+    #     self.l.setText("Counter: %d" % self.counter)
 
 
 # End of File
