@@ -12,10 +12,8 @@ from PyQt5.QtWidgets import (
 # GUI
 from .side_dock import SideDock
 from .main_interface_tabs import MainInterfaceTabs
-
-# Functions
-# from ..func.worker_thread import Worker
 from .main_interface_menubar import MainInterfaceMenuBar
+# Functions
 from ..data import data as wgr_data
 from ..func.wgr_api import WGR_API
 
@@ -42,6 +40,7 @@ class MainInterface(QMainWindow):
         self.init_data_files()
         game_data = self.api_initGame()
 
+        # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob. Qt.Focus issue)
         self.init_ui()
         self.init_side_dock()
         if self.is_realrun:

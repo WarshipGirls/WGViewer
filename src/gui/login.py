@@ -1,15 +1,14 @@
-# import sys
 import logging
 import requests
 import qdarkstyle
 
 from PyQt5.QtCore import QSettings, QVariant
-from PyQt5.QtWidgets import QPushButton, QLabel, QLineEdit
-from PyQt5.QtWidgets import QComboBox, QMessageBox, QCheckBox
-from PyQt5.QtWidgets import QWidget, QDesktopWidget
-from PyQt5.QtWidgets import QGridLayout
-
-from sys import platform as _platform
+from PyQt5.QtWidgets import (
+    QPushButton, QLabel, QLineEdit,
+    QComboBox, QMessageBox, QCheckBox,
+    QWidget, QDesktopWidget,
+    QGridLayout
+)
 
 from .main_interface import MainInterface
 from ..func.encryptor import Encryptor

@@ -3,8 +3,10 @@ import os
 import sys
 
 from PyQt5.QtCore import QTimer, pyqtSlot
-from PyQt5.QtWidgets import QWidget, QTabWidget, QLabel, QPushButton
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout
+from PyQt5.QtWidgets import (
+    QWidget, QTabWidget, QLabel, QPushButton,
+    QVBoxLayout, QHBoxLayout, QGridLayout
+)
 
 from .tabs.advance_functions import TabAdvanceFunctions
 from .tabs.tab_ship import TabShips

@@ -1,7 +1,9 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem
-from PyQt5.QtWidgets import QHBoxLayout
-from PyQt5.QtWidgets import QTableView, QHeaderView, QAbstractScrollArea
+from PyQt5.QtWidgets import (
+    QWidget, QTableWidget, QTableWidgetItem,
+    QHBoxLayout,
+    QTableView, QHeaderView, QAbstractScrollArea
+)
 
 
 class DailySummary(QWidget):

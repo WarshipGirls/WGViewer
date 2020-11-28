@@ -2,9 +2,11 @@ import csv
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtWidgets import QHeaderView, QTableView
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import (
+    QWidget,
+    QHeaderView, QTableView,
+    QVBoxLayout
+)
 
 from ....data import data as wgr_data
 

@@ -2,9 +2,11 @@ import sys
 import os
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QWidget, QPushButton, QMainWindow
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
-from PyQt5.QtWidgets import QVBoxLayout, QHeaderView
+from PyQt5.QtWidgets import (
+    QWidget, QPushButton, QMainWindow,
+    QTableWidget, QTableWidgetItem,
+    QVBoxLayout, QHeaderView
+)
 
 from . import constant as SCONST
 from ....data import data as wgr_data

@@ -1,9 +1,11 @@
 import logging
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem
-from PyQt5.QtWidgets import QHBoxLayout,QVBoxLayout
-from PyQt5.QtWidgets import QTableView, QHeaderView, QAbstractScrollArea
+from PyQt5.QtWidgets import (
+    QWidget, QTableWidget, QTableWidgetItem,
+    QHBoxLayout, QVBoxLayout,
+    QTableView, QHeaderView, QAbstractScrollArea
+)
 
 from ....data import data as wgr_data
 
