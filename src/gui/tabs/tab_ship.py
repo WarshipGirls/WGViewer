@@ -22,15 +22,18 @@ def get_data_path(relative_path):
 
 
 class TabShips(QWidget):
-    def __init__(self, api, realrun):
+    def __init__(self, api, is_realrun):
         super().__init__()
+        logging.info("SHIPS - Creating Ships Tab...")
         self.api = api
 
         self.init_ui()
         self.init_assets()
 
-        if realrun == 0:
-            self.test()
+        if is_realrun:
+            pass
+        else:
+            self._testrun()
 
     def init_ui(self):
         scroll_box = QVBoxLayout(self)
@@ -62,16 +65,11 @@ class TabShips(QWidget):
         self.lower_layout = QGridLayout(self.lower_content_widget)
         self.search_line = QLineEdit(self.lower_content_widget)
         self.search_line.setPlaceholderText('Search ship by name. To reset, type whitespace and delete it.')
+        self.search_line.textChanged.connect(self.table_proxy.setNameFilter)
         self.lower_layout.addWidget(self.search_line, 0, 0, 1, self.table_model.columnCount())
         self.lower_layout.addWidget(self.table_view, 1, 0, 1, self.table_model.columnCount())
 
         self.init_view_settings()
-
-        # Last column is stretched as of now
-        self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        # self.table_view.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-
-        self.search_line.textChanged.connect(self.table_proxy.setNameFilter)
 
     def init_view_settings(self):
         self.table_view.setItemDelegate(ShipTableDelegate(self.table_view))
@@ -80,12 +78,14 @@ class TabShips(QWidget):
         self.table_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setShowGrid(False)
+        self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
     def init_assets(self):
         # TODO: find drive that serves ppl in/out GFW
+        # TODO: pyinstaller seems not packing zip
         # s_link = 'https://drive.google.com/file/d/1v5VO1b_Phl66xJJgk4TAXjGa_XHjbl-k/view?usp=sharing'
         # e_link = 'https://drive.google.com/file/d/1CeluorrRqqhrKeNUo18UelKXhTxE8dsU/view?usp=sharing'
-        logging.info('Loading necessary resource files...')
+        logging.info('SHIPS - Loading necessary assets files...')
         if os.path.isdir(get_data_path('src/assets/S')):
             pass
         else:
@@ -98,24 +98,26 @@ class TabShips(QWidget):
             with zipfile.ZipFile(get_data_path('src/assets/E.zip'), 'r') as zip_ref:
                 zip_ref.extractall(get_data_path('src/assets'))
 
-    def test(self):
+    def _testrun(self):
         logging.debug("Starting tests")
         import json
         p = get_data_path('api_getShipList.json')
         with open(p) as f:
             d = json.load(f)
         # logging.error(len(d['userShipVO']))
-        d['userShipVO'] = d['userShipVO'][:5]
+        # d['userShipVO'] = d['userShipVO'][:5]
         self.on_received_shiplist(d)
 
     @pyqtSlot(dict)
     def on_received_shiplist(self, data):
         if data == None:
-            logging.error("Invalid ship list data.")
+            logging.error("SHIPS - Invalid ship list data.")
         else:
             # First sort by level, then sort by cid
             sorted_ships = sorted(data["userShipVO"], key=lambda x: (x['level'], x['shipCid']), reverse=True)
             self.table_model.set_data(sorted_ships)
+            self.table_model.save_table_data()
+            logging.info("SHIPS - Success initialized table and save table data.")
 
 
 # End of File

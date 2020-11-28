@@ -211,10 +211,13 @@ class LoginForm(QWidget):
             self.server = "http://s13.jr.moefantasy.com/"
         elif text == "长春":
             self.server = "http://s14.jr.moefantasy.com/"
+        elif text == "":
+            logging.warn("Server is not manually chosen.")
         else:
-            logging.error("Invalid server name.")
+            logging.error("Invalid server name: {}".format(text))
 
     def check_password(self):
+        # TODO: #30
         self.button_login.setText('Connecting to server...')
         self.button_login.setEnabled(False)
         self.on_check_clicked()
@@ -238,12 +241,15 @@ class LoginForm(QWidget):
         try:
             res1 = account.first_login(_username, _password)
             res2 = account.second_login(self.server)
-            self.button_login.setText('Loading & Initializing...')
+            self.button_login.setText('Loading and Initializing...')
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(e)
+            self.button_login.setEnabled(True)
+            self.button_login.setText('Login')
             msg.setText("Logging failed.")
             msg.exec_()
             return
+
         if res1 == True and res2 == True:
             logging.info("Login Successfully...")
             msg.setText('Success')

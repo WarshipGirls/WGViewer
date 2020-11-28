@@ -1,4 +1,5 @@
 import ctypes
+import logging
 import os
 import sys
 
@@ -35,6 +36,8 @@ if __name__ == '__main__':
     set_app_icon()
     init_QSettings()
     init_fonts()
+    
+    logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     # python gui_main.py 0/1
     if int(sys.argv[1]):   # user run
@@ -43,9 +46,8 @@ if __name__ == '__main__':
         login_form.raise_()
     else:   # test
         # NOTE!! In test run, api call to server won't work
-        import logging
         from src.gui.main_interface import MainInterface
-        logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        # logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logging.info("Warship Girls Viewer started...")
         mi = MainInterface("0", "0", "0", False)
         mi.show()
