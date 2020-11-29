@@ -24,7 +24,7 @@ Nice tools to have: [Fiddler 4](https://www.telerik.com/fiddler), [Python debugg
 
 To contribute code,
 
-1. start a Python vitrual environment
+1. start a Python virtual environment
 2. install required packages:
 
 > pip install -r requirements.txt
@@ -47,7 +47,7 @@ Warship Girls Viewer (as "WGViewer") is not a representative and is not associat
 
 WGViewer is intended for educational purposes only. Botting is in violation of the User Agreement of the game; prolonged usage of WGViewer may result in your game account being banned. The developer of WGViewer takes no responsibility for repercussions related to the usage of WGViewer.
 
-Although unlikely, users may sink ships and lose equipment when using WGViewer to conduct combat sorties. While WGViewer has been painstakingly designed to reduce chances of such occurence, the developer of WGViewer does not take responsibility for any loss of ships and/or resources.
+Although unlikely, users may sink ships and lose equipment when using WGViewer to conduct combat sorties. While WGViewer has been painstakingly designed to reduce chances of such occurrence, the developer of WGViewer does not take responsibility for any loss of ships and/or resources.
 
 ## Licenses
 
