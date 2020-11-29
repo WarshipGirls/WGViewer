@@ -27,7 +27,7 @@ def save_init_data():
             if res[0] == True:
                 pass
             else:
-                res[0] = save_all_attr(storage_dir, res[1])
+                res[0] = _save_all_attr(storage_dir, res[1])
         except (TimeoutError, requests.exceptions.ConnectionError) as e:
             logging.error('Data initializing failed. Trying again...')
             sleep(5)
@@ -38,7 +38,7 @@ def save_init_data():
 # ================================
 
 
-def save_data_by_attr(storage_dir, data_dict, field):
+def _save_data_by_attr(storage_dir, data_dict, field):
     try:
         filename = field + '.json'
         p = os.path.join(storage_dir, filename)
@@ -52,10 +52,10 @@ def save_data_by_attr(storage_dir, data_dict, field):
         return False
     return True
 
-def save_all_attr(storage_dir, data):
+def _save_all_attr(storage_dir, data):
     res = True
     for k in data.keys():
-        res &= save_data_by_attr(storage_dir, data, k)
+        res &= _save_data_by_attr(storage_dir, data, k)
     return res
 
 def _check_data_ver(storage_dir):

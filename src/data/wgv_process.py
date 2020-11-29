@@ -1,5 +1,5 @@
 import os
-from .json import (
+from .wgv_json import (
     get_user_fleets, get_shipItem, get_userVo, 
     get_shipCard, get_shipEquipmnt, get_equipmentVo,
     save_equipmentVo
@@ -9,7 +9,7 @@ from .json import (
 # Not Exports
 # ================================
 
-def process_one_equip(equip):
+def _process_one_equip(equip):
     res = {}
     res['title'] = equip['title']
     res['desc'] = equip['desc']
@@ -76,7 +76,7 @@ def get_ship_equips(cid):
     for e in all_equips:
         if target_type in e['shipType']:
             equips.append(e['cid'])
-            id_to_data[e['cid']] = process_one_equip(e)
+            id_to_data[e['cid']] = _process_one_equip(e)
         else:
             pass
 
@@ -145,7 +145,7 @@ def _type_to_equips(equipable_types):
         else:
             type_to_id[e['type']] = []
         type_to_id[e['type']].append(e['cid'])
-        id_to_data[e['cid']] = process_one_equip(e)
+        id_to_data[e['cid']] = _process_one_equip(e)
 
     print(type_to_id)
 

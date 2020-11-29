@@ -3,7 +3,7 @@
 import json
 import os
 
-from .path import get_init_dir, get_user_dir, get_temp_dir
+from .wgv_path import get_init_dir, get_user_dir, get_temp_dir
 
 """
 Order functions alphabetically!
@@ -27,6 +27,12 @@ def _save_json(folder, filename, data):
 # ================================
 # Exports
 # ================================
+
+def get_api_initGame():
+    return _load_json(get_temp_dir(), 'api_initGame.json')
+
+def save_api_initGame(data):
+    _save_json(get_temp_dir(), 'api_initGame.json', data)
 
 def get_equipmentVo():
     # shipEquipmnt.json contains the equipment you own;
@@ -59,6 +65,12 @@ def get_shipItem():
 
 def get_tactics_json():
     return _load_json(get_init_dir(), 'ShipTactics.json')
+
+def get_taskVo():
+    return _load_json(get_init_dir(), 'taskVo.json')
+
+def save_taskVo(data):
+    _save_json(get_user_dir(), 'taskVo.json', data)
 
 def get_user_fleets():
     return _load_json(get_user_dir(), 'fleetVo.json')
