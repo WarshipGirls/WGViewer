@@ -21,7 +21,7 @@ class MainInterfaceMenuBar(QMenuBar):
     def create_action(self, text, handler, shortcut=None):
         q = QAction(text, self)
         q.triggered.connect(handler)
-        if shortcut != None:
+        if shortcut is not None:
             q.setShortcut(shortcut)
         else:
             pass

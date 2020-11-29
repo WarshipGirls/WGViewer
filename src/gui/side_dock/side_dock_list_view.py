@@ -8,11 +8,11 @@ class AlignListView(QTreeView):
     Custom View for aligning left and right items
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         # PUT keyword argument between *args and **kwargs!!
         # e.g. __init__(self, *args, rows=None, **kwargs)
         # TODO: styling?? the font is TOO small
-        super(AlignListView, self).__init__()
+        super().__init__()
         self.setModel(QStandardItemModel(self))
         self.model().setColumnCount(2)
         self.setRootIsDecorated(False)
@@ -34,11 +34,11 @@ class AlignListView(QTreeView):
     def add_item(self, key, value, desc=None, is_limited=False):
         # TODO: add function, when user clicked, pop up build/dev/repair etc
         first = QStandardItem(key)
-        if desc != None:
+        if desc is not None:
             first.setToolTip(desc)
         else:
             pass
-        if is_limited != False:
+        if is_limited:
             first.setForeground(QColor(255, 51, 51))
         else:
             pass
@@ -54,7 +54,7 @@ class AlignListView(QTreeView):
 
 
 class BathListView(AlignListView):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         super().__init__()
 
     def on_click(self, index):
@@ -65,7 +65,7 @@ class BathListView(AlignListView):
 
 
 class BuildListView(AlignListView):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         super().__init__()
 
     def on_click(self, index):
@@ -79,13 +79,13 @@ class BuildListView(AlignListView):
 
 
 class DevListView(AlignListView):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         super().__init__()
 
     def on_click(self, index):
         pass
         # dock/buildEquipment/{slot}/{fuel}/{ammo}/{steel}/{baux}
-        # dock/dismantleEquipment       # I'm suprised, how do we know which to dismantle?
+        # dock/dismantleEquipment       # I'm surprised, how do we know which to dismantle?
         # dock/getEquipment/2/
         # TODO: build 10 equips
         # TODO: cancel dev
@@ -93,10 +93,11 @@ class DevListView(AlignListView):
 
 
 class ExpListView(AlignListView):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         super().__init__()
 
     def on_click(self, index):
+        print('exp')
         pass
         # explore/getResult/{exp_map}
         # explore/Start/{fleet}/{exp_map}
@@ -105,7 +106,7 @@ class ExpListView(AlignListView):
 
 
 class TaskListView(AlignListView):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         super().__init__()
 
     def on_click(self, index):
