@@ -15,35 +15,33 @@ from .helper_function import Helper
 
 class GameLogin:
     """
-    1st login: channal cookie version server_list
+    1st login: channel cookie version server_list
     2nd login: return nothing; init data
     """
+
     def __init__(self, game_version, game_channel, game_session, login_button):
         self.version = game_version
         self.channel = game_channel
         self.session = game_session
         self.login_button = login_button
 
-        self.init_attr()
-
-        self.hlp = Helper(self.session)
-
-    def init_attr(self):
+        self.uid = None
+        self.cookies = None
+        self.login_server = ""
+        self.key = constants.login_key
+        self.portHead = ""
+        self.hm_login_server = ""
         self.pastport_headers = {
             "Accept-Encoding": "gzip",
             'User-Agent': 'okhttp/3.4.1',
             "Content-Type": "application/json; charset=UTF-8"
         }
-        self.hm_login_server = ""
-        self.portHead = ""
-        self.key = constants.login_key
-        self.login_server = ""
-        self.cookies = None
-        self.uid = None
+
+        self.hlp = Helper(self.session)
 
     def first_login(self, username, pwd):
         logging.info("LOGIN - first server fetching...")
-        url_version = f'http://version.jr.moefantasy.com/index/checkVer/{self.version}/{self.channel}/2&version={self.version}&channel={self.channel}&market=2'
+        url_version = f"http://version.jr.moefantasy.com/index/checkVer/{self.version}/{self.channel}/2&version={self.version}&channel={self.channel}&market=2"
         self.portHead = "881d3SlFucX5R5hE"
         # -------------------------------------------------------------------------------------------
         # Pull version Info
@@ -124,7 +122,8 @@ class GameLogin:
 
         self.refresh_headers(url_login)
 
-        login_response = self.session.post(url=url_login, data=json.dumps(data).replace(" ", ""), headers=self.pastport_headers, timeout=10)
+        login_response = self.session.post(url=url_login, data=json.dumps(data).replace(" ", ""),
+                                           headers=self.pastport_headers, timeout=10)
         login_response = json.loads(login_response.text)
 
         if "error" in login_response and int(login_response["error"]) != 0:
@@ -179,6 +178,5 @@ class GameLogin:
 
     def get_cookies(self):
         return self.cookies
-
 
 # End of File
