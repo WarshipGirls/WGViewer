@@ -51,11 +51,9 @@ class MainInterfaceMenuBar(QMenuBar):
         menu.addSeparator()
         menu.addAction(self.create_action("&About Warship Girls Viewer", self.open_author_info))
 
-
     # ================================
     # File QActions
     # ================================
-
 
     def quit_application(self):
         # TODO: in the future, save unfinished tasks
@@ -65,9 +63,10 @@ class MainInterfaceMenuBar(QMenuBar):
         os.startfile(wgr_data.get_data_dir())
 
     def clear_cache_folder(self):
-        reply = QMessageBox.question(self, 'Warning', "Do you want to clear all caches?\n(Re-caching takes time)", QMessageBox.Yes, QMessageBox.No)
+        reply = QMessageBox.question(self, 'Warning', "Do you want to clear all caches?\n(Re-caching takes time)",
+                                     QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            wgr_data._clear_cache()
+            wgr_data.clear_cache_folder()
         else:
             pass
 
@@ -88,7 +87,8 @@ class MainInterfaceMenuBar(QMenuBar):
     # ================================
 
     def submit_issue(self):
-        reply = QMessageBox.question(self, 'Report', "Do you want to submit a bug or make an suggestion?", QMessageBox.Yes, QMessageBox.No)
+        reply = QMessageBox.question(self, 'Report', "Do you want to submit a bug or make an suggestion?",
+                                     QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
             webbrowser.open_new('https://github.com/WarshipGirls/WGViewer/issues/new')
         else:
@@ -96,12 +96,11 @@ class MainInterfaceMenuBar(QMenuBar):
 
     def open_author_info(self):
         def get_hyperlink(link, text):
-            return "<a style=\"color:hotpink;text-align: center;\" href='"+link+"'>"+text+"</a>"
+            return "<a style=\"color:hotpink;text-align: center;\" href='" + link + "'>" + text + "</a>"
 
         msg_str = '<h1>Warship Girls Viewer</h1>'
         msg_str += "\n"
         msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
         QMessageBox.about(self, "About", msg_str)
-
 
 # End of File
