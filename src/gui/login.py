@@ -222,7 +222,6 @@ class LoginForm(QWidget):
             self.login_button.setEnabled(True)
             self.login_button.setText('Login')
 
-        # TODO: #30
         self.login_button.setText('Connecting to server...')
         self.login_button.setEnabled(False)
         self.on_check_clicked()
@@ -236,7 +235,7 @@ class LoginForm(QWidget):
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()
 
-        if wgr_data.is_key_exists(self.key_filename) == False:
+        if not wgr_data.is_key_exists(self.key_filename):
             key = self.encryptor.gen_key()
             self.encryptor.save_key(key, wgr_data.get_key_path(self.key_filename))
         else:

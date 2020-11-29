@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import requests
-import urllib
+from urllib.error import URLError
 
 from time import sleep
 from .wgv_path import get_init_dir
@@ -25,11 +25,11 @@ def save_init_data():
     while not res[0]:
         try:
             res = _check_data_ver(storage_dir)
-            if res[0] == True:
+            if res[0]:
                 pass
             else:
                 res[0] = _save_all_attr(storage_dir, res[1])
-        except (TimeoutError, requests.exceptions.ConnectionError) as e:
+        except (TimeoutError, requests.exceptions.ConnectionError):
             logging.error('Data initializing failed. Trying again...')
             sleep(5)
 
@@ -69,7 +69,7 @@ def _check_data_ver(storage_dir):
     d = None
     try:
         d = requests.get(url).json()
-    except (urllib.error.URLError, json.decoder.JSONDecodeError) as e:
+    except (URLError, json.decoder.JSONDecodeError):
         logging.error('Server connection error. Please try again later.')
         return [False, d]
 

@@ -38,7 +38,7 @@ class EquipPopup(QMainWindow):
         self.button = QPushButton('Unequip Current Equipment')
         self.tab = QTableWidget()
         self.init_ui()
-        if self.button_enable == True:
+        if self.button_enable:
             pass
         else:
             self.button.setEnabled(False)

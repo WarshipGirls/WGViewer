@@ -126,7 +126,7 @@ class TabShips(QWidget):
 
     @pyqtSlot(dict)
     def on_received_shiplist(self, data):
-        if data == None:
+        if data is None:
             logging.error("SHIPS - Invalid ship list data.")
         else:
             # First sort by level, then sort by cid

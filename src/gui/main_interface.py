@@ -72,7 +72,7 @@ class MainInterface(QMainWindow):
 
     def init_side_dock(self):
         def _create_side_dock():
-            if self.side_dock_on == False:
+            if not self.side_dock_on:
                 self.side_dock = SideDock(self)
                 self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
                 self.side_dock_on = True

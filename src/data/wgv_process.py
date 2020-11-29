@@ -1,4 +1,3 @@
-import os
 from .wgv_json import (
     get_user_fleets, get_shipItem, get_userVo,
     get_shipCard, get_shipEquipmnt, get_equipmentVo,
@@ -100,7 +99,7 @@ def get_ship_equips(cid):
 
 
 def update_equipment_amount(equipped, unequipped):
-    # both input are cids (int)
+    # both input are cid (int)
     equipped = int(equipped)
     unequipped = int(unequipped)
     user_equips = get_equipmentVo()
@@ -133,10 +132,10 @@ def find_all_indices(lst, key, value):
     return res
 
 
-""" Following implementation is not used because MF's bug
-def _type_to_equips(equipable_types):
+""" Following implementation is not used because Moefantasy bug
+def _type_to_equips(equipment_types):
     '''
-    Based on a ship equipable types, return all user owned equipment. 
+    Based on a ship equipment types, return all user owned equipment. 
     '''
     # 2. get all equipment id in shipEquipmnt (yes, no 'e')
     equip_path = os.path.join(get_init_dir(), 'shipEquipmnt.json')
@@ -161,7 +160,7 @@ def _type_to_equips(equipable_types):
 
     # 3. get all user-owned equipment by equipment id
     res = []
-    for t in equipable_types:
+    for t in equipment_types:
         for e in type_to_id[t]:
             try:
                 user_e = next((i for i in user_equips if i['equipmentCid'] == e))
@@ -186,7 +185,6 @@ def get_ship_equips(cid):
         x = json.load(f)
     try:
         ship = next((i for i in x if i['cid'] == cid))
-        # TOFIX
         types = ship['equipmentType']
     except StopIteration:
         return []
