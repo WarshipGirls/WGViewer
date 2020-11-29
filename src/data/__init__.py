@@ -21,7 +21,7 @@ from .wgv_path import (
 )
 from .wgv_process import (
     find_all_indices, find_index, 
-    get_big_success_rate, get_exp_fleets, get_exp_map, get_ship_equips, 
+    get_big_success_rate, get_exp_fleets, get_exp_list, get_exp_map, get_ship_equips, 
     update_equipment_amount
 )
 from .wgv_qsettings import (

@@ -108,6 +108,16 @@ def get_exp_map(fleet_id):
     return map_name
 
 
+def get_exp_list():
+    exp_list = get_pveExploreVo()['chapters']
+    res = []
+    for i in exp_list:
+        end_idx = 5 if i is not 8 else 3
+        _list = [str(i) + "000" + str(j) for j in range(1, end_idx)]
+        res += _list
+    return res
+
+
 def update_equipment_amount(equipped, unequipped):
     # both input are cid (int)
     equipped = int(equipped)

@@ -473,12 +473,12 @@ class SideDock(QDockWidget):
         box.setDefaultButton(QMessageBox.No)
         box.setCheckBox(cb)
 
-        self.qsettings.setValue("UI/no_side_dock", cb.isChecked())
         if box.exec() == QMessageBox.Yes:
             event.accept()
             self.sig_closed.emit()
         else:
             event.ignore()
+        self.qsettings.setValue("UI/no_side_dock", cb.isChecked())
 
     def update_geometry(self):
         y = 0.03 * self.user_screen_h
