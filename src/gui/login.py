@@ -1,22 +1,21 @@
-# import sys
 import logging
 import requests
 import qdarkstyle
 
 from PyQt5.QtCore import QSettings, QVariant
-from PyQt5.QtWidgets import QPushButton, QLabel, QLineEdit
-from PyQt5.QtWidgets import QComboBox, QMessageBox, QCheckBox
-from PyQt5.QtWidgets import QWidget, QDesktopWidget
-from PyQt5.QtWidgets import QGridLayout
+from PyQt5.QtWidgets import (
+    QPushButton, QLabel, QLineEdit,
+    QComboBox, QMessageBox, QCheckBox,
+    QWidget, QDesktopWidget,
+    QGridLayout
+)
 
-from sys import platform as _platform
-
+from src import data as wgr_data
+from src.func.encryptor import Encryptor
+from src.func.login import GameLogin
+from src.func.session import Session
+from src.func import constants as constants
 from .main_interface import MainInterface
-from ..func.encryptor import Encryptor
-from ..func.login import GameLogin
-from ..func.session import Session
-from ..func import constants as constants
-from ..data import data as wgr_data
 
 
 class LoginForm(QWidget):
@@ -130,10 +129,10 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.checkbox, 4, 1)
 
     def init_login_button(self, user_h):
-        self.button_login = QPushButton('Login')
-        self.button_login.clicked.connect(self.check_password)
+        self.login_button = QPushButton('Login')
+        self.login_button.clicked.connect(self.check_password)
         # set an empty gap row
-        self.layout.addWidget(self.button_login, 6, 0, 1, 2)
+        self.layout.addWidget(self.login_button, 6, 0, 1, 2)
         self.layout.setRowMinimumHeight(5, 0.03*user_h)
 
 
@@ -176,7 +175,7 @@ class LoginForm(QWidget):
             self.qsettings.endGroup()
         else:
             self.qsettings.remove("Login")
-            wgr_data._del_key_file(self.key_filename)
+            wgr_data.del_key_file(self.key_filename)
 
     def update_server_box(self, text):
         servers = []
@@ -195,7 +194,7 @@ class LoginForm(QWidget):
         #     self.channel = "100024"
         else:
             servers = ["N/A"]
-            logging.warn("Login server is not chosen.")
+            logging.warning("Login server is not chosen.")
         self.combo_server.addItems(servers)
 
     def update_server(self, text):
@@ -211,12 +210,22 @@ class LoginForm(QWidget):
             self.server = "http://s13.jr.moefantasy.com/"
         elif text == "长春":
             self.server = "http://s14.jr.moefantasy.com/"
+        elif text == "":
+            logging.warning("Server is not manually chosen.")
         else:
-            logging.error("Invalid server name.")
+            logging.error("Invalid server name: {}".format(text))
 
     def check_password(self):
-        self.button_login.setText('Connecting to server...')
-        self.button_login.setEnabled(False)
+        
+        def _login_failed():
+            msg.setText("Login Failed: Probably due to bad server connection")
+            msg.exec_()
+            self.login_button.setEnabled(True)
+            self.login_button.setText('Login')
+
+        # TODO: #30
+        self.login_button.setText('Connecting to server...')
+        self.login_button.setEnabled(False)
         self.on_check_clicked()
 
         msg = QMessageBox()
@@ -224,7 +233,7 @@ class LoginForm(QWidget):
         msg.setWindowTitle("Info")
 
         sess = Session()
-        account = GameLogin(constants.version, self.channel, sess)
+        account = GameLogin(constants.version, self.channel, sess, self.login_button)
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()
 
@@ -238,24 +247,21 @@ class LoginForm(QWidget):
         try:
             res1 = account.first_login(_username, _password)
             res2 = account.second_login(self.server)
-            self.button_login.setText('Loading & Initializing...')
+            self.login_button.setText('Loading and Initializing...')
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
-            logging.error(e)
-            msg.setText("Logging failed.")
-            msg.exec_()
+            logging.error(f"LOGIN - {e}")
+            _login_failed()
             return
+
         if res1 == True and res2 == True:
-            logging.info("Login Successfully...")
-            msg.setText('Success')
+            logging.info("LOGIN - SUCCESS!")
+            msg.setText('Login Success')
             msg.exec_()
             msg.close()
             self.mi = MainInterface(self.server, self.channel, account.get_cookies())
             self.login_success()
         else:
-            msg.setText("Incorrect Password.")
-            msg.exec_()
-            self.button_login.setEnabled(True)
-            self.button_login.setText('Login')
+            _login_failed()
 
 
 # End of File

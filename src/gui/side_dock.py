@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 import logging
 import os
 import pytz
@@ -7,17 +5,21 @@ import re
 import sys
 import time
 
+from datetime import datetime, timedelta
+
 from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QRect, QSize, QTimer, QSettings
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QTableView, QAbstractItemView
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
-from PyQt5.QtWidgets import QDockWidget, QWidget, QLabel, QLineEdit, QMessageBox, QCheckBox
-from PyQt5.QtWidgets import QDesktopWidget
+from PyQt5.QtWidgets import (
+    QTableView, QAbstractItemView,
+    QVBoxLayout, QHBoxLayout,
+    QDesktopWidget, QDockWidget, QWidget,
+    QLabel, QLineEdit, QMessageBox, QCheckBox
+)
 
+from src import data as wgr_data
+from src.func import constants as CONST
 from .models.resource_model import ResourceTableModel
 from .models.side_dock_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
-from ..func import constants as CONST
-from ..data import data as wgr_data
 
 
 def get_data_path(relative_path):
@@ -32,24 +34,18 @@ class SideDock(QDockWidget):
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
-    def __init__(self, parent, realrun):
+    def __init__(self, parent):
         super(SideDock, self).__init__(parent)
         self.init_attr()
 
         self.sig_resized.connect(self.update_geometry)
         self.sig_closed.connect(parent.on_dock_closed)
 
-        if realrun == False:
-            self.test()
-        else:
-            self.init_ui()
-
-    def test(self):
         self.init_ui()
-        import json
-        file_path = get_data_path('api_initGame.json')
-        with open(file_path) as f:
-            d = json.load(f)
+        self.set_data()
+
+    def set_data(self):
+        d = wgr_data.get_api_initGame()
         self.on_received_lists(d)
         self.on_received_resource(d)
         self.on_received_name(d)
@@ -81,7 +77,6 @@ class SideDock(QDockWidget):
     def init_ui(self):
         self.setFloating(False)
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        # TODO: after selecting a row/cell, cannot be de-selected (highlight looks ugly)
         self.setMinimumWidth(0.4 * self.user_screen_h)
         self.setWindowTitle("Navy Base Overview")
 
@@ -111,8 +106,9 @@ class SideDock(QDockWidget):
 
     def init_sign_info(self):
         self.sign_widget = QLineEdit(self)
-        icon_path = get_data_path('src/assets/icons/sign_16.png')
-        self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition);
+        icon_path = get_data_path('assets/icons/sign_16.png')
+        self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition)
+        self.sign_widget.setFocusPolicy
 
     def init_resource_info(self):
         data = [
@@ -287,7 +283,7 @@ class SideDock(QDockWidget):
         return CONST.build_type[_id]
 
     def _remove_widget(self, parent, widget):
-        logging.warn("Deleting widget")
+        logging.warning("Deleting widget")
         parent.removeWidget(widget)
         widget.deleteLater()
         widget = None
@@ -384,15 +380,15 @@ class SideDock(QDockWidget):
             lvl_tooltip = str(x["exp"]) + " / " + str(x["nextLevelExpNeed"]) + \
                             ", resource soft cap = " + str(data["userVo"]["resourcesTops"][0])
             self.lvl_label.setToolTip(lvl_tooltip)
-            ship_icon = get_data_path('src/assets/icons/ship_16.png')
+            ship_icon = get_data_path('assets/icons/ship_16.png')
             ship_str = "<html><img src='{}'></html> ".format(ship_icon) + str(x["shipNum"]) \
                          + " / "  + str(x["shipNumTop"])
             self.ship_count_label.setText(ship_str)
-            equip_icon = get_data_path('src/assets/icons/equip_16.png')
+            equip_icon = get_data_path('assets/icons/equip_16.png')
             equip_str = "<html><img src='{}'></html> ".format(equip_icon) + str(x["equipmentNum"]) \
                         + " / "  + str(x["equipmentNumTop"])
             self.equip_count_label.setText(equip_str)
-            collect_icon = get_data_path('src/assets/icons/collect_16.png')
+            collect_icon = get_data_path('assets/icons/collect_16.png')
             collect_str = "<html><img src='{}'></html> ".format(collect_icon) + str(len(data["unlockShip"])) \
                         + " / " + str(x["basicShipNum"])
             self.collect_count_label.setText(collect_str)

@@ -1,7 +1,9 @@
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QCheckBox, QPushButton
-from PyQt5.QtWidgets import QHBoxLayout, QGridLayout
+from PyQt5.QtWidgets import (
+    QWidget, QLabel, QComboBox, QCheckBox, QPushButton,
+    QHBoxLayout, QGridLayout
+)
 
 from . import constant as SCONST
 

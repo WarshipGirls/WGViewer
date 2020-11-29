@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import hmac
 import json
+import logging
 import random
 import time
 import urllib
@@ -17,8 +18,17 @@ class GameLogin:
     1st login: channal cookie version server_list
     2nd login: return nothing; init data
     """
-    def __init__(self, game_version, game_channel, game_session):
+    def __init__(self, game_version, game_channel, game_session, login_button):
+        self.version = game_version
+        self.channel = game_channel
+        self.session = game_session
+        self.login_button = login_button
 
+        self.init_attr()
+
+        self.hlp = Helper(self.session)
+
+    def init_attr(self):
         self.pastport_headers = {
             "Accept-Encoding": "gzip",
             'User-Agent': 'okhttp/3.4.1',
@@ -28,16 +38,11 @@ class GameLogin:
         self.portHead = ""
         self.key = constants.login_key
         self.login_server = ""
-
-        self.version = game_version
-        self.channel = game_channel
-        self.session = game_session
         self.cookies = None
         self.uid = None
 
-        self.hlp = Helper(self.session)
-
     def first_login(self, username, pwd):
+        logging.info("LOGIN - first server fetching...")
         url_version = f'http://version.jr.moefantasy.com/index/checkVer/{self.version}/{self.channel}/2&version={self.version}&channel={self.channel}&market=2'
         self.portHead = "881d3SlFucX5R5hE"
         # -------------------------------------------------------------------------------------------
@@ -64,11 +69,15 @@ class GameLogin:
         return True
 
     def cheat_sess(self, host, link):
+        # TODO the text is not get set in this file!
+        self.login_button.setText(link)
+
         time.sleep(0.5)
         url_cheat = host + link + self.hlp.get_url_end(self.channel)
         self.session.get(url=url_cheat, headers=constants.header, cookies=self.cookies, timeout=10)
 
     def second_login(self, host):
+        logging.info("LOGIN - second data fetching...")
         # Generate random device number
         now_time = str(int(round(time.time() * 1000)))
         random.seed(hashlib.md5(self.uid.encode('utf-8')).hexdigest())

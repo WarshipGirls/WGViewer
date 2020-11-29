@@ -4,71 +4,49 @@ import os
 import qdarkstyle
 
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QThreadPool, QTimer, QSettings
-from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
-from PyQt5.QtWidgets import QDesktopWidget
+from PyQt5.QtWidgets import (
+    QMainWindow, QHBoxLayout,
+    QDesktopWidget
+)
 
-# GUI
+from src import data as wgr_data
+from src.func.wgr_api import WGR_API
 from .side_dock import SideDock
 from .main_interface_tabs import MainInterfaceTabs
-
-# Functions
-# from ..func.worker_thread import Worker
 from .main_interface_menubar import MainInterfaceMenuBar
-from ..data import data as wgr_data
-from ..func.wgr_api import WGR_API
 
 
 class MainInterface(QMainWindow):
     # https://stackoverflow.com/questions/2970312/pyqt4-qtcore-pyqtsignal-object-has-no-attribute-connect
-    sig_initGame = pyqtSignal(dict)
-    sig_getShipList = pyqtSignal(dict)
+    # sig_initGame = pyqtSignal(dict)
 
     def __init__(self, server, channel, cookies, realrun=True):
         super().__init__()
         self.server = server
         self.channel = channel
         self.cookies = cookies
-        self.realrun = realrun
+        self.is_realrun = realrun
         self.side_dock_on = False
 
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.threadpool = QThreadPool()
         self.api = WGR_API(self.server, self.channel, self.cookies)
-        self.setMenuBar(MainInterfaceMenuBar(self))
+        
+        # !!! all DATA initialization must occur before any UI initialization !!!
 
+        # TODO TODO multi-threading
         self.init_data_files()
-        self.init_ui()
-
-        if self.qsettings.contains("UI/init_side_dock"):
-            if self.qsettings.value("UI/init_side_dock") == "true":
-                pass
-            else:
-                self.init_side_dock()
-        else:
-            self.qsettings.setValue("UI/init_side_dock", False)
-            self.init_side_dock()
-
-        # # Multi-Threading TODO?
-        logging.info("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
-        print(self.threadpool.activeThreadCount())
-
-        if self.realrun:
-            self._realrun()
-
-    def _realrun(self):
-        self.sig_initGame.connect(self.side_dock.on_received_resource)
-        self.sig_initGame.connect(self.side_dock.on_received_name)
-        self.sig_initGame.connect(self.side_dock.on_received_tasks)
-        self.sig_initGame.connect(self.side_dock.on_received_lists)
         self.api_initGame()
 
-        self.sig_getShipList.connect(self.table_widget.tab_ships.on_received_shiplist)
-        self.api_getShipList()
+        # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob. Qt.Focus issue)
+        self.init_ui()
+        self.init_side_dock()
 
 
     # ================================
     # Initialization
     # ================================
+
 
     def set_color_scheme(self):
         self.setStyleSheet(wgr_data.get_color_scheme())
@@ -79,21 +57,32 @@ class MainInterface(QMainWindow):
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.resize(0.67*user_w, 0.67*user_h)
 
-        # UI layout - top/L/R/bottom docks and central widget
-        # https://doc.qt.io/archives/4.6/mainwindow.html
-        self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.realrun)
+        self.menu_bar = MainInterfaceMenuBar(self)
+        self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.is_realrun)
+
+        self.setMenuBar(self.menu_bar)
         self.setCentralWidget(self.table_widget)
 
         self.setLayout(QHBoxLayout())
         self.setWindowTitle('Warship Girls Viewer')
 
     def init_side_dock(self):
-        if self.side_dock_on == False:
-            self.side_dock = SideDock(self, self.realrun)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
-            self.side_dock_on = True
+        def _create_side_dock():
+            if self.side_dock_on == False:
+                self.side_dock = SideDock(self)
+                self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
+                self.side_dock_on = True
+            else:
+                pass
+
+        if self.qsettings.contains("UI/init_side_dock"):
+            if self.qsettings.value("UI/init_side_dock") == "true":
+                pass
+            else:
+                _create_side_dock()
         else:
-            pass
+            self.qsettings.setValue("UI/init_side_dock", False)
+            _create_side_dock()
 
     def init_data_files(self):
         num = len(os.listdir(wgr_data.get_init_dir()))
@@ -119,25 +108,18 @@ class MainInterface(QMainWindow):
     # ================================
 
 
-    def api_getShipList(self):
-        data = self.api.api_getShipList()
-        with open('api_getShipList.json', 'w') as of:
-            json.dump(data, of)
-        self.sig_getShipList.emit(data)
-
     def api_initGame(self):
-        data = self.api.api_initGame()
-        with open('api_initGame.json', 'w') as of:
-            json.dump(data, of)
-        self.sig_initGame.emit(data)
+        if self.is_realrun:
+            data = self.api.api_initGame()
+            wgr_data.save_api_initGame(data)
+        else:
+            data = wgr_data.get_api_initGame()
 
-        # save necessary data
-        user_dir = wgr_data.get_user_dir()
-        with open(os.path.join(user_dir, 'equipmentVo.json'), 'w') as f:
-            json.dump(data['equipmentVo'], f, ensure_ascii=False, indent=4)
-
-        with open(os.path.join(user_dir, 'tactics.json'), 'w') as f:
-            json.dump(data['tactics'], f, ensure_ascii=False, indent=4)
+        wgr_data.save_equipmentVo(data['equipmentVo'])
+        wgr_data.save_user_tactics(data['tactics'])
+        wgr_data.save_userVo(data['userVo'])
+        wgr_data.save_user_fleets(data['fleetVo'])
+        wgr_data.save_pveExploreVo(data['pveExploreVo'])
 
 
 # End of File

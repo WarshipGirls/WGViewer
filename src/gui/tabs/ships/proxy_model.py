@@ -1,11 +1,12 @@
 import ast
+import logging
 import re
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import  QIcon
 
 from . import constant as SCONST
-from ....data import data as wgr_data
+from src import data as wgr_data
 
 
 class ShipSortFilterProxyModel(QSortFilterProxyModel):
@@ -34,11 +35,12 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         # TODO? multi-processing following command
         self._info = wgr_data.init_ships_temp()
+        logging.debug('SHIP - Proxy Model init done.')
 
-    def ship_id_to_rarity(self, cid):
+    def ship_id_to_rarity(self, cid: int) -> int:
         return self._info[str(cid)]['rarity']
 
-    def ship_id_to_country(self, cid):
+    def ship_id_to_country(self, cid: int) -> int:
         return self._info[str(cid)]['country']
 
     def setNameFilter(self, regex):
@@ -206,7 +208,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         def f(o, i):    # o is QComboBox index
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
-            rarity = self.ship_id_to_rarity(int(cid))
+            rarity = self.ship_id_to_rarity(cid)
             if o == 0:
                 res.append(True)
             else:
@@ -218,7 +220,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         def f(o, i):    # o is QComboBox index
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
-            country = self.ship_id_to_country(int(cid))
+            country = self.ship_id_to_country(cid)
             if o in [0, 9, 10]:
                 res.append(True)
             else:
@@ -316,7 +318,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                 return SCONST._range_to_int[l] < SCONST._range_to_int[r]
             elif (source_left.column() in self.resource_sort_cols):
                 if (isinstance(l, str) == True) and ("/" in l):
-                    return int(l[:l.find('/')]) < int(r[:r.find('/')]) 
+                    return int(l[:l.find('/')]) < int(r[:r.find('/')])
                 else:
                     return l < r
             elif (source_left.column() in self.slot_sort_col):
