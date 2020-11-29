@@ -9,12 +9,12 @@ class Encryptor():
         return Fernet.generate_key()
 
     def save_key(self, key, path):
-        with open(path, 'wb') as mykey:
-            mykey.write(key)
+        with open(path, 'wb') as f:
+            f.write(key)
 
     def load_key(self, path):
-        with open(path, 'rb') as mykey:
-            key = mykey.read()
+        with open(path, 'rb') as f:
+            key = f.read()
         return key
 
     def encrypt_str(self, key, string):
@@ -22,6 +22,5 @@ class Encryptor():
 
     def decrypt_data(self, key, data):
         return Fernet(key).decrypt(data)
-
 
 # End of File

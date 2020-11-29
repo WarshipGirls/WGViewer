@@ -4,9 +4,10 @@ from PyQt5.QtWidgets import QTreeView, QAbstractItemView, QHeaderView
 
 
 class AlignListView(QTreeView):
-    '''
+    """
     Custom View for aligning left and right items
-    '''
+    """
+
     def __init__(self, *args, **kwargs):
         # PUT keyword argument between *args and **kwargs!!
         # e.g. __init__(self, *args, rows=None, **kwargs)
@@ -90,6 +91,7 @@ class DevListView(AlignListView):
         # TODO: cancel dev
         # TODO: instant build
 
+
 class ExpListView(AlignListView):
     def __init__(self, *args, **kwargs):
         super().__init__()
@@ -109,6 +111,5 @@ class TaskListView(AlignListView):
     def on_click(self, index):
         pass
         # task/getAward/{task_cid}
-
 
 # End of File

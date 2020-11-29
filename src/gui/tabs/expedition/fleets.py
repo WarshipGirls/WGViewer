@@ -19,7 +19,7 @@ class ExpFleets(QWidget):
         self.tab.setColumnCount(4)
         for i in range(self.tab.rowCount()):
             for j in range(self.tab.rowCount()):
-                self.tab.setItem(i,j,QTableWidgetItem(str([i,j,i,j,i,j])))
+                self.tab.setItem(i, j, QTableWidgetItem(str([i, j, i, j, i, j])))
 
         # self.tab = QTableWidget()
         # self.tab.setColumnCount()
@@ -55,27 +55,19 @@ class ExpFleets(QWidget):
 
     def set_table(self):
         print(self.fleets)
-        # print(self.ships_info)
-        # for fleet_id in self.fleets:
-        # self.buttons = []
+
         self.set_one_fleet(1, 0, '5')
         self.set_one_fleet(1, 2, '6')
         self.set_one_fleet(17, 0, '7')
         self.set_one_fleet(17, 2, '8')
-        # print(self.buttons)
 
     def set_one_fleet(self, row, col, fleet_id):
         fleet_name = "Fleet #" + fleet_id
         self.tab.setItem(row, col, QTableWidgetItem(fleet_name))
         row += 1
-        # start_button = QPushButton('START')
-        # start_button.clicked.connect(lambda: self.start_exp(fleet_id))
-        # self.tab.setItem(row, col, start_button)
-        # stop_button = QPushButton('STOP')
-        # stop_button.clicked.connect(lambda: self.stop_exp(fleet_id))
-        # self.tab.setItem(row, col+1, stop_button)
+
         self.add_button(row, col, 'START', self.start_exp, fleet_id)
-        self.add_button(row, col+1, 'STOP', self.stop_exp, fleet_id)
+        self.add_button(row, col + 1, 'STOP', self.stop_exp, fleet_id)
         row += 1
 
         for ship_id in self.fleets[fleet_id]:
@@ -91,22 +83,21 @@ class ExpFleets(QWidget):
         l = QHBoxLayout(w)
         l.addWidget(b)
         l.setAlignment(Qt.AlignCenter)
-        l.setContentsMargins(0,0,0,0)
+        l.setContentsMargins(0, 0, 0, 0)
         w.setLayout(l)
         # self.buttons.append(b)
         self.tab.setCellWidget(row, col, w)
 
     def set_one_ship(self, row, col, ship_id, info):
         self.tab.setItem(row, col, QTableWidgetItem(info['Name']))
-        self.tab.setItem(row, col+1, QTableWidgetItem(str(ship_id)))
-        self.tab.setItem(row+1, col, QTableWidgetItem(info['Lv.']))
-        self.tab.setItem(row+1, col+1, QTableWidgetItem(info['Class']))
+        self.tab.setItem(row, col + 1, QTableWidgetItem(str(ship_id)))
+        self.tab.setItem(row + 1, col, QTableWidgetItem(info['Lv.']))
+        self.tab.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
 
     def start_exp(self, fleet_id):
         print(f'{fleet_id} start exp')
 
     def stop_exp(self, fleet_id):
         print(f'{fleet_id} stop exp')
-
 
 # End of FIle

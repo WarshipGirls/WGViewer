@@ -2,15 +2,13 @@ import logging
 import os
 import sys
 
-from PyQt5.QtCore import QTimer, pyqtSlot
 from PyQt5.QtWidgets import (
-    QWidget, QTabWidget, QLabel, QPushButton,
-    QVBoxLayout, QHBoxLayout, QGridLayout
+    QWidget, QTabWidget, QGridLayout
 )
 
-from .tabs.advance_functions import TabAdvanceFunctions
-from .tabs.tab_ship import TabShips
-from .tabs.tab_expedition import TabExpedition
+from src.gui.tabs.advance_functions import TabAdvanceFunctions
+from src.gui.tabs.tab_ship import TabShips
+from src.gui.tabs.tab_expedition import TabExpedition
 
 
 def get_data_path(relative_path):
@@ -50,12 +48,11 @@ class MainInterfaceTabs(QWidget):
         self.tab_advance = TabAdvanceFunctions(self)
 
         # Add tabs
-        self.tabs.addTab(self.tab_ships,"  Ships  ")
-        self.tabs.addTab(self.tab1,"  Sortie  ")
-        self.tabs.addTab(self.tab2,"  Fleets  ")
-        self.tabs.addTab(self.tab4,"  Equipment  ")
-        self.tabs.addTab(self.tab5,"  Tactics  ")
-        self.tabs.addTab(self.tab_advance,"  Advance Functions  ")
-
+        self.tabs.addTab(self.tab_ships, "  Ships  ")
+        self.tabs.addTab(self.tab1, "  Sortie  ")
+        self.tabs.addTab(self.tab2, "  Fleets  ")
+        self.tabs.addTab(self.tab4, "  Equipment  ")
+        self.tabs.addTab(self.tab5, "  Tactics  ")
+        self.tabs.addTab(self.tab_advance, "  Advance Functions  ")
 
 # End of File

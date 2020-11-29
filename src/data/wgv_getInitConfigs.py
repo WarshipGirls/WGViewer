@@ -2,10 +2,11 @@ import json
 import logging
 import os
 import requests
-import shutil
 import urllib
 
 from time import sleep
+from .wgv_path import get_init_dir
+
 
 # TODO: maybe add init.zip to cloud, and use script to auto update it.
 # https://drive.google.com/file/d/19L7UB00C1oSqYEshP3gRiraTTnzlH19b/view?usp=sharing
@@ -15,9 +16,9 @@ from time import sleep
 # ================================
 
 def save_init_data():
-    '''
+    """
     Updating data to the latest version
-    '''
+    """
     logging.info('Initializing data for first-time user... This may take 30+ seconds...')
     storage_dir = get_init_dir()
     res = [False]
@@ -45,12 +46,13 @@ def _save_data_by_attr(storage_dir, data_dict, field):
         if os.path.exists(p):
             pass
         else:
-            with open(p, 'w', encoding='utf-8') as fout:
-                json.dump(data_dict[field], fout, ensure_ascii=False, indent=4)
+            with open(p, 'w', encoding='utf-8') as f:
+                json.dump(data_dict[field], f, ensure_ascii=False, indent=4)
     except Exception as e:
         logging.error(e)
         return False
     return True
+
 
 def _save_all_attr(storage_dir, data):
     res = True
@@ -58,11 +60,13 @@ def _save_all_attr(storage_dir, data):
         res &= _save_data_by_attr(storage_dir, data, k)
     return res
 
+
 def _check_data_ver(storage_dir):
     # Note: since getting raw data takes 20+ seconds, use this method minimally
     # TODO: this is Chinese data; is there a link for English counterpart?
     url = 'http://login.jr.moefantasy.com/index/getInitConfigs'
     # url = 'http://loginios.jr.moefantasy.com/index/getInitConfigs'
+    d = None
     try:
         d = requests.get(url).json()
     except (urllib.error.URLError, json.decoder.JSONDecodeError) as e:
@@ -83,6 +87,5 @@ def _check_data_ver(storage_dir):
                 res = [False, d]
                 logging.info('getInitConfigs data is updating.')
     return res
-
 
 # End of File

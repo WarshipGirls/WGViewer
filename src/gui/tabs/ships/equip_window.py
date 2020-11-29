@@ -80,7 +80,7 @@ class EquipPopup(QMainWindow):
     def addTableRow(self, table, data):
         self.id_list.append(data['equipmentCid'])
         row = table.rowCount()
-        table.setRowCount(row+1)
+        table.setRowCount(row + 1)
         # col 0
         title = QTableWidgetItem(data['data']['title'])
         if data['locked'] == 1:
@@ -119,6 +119,5 @@ class EquipPopup(QMainWindow):
 
     def unequip(self):
         self.parent.handle_event(self._row, self._col, -1)
-
 
 # End of File

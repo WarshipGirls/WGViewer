@@ -57,14 +57,14 @@ class TopCheckboxes(QWidget):
         for k, v in enumerate(first_row_types):
             b = QCheckBox(v, self)
             self.first_boxes.append(b)
-            self.layout.addWidget(b, 1, k*2+1, 1, 2)
+            self.layout.addWidget(b, 1, k * 2 + 1, 1, 2)
             # https://stackoverflow.com/a/35821092
             self.first_boxes[k].stateChanged.connect(lambda _, b=self.first_boxes[k]: self.proxy.setCheckBoxFilter(b))
         self.second_boxes = []
         for k, v in enumerate(second_row_types):
             b = QCheckBox(v, self)
             self.second_boxes.append(b)
-            self.layout.addWidget(b, 2, k*2+1, 1, 2)
+            self.layout.addWidget(b, 2, k * 2 + 1, 1, 2)
             self.second_boxes[k].stateChanged.connect(lambda _, b=self.second_boxes[k]: self.proxy.setCheckBoxFilter(b))
 
     def _add_dropdown(self, label, combobox, x, y, y_span):
@@ -116,6 +116,5 @@ class TopCheckboxes(QWidget):
         for b in self.second_boxes:
             b.setChecked(False)
         self.proxy.setCheckBoxFilter(None)
-
 
 # End of File

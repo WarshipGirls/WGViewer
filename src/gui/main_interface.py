@@ -1,9 +1,6 @@
-import json
-import logging
 import os
-import qdarkstyle
 
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QThreadPool, QTimer, QSettings
+from PyQt5.QtCore import Qt, pyqtSlot, QThreadPool, QSettings
 from PyQt5.QtWidgets import (
     QMainWindow, QHBoxLayout,
     QDesktopWidget
@@ -11,9 +8,9 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgr_data
 from src.func.wgr_api import WGR_API
-from .side_dock import SideDock
-from .main_interface_tabs import MainInterfaceTabs
-from .main_interface_menubar import MainInterfaceMenuBar
+from src.gui.side_dock.dock import SideDock
+from src.gui.interface.main_interface_tabs import MainInterfaceTabs
+from src.gui.interface.main_interface_menubar import MainInterfaceMenuBar
 
 
 class MainInterface(QMainWindow):
@@ -31,22 +28,21 @@ class MainInterface(QMainWindow):
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.threadpool = QThreadPool()
         self.api = WGR_API(self.server, self.channel, self.cookies)
-        
+
         # !!! all DATA initialization must occur before any UI initialization !!!
 
         # TODO TODO multi-threading
         self.init_data_files()
         self.api_initGame()
 
-        # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob. Qt.Focus issue)
+        # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob.
+        #  Qt.Focus issue)
         self.init_ui()
         self.init_side_dock()
-
 
     # ================================
     # Initialization
     # ================================
-
 
     def set_color_scheme(self):
         self.setStyleSheet(wgr_data.get_color_scheme())
@@ -55,7 +51,7 @@ class MainInterface(QMainWindow):
         self.set_color_scheme()
         user_w = QDesktopWidget().screenGeometry(-1).width()
         user_h = QDesktopWidget().screenGeometry(-1).height()
-        self.resize(0.67*user_w, 0.67*user_h)
+        self.resize(0.67 * user_w, 0.67 * user_h)
 
         self.menu_bar = MainInterfaceMenuBar(self)
         self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.is_realrun)
@@ -92,21 +88,17 @@ class MainInterface(QMainWindow):
         else:
             pass
 
-
     # ================================
     # Events
     # ================================
-
 
     @pyqtSlot()
     def on_dock_closed(self):
         self.side_dock_on = False
 
-
     # ================================
     # WGR APIs
     # ================================
-
 
     def api_initGame(self):
         if self.is_realrun:
@@ -120,6 +112,5 @@ class MainInterface(QMainWindow):
         wgr_data.save_userVo(data['userVo'])
         wgr_data.save_user_fleets(data['fleetVo'])
         wgr_data.save_pveExploreVo(data['pveExploreVo'])
-
 
 # End of File

@@ -26,12 +26,12 @@ class Helper():
         return url_end
 
     def decompress_data(self, url, cookies, *vdata):
-        if  len(vdata) is 0:
+        if len(vdata) is 0:
             content = self.sess.get(url=url, headers=constants.header, cookies=cookies, timeout=10).content
         else:
             h = constants.header
             # https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
-            h["Content-Type"]="application/x-www-form-urlencoded"
+            h["Content-Type"] = "application/x-www-form-urlencoded"
             content = self.sess.post(url=url, data=str(vdata[0]), headers=h, cookies=cookies, timeout=10).content
         try:
             data = zlib.decompress(content)
@@ -50,6 +50,5 @@ class Helper():
 
     def ts_to_countdown(self, seconds):
         return str(timedelta(seconds=t))
-
 
 # End of File

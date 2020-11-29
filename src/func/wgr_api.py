@@ -33,7 +33,8 @@ class WGR_API:
                 sleep(self.sleep_time)
             tries += 1
             if tries >= self.max_retry:
-                logging.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
+                logging.warning(
+                    f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
                 break
             else:
                 pass
@@ -122,6 +123,5 @@ class WGR_API:
         with open('campaign_getUserData.json', 'w') as of:
             json.dump(data, of)
     '''
-
 
 # End of File

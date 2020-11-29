@@ -32,12 +32,12 @@ class TabExpedition(QWidget):
         main_layout.addWidget(self.table, 0, 0, self.table.get_row_count(), self.table.get_col_count())
 
         self.fleet_table = ExpFleets()
-        main_layout.addWidget(self.fleet_table, 0, self.table.get_col_count(), self.fleet_table.get_row_count(), self.fleet_table.get_col_count())
+        main_layout.addWidget(self.fleet_table, 0, self.table.get_col_count(), self.fleet_table.get_row_count(),
+                              self.fleet_table.get_col_count())
 
         self.summary = DailySummary()
         main_layout.addWidget(self.summary, self.table.get_row_count(), 0, 5, 10)
 
         self.setLayout(main_layout)
-
 
 # End of File

@@ -27,8 +27,8 @@ class DailySummary(QWidget):
         self.tab.setSpan(0, 0, 1, 4)
         self.tab.setSpan(0, 4, 1, 4)
 
-        labels_col1 = ["Fuel","Ammo.","Steel","Bauxite"]
-        labels_col2 = ["Inst. Repair","Inst. Build.","Ship Blueprint","Equip. Blueprint"]
+        labels_col1 = ["Fuel", "Ammo.", "Steel", "Bauxite"]
+        labels_col2 = ["Inst. Repair", "Inst. Build.", "Ship Blueprint", "Equip. Blueprint"]
         self.set_labels(labels_col1, 0)
         self.set_labels(labels_col2, 2)
         self.set_labels(labels_col1, 4)
@@ -48,11 +48,10 @@ class DailySummary(QWidget):
 
     def set_labels(self, labels, col):
         for row in range(1, 5):
-            self.tab.setItem(row, col, QTableWidgetItem(labels[row-1]))
+            self.tab.setItem(row, col, QTableWidgetItem(labels[row - 1]))
 
     def update_val(self, data, row, col):
         item = self.tab.item(row, col)
         self.tab.setItem(row, col, QTableWidgetItem(str(data)))
-
 
 # End of File

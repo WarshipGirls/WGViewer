@@ -29,11 +29,9 @@ class ExpTable(QWidget):
         self.main_layout = QVBoxLayout(self)
         self.main_layout.addWidget(self.table_view)
 
-
     # ================================
     # Getter / Setter
     # ================================
-
 
     def set_col_count(self, cols):
         self.table_model.setColumnCount(cols)
@@ -44,18 +42,16 @@ class ExpTable(QWidget):
     def get_col_count(self):
         return self.table_model.columnCount()
 
-
     # ================================
     # UI
     # ================================
 
-
     def init_ui(self):
         self.merge_cells()
         self.init_header_ui()
-        self.highlight_data([3,4,5,6], highlight_color=None, bold=True)
-        self.highlight_data([7,8,9,10], highlight_color=QColor(128, 159, 255), bold=True)
-        self.highlight_data([11,12,13,14], highlight_color=QColor(0, 153, 51), bold=True)
+        self.highlight_data([3, 4, 5, 6], highlight_color=None, bold=True)
+        self.highlight_data([7, 8, 9, 10], highlight_color=QColor(128, 159, 255), bold=True)
+        self.highlight_data([11, 12, 13, 14], highlight_color=QColor(0, 153, 51), bold=True)
 
         self.table_view.setShowGrid(False)
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
@@ -69,7 +65,7 @@ class ExpTable(QWidget):
             self.table_view.setRowHeight(i, 20)
 
     def init_header_ui(self):
-        for c in [3,7,11]:
+        for c in [3, 7, 11]:
             item = self.table_model.itemFromIndex(self.table_model.index(0, c))
             f = item.font()
             f.setBold(True)
@@ -79,10 +75,10 @@ class ExpTable(QWidget):
             item.setBackground(QColor(89, 89, 89))
 
     def merge_cells(self):
-        self.table_view.setSpan(0,0,1,3)
-        self.table_view.setSpan(0,3,1,4)
-        self.table_view.setSpan(0,7,1,4)
-        self.table_view.setSpan(0,11,1,2)
+        self.table_view.setSpan(0, 0, 1, 3)
+        self.table_view.setSpan(0, 3, 1, 4)
+        self.table_view.setSpan(0, 7, 1, 4)
+        self.table_view.setSpan(0, 11, 1, 2)
 
     def highlight_data(self, cols, highlight_color=None, bold=False):
         idxs = []
@@ -107,15 +103,13 @@ class ExpTable(QWidget):
             item = self.table_model.itemFromIndex(self.table_model.index(m, 0))
             item.setBackground(QColor(0, 153, 51))
 
-
     # ================================
     # Data processing
     # ================================
 
-
     def load_csv(self, csv_path):
         with open(csv_path, "r") as f:
-            for row in csv.reader(f): 
+            for row in csv.reader(f):
                 items = [QStandardItem(field) for field in row]
                 self.table_model.appendRow(items)
 
@@ -123,18 +117,18 @@ class ExpTable(QWidget):
         raw = wgr_data.get_big_success_rate()
         item = QStandardItem(str(raw[0]))
         item.setToolTip(f'Expedition Detail\nSuccess\t\t{raw[1]}\nGrate Success\t{raw[2]}')
-        self.table_model.setItem(0, self.get_col_count()-1, item)
+        self.table_model.setItem(0, self.get_col_count() - 1, item)
 
     def set_expectation_income(self):
         rate = wgr_data.get_big_success_rate()[0]
         for row in range(2, self.get_row_count()):
-            for col in [11,12,13,14]:
-                d = self.table_model.index(row, col-4).data()
+            for col in [11, 12, 13, 14]:
+                d = self.table_model.index(row, col - 4).data()
                 if d == "":
                     continue
                 else:
                     d = int(d)
-                    t = (1-rate)*d + rate*d*1.5
+                    t = (1 - rate) * d + rate * d * 1.5
                     self.table_model.setItem(row, col, QStandardItem(str(int(t))))
 
     def get_n_max_val_idx_by_col(self, col, n=4):
@@ -167,6 +161,5 @@ class ExpTable(QWidget):
             else:
                 break
         return res
-
 
 # End of File

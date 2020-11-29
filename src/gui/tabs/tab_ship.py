@@ -125,5 +125,4 @@ class TabShips(QWidget):
             self.table_model.save_table_data()
             logging.info("SHIPS - Success initialized table and saved table data.")
 
-
 # End of File

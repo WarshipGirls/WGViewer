@@ -51,17 +51,15 @@ class LoginForm(QWidget):
         self.setLayout(self.layout)
         self.init_ui_qsettings()
 
-
     # ================================
     # Initialization
     # ================================
-
 
     def init_ui_qsettings(self):
         user_w = QDesktopWidget().screenGeometry(-1).width()
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.init_login_button(user_h)
-        self.resize(0.26*user_w, 0.12*user_h)
+        self.resize(0.26 * user_w, 0.12 * user_h)
         self.setStyleSheet(self.style_sheet)
         self.setWindowTitle('Warship Girls Viewer Login')
 
@@ -104,7 +102,7 @@ class LoginForm(QWidget):
         if text == '':
             pass
         else:
-            self.combo_platform.setCurrentText(text)      
+            self.combo_platform.setCurrentText(text)
 
         self.layout.addWidget(label_platform, 2, 0)
         self.layout.addWidget(self.combo_platform, 2, 1)
@@ -133,13 +131,11 @@ class LoginForm(QWidget):
         self.login_button.clicked.connect(self.check_password)
         # set an empty gap row
         self.layout.addWidget(self.login_button, 6, 0, 1, 2)
-        self.layout.setRowMinimumHeight(5, 0.03*user_h)
-
+        self.layout.setRowMinimumHeight(5, 0.03 * user_h)
 
     # ================================
     # General
     # ================================
-
 
     def create_qLabel(self, text):
         _str = '<font size="4"> ' + text + ' </font>'
@@ -158,11 +154,9 @@ class LoginForm(QWidget):
             res = ''
         return res
 
-
     # ================================
     # Events
     # ================================
-
 
     def on_check_clicked(self):
         if self.checkbox.isChecked():
@@ -216,7 +210,7 @@ class LoginForm(QWidget):
             logging.error("Invalid server name: {}".format(text))
 
     def check_password(self):
-        
+
         def _login_failed():
             msg.setText("Login Failed: Probably due to bad server connection")
             msg.exec_()
@@ -262,6 +256,5 @@ class LoginForm(QWidget):
             self.login_success()
         else:
             _login_failed()
-
 
 # End of File
