@@ -30,6 +30,7 @@ def _clear_dir(_dir):
 def clear_cache_folder():
     _clear_dir(get_data_dir())
 
+
 def get_data_dir():
     # TODO: unix not tested
     # TODO: mac not tested
@@ -45,6 +46,7 @@ def get_data_dir():
         _dir = str(Path.home())
     return os.path.join(_dir, 'WarshipGirlsViewer')
 
+
 def get_init_dir():
     p = os.path.join(get_data_dir(), 'init')
     if not os.path.exists(p):
@@ -52,6 +54,7 @@ def get_init_dir():
     else:
         pass
     return p
+
 
 def get_user_dir():
     p = os.path.join(get_data_dir(), 'user')
@@ -61,6 +64,7 @@ def get_user_dir():
         pass
     return p
 
+
 def get_temp_dir():
     p = os.path.join(get_data_dir(), 'temp')
     if not os.path.exists(p):
@@ -68,6 +72,5 @@ def get_temp_dir():
     else:
         pass
     return p
-
 
 # End of File

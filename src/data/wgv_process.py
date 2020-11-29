@@ -1,18 +1,17 @@
 import os
 from .wgv_json import (
-    get_user_fleets, get_shipItem, get_userVo, 
+    get_user_fleets, get_shipItem, get_userVo,
     get_shipCard, get_shipEquipmnt, get_equipmentVo,
     save_equipmentVo
 )
+
 
 # ================================
 # Not Exports
 # ================================
 
 def _process_one_equip(equip):
-    res = {}
-    res['title'] = equip['title']
-    res['desc'] = equip['desc']
+    res = {'title': equip['title'], 'desc': equip['desc']}
     for key in equip.keys():
         if isinstance(equip[key], int):
             res[key] = equip[key]
@@ -27,12 +26,14 @@ def _process_one_equip(equip):
             pass
     return res
 
+
 def _process_shipItem():
     t = get_shipItem()
     res = {}
     for i in t:
         res[i['cid']] = i['title']
     return res
+
 
 # ================================
 # Exports
@@ -42,13 +43,14 @@ def get_big_success_rate():
     t = get_userVo()
     n = t['detailInfo']['exploreBigSuccessNum']
     d = t['detailInfo']['exploreNum']
-    res = round(int(n)/int(d), 4)
+    res = round(int(n) / int(d), 4)
     return [res, n, d]
+
 
 def get_exp_fleets():
     # return a list of int
     fleets = get_user_fleets()
-    exp_ids = ["5","6","7","8"]
+    exp_ids = ["5", "6", "7", "8"]
     res = {}
     for fleet in fleets:
         if fleet['id'] in exp_ids:
@@ -57,18 +59,18 @@ def get_exp_fleets():
             continue
     return res
 
+
 def get_ship_equips(cid):
-    '''
+    """
     Given a ship's cid, find all user owned equipment.
-    '''
+    """
     x = get_shipCard()
     try:
-        ship = next((i for i in x if i['cid']==cid))
+        ship = next((i for i in x if i['cid'] == cid))
     except StopIteration:
         return []
 
     target_type = ship['type']
-
 
     all_equips = get_shipEquipmnt()
     equips = []
@@ -96,12 +98,13 @@ def get_ship_equips(cid):
             continue
     return res
 
+
 def update_equipment_amount(equipped, unequipped):
     # both input are cids (int)
     equipped = int(equipped)
     unequipped = int(unequipped)
     user_equips = get_equipmentVo()
-    if equipped == -1:      # unequip
+    if equipped == -1:  # unequip
         pass
     else:
         idx_1 = find_index(user_equips, 'equipmentCid', equipped)
@@ -111,14 +114,16 @@ def update_equipment_amount(equipped, unequipped):
     user_equips[idx_2]['num'] += 1
     save_equipmentVo(user_equips)
 
+
 def find_index(lst, key, value):
-    '''
+    """
     Given a list of dict, find index by key-value pair.
-    '''
+    """
     for i, dic in enumerate(lst):
         if dic[key] == value:
             return i
     return -1
+
 
 def find_all_indices(lst, key, value):
     res = []
@@ -126,6 +131,7 @@ def find_all_indices(lst, key, value):
         if dic[key] == value:
             res.append(i)
     return res
+
 
 """ Following implementation is not used because MF's bug
 def _type_to_equips(equipable_types):
@@ -187,6 +193,5 @@ def get_ship_equips(cid):
 
     return _type_to_equips(types)
 """
-
 
 # End of File
