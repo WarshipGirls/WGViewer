@@ -16,10 +16,10 @@ from PyQt5.QtWidgets import (
     QLabel, QLineEdit, QMessageBox, QCheckBox
 )
 
+from src import data as wgr_data
+from src.func import constants as CONST
 from .models.resource_model import ResourceTableModel
 from .models.side_dock_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
-from ..func import constants as CONST
-from ..data import data as wgr_data
 
 
 def get_data_path(relative_path):
@@ -34,7 +34,7 @@ class SideDock(QDockWidget):
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
-    def __init__(self, parent, is_realrun):
+    def __init__(self, parent):
         super(SideDock, self).__init__(parent)
         self.init_attr()
 
@@ -42,16 +42,10 @@ class SideDock(QDockWidget):
         self.sig_closed.connect(parent.on_dock_closed)
 
         self.init_ui()
-        if is_realrun == False:
-            self._testrun()
-        else:
-            pass
+        self.set_data()
 
-    def _testrun(self):
-        import json
-        test_json = os.path.join(wgr_data.get_temp_dir(), 'api_initGame.json')
-        with open(test_json, encoding='utf-8') as f:
-            d = json.load(f)
+    def set_data(self):
+        d = wgr_data.get_api_initGame()
         self.on_received_lists(d)
         self.on_received_resource(d)
         self.on_received_name(d)
@@ -112,7 +106,7 @@ class SideDock(QDockWidget):
 
     def init_sign_info(self):
         self.sign_widget = QLineEdit(self)
-        icon_path = get_data_path('src/assets/icons/sign_16.png')
+        icon_path = get_data_path('assets/icons/sign_16.png')
         self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition)
         self.sign_widget.setFocusPolicy
 
@@ -289,7 +283,7 @@ class SideDock(QDockWidget):
         return CONST.build_type[_id]
 
     def _remove_widget(self, parent, widget):
-        logging.warn("Deleting widget")
+        logging.warning("Deleting widget")
         parent.removeWidget(widget)
         widget.deleteLater()
         widget = None
@@ -386,15 +380,15 @@ class SideDock(QDockWidget):
             lvl_tooltip = str(x["exp"]) + " / " + str(x["nextLevelExpNeed"]) + \
                             ", resource soft cap = " + str(data["userVo"]["resourcesTops"][0])
             self.lvl_label.setToolTip(lvl_tooltip)
-            ship_icon = get_data_path('src/assets/icons/ship_16.png')
+            ship_icon = get_data_path('assets/icons/ship_16.png')
             ship_str = "<html><img src='{}'></html> ".format(ship_icon) + str(x["shipNum"]) \
                          + " / "  + str(x["shipNumTop"])
             self.ship_count_label.setText(ship_str)
-            equip_icon = get_data_path('src/assets/icons/equip_16.png')
+            equip_icon = get_data_path('assets/icons/equip_16.png')
             equip_str = "<html><img src='{}'></html> ".format(equip_icon) + str(x["equipmentNum"]) \
                         + " / "  + str(x["equipmentNumTop"])
             self.equip_count_label.setText(equip_str)
-            collect_icon = get_data_path('src/assets/icons/collect_16.png')
+            collect_icon = get_data_path('assets/icons/collect_16.png')
             collect_str = "<html><img src='{}'></html> ".format(collect_icon) + str(len(data["unlockShip"])) \
                         + " / " + str(x["basicShipNum"])
             self.collect_count_label.setText(collect_str)

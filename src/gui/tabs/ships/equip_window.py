@@ -8,8 +8,8 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QHeaderView
 )
 
+from src import data as wgr_data
 from . import constant as SCONST
-from ....data import data as wgr_data
 
 
 def get_data_path(relative_path):
@@ -32,7 +32,7 @@ class EquipPopup(QMainWindow):
         self.width = 600
         self.height = 600
         self.id_list = []
-        self.lock_icon = QIcon(get_data_path("src/assets/icons/lock_64.png"))
+        self.lock_icon = QIcon(get_data_path("assets/icons/lock_64.png"))
         self.trans = SCONST._equip_spec
 
         self.init_ui()

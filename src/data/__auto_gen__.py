@@ -90,7 +90,7 @@ Note that '_' leading functions are not imported!
             res = True
     except FileNotFoundError as e:
         logging.error(f'DATA - auto_gen failed for {e}')
-    return True
+    return res
 
 
 # End of File

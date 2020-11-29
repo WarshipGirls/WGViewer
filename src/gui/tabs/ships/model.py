@@ -7,10 +7,10 @@ import traceback
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
+from src import data as  wgr_data
+from src.func import constants as CONST
+from src.func.helper_function import Helper
 from . import constant as SCONST
-from ....func import constants as CONST
-from ....func.helper_function import Helper
-from ....data import data as  wgr_data
 
 
 def get_data_path(relative_path):
@@ -62,8 +62,8 @@ class ShipModel(QStandardItemModel):
 
     def init_icons(self):
         # To avoid repeatedly loading same icon, preload them
-        self.ring_icon = QIcon(get_data_path("src/assets/icons/ring_60.png"))
-        self.lock_icon = QIcon(get_data_path("src/assets/icons/lock_64.png"))
+        self.ring_icon = QIcon(get_data_path("assets/icons/ring_60.png"))
+        self.lock_icon = QIcon(get_data_path("assets/icons/lock_64.png"))
 
     def init_json(self):
         self.tactics_json = wgr_data.get_tactics_json()
@@ -113,7 +113,7 @@ class ShipModel(QStandardItemModel):
             return None
 
         # QTableWidgetItem requires unique assignment; thus, same pic cannot assign twice. Differ from QIcon
-        img_path = "src/assets/S/" + prefix + str(int(cid[3:6])) + ".png"
+        img_path = "assets/S/" + prefix + str(int(cid[3:6])) + ".png"
         img = QPixmap()
         is_loaded =  img.load(get_data_path(img_path))
         if is_loaded:
@@ -124,13 +124,13 @@ class ShipModel(QStandardItemModel):
             self.setItem(row, 0, thumbnail)
         else:
             tmp = QPixmap()
-            tmp.load(get_data_path("src/assets/S/0v0.png"))
+            tmp.load(get_data_path("assets/S/0v0.png"))
             tmp2 = QStandardItem()
             tmp2.setData(QVariant(tmp.scaled(78, 44)), Qt.DecorationRole)
             tmp2.setData(cid, Qt.UserRole)
             self.setItem(row, 0, tmp2)
             err = "Image path does not exist: " + img_path
-            logging.warn(err)
+            logging.warning(err)
 
     def set_name(self, *args):
         wig = QStandardItem(args[1])
@@ -293,7 +293,7 @@ class ShipModel(QStandardItemModel):
                 continue
             else:
                 pass
-            raw_path = "src/assets/E/equip_L_" + str(int(e[3:6])) + ".png"
+            raw_path = "assets/E/equip_L_" + str(int(e[3:6])) + ".png"
             img_path = get_data_path(raw_path)
 
             img = QPixmap()
@@ -338,7 +338,7 @@ class ShipModel(QStandardItemModel):
             logging.error('Equipment change is failed.')
             return
 
-        raw_path = "src/assets/E/equip_L_" + str(int(equip_id[3:6])) + ".png"
+        raw_path = "assets/E/equip_L_" + str(int(equip_id[3:6])) + ".png"
         img_path = get_data_path(raw_path)
         img = QPixmap()
         is_loaded =  img.load(img_path)

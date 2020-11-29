@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout
 )
 
-from ....data import data as wgr_data
+from src import data as wgr_data
 
 
 class ExpTable(QWidget):

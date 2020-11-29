@@ -9,18 +9,16 @@ from PyQt5.QtWidgets import (
     QDesktopWidget
 )
 
-# GUI
+from src import data as wgr_data
+from src.func.wgr_api import WGR_API
 from .side_dock import SideDock
 from .main_interface_tabs import MainInterfaceTabs
 from .main_interface_menubar import MainInterfaceMenuBar
-# Functions
-from ..data import data as wgr_data
-from ..func.wgr_api import WGR_API
 
 
 class MainInterface(QMainWindow):
     # https://stackoverflow.com/questions/2970312/pyqt4-qtcore-pyqtsignal-object-has-no-attribute-connect
-    sig_initGame = pyqtSignal(dict)
+    # sig_initGame = pyqtSignal(dict)
 
     def __init__(self, server, channel, cookies, realrun=True):
         super().__init__()
@@ -38,19 +36,11 @@ class MainInterface(QMainWindow):
 
         # TODO TODO multi-threading
         self.init_data_files()
-        game_data = self.api_initGame()
+        self.api_initGame()
 
         # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob. Qt.Focus issue)
         self.init_ui()
         self.init_side_dock()
-        if self.is_realrun:
-            self.sig_initGame.connect(self.side_dock.on_received_resource)
-            self.sig_initGame.connect(self.side_dock.on_received_name)
-            self.sig_initGame.connect(self.side_dock.on_received_tasks)
-            self.sig_initGame.connect(self.side_dock.on_received_lists)
-            self.sig_initGame.emit(game_data)
-        else:
-            pass       
 
 
     # ================================
@@ -79,7 +69,7 @@ class MainInterface(QMainWindow):
     def init_side_dock(self):
         def _create_side_dock():
             if self.side_dock_on == False:
-                self.side_dock = SideDock(self, self.is_realrun)
+                self.side_dock = SideDock(self)
                 self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
                 self.side_dock_on = True
             else:
@@ -117,31 +107,19 @@ class MainInterface(QMainWindow):
     # WGR APIs
     # ================================
 
+
     def api_initGame(self):
-        test_json = os.path.join(wgr_data.get_temp_dir(), 'api_initGame.json')
         if self.is_realrun:
             data = self.api.api_initGame()
-            with open(test_json, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
+            wgr_data.save_api_initGame(data)
         else:
-            with open(test_json, encoding='utf-8') as f:
-                data = json.load(f)
+            data = wgr_data.get_api_initGame()
 
-        # save necessary data; this should be done before any child UI creation!
-        user_dir = wgr_data.get_user_dir()
-        with open(os.path.join(user_dir, 'equipmentVo.json'), 'w', encoding='utf-8') as f:
-            json.dump(data['equipmentVo'], f, ensure_ascii=False, indent=4)
-
-        with open(os.path.join(user_dir, 'tactics.json'), 'w', encoding='utf-8') as f:
-            json.dump(data['tactics'], f, ensure_ascii=False, indent=4)
-
-        with open(os.path.join(user_dir, 'userVo.json'), 'w', encoding='utf-8') as f:
-            json.dump(data['userVo'], f, ensure_ascii=False, indent=4)
-
-        with open(os.path.join(user_dir, 'fleetVo.json'), 'w', encoding='utf-8') as f:
-            json.dump(data['fleetVo'], f, ensure_ascii=False, indent=4)
-
-        return data
+        wgr_data.save_equipmentVo(data['equipmentVo'])
+        wgr_data.save_user_tactics(data['tactics'])
+        wgr_data.save_userVo(data['userVo'])
+        wgr_data.save_user_fleets(data['fleetVo'])
+        wgr_data.save_pveExploreVo(data['pveExploreVo'])
 
 
 # End of File

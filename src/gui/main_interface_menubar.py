@@ -4,7 +4,7 @@ import webbrowser
 from PyQt5.QtCore import QCoreApplication, QSettings
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
-from ..data import data as wgr_data
+from src import data as wgr_data
 
 
 class MainInterfaceMenuBar(QMenuBar):
@@ -62,7 +62,7 @@ class MainInterfaceMenuBar(QMenuBar):
         QCoreApplication.exit()
 
     def open_cache_folder(self):
-        os.startfile(wgr_data._get_data_dir())
+        os.startfile(wgr_data.get_data_dir())
 
     def clear_cache_folder(self):
         reply = QMessageBox.question(self, 'Warning', "Do you want to clear all caches?\n(Re-caching takes time)", QMessageBox.Yes, QMessageBox.No)

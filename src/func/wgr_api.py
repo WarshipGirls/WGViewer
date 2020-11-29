@@ -29,11 +29,11 @@ class WGR_API:
                 res = True
             except (TimeoutError, exceptions.ReadTimeout) as e:
                 logging.error(e)
-                logging.warn('Trying reconnecting...')
+                logging.warning('Trying reconnecting...')
                 sleep(self.sleep_time)
             tries += 1
             if tries >= self.max_retry:
-                logging.warn(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
+                logging.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
                 break
             else:
                 pass
@@ -55,14 +55,15 @@ class WGR_API:
         link = '/boat/removeEquipment/' + str(ship_id) + '/' + str(equip_slot)
         return self._api_call(link)
 
-    # FOLLOWING ARE NOT USED YET
-    '''
     def pve_getPveData(self):
         url = self.server + 'pve/getPveData' + self.hlp.get_url_end(self.channel)
         raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
         data = json.loads(raw_data)
         with open('pve_getPveData.json', 'w') as of:
             json.dump(data, of)
+
+    # FOLLOWING ARE NOT USED YET
+    '''
 
     def pevent_getPveData(self):
         url = self.server + 'pevent/getPveData' + self.hlp.get_url_end(self.channel)

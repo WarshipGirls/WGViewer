@@ -11,11 +11,11 @@ from PyQt5.QtWidgets import (
     QHeaderView, QTableView
 )
 
+from src import data as wgr_data
 from .ships.delegate import ShipTableDelegate
 from .ships.model import ShipModel
 from .ships.proxy_model import ShipSortFilterProxyModel
 from .ships.top_checkbox import TopCheckboxes
-from ...data import data as wgr_data
 
 
 def get_data_path(relative_path):
@@ -40,20 +40,16 @@ class TabShips(QWidget):
             self._testrun()
 
     def _realrun(self):
-        test_json = os.path.join(wgr_data.get_temp_dir(), 'api_getShipList.json')
         data = self.api.api_getShipList()
-        with open(test_json, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+        wgr_data.save_api_getShipList(data)
         self.on_received_shiplist(data)
 
     def _testrun(self):
         logging.debug("SHIPS - Starting tests...")
-        p = os.path.join(wgr_data.get_temp_dir(), 'api_getShipList.json')
-        with open(p, encoding='utf-8') as f:
-            d = json.load(f)
-        # logging.error(len(d['userShipVO']))
-        # d['userShipVO'] = d['userShipVO'][:5]
-        self.on_received_shiplist(d)
+        data = wgr_data.get_api_getShipList()
+        # logging.error(len(data['userShipVO']))
+        # data['userShipVO'] = data['userShipVO'][:5]
+        self.on_received_shiplist(data)
 
     def init_ui(self):
         scroll_box = QVBoxLayout(self)
@@ -106,17 +102,17 @@ class TabShips(QWidget):
         # s_link = 'https://drive.google.com/file/d/1v5VO1b_Phl66xJJgk4TAXjGa_XHjbl-k/view?usp=sharing'
         # e_link = 'https://drive.google.com/file/d/1CeluorrRqqhrKeNUo18UelKXhTxE8dsU/view?usp=sharing'
         logging.info('SHIPS - Loading necessary assets files...')
-        if os.path.isdir(get_data_path('src/assets/S')):
+        if os.path.isdir(get_data_path('assets/S')):
             pass
         else:
-            with zipfile.ZipFile(get_data_path('src/assets/S.zip'), 'r') as zip_ref:
-                zip_ref.extractall(get_data_path('src/assets'))
+            with zipfile.ZipFile(get_data_path('assets/S.zip'), 'r') as zip_ref:
+                zip_ref.extractall(get_data_path('assets'))
 
-        if os.path.isdir(get_data_path('src/assets/E')):
+        if os.path.isdir(get_data_path('assets/E')):
             pass
         else:
-            with zipfile.ZipFile(get_data_path('src/assets/E.zip'), 'r') as zip_ref:
-                zip_ref.extractall(get_data_path('src/assets'))
+            with zipfile.ZipFile(get_data_path('assets/E.zip'), 'r') as zip_ref:
+                zip_ref.extractall(get_data_path('assets'))
 
     @pyqtSlot(dict)
     def on_received_shiplist(self, data):

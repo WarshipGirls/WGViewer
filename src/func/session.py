@@ -26,7 +26,7 @@ class Session:
                 r.close()
                 return r
             except self.accept_errors as e:
-                logging.warn(f"SESS - {e}")
+                logging.warning(f"SESS - {e}")
                 sleep(self.sleep_time)
                 if i == 4:
                     raise
@@ -38,7 +38,7 @@ class Session:
                 r.close()
                 return r
             except self.accept_errors as e:
-                logging.warn(f"SESS - {e}")
+                logging.warning(f"SESS - {e}")
                 sleep(self.sleep_time)
                 if i == 4:
                     raise

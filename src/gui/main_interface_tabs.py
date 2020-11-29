@@ -33,7 +33,7 @@ class MainInterfaceTabs(QWidget):
         self.tab_exp = TabExpedition()
         tabwidget = QTabWidget()
 
-        tabwidget.addTab(self.tab_exp, "  Expedition  ")
+        tabwidget.addTab(self.tab_exp, "  Expedition (beta)  ")
         tabwidget.addTab(self.tab_ships, "  Dock  ")
 
         self.layout.addWidget(tabwidget, 0, 0)

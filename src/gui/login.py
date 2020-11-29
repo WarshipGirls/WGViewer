@@ -11,11 +11,11 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgr_data
+from src.func.encryptor import Encryptor
+from src.func.login import GameLogin
+from src.func.session import Session
+from src.func import constants as constants
 from .main_interface import MainInterface
-from ..func.encryptor import Encryptor
-from ..func.login import GameLogin
-from ..func.session import Session
-from ..func import constants as constants
 
 
 class LoginForm(QWidget):
@@ -175,7 +175,7 @@ class LoginForm(QWidget):
             self.qsettings.endGroup()
         else:
             self.qsettings.remove("Login")
-            wgr_data._del_key_file(self.key_filename)
+            wgr_data.del_key_file(self.key_filename)
 
     def update_server_box(self, text):
         servers = []
@@ -194,7 +194,7 @@ class LoginForm(QWidget):
         #     self.channel = "100024"
         else:
             servers = ["N/A"]
-            logging.warn("Login server is not chosen.")
+            logging.warning("Login server is not chosen.")
         self.combo_server.addItems(servers)
 
     def update_server(self, text):
@@ -211,14 +211,14 @@ class LoginForm(QWidget):
         elif text == "长春":
             self.server = "http://s14.jr.moefantasy.com/"
         elif text == "":
-            logging.warn("Server is not manually chosen.")
+            logging.warning("Server is not manually chosen.")
         else:
             logging.error("Invalid server name: {}".format(text))
 
     def check_password(self):
         
         def _login_failed():
-            msg.setText("\tLogin Failed\nProbably due to bad server connection")
+            msg.setText("Login Failed: Probably due to bad server connection")
             msg.exec_()
             self.login_button.setEnabled(True)
             self.login_button.setText('Login')
