@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import sys
@@ -31,6 +30,15 @@ class TabShips(QWidget):
         logging.info("SHIPS - Creating Ships Tab...")
         self.api = api
 
+        self.content_widget = None
+        self.content_layout = None
+        self.upper_content_widget = None
+        self.lower_content_widget = None
+        self.table_view = None
+        self.table_model = None
+        self.table_proxy = None
+        self.lower_layout = None
+        self.search_line = None
         self.init_ui()
         self.init_assets()
 
@@ -59,6 +67,7 @@ class TabShips(QWidget):
         scroll.setWidgetResizable(True)
 
         self.content_widget = QWidget(scroll)
+
         self.content_layout = QVBoxLayout(self.content_widget)
         self.content_widget.setLayout(self.content_layout)
         scroll.setWidget(self.content_widget)
@@ -76,7 +85,7 @@ class TabShips(QWidget):
         self.table_proxy = ShipSortFilterProxyModel(self)
         self.table_proxy.setSourceModel(self.table_model)
         self.table_view.setModel(self.table_proxy)
-        ck = TopCheckboxes(self.upper_content_widget, self.table_model, self.table_proxy)
+        TopCheckboxes(self.upper_content_widget, self.table_model, self.table_proxy)
 
         self.lower_layout = QGridLayout(self.lower_content_widget)
         self.search_line = QLineEdit(self.lower_content_widget)
@@ -96,7 +105,8 @@ class TabShips(QWidget):
         self.table_view.setShowGrid(False)
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
-    def init_assets(self):
+    @staticmethod
+    def init_assets():
         # TODO: find drive that serves ppl in/out GFW
         # TODO: pyinstaller seems not packing zip
         # s_link = 'https://drive.google.com/file/d/1v5VO1b_Phl66xJJgk4TAXjGa_XHjbl-k/view?usp=sharing'
