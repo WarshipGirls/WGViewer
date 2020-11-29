@@ -19,7 +19,7 @@ from PyQt5.QtWidgets import (
 from src import data as wgr_data
 from src.func import constants as CONST
 from .resource_model import ResourceTableModel
-from .side_dock_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
+from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 
 
 def get_data_path(relative_path):
@@ -30,7 +30,6 @@ def get_data_path(relative_path):
 
 
 class SideDock(QDockWidget):
-    # TODO TODO code simplification, OOP
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
@@ -39,32 +38,33 @@ class SideDock(QDockWidget):
         self.user_screen_h = QDesktopWidget().screenGeometry(-1).height()
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
 
-        self.task_counter_labels = None
-        self.task_counter_desc_labels = None
-        self.task_counter_timers = None
-        self.task_counters = None
-        self.bath_counter_labels = None
-        self.bath_counter_timers = None
-        self.bath_counters = None
-        self.build_counter_labels = None
-        self.build_counter_timers = None
-        self.build_counters = None
-        self.dev_counter_labels = None
-        self.dev_counter_timers = None
-        self.dev_counters = None
-        self.exp_counter_labels = None
-        self.exp_counter_timers = None
-        self.exp_counters = None
+        # index 0 for daily, 1 for weekly, 2+ for tasks/events
+        self.task_counter_desc_labels = []
+        self.task_counter_labels = []
+        self.task_counter_timers = []
+        self.task_counters = []
+        self.bath_counter_labels = [None] * 4
+        self.bath_counter_timers = [None] * 4
+        self.bath_counters = [None] * 4
+        self.build_counter_labels = [None] * 4
+        self.build_counter_timers = [None] * 4
+        self.build_counters = [None] * 4
+        self.dev_counter_labels = [None] * 4
+        self.dev_counter_timers = [None] * 4
+        self.dev_counters = [None] * 4
+        self.exp_counter_labels = [None] * 4
+        self.exp_counter_timers = [None] * 4
+        self.exp_counters = [None] * 4
 
-        self.name_layout = None
-        self.name_label = None
-        self.name_layout_widget = None
-        self.lvl_label = None
-        self.ship_count_label = None
-        self.equip_count_label = None
-        self.collect_count_label = None
+        self.name_layout_widget = QWidget(self)
+        self.name_layout = QHBoxLayout(self.name_layout_widget)
+        self.name_label = QLabel(self.name_layout_widget)
+        self.lvl_label = QLabel(self.name_layout_widget)
+        self.ship_count_label = QLabel(self.name_layout_widget)
+        self.equip_count_label = QLabel(self.name_layout_widget)
+        self.collect_count_label = QLabel(self.name_layout_widget)
 
-        self.sign_widget = None
+        self.sign_widget = QLineEdit(self)
         self.table_model = None
         self.table_view = None
         self.bathlist_view = None
@@ -81,8 +81,6 @@ class SideDock(QDockWidget):
         self.countdowns_layout = None
         self.countdowns_layout_widget = None
 
-        self.init_attr()
-
         self.sig_resized.connect(self.update_geometry)
         self.sig_closed.connect(parent.on_dock_closed)
 
@@ -95,26 +93,6 @@ class SideDock(QDockWidget):
         self.on_received_resource(d)
         self.on_received_name(d)
         self.on_received_tasks(d)
-
-    def init_attr(self):
-        # index 0 for daily, 1 for weekly, 2+ for tasks/events
-        self.task_counter_desc_labels = []
-        self.task_counter_labels = []
-        self.task_counter_timers = []
-        self.task_counters = []
-
-        self.bath_counter_labels = [None] * 4
-        self.bath_counter_timers = [None] * 4
-        self.bath_counters = [None] * 4
-        self.build_counter_labels = [None] * 4
-        self.build_counter_timers = [None] * 4
-        self.build_counters = [None] * 4
-        self.dev_counter_labels = [None] * 4
-        self.dev_counter_timers = [None] * 4
-        self.dev_counters = [None] * 4
-        self.exp_counter_labels = [None] * 4
-        self.exp_counter_timers = [None] * 4
-        self.exp_counters = [None] * 4
 
     def init_ui(self):
         self.setFloating(False)
@@ -130,15 +108,7 @@ class SideDock(QDockWidget):
         self.init_task_panel()
 
     def init_name_info(self):
-        self.name_layout_widget = QWidget(self)
-        self.name_layout = QHBoxLayout(self.name_layout_widget)
         self.name_layout.setContentsMargins(0, 0, 0, 0)
-
-        self.name_label = QLabel(self.name_layout_widget)
-        self.lvl_label = QLabel(self.name_layout_widget)
-        self.ship_count_label = QLabel(self.name_layout_widget)
-        self.equip_count_label = QLabel(self.name_layout_widget)
-        self.collect_count_label = QLabel(self.name_layout_widget)
 
         self.name_layout.addWidget(self.name_label)
         self.name_layout.addWidget(self.lvl_label)
@@ -147,7 +117,6 @@ class SideDock(QDockWidget):
         self.name_layout.addWidget(self.collect_count_label)
 
     def init_sign_info(self):
-        self.sign_widget = QLineEdit(self)
         icon_path = get_data_path('assets/icons/sign_16.png')
         self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition)
 
