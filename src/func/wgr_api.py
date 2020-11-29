@@ -8,6 +8,9 @@ from .helper_function import Helper
 
 
 class WGR_API:
+    """
+    Warship Girls (R) - API
+    """
     def __init__(self, server, channel, cookies):
         self.server = server
         self.channel = channel
@@ -17,7 +20,7 @@ class WGR_API:
         self.max_retry = 10
         self.sleep_time = 5
 
-    def _api_call(self, link):
+    def _api_call(self, link: str) -> object:
         data = None
         url = self.server + link + self.hlp.get_url_end(self.channel)
         res = False
@@ -33,8 +36,7 @@ class WGR_API:
                 sleep(self.sleep_time)
             tries += 1
             if tries >= self.max_retry:
-                logging.warning(
-                    f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
+                logging.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
                 break
             else:
                 pass
@@ -57,11 +59,8 @@ class WGR_API:
         return self._api_call(link)
 
     def pve_getPveData(self):
-        url = self.server + 'pve/getPveData' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        with open('pve_getPveData.json', 'w') as of:
-            json.dump(data, of)
+        link = 'pve/getPveData'
+        return self._api_call(link)
 
     # FOLLOWING ARE NOT USED YET
     '''

@@ -21,9 +21,6 @@ class ExpFleets(QWidget):
             for j in range(self.tab.rowCount()):
                 self.tab.setItem(i, j, QTableWidgetItem(str([i, j, i, j, i, j])))
 
-        # self.tab = QTableWidget()
-        # self.tab.setColumnCount()
-
         # # f1 = OneExpFleet()
         self.init_ui()
 
@@ -64,6 +61,8 @@ class ExpFleets(QWidget):
     def set_one_fleet(self, row, col, fleet_id):
         fleet_name = "Fleet #" + fleet_id
         self.tab.setItem(row, col, QTableWidgetItem(fleet_name))
+        map_name = wgr_data.get_exp_map(fleet_id)
+        self.tab.setItem(row, col+1, QTableWidgetItem(map_name))
         row += 1
 
         self.add_button(row, col, 'START', self.start_exp, fleet_id)
@@ -85,13 +84,14 @@ class ExpFleets(QWidget):
         l.setAlignment(Qt.AlignCenter)
         l.setContentsMargins(0, 0, 0, 0)
         w.setLayout(l)
-        # self.buttons.append(b)
         self.tab.setCellWidget(row, col, w)
 
     def set_one_ship(self, row, col, ship_id, info):
         self.tab.setItem(row, col, QTableWidgetItem(info['Name']))
-        self.tab.setItem(row, col + 1, QTableWidgetItem(str(ship_id)))
-        self.tab.setItem(row + 1, col, QTableWidgetItem(info['Lv.']))
+        s_id = "ID " + str(ship_id)
+        self.tab.setItem(row, col + 1, QTableWidgetItem(s_id))
+        lvl = "Lv. " + info['Lv.']
+        self.tab.setItem(row + 1, col, QTableWidgetItem(lvl))
         self.tab.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
 
     def start_exp(self, fleet_id):

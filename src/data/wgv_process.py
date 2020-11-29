@@ -1,7 +1,7 @@
 from .wgv_json import (
     get_user_fleets, get_shipItem, get_userVo,
     get_shipCard, get_shipEquipmnt, get_equipmentVo,
-    save_equipmentVo
+    save_equipmentVo, get_pveExploreVo
 )
 
 
@@ -96,6 +96,16 @@ def get_ship_equips(cid):
         else:
             continue
     return res
+
+
+def get_exp_map(fleet_id):
+    _json = get_pveExploreVo()['levels']
+    try:
+        fleet = next(i for i in _json if i['fleetId'] == str(fleet_id))
+        map_name = fleet['exploreId'].replace('000', '-')
+    except StopIteration:
+        map_name = ""
+    return map_name
 
 
 def update_equipment_amount(equipped, unequipped):
