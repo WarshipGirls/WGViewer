@@ -1,8 +1,7 @@
 import logging
 import requests
-import qdarkstyle
 
-from PyQt5.QtCore import QSettings, QVariant
+from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import (
     QPushButton, QLabel, QLineEdit,
     QComboBox, QMessageBox, QCheckBox,
@@ -18,13 +17,31 @@ from src.func import constants as constants
 from .main_interface import MainInterface
 
 
+def create_qLabel(text):
+    _str = '<font size="4"> ' + text + ' </font>'
+    _res = QLabel(_str)
+    return _res
+
+
 class LoginForm(QWidget):
     def __init__(self):
         super().__init__()
-        self.layout = QGridLayout()
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.encryptor = Encryptor()
         self.key_filename = '.wgr.key'
+
+        self.channel = ""
+        self.server = ""
+        self.mi = None
+
+        self.lineEdit_username = QLineEdit()
+        self.lineEdit_password = QLineEdit()
+        self.combo_platform = QComboBox()
+        self.combo_server = QComboBox()
+        self.checkbox = QCheckBox('remember login info (secured by encryption)')
+        self.login_button = QPushButton('Login')
+
+        self.layout = QGridLayout()
 
         self.style_sheet = wgr_data.get_color_scheme()
 
@@ -64,8 +81,7 @@ class LoginForm(QWidget):
         self.setWindowTitle('Warship Girls Viewer Login')
 
     def init_name_field(self, text=''):
-        label_name = self.create_qLabel('Username')
-        self.lineEdit_username = QLineEdit()
+        label_name = create_qLabel('Username')
         self.lineEdit_username.setClearButtonEnabled(True)
 
         if text == '':
@@ -78,8 +94,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.lineEdit_username, 0, 1)
 
     def init_password_field(self, text=''):
-        label_password = self.create_qLabel('Password')
-        self.lineEdit_password = QLineEdit()
+        label_password = create_qLabel('Password')
         self.lineEdit_password.setClearButtonEnabled(True)
         self.lineEdit_password.setEchoMode(QLineEdit.Password)
 
@@ -92,8 +107,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.lineEdit_password, 1, 1)
 
     def init_platform_field(self, text=''):
-        label_platform = self.create_qLabel('Platform')
-        self.combo_platform = QComboBox()
+        label_platform = create_qLabel('Platform')
         # platforms = ["Choose your platform", "CN-iOS", "CN-Android", "International", "JP"]
         platforms = ["Choose your platform", "CN-iOS", "CN-Android"]
         self.combo_platform.addItems(platforms)
@@ -108,8 +122,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.combo_platform, 2, 1)
 
     def init_server_field(self, text=''):
-        label_server = self.create_qLabel('Server')
-        self.combo_server = QComboBox()
+        label_server = create_qLabel('Server')
         self.combo_server.currentTextChanged.connect(self.update_server)
 
         if text == '':
@@ -121,13 +134,11 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.combo_server, 3, 1)
 
     def init_checkbox(self, checked=False):
-        self.checkbox = QCheckBox('remember login info (secured by encryption)')
         self.checkbox.setChecked(checked)
         self.checkbox.stateChanged.connect(self.on_check_clicked)
         self.layout.addWidget(self.checkbox, 4, 1)
 
     def init_login_button(self, user_h):
-        self.login_button = QPushButton('Login')
         self.login_button.clicked.connect(self.check_password)
         # set an empty gap row
         self.layout.addWidget(self.login_button, 6, 0, 1, 2)
@@ -136,11 +147,6 @@ class LoginForm(QWidget):
     # ================================
     # General
     # ================================
-
-    def create_qLabel(self, text):
-        _str = '<font size="4"> ' + text + ' </font>'
-        _res = QLabel(_str)
-        return _res
 
     def login_success(self):
         self.mi.show()
@@ -172,14 +178,13 @@ class LoginForm(QWidget):
             wgr_data.del_key_file(self.key_filename)
 
     def update_server_box(self, text):
-        servers = []
         self.combo_server.clear()
         if text == "CN-iOS":
             servers = ["列克星敦", "维内托"]
             self.channel = "100020"
         elif text == "CN-Android":
             servers = ["胡德", "俾斯麦", "昆西", "长春"]
-        #     self.channel = "100015"
+            self.channel = "100015"
         # elif text == "International":
         #     servers = ["server1", "NOT TESTED!"]
         #     self.channel = "100060"
