@@ -1,3 +1,7 @@
+# TODO As of now, the function names are added manually, is there a more efficient way?
+#   - a slightly faster way is import file_name and do dir(file_name), then manually copy paste
+#   - Or I could write a script...
+
 from .getInitConfigs import save_init_data
 
 from .path import (
@@ -11,8 +15,10 @@ from .qsettings import (
 )
 
 from .json import (
-    get_tactics_json, get_user_tactics, get_user_fleets, get_processed_userShipVo,
-    save_processed_userShipVo, init_ships_temp
+    get_equipmentVo, get_processed_userShipVo, get_pveExploreVo,
+    get_shipCard, get_shipEquipmnt, get_shipItem, get_tactics_json, get_userVo, get_user_fleets, get_user_tactics,
+    save_equipmentVo, save_processed_userShipVo, save_pveExploreVo, save_userVo, save_user_fleets, save_user_tactics,
+    init_ships_temp
 )
 
 from .process import (

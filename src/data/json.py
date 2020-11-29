@@ -9,6 +9,10 @@ from .path import get_init_dir, get_user_dir, get_temp_dir
 Order functions alphabetically!
 """
 
+# ================================
+# Not Exports
+# ================================
+
 def _load_json(folder, filename):
     path = os.path.join(folder, filename)
     with open(path, encoding='utf-8') as fin:
@@ -20,31 +24,29 @@ def _save_json(folder, filename, data):
     with open(path, 'w', encoding='utf-8') as fout:
         json.dump(data, fout, ensure_ascii=False, indent=4)
 
-def get_tactics_json():
-    return _load_json(get_init_dir(), 'ShipTactics.json')
-
-def get_user_fleets():
-    return _load_json(get_user_dir(), 'fleetVo.json')
-
-def get_user_tactics():
-    return _load_json(get_user_dir(), 'tactics.json')
-
-def get_processed_userShipVo():
-    return _load_json(get_user_dir(), 'proc_userShipVo.json')
-
-def get_shipItem():
-    return _load_json(get_init_dir(), 'shipItem.json')
-
-def get_userVo():
-    return _load_json(get_user_dir(), 'userVo.json')
+# ================================
+# Exports
+# ================================
 
 def get_equipmentVo():
     # shipEquipmnt.json contains the equipment you own;
     # the `num` excludes those on ship
     return _load_json(get_user_dir(), 'equipmentVo.json')
 
-def save_equipmentVo(user_equips):
-    _save_json(get_user_dir(), 'equipmentVo.json', user_equips)
+def save_equipmentVo(data):
+    _save_json(get_user_dir(), 'equipmentVo.json', data)
+
+def get_processed_userShipVo():
+    return _load_json(get_user_dir(), 'proc_userShipVo.json')
+
+def save_processed_userShipVo(data):
+    _save_json(get_user_dir(), 'proc_userShipVo.json', data)
+
+def get_pveExploreVo():
+    return _load_json(get_user_dir(), 'get_pveExploreVo.json')
+
+def save_pveExploreVo(data):
+    _save_json(get_user_dir(), 'get_pveExploreVo.json', data)    
 
 def get_shipCard():
     return _load_json(get_init_dir(), 'shipCard.json')
@@ -52,8 +54,29 @@ def get_shipCard():
 def get_shipEquipmnt(): # No typo
     return _load_json(get_init_dir(), 'shipEquipmnt.json')
 
-def save_processed_userShipVo(data):
-    _save_json(get_user_dir(), 'proc_userShipVo.json', data)
+def get_shipItem():
+    return _load_json(get_init_dir(), 'shipItem.json')
+
+def get_tactics_json():
+    return _load_json(get_init_dir(), 'ShipTactics.json')
+
+def get_user_fleets():
+    return _load_json(get_user_dir(), 'fleetVo.json')
+
+def save_user_fleets(data):
+    _save_json(get_user_dir(), 'fleetVo.json', data)
+
+def get_user_tactics():
+    return _load_json(get_user_dir(), 'tactics.json')
+
+def save_user_tactics(data):
+    _save_json(get_user_dir(), 'tactics.json', data)
+
+def get_userVo():
+    return _load_json(get_user_dir(), 'userVo.json')
+
+def save_userVo(data):
+    _save_json(get_user_dir(), 'userVo.json', data)
 
 def init_ships_temp():
     data = {}

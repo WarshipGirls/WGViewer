@@ -122,3 +122,4 @@ env/
 *.py~
 test.py
 init.zip
+todo.txt

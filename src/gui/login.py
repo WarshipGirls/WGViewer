@@ -10,12 +10,12 @@ from PyQt5.QtWidgets import (
     QGridLayout
 )
 
+from src import data as wgr_data
 from .main_interface import MainInterface
 from ..func.encryptor import Encryptor
 from ..func.login import GameLogin
 from ..func.session import Session
 from ..func import constants as constants
-from ..data import data as wgr_data
 
 
 class LoginForm(QWidget):
@@ -216,6 +216,13 @@ class LoginForm(QWidget):
             logging.error("Invalid server name: {}".format(text))
 
     def check_password(self):
+        
+        def _login_failed():
+            msg.setText("\tLogin Failed\nProbably due to bad server connection")
+            msg.exec_()
+            self.login_button.setEnabled(True)
+            self.login_button.setText('Login')
+
         # TODO: #30
         self.login_button.setText('Connecting to server...')
         self.login_button.setEnabled(False)
@@ -243,10 +250,7 @@ class LoginForm(QWidget):
             self.login_button.setText('Loading and Initializing...')
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
-            self.login_button.setEnabled(True)
-            self.login_button.setText('Login')
-            msg.setText("Logging failed.")
-            msg.exec_()
+            _login_failed()
             return
 
         if res1 == True and res2 == True:
@@ -257,11 +261,7 @@ class LoginForm(QWidget):
             self.mi = MainInterface(self.server, self.channel, account.get_cookies())
             self.login_success()
         else:
-            logging.debug(_password)
-            msg.setText("Incorrect Password.")
-            msg.exec_()
-            self.login_button.setEnabled(True)
-            self.login_button.setText('Login')
+            _login_failed()
 
 
 # End of File
