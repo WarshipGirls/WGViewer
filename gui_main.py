@@ -19,11 +19,11 @@ def get_data_path(relative_path):
 
 def set_app_icon():
     app.setWindowIcon(QIcon(get_data_path('assets/favicon.ico')))
-    myappid = u'PWYQ.WarshipGirlsViewer.WGViewer.version'  # arbitrary string
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    app_id = u'PWYQ.WarshipGirlsViewer.WGViewer.version'  # arbitrary string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
 
 
-def init_QSettings():
+def init_qsettings():
     app.setOrganizationName("WarshipGirls")
     app.setOrganizationDomain("https://github.com/WarshipGirls")
     app.setApplicationName("Warship Girls Viewer")
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     logging.info("Warship Girls Viewer started...")
     app = QApplication([])
     set_app_icon()
-    init_QSettings()
+    init_qsettings()
     init_fonts()
     init_data_imports()
 

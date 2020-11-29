@@ -17,7 +17,7 @@ from src.func import constants as constants
 from .main_interface import MainInterface
 
 
-def create_qLabel(text):
+def create_label(text):
     _str = '<font size="4"> ' + text + ' </font>'
     _res = QLabel(_str)
     return _res
@@ -81,7 +81,7 @@ class LoginForm(QWidget):
         self.setWindowTitle('Warship Girls Viewer Login')
 
     def init_name_field(self, text=''):
-        label_name = create_qLabel('Username')
+        label_name = create_label('Username')
         self.lineEdit_username.setClearButtonEnabled(True)
 
         if text == '':
@@ -94,7 +94,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.lineEdit_username, 0, 1)
 
     def init_password_field(self, text=''):
-        label_password = create_qLabel('Password')
+        label_password = create_label('Password')
         self.lineEdit_password.setClearButtonEnabled(True)
         self.lineEdit_password.setEchoMode(QLineEdit.Password)
 
@@ -107,7 +107,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.lineEdit_password, 1, 1)
 
     def init_platform_field(self, text=''):
-        label_platform = create_qLabel('Platform')
+        label_platform = create_label('Platform')
         # platforms = ["Choose your platform", "CN-iOS", "CN-Android", "International", "JP"]
         platforms = ["Choose your platform", "CN-iOS", "CN-Android"]
         self.combo_platform.addItems(platforms)
@@ -122,7 +122,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.combo_platform, 2, 1)
 
     def init_server_field(self, text=''):
-        label_server = create_qLabel('Server')
+        label_server = create_label('Server')
         self.combo_server.currentTextChanged.connect(self.update_server)
 
         if text == '':

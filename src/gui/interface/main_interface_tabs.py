@@ -2,8 +2,9 @@ import logging
 import os
 import sys
 
+from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import (
-    QWidget, QTabWidget, QGridLayout
+    QWidget, QTabWidget, QGridLayout, QTabBar
 )
 
 from src.gui.tabs.advance_functions import TabAdvanceFunctions
@@ -18,41 +19,50 @@ def get_data_path(relative_path):
     return relative_path if not os.path.exists(res) else res
 
 
+class TabBar(QTabBar):
+    def tabSizeHint(self, index):
+        size = QTabBar.tabSizeHint(self, index)
+        w = int(self.width() / self.count())
+        return QSize(w, size.height())
+
+
 class MainInterfaceTabs(QWidget):
     def __init__(self, parent, api, threadpool, is_realrun):
         super().__init__()
         logging.info("Creating Main Interface Tabs...")
         self.api = api
+        self.parent = parent
+        self.threadpool = threadpool
         self.is_realrun = is_realrun
 
         # do NOT change the order of creation
         self.layout = QGridLayout()
         self.tab_ships = TabShips(self.api, self.is_realrun)
         self.tab_exp = TabExpedition()
-        tabwidget = QTabWidget()
+        self.tab_adv = TabAdvanceFunctions(self.parent)
+        self.tabs = QTabWidget()
+        self.tabs.setTabBar(QTabBar())
+        self.init_ui()
 
-        tabwidget.addTab(self.tab_exp, "  Expedition (beta)  ")
-        tabwidget.addTab(self.tab_ships, "  Dock  ")
+        self.tabs.addTab(self.tab_exp, "  Expedition (beta)  ")
+        self.tabs.addTab(self.tab_ships, "  Dock  ")
+        self.tabs.addTab(self.tab_adv, "  Advance (N/A)  ")
 
-        self.layout.addWidget(tabwidget, 0, 0)
+        self.layout.addWidget(self.tabs, 0, 0)
         self.setLayout(self.layout)
 
-    def init_tab_bar(self):
-        # Initialize tab screen
-        self.tabs = QTabWidget()
-        self.tab1 = QWidget()
-        self.tab2 = QWidget()
-        self.tab_ships = TabShips(self, self.is_realrun)
-        self.tab4 = QWidget()
-        self.tab5 = QWidget()
-        self.tab_advance = TabAdvanceFunctions(self)
+    def init_ui(self):
+        self.tabs.setTabBar(TabBar())
+        self.tabs.setTabsClosable(True)
+        self.tabs.setMovable(True)
+        self.tabs.setDocumentMode(True)
+        self.tabs.setElideMode(Qt.ElideRight)
+        self.tabs.setUsesScrollButtons(True)
+        self.tabs.tabCloseRequested.connect(self.close_tab)
 
-        # Add tabs
-        self.tabs.addTab(self.tab_ships, "  Ships  ")
-        self.tabs.addTab(self.tab1, "  Sortie  ")
-        self.tabs.addTab(self.tab2, "  Fleets  ")
-        self.tabs.addTab(self.tab4, "  Equipment  ")
-        self.tabs.addTab(self.tab5, "  Tactics  ")
-        self.tabs.addTab(self.tab_advance, "  Advance Functions  ")
+    def close_tab(self, index):
+        tab = self.tabs.widget(index)
+        tab.deleteLater()
+        self.tabs.removeTab(index)
 
 # End of File
