@@ -27,35 +27,35 @@ class ResourceTableModel(QAbstractTableModel):
 
         if role == Qt.DecorationRole:
             if row == 0 and col == 0:
-                return QIcon(get_data_path('src/assets/items/fuel.png'))
+                return QIcon(get_data_path('assets/items/fuel.png'))
             elif row == 0 and col == 1:
-                return QIcon(get_data_path('src/assets/items/ammo.png'))
+                return QIcon(get_data_path('assets/items/ammo.png'))
             elif row == 0 and col == 2:
-                return QIcon(get_data_path('src/assets/items/steel.png'))
+                return QIcon(get_data_path('assets/items/steel.png'))
             elif row == 0 and col == 3:
-                return QIcon(get_data_path('src/assets/items/bauxite.png'))
+                return QIcon(get_data_path('assets/items/bauxite.png'))
             elif row == 0 and col == 4:
-                return QIcon(get_data_path('src/assets/items/gold.png'))
+                return QIcon(get_data_path('assets/items/gold.png'))
             elif row == 1 and col == 0:
-                return QIcon(get_data_path('src/assets/items/instant_repair.png'))
+                return QIcon(get_data_path('assets/items/instant_repair.png'))
             elif row == 1 and col == 1:
-                return QIcon(get_data_path('src/assets/items/instant_build.png'))
+                return QIcon(get_data_path('assets/items/instant_build.png'))
             elif row == 1 and col == 2:
-                return QIcon(get_data_path('src/assets/items/blueprint_construct.png'))
+                return QIcon(get_data_path('assets/items/blueprint_construct.png'))
             elif row == 1 and col == 3:
-                return QIcon(get_data_path('src/assets/items/blueprint_dev.png'))
+                return QIcon(get_data_path('assets/items/blueprint_dev.png'))
             elif row == 1 and col == 4:
-                return QIcon(get_data_path('src/assets/items/revive.png'))
+                return QIcon(get_data_path('assets/items/revive.png'))
             elif row == 2 and col == 0:
-                return QIcon(get_data_path('src/assets/items/DD.png'))
+                return QIcon(get_data_path('assets/items/DD.png'))
             elif row == 2 and col == 1:
-                return QIcon(get_data_path('src/assets/items/CA.png'))
+                return QIcon(get_data_path('assets/items/CA.png'))
             elif row == 2 and col == 2:
-                return QIcon(get_data_path('src/assets/items/BB.png'))
+                return QIcon(get_data_path('assets/items/BB.png'))
             elif row == 2 and col == 3:
-                return QIcon(get_data_path('src/assets/items/CV.png'))
+                return QIcon(get_data_path('assets/items/CV.png'))
             elif row == 2 and col == 4:
-                return QIcon(get_data_path('src/assets/items/SS.png'))
+                return QIcon(get_data_path('assets/items/SS.png'))
             else:
                 logging.error('incorrect indexes')
 

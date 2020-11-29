@@ -26,7 +26,7 @@ class TabExpedition(QWidget):
     def init_ui(self):
         main_layout = QGridLayout(self)
 
-        csv_path = get_data_path('src/assets/data/exp_data.csv')
+        csv_path = get_data_path('assets/data/exp_data.csv')
 
         self.table = ExpTable(csv_path)
         main_layout.addWidget(self.table, 0, 0, self.table.get_row_count(), self.table.get_col_count())

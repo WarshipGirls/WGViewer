@@ -5,6 +5,11 @@ import platform
 from pathlib import Path
 
 
+# ================================
+# Not Exports
+# ================================
+
+
 def _get_data_dir():
     # TODO: unix not tested
     # TODO: mac not tested
@@ -30,6 +35,12 @@ def _clear_dir(_dir):
                 shutil.rmtree(file_path)
         except Exception as e:
             logging.error('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
+# ================================
+# Exports
+# ================================
+
 
 def clear_cache_folder():
     _clear_dir(_get_data_dir())
