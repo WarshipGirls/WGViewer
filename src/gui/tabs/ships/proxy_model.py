@@ -3,7 +3,7 @@ import logging
 import re
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
-from PyQt5.QtGui import  QIcon
+from PyQt5.QtGui import QIcon
 
 from . import constant as SCONST
 from src import data as wgr_data
@@ -21,10 +21,9 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.marry_opt = None
         self.country_opt = None
 
-        self.checkboxes_opt={}
-        # LESSON: Unlike C++, Python have no reference to a variable, so following will create self.all_opts points to [None, ...]
-        #    which will remain unchanged and will fail filtering
-        # self.all_opts = [self.name_reg, ...]
+        self.checkboxes_opt = {}
+        # LESSON: Unlike C++, Python have no reference to a variable, so following will create self.all_opts points
+        # to [None, ...] which will remain unchanged and will fail filtering self.all_opts = [self.name_reg, ...]
 
         self.no_sort_cols = [0, 1, 3, 21, 22, 23, 24, 25, 26, 27]
         self.int_sort_cols = [2, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
@@ -44,9 +43,9 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         return self._info[str(cid)]['country']
 
     def setNameFilter(self, regex):
-        '''
+        """
         reg = string, auto mapped to QString in Py3
-        '''
+        """
         if isinstance(regex, str):
             regex = re.compile(regex)
         else:
@@ -127,12 +126,13 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                 # https://docs.python.org/3/library/re.html#re.compile
                 r.append(o.search(name))
             return r
+
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def lockFilterAcceptsRow(self, source_row, source_parent, opt, col):
         def f(o, i):
             r = []
-            lock = self.sourceModel().data(i, Qt.DecorationRole)   # Detect if have ICON
+            lock = self.sourceModel().data(i, Qt.DecorationRole)  # Detect if have ICON
             if o == 'YES':
                 r.append(isinstance(lock, QIcon))
             elif o == 'NO':
@@ -140,6 +140,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             else:
                 r.append(True)
             return r
+
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def levelFilterAcceptsRow(self, source_row, source_parent, opt, col):
@@ -159,6 +160,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             else:
                 r.append(True)
             return r
+
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def modFilterAcceptsRow(self, source_row, source_parent, opt, col):
@@ -172,6 +174,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             else:
                 r.append(True)
             return r
+
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def sizeFilterAcceptsRow(self, source_row, source_parent, opt, col):
@@ -187,6 +190,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             else:
                 r.append(True)
             return r
+
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def typeFilterAcceptsRow(self, source_row, source_parent, opt, col):
@@ -202,10 +206,11 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             else:
                 r.append(True)
             return r
+
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def rarityFilterAcceptsRow(self, source_row, source_parent, opt, col):
-        def f(o, i):    # o is QComboBox index
+        def f(o, i):  # o is QComboBox index
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
             rarity = self.ship_id_to_rarity(cid)
@@ -214,10 +219,11 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             else:
                 res.append(o == rarity)
             return res
+
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     def countryFilterAcceptsRow(self, source_row, source_parent, opt, col):
-        def f(o, i):    # o is QComboBox index
+        def f(o, i):  # o is QComboBox index
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
             country = self.ship_id_to_country(cid)
@@ -226,18 +232,19 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             else:
                 res.append(o == country)
             return res
-        return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
+        return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
     # ================================================================
     # QSortFilterProxyModel virtual functions
     # ================================================================
 
-
     def filterAcceptsRow(self, source_row, source_parent):
 
         cond1 = False == any(self.checkboxes_opt)
-        cond2 = False == any([self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt, self.marry_opt, self.country_opt])
+        cond2 = False == any(
+            [self.name_reg, self.lock_opt, self.level_opt, self.mod_opt, self.type_size_opt, self.rarity_opt,
+             self.marry_opt, self.country_opt])
         if cond1 and cond2:
             return True
         else:
@@ -305,31 +312,30 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         return super().setFilterKeyColumn(column)
 
     def lessThan(self, source_left, source_right):
-        if (source_left.isValid() and source_right.isValid()):
+        if source_left.isValid() and source_right.isValid():
             l = source_left.data()
             r = source_right.data()
-            if (source_left.column() in self.no_sort_cols):
+            if source_left.column() in self.no_sort_cols:
                 pass
-            elif (source_left.column() in self.int_sort_cols):
+            elif source_left.column() in self.int_sort_cols:
                 return int(l) < int(r)
-            elif (source_left.column() in self.float_sort_cols):
+            elif source_left.column() in self.float_sort_cols:
                 return float(l) < float(r)
-            elif (source_left.column() in self.range_sort_col):
+            elif source_left.column() in self.range_sort_col:
                 return SCONST._range_to_int[l] < SCONST._range_to_int[r]
-            elif (source_left.column() in self.resource_sort_cols):
+            elif source_left.column() in self.resource_sort_cols:
                 if (isinstance(l, str) == True) and ("/" in l):
                     return int(l[:l.find('/')]) < int(r[:r.find('/')])
                 else:
                     return l < r
-            elif (source_left.column() in self.slot_sort_col):
-                    l = 0 if '-' in l else sum(ast.literal_eval(l))
-                    r = 0 if '-' in r else sum(ast.literal_eval(r))
-                    return l < r
+            elif source_left.column() in self.slot_sort_col:
+                l = 0 if '-' in l else sum(ast.literal_eval(l))
+                r = 0 if '-' in r else sum(ast.literal_eval(r))
+                return l < r
             else:
                 pass
         else:
             pass
         return super().lessThan(source_left, source_right)
-
 
 # End of File

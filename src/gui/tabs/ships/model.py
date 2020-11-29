@@ -47,13 +47,13 @@ class ShipModel(QStandardItemModel):
             s['Name'] = self.index(row, 1).data()
             # Lesson: JSON keys have to be strings; json.dump() will convert int-key to str type
             all_ships[self.index(row, 2).data()] = s
-            for col in range(3, 21):        # str and str representation of int, float, list of int, int/int
+            for col in range(3, 21):  # str and str representation of int, float, list of int, int/int
                 s[SCONST._header[col]] = self.index(row, col).data()
-            equips = []                     # equips cid (int), may contain None
+            equips = []  # equips cid (int), may contain None
             for col in range(21, 25):
                 equips.append(self.index(row, col).data(Qt.UserRole))
             s['equips'] = equips
-            tacts = []                      # tactics cid (int), may contain None
+            tacts = []  # tactics cid (int), may contain None
             for col in range(25, 28):
                 tacts.append(self.index(row, col).data(Qt.UserRole))
             s['tactics'] = tacts
@@ -83,7 +83,7 @@ class ShipModel(QStandardItemModel):
             else:
                 for ship in ship_lists:
                     self.insertRow(self.rowCount())
-                    self.add_ship(self.rowCount()-1, ship)
+                    self.add_ship(self.rowCount() - 1, ship)
 
     def add_ship(self, row, d):
         self.set_thumbnail(row, str(d["shipCid"]))
@@ -115,7 +115,7 @@ class ShipModel(QStandardItemModel):
         # QTableWidgetItem requires unique assignment; thus, same pic cannot assign twice. Differ from QIcon
         img_path = "assets/S/" + prefix + str(int(cid[3:6])) + ".png"
         img = QPixmap()
-        is_loaded =  img.load(get_data_path(img_path))
+        is_loaded = img.load(get_data_path(img_path))
         if is_loaded:
             thumbnail = QStandardItem()
             thumbnail.setData(QVariant(img.scaled(78, 44)), Qt.DecorationRole)
@@ -184,7 +184,7 @@ class ShipModel(QStandardItemModel):
             _id = int(self.data(_id_idx, Qt.DisplayRole))
             _ship = next(i for i in self.ships_raw_data if i['id'] == _id)
 
-            if self.value_opt == SCONST.value_select[0]:    # curr
+            if self.value_opt == SCONST.value_select[0]:  # curr
                 hp = str(_ship['battleProps']['hp']) + "/" + str(_ship['battlePropsMax']['hp'])
                 oil = str(_ship['battleProps']['oil']) + "/" + str(_ship['battlePropsMax']['oil'])
                 ammo = str(_ship['battleProps']['ammo']) + "/" + str(_ship['battlePropsMax']['ammo'])
@@ -238,7 +238,7 @@ class ShipModel(QStandardItemModel):
 
     def set_stats(self, *args):
         # set current ship stats as default
-        
+
         # Design thinking: I thought set eye-catching color for not-full hp. 
         # but there will be dock in the future, so it is redundant to set color here
         # also extra work of set/reset-ing color
@@ -297,17 +297,17 @@ class ShipModel(QStandardItemModel):
             img_path = get_data_path(raw_path)
 
             img = QPixmap()
-            is_loaded =  img.load(img_path)
+            is_loaded = img.load(img_path)
             if is_loaded:
                 thumbnail = QStandardItem()
                 thumbnail.setData(QVariant(img), Qt.DecorationRole)
-                thumbnail.setData(e, Qt.UserRole)   # hide Equipment cid
+                thumbnail.setData(e, Qt.UserRole)  # hide Equipment cid
                 self.setItem(args[0], col, thumbnail)
             else:
                 logging.warning('Image for equipment {} is absent.'.format(e))
             col += 1
 
-        rest = 4-len(args[1])
+        rest = 4 - len(args[1])
         for i in range(rest):
             item = QStandardItem('X')
             item.setFlags(Qt.NoItemFlags)
@@ -341,7 +341,7 @@ class ShipModel(QStandardItemModel):
         raw_path = "assets/E/equip_L_" + str(int(equip_id[3:6])) + ".png"
         img_path = get_data_path(raw_path)
         img = QPixmap()
-        is_loaded =  img.load(img_path)
+        is_loaded = img.load(img_path)
         if is_loaded:
             thumbnail = QStandardItem()
             thumbnail.setData(QVariant(img), Qt.DecorationRole)
@@ -386,6 +386,5 @@ class ShipModel(QStandardItemModel):
     def set_skill(self):
         # TODO
         pass
-
 
 # End of File

@@ -13,7 +13,7 @@ class ShipTableDelegate(QStyledItemDelegate):
         if index.column() == 1:
             # Make only column 1 editable
             return super(ShipTableDelegate, self).createEditor(parent, option, index)
-        elif 21 <= index.column() <= 24: 
+        elif 21 <= index.column() <= 24:
             # TODO? THIS is probably NOT the way it should be done. but I don't know how to do it otherwise
             print("clicked equip " + str(index.row()) + ", " + str(index.column()))
             cid = index.sibling(index.row(), 0).data(Qt.UserRole)
@@ -30,6 +30,5 @@ class ShipTableDelegate(QStyledItemDelegate):
         # the chain of following is disgusting
         self._view.model().sourceModel().update_one_equip(row, col, str(eid))
         self.w.close()
-
 
 # End of File
