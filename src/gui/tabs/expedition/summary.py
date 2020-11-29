@@ -10,6 +10,7 @@ class DailySummary(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.tab = QTableWidget()
         self.init_table()
         self.init_ui()
 
@@ -18,7 +19,6 @@ class DailySummary(QWidget):
         self.setLayout(self.layout)
 
     def init_table(self):
-        self.tab = QTableWidget()
         self.tab.setColumnCount(8)
         self.tab.setRowCount(5)
 
@@ -51,7 +51,6 @@ class DailySummary(QWidget):
             self.tab.setItem(row, col, QTableWidgetItem(labels[row - 1]))
 
     def update_val(self, data, row, col):
-        item = self.tab.item(row, col)
         self.tab.setItem(row, col, QTableWidgetItem(str(data)))
 
 # End of File

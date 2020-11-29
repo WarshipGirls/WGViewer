@@ -2,12 +2,11 @@ import logging
 import os
 import re
 import sys
-import traceback
 
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
-from src import data as  wgr_data
+from src import data as wgr_data
 from src.func import constants as CONST
 from src.func.helper_function import Helper
 from . import constant as SCONST
@@ -23,40 +22,43 @@ def get_data_path(relative_path):
 class ShipModel(QStandardItemModel):
     def __init__(self, view, api):
         super().__init__(view)
-        # NOTE: `data()` is a method of `QStandardItemModel()`
-        self.hlp = Helper()
         self.view = view
         self.api = api
-
-        self.ships_raw_data = None
+        self.hlp = Helper()
 
         self.value_opt = SCONST.value_select[0]
+        self.headers = SCONST.header
 
-        self.headers = SCONST._header
+        self.ring_icon = None
+        self.lock_icon = None
+        self.init_icons()
+        self.tactics_json = None
+        self.user_tactics = None
+        self.init_json()
+
+        self.ships_raw_data = None
+        self.ships_data = []
+
         self.setColumnCount(len(self.headers))
         self.setHorizontalHeaderLabels(self.headers)
-        self.init_icons()
-        self.init_json()
 
     def save_table_data(self):
         all_ships = {}
         for row in range(self.rowCount()):
             # Qt.DisplayRole (default), Qt.UserRole (hidden), Qt.DecorationRole (icon)
-            s = {}
-            s['cid'] = int(self.index(row, 0).data(Qt.UserRole))
-            s['Name'] = self.index(row, 1).data()
+            s = {'cid': int(self.index(row, 0).data(Qt.UserRole)), 'Name': self.index(row, 1).data()}
             # Lesson: JSON keys have to be strings; json.dump() will convert int-key to str type
             all_ships[self.index(row, 2).data()] = s
             for col in range(3, 21):  # str and str representation of int, float, list of int, int/int
-                s[SCONST._header[col]] = self.index(row, col).data()
+                s[SCONST.header[col]] = self.index(row, col).data()
             equips = []  # equips cid (int), may contain None
             for col in range(21, 25):
                 equips.append(self.index(row, col).data(Qt.UserRole))
             s['equips'] = equips
-            tacts = []  # tactics cid (int), may contain None
+            tactics = []  # tactics cid (int), may contain None
             for col in range(25, 28):
-                tacts.append(self.index(row, col).data(Qt.UserRole))
-            s['tactics'] = tacts
+                tactics.append(self.index(row, col).data(Qt.UserRole))
+            s['tactics'] = tactics
             # TODO skill cid after implementing skill
         wgr_data.save_processed_userShipVo(all_ships)
 
@@ -72,7 +74,6 @@ class ShipModel(QStandardItemModel):
     def set_data(self, _data):
         self.ships_raw_data = _data
 
-        self.ships_data = []
         for i in range(27):
             self.ships_data.append([])
         for s in self.ships_raw_data:
@@ -98,9 +99,9 @@ class ShipModel(QStandardItemModel):
         self.set_tactics(row, d['tactics'])
 
     def set_thumbnail(self, row, cid):
-        ''' Column 0
+        """ Column 0
         Set ship image (thumbnail) and categorize ships by cid along the way.
-        '''
+        """
         assert (len(cid) == 8)
 
         if cid[:3] == "100":
@@ -168,9 +169,9 @@ class ShipModel(QStandardItemModel):
 
     @pyqtSlot(str)
     def on_stats_changed(self, *args):
-        '''
+        """
         Getting check box update signal
-        '''
+        """
         if args[0] in SCONST.value_select:
             self.value_opt = args[0]
         else:
@@ -178,7 +179,7 @@ class ShipModel(QStandardItemModel):
 
         self.update_stats()
 
-    def update_stats(self, *args):
+    def update_stats(self):
         for row in range(self.rowCount()):
             _id_idx = self.index(row, 2)
             _id = int(self.data(_id_idx, Qt.DisplayRole))
@@ -269,7 +270,7 @@ class ShipModel(QStandardItemModel):
         self.setItem(args[0], 19, wig_b)
 
     def set_slots(self, *args):
-        if (any(args[1]) and any(args[2])):
+        if any(args[1]) and any(args[2]):
             slot = " - "
         else:
             if max(args[1]) > max(args[2]):
@@ -348,7 +349,7 @@ class ShipModel(QStandardItemModel):
             thumbnail.setData(equip_id, Qt.UserRole)
             self.setItem(row, col, thumbnail)
         else:
-            logging.warning('Image for equipment {} is absent.'.format(e))
+            logging.warning('Image for equipment {} is absent.'.format(equip_id))
 
     def set_tactics(self, *args):
         # stupid MoeFantasy makes it inefficient; can't access tactics LV by ship data

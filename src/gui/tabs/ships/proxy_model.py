@@ -42,7 +42,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
     def ship_id_to_country(self, cid: int) -> int:
         return self._info[str(cid)]['country']
 
-    def setNameFilter(self, regex):
+    def set_name_filter(self, regex):
         """
         reg = string, auto mapped to QString in Py3
         """
@@ -53,36 +53,36 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.name_reg = regex
         self.invalidateFilter()
 
-    def setLockFilter(self, is_lock):
+    def set_lock_filter(self, is_lock):
         self.lock_opt = is_lock
         self.invalidateFilter()
 
-    def setLevelFilter(self, level):
+    def set_level_filter(self, level):
         self.level_opt = level
         self.invalidateFilter()
 
-    def setModFilter(self, mod):
+    def set_mod_filter(self, mod):
         self.mod_opt = mod
         self.invalidateFilter()
 
-    def setTypeSizeFilter(self, type_size):
+    def set_type_filter(self, type_size):
         self.type_size_opt = type_size
         self.invalidateFilter()
 
-    def setRarityFilter(self, rarity):
+    def set_rarity_filter(self, rarity):
         self.rarity_opt = rarity
         self.invalidateFilter()
 
-    def setMarryFilter(self, married):
+    def set_marry_filter(self, married):
         self.marry_opt = married
         self.invalidateFilter()
 
-    def setCountryFilter(self, country):
+    def set_country_filter(self, country):
         self.country_opt = country
         self.invalidateFilter()
 
-    def setCheckBoxFilter(self, x):
-        if x == None:
+    def set_checkbox_filter(self, x):
+        if x is None:
             self.checkboxes_opt = {}
         else:
             self.checkboxes_opt[x.text()] = x.isChecked()
@@ -90,11 +90,11 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
     def _customFilterAcceptsRow(self, source_row, source_parent, opt, col, func):
         res = []
-        if opt == None:
+        if opt is None:
             res.append(source_row if source_row != 0 else True)
         else:
             idx = self.sourceModel().index(source_row, col, source_parent)
-            if idx.isValid() == False:
+            if not idx.isValid():
                 pass
             else:
                 res = func(opt, idx)
@@ -102,11 +102,11 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
     def checkboxFilterAcceptsRow(self, source_row, source_parent, opt, col):
         res = []
-        if any(opt) == False:
+        if not any(opt):
             res.append(source_row if source_row != 0 else True)
         else:
             idx = self.sourceModel().index(source_row, col, source_parent)
-            if idx.isValid() == False:
+            if not idx.isValid():
                 pass
             else:
                 ship_class = self.sourceModel().data(idx, Qt.DisplayRole)
@@ -120,7 +120,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         def f(o, i):
             r = []
             name = self.sourceModel().data(i, Qt.DisplayRole)
-            if name == None:
+            if name is None:
                 r.append(False)
             else:
                 # https://docs.python.org/3/library/re.html#re.compile
@@ -251,32 +251,32 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             pass
 
         checkbox_res = self.checkboxFilterAcceptsRow(source_row, source_parent, self.checkboxes_opt, 3)
-        if all(checkbox_res) == False:
+        if not all(checkbox_res):
             return False
         else:
             pass
 
         # columns are HARDCODING
         name_res = self.nameFilterAcceptsRow(source_row, source_parent, self.name_reg, 1)
-        if all(name_res) == False:
+        if not all(name_res):
             return False
         else:
             pass
 
         lock_res = self.lockFilterAcceptsRow(source_row, source_parent, self.lock_opt, 2)
-        if all(lock_res) == False:
+        if not all(lock_res):
             return False
         else:
             pass
 
         level_res = self.levelFilterAcceptsRow(source_row, source_parent, self.level_opt, 6)
-        if all(level_res) == False:
+        if not all(level_res):
             return False
         else:
             pass
 
         mod_res = self.modFilterAcceptsRow(source_row, source_parent, self.mod_opt, 0)
-        if all(mod_res) == False:
+        if not all(mod_res):
             return False
         else:
             pass
@@ -284,20 +284,20 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         size_res = self.sizeFilterAcceptsRow(source_row, source_parent, self.type_size_opt, 0)
         type_res = self.typeFilterAcceptsRow(source_row, source_parent, self.type_size_opt, 3)
         type_size_res = all(size_res) and all(type_res)
-        if type_size_res == False:
+        if not type_size_res:
             return False
         else:
             pass
 
         rarity_res = self.rarityFilterAcceptsRow(source_row, source_parent, self.rarity_opt, 0)
-        if all(rarity_res) == False:
+        if not all(rarity_res):
             return False
         else:
             pass
 
         # marryFilter shares same code as lockFilter
         marry_res = self.lockFilterAcceptsRow(source_row, source_parent, self.marry_opt, 1)
-        if all(marry_res) == False:
+        if not all(marry_res):
             return False
         else:
             pass
@@ -322,7 +322,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
             elif source_left.column() in self.float_sort_cols:
                 return float(l) < float(r)
             elif source_left.column() in self.range_sort_col:
-                return SCONST._range_to_int[l] < SCONST._range_to_int[r]
+                return SCONST.range_to_int[l] < SCONST.range_to_int[r]
             elif source_left.column() in self.resource_sort_cols:
                 if (isinstance(l, str) == True) and ("/" in l):
                     return int(l[:l.find('/')]) < int(r[:r.find('/')])

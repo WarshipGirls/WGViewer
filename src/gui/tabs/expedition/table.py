@@ -12,7 +12,7 @@ from src import data as wgr_data
 
 
 class ExpTable(QWidget):
-    # Long term TODO: max coeff. by iter thru user's engineering bay stats
+    # Long term TODO: max coefficient by iter through user's engineering bay stats
     def __init__(self, filename):
         super().__init__()
         self.filename = filename
@@ -81,11 +81,11 @@ class ExpTable(QWidget):
         self.table_view.setSpan(0, 11, 1, 2)
 
     def highlight_data(self, cols, highlight_color=None, bold=False):
-        idxs = []
+        indices = []
         for col in cols:
-            idxs += self.get_n_max_val_idx_by_col(col)
+            indices += self.get_n_max_val_idx_by_col(col)
         maps = set()
-        for i in idxs:
+        for i in indices:
             item = self.table_model.itemFromIndex(i)
             if isinstance(highlight_color, QColor):
                 maps.add(item.row())
@@ -93,7 +93,7 @@ class ExpTable(QWidget):
                 item.setForeground(QColor('black'))
             else:
                 pass
-            if bold == True:
+            if bold:
                 f = item.font()
                 f.setBold(True)
                 item.setFont(f)

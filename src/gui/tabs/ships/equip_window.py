@@ -33,8 +33,10 @@ class EquipPopup(QMainWindow):
         self.height = 600
         self.id_list = []
         self.lock_icon = QIcon(get_data_path("assets/icons/lock_64.png"))
-        self.trans = SCONST._equip_spec
+        self.trans = SCONST.equip_spec
 
+        self.button = QPushButton('Unequip Current Equipment')
+        self.tab = QTableWidget()
         self.init_ui()
         if self.button_enable == True:
             pass
@@ -46,10 +48,8 @@ class EquipPopup(QMainWindow):
         self.setWindowTitle('WGViewer - Equipment Selection')
         self.resize(self.width, self.height)
 
-        self.button = QPushButton('Unequip Current Equipment')
         self.button.clicked.connect(self.unequip)
 
-        self.tab = QTableWidget()
         self.tab.setColumnCount(4)
         equips = wgr_data.get_ship_equips(self.cid)
 
@@ -62,7 +62,7 @@ class EquipPopup(QMainWindow):
         self.tab.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
 
         self.tab.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.tab.setHorizontalHeaderLabels(SCONST._equip_header)
+        self.tab.setHorizontalHeaderLabels(SCONST.equip_header)
         self.tab.setEditTriggers(QTableWidget.NoEditTriggers)
         self.tab.setSelectionBehavior(QTableWidget.SelectRows)
         self.tab.setSelectionMode(QTableWidget.SingleSelection)
@@ -107,7 +107,7 @@ class EquipPopup(QMainWindow):
             if not isinstance(data[key], int) or (key == 'star'):
                 pass
             elif key == 'range':
-                res.append('{}\t{}'.format(self.trans[key], SCONST._range_to_str[data[key]]))
+                res.append('{}\t{}'.format(self.trans[key], SCONST.range_to_str[data[key]]))
             else:
                 res.append('{}\t{}'.format(self.trans[key], data[key]))
         return '\n'.join(res)

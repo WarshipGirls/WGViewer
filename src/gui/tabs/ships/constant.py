@@ -19,17 +19,17 @@ flagships = ['BB', 'BBV', 'BC', 'BBG', 'CB', 'CV', 'AV', 'ASDG']
 escorts = ['CVL', 'CA', 'CL', 'CLT', 'CAV', 'BM', 'DD', 'AADG', 'AP']
 subs = ['SS', 'SC', 'SSV']
 # Whenever changed `_header`, double check hardcoding columns
-_header = ["", "Name", "ID", "Class", "Speed",
+header = ["", "Name", "ID", "Class", "Speed",
            "Range", "Lv.", "HP", "FP", "Armor",
            "Torp.", "Acc.", "Eva.", "LOS", "AA",
            "AS", "Luck", "Fuel", "Ammo.", "Baux.",
            "Slot", "Equip.", "", "", "",
            "Tact.", "", ""]
-_equip_header = ['Name', 'Amount', 'Specification', 'Description']
-_range_to_int = {"XL": 4, "L": 3, "M": 2, "S": 1}
-_range_to_str = {4: "X-Long", 3: "Long", 2: "Medium", 1: "Short"}
+equip_header = ['Name', 'Amount', 'Specification', 'Description']
+range_to_int = {"XL": 4, "L": 3, "M": 2, "S": 1}
+range_to_str = {4: "X-Long", 3: "Long", 2: "Medium", 1: "Short"}
 
-_equip_spec = {
+equip_spec = {
     'hp': 'HP',
     'atk': 'Firepower',
     'def': 'Armor',
