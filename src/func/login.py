@@ -31,7 +31,7 @@ class GameLogin:
         self.key = constants.login_key
         self.portHead = ""
         self.hm_login_server = ""
-        self.pastport_headers = {
+        self.passport_headers = {
             "Accept-Encoding": "gzip",
             'User-Agent': 'okhttp/3.4.1',
             "Content-Type": "application/json; charset=UTF-8"
@@ -57,7 +57,7 @@ class GameLogin:
         # For game log in
         server_data = self.login_usual(username=username, pwd=pwd)
 
-        if server_data == False:
+        if not server_data:
             return False
 
         # self.defaultServer = int(server_data["defaultServer"])
@@ -85,7 +85,7 @@ class GameLogin:
         elif self.channel == "100015":
             data_dict = constants.android_data_dict
         else:
-            pass
+            data_dict = {}
         data_dict["udid"] = str(random.randint(100000000000000, 999999999999999))
         data_dict["t"] = now_time
         data_dict["e"] = self.hlp.get_url_end(self.channel, now_time)
@@ -104,7 +104,7 @@ class GameLogin:
             self.cheat_sess(host, 'bsea/getData/')
             self.cheat_sess(host, 'active/getUserData')
             self.cheat_sess(host, 'pve/getUserData/')
-        except Exception as e:
+        except Exception:
             return False
 
         return True
@@ -123,7 +123,7 @@ class GameLogin:
         self.refresh_headers(url_login)
 
         login_response = self.session.post(url=url_login, data=json.dumps(data).replace(" ", ""),
-                                           headers=self.pastport_headers, timeout=10)
+                                           headers=self.passport_headers, timeout=10)
         login_response = json.loads(login_response.text)
 
         if "error" in login_response and int(login_response["error"]) != 0:
@@ -137,7 +137,7 @@ class GameLogin:
 
         url_init = self.hm_login_server + "1.0/get/initConfig/@self"
         self.refresh_headers(url_init)
-        self.session.post(url=url_init, data="{}", headers=self.pastport_headers, timeout=10)
+        self.session.post(url=url_init, data="{}", headers=self.passport_headers, timeout=10)
         time.sleep(1)
 
         # Validate token
@@ -147,7 +147,7 @@ class GameLogin:
             login_data = json.dumps({"access_token": tokens})
 
             self.refresh_headers(url_info)
-            user_info = self.session.post(url=url_info, data=login_data, headers=self.pastport_headers, timeout=10).text
+            user_info = self.session.post(url=url_info, data=login_data, headers=self.passport_headers, timeout=10).text
             user_info = json.loads(user_info)
             if "error" in user_info and user_info["error"] != 0:
                 tokens = ""
@@ -173,8 +173,8 @@ class GameLogin:
 
     def refresh_headers(self, url):
         data, times = self.encryption(url=url, method="POST")
-        self.pastport_headers["Authorization"] = "HMS {}:".format(self.portHead) + data
-        self.pastport_headers["Date"] = times
+        self.passport_headers["Authorization"] = "HMS {}:".format(self.portHead) + data
+        self.passport_headers["Date"] = times
 
     def get_cookies(self):
         return self.cookies

@@ -134,8 +134,8 @@ def init_ships_temp():
             data[str(c['cid'])] = {}
             data[str(c['cid'])]['rarity'] = c['star']
             data[str(c['cid'])]['country'] = c['country']
-        with open(path, 'w', encoding='utf-8') as fout:
-            json.dump(data, fout, ensure_ascii=False, indent=4)
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
 
     return data
 

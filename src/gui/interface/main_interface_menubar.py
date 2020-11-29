@@ -21,7 +21,7 @@ class MainInterfaceMenuBar(QMenuBar):
     def create_action(self, text, handler, shortcut=None):
         q = QAction(text, self)
         q.triggered.connect(handler)
-        if shortcut != None:
+        if shortcut is not None:
             q.setShortcut(shortcut)
         else:
             pass
@@ -55,11 +55,13 @@ class MainInterfaceMenuBar(QMenuBar):
     # File QActions
     # ================================
 
-    def quit_application(self):
+    @staticmethod
+    def quit_application():
         # TODO: in the future, save unfinished tasks
         QCoreApplication.exit()
 
-    def open_cache_folder(self):
+    @staticmethod
+    def open_cache_folder():
         os.startfile(wgr_data.get_data_dir())
 
     def clear_cache_folder(self):

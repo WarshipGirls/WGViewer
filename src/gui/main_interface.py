@@ -13,6 +13,15 @@ from src.gui.interface.main_interface_tabs import MainInterfaceTabs
 from src.gui.interface.main_interface_menubar import MainInterfaceMenuBar
 
 
+def init_data_files():
+    num = len(os.listdir(wgr_data.get_init_dir()))
+    # As of 5.0.0, there should be 30 files
+    if num != 30:
+        wgr_data.save_init_data()
+    else:
+        pass
+
+
 class MainInterface(QMainWindow):
     # https://stackoverflow.com/questions/2970312/pyqt4-qtcore-pyqtsignal-object-has-no-attribute-connect
     # sig_initGame = pyqtSignal(dict)
@@ -32,11 +41,13 @@ class MainInterface(QMainWindow):
         # !!! all DATA initialization must occur before any UI initialization !!!
 
         # TODO TODO multi-threading
-        self.init_data_files()
+        init_data_files()
         self.api_initGame()
 
         # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob.
         #  Qt.Focus issue)
+        self.menu_bar = MainInterfaceMenuBar(self)
+        self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.is_realrun)
         self.init_ui()
         self.init_side_dock()
 
@@ -53,9 +64,6 @@ class MainInterface(QMainWindow):
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.resize(0.67 * user_w, 0.67 * user_h)
 
-        self.menu_bar = MainInterfaceMenuBar(self)
-        self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.is_realrun)
-
         self.setMenuBar(self.menu_bar)
         self.setCentralWidget(self.table_widget)
 
@@ -64,7 +72,7 @@ class MainInterface(QMainWindow):
 
     def init_side_dock(self):
         def _create_side_dock():
-            if self.side_dock_on == False:
+            if not self.side_dock_on:
                 self.side_dock = SideDock(self)
                 self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
                 self.side_dock_on = True
@@ -79,14 +87,6 @@ class MainInterface(QMainWindow):
         else:
             self.qsettings.setValue("UI/init_side_dock", False)
             _create_side_dock()
-
-    def init_data_files(self):
-        num = len(os.listdir(wgr_data.get_init_dir()))
-        # As of 5.0.0, there should be 30 files
-        if num != 30:
-            wgr_data.save_init_data()
-        else:
-            pass
 
     # ================================
     # Events

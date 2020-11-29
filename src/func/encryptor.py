@@ -1,26 +1,31 @@
 from cryptography.fernet import Fernet
 
 
-class Encryptor():
+class Encryptor:
     def __init__(self):
         pass
 
-    def gen_key(self):
+    @staticmethod
+    def gen_key():
         return Fernet.generate_key()
 
-    def save_key(self, key, path):
+    @staticmethod
+    def save_key(key, path):
         with open(path, 'wb') as f:
             f.write(key)
 
-    def load_key(self, path):
+    @staticmethod
+    def load_key(path):
         with open(path, 'rb') as f:
             key = f.read()
         return key
 
-    def encrypt_str(self, key, string):
+    @staticmethod
+    def encrypt_str(key, string):
         return Fernet(key).encrypt(bytes(string, encoding='utf8'))
 
-    def decrypt_data(self, key, data):
+    @staticmethod
+    def decrypt_data(key, data):
         return Fernet(key).decrypt(data)
 
 # End of File

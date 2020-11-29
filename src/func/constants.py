@@ -45,7 +45,7 @@ login_key = "kHPmWZ4zQBYP24ubmJ5wA4oz0d8EgIFe"
 repair_types = {
     0: "Minor Damage Repair",
     1: "Moderate Damage Repair",
-    2: "Heavy Damage Rapair"
+    2: "Heavy Damage Repair"
 }
 
 war_eval = ['-', 'SS', 'S', 'A', 'B', 'C', 'D']
