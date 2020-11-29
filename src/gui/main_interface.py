@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgr_data
 from src.func.wgr_api import WGR_API
-from .side_dock import SideDock
+from .side_dock.dock import SideDock
 from .main_interface_tabs import MainInterfaceTabs
 from .main_interface_menubar import MainInterfaceMenuBar
 
