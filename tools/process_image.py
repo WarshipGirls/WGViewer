@@ -1,28 +1,30 @@
 import os
 import shutil
-from PIL import Image 
+from PIL import Image
 
 
-def get_dir_size(start_path = '.'):
+def get_dir_size(start_path='.'):
     total_size = 0
-    for dirpath, dirnames, filenames in os.walk(start_path):
+    for dir_path, dir_names, filenames in os.walk(start_path):
         for f in filenames:
-            fp = os.path.join(dirpath, f)
+            fp = os.path.join(dir_path, f)
             total_size += os.path.getsize(fp)
     return total_size
 
+
 def print_dir_size(path):
     res = get_dir_size(path)
-    print('Drictory size: {:,} bytes'.format(res).replace(',', ' '))
-    print('Drictory size: {:,} KB'.format(int(res/1024)).replace(',', ' '))
-    print('Drictory size: {:,} MB'.format(int(res/1024**2)).replace(',', ' '))
-    # print('Drictory size: {:,} GB'.format(int(res/1024**3)).replace(',', ' '))
-    # print('Drictory size: {:,} TB'.format(int(res/1024**4)).replace(',', ' '))
+    print('Directory size: {:,} bytes'.format(res).replace(',', ' '))
+    print('Directory size: {:,} KB'.format(int(res / 1024)).replace(',', ' '))
+    print('Directory size: {:,} MB'.format(int(res / 1024 ** 2)).replace(',', ' '))
+    # print('Directory size: {:,} GB'.format(int(res/1024**3)).replace(',', ' '))
+    # print('Directory size: {:,} TB'.format(int(res/1024**4)).replace(',', ' '))
+
 
 def crop_images():
-    '''
+    """
     For cropping ship images, 363x88 -> 156x88
-    '''
+    """
     img_dir = "./S/"
     res_dir = "../src/assets/S/"
     if not os.path.exists(res_dir):
@@ -54,10 +56,11 @@ def crop_images():
     print("==== After ====")
     print_dir_size(res_dir)
 
+
 def resize_images():
-    '''
+    """
     For resizing equipment images, 512x512 -> 64x64
-    '''
+    """
     img_dir = "./equip_512/"
     res_dir = "../src/assets/E/"
     if not os.path.exists(res_dir):

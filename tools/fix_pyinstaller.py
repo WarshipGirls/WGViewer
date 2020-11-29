@@ -11,11 +11,11 @@ Run this scripts, and copy paste output to the *.spec file. Do clean the old fix
 '''
 
 os.chdir("..")
-rootdir = os.path.dirname(os.path.realpath(__file__))
-prefix_len = len(rootdir) + 1
+root_dir = os.path.dirname(os.path.realpath(__file__))
+prefix_len = len(root_dir) + 1
 
 print("a.datas += [")
-for subdir, dirs, files in os.walk(rootdir):
+for subdir, dirs, files in os.walk(root_dir):
     for file in files:
         res = os.path.join(subdir, file)
         if "assets" in res:
