@@ -58,12 +58,14 @@ class GameLogin:
         server_data = self.login_usual(username=username, pwd=pwd)
 
         if not server_data:
+            logging.error("LOGIN - First fetch failed")
             return False
 
         # self.defaultServer = int(server_data["defaultServer"])
         # self.server_list = server_data["serverList"]
         self.uid = server_data["userId"]
 
+        logging.info("LOGIN - First fetch succeed!")
         return True
 
     def cheat_sess(self, host, link):

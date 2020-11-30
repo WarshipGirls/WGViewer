@@ -1,2 +1,2 @@
-class InterruptExecution (Exception):
+class InterruptExecution(Exception):
     pass
