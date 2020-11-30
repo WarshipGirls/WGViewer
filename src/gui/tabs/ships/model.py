@@ -74,7 +74,7 @@ class ShipModel(QStandardItemModel):
     def set_data(self, _data):
         self.ships_raw_data = _data
 
-        for i in range(27):
+        for i in range(28): # up to (not including) 28
             self.ships_data.append([])
         for s in self.ships_raw_data:
             self.ships_data[s["type"]].append(s)
@@ -104,17 +104,21 @@ class ShipModel(QStandardItemModel):
         """
         assert (len(cid) == 8)
 
+        mid = str(int(cid[3:6]))
         if cid[:3] == "100":
             prefix = "S_NORMAL_"
         elif cid[:3] == "110":
             prefix = "S_NORMAL_1"
+        elif cid[:2] == "18":
+            prefix = "S_NORMAL_8"
+            mid = mid.rjust(4, '0')[1:]
         else:
             err = "Unrecognized ship cid pattern: " + cid
             logging.warning(err)
             return None
 
         # QTableWidgetItem requires unique assignment; thus, same pic cannot assign twice. Differ from QIcon
-        img_path = "assets/S/" + prefix + str(int(cid[3:6])) + ".png"
+        img_path = "assets/S/" + prefix + mid + ".png"
         img = QPixmap()
         is_loaded = img.load(get_data_path(img_path))
         if is_loaded:
@@ -135,10 +139,10 @@ class ShipModel(QStandardItemModel):
 
     def set_name(self, *args):
         wig = QStandardItem(args[1])
-        s = "Met on " + self.hlp.ts_to_date(args[3])
+        s = "Met on " + self.hlp.ts_to_date(int(args[3]))
         if args[2] == 1:
             wig.setIcon(self.ring_icon)
-            s += "\nMarried on " + self.hlp.ts_to_date(args[4])
+            s += "\nMarried on " + self.hlp.ts_to_date(int(args[4]))
         else:
             pass
         wig.setToolTip(s)
