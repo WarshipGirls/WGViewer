@@ -94,7 +94,6 @@ class GameLogin:
             login_url_tmp = host + 'index/login/' + self.uid + '?&' + urllib.parse.urlencode(data_dict)
             self.session.get(url=login_url_tmp, headers=constants.header, cookies=self.cookies, timeout=10)
 
-            # TODO? process following data
             self.cheat_sess(host, 'pevent/getPveData/')
             self.cheat_sess(host, 'shop/canBuy/1/')
             self.cheat_sess(host, 'live/getUserInfo')
