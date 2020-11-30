@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit
 import src.data as wgr_data
 from src.func.worker import Worker
 
+from src.wgr.six import API_SIX
 from .thermopylae.ship_window import ShipSelectWindow
 from .thermopylae.sortie import Sortie
 
@@ -24,9 +25,9 @@ class LogHandler(logging.Handler, QObject):
 
 
 class TabThermopylae(QWidget):
-    def __init__(self, api):
+    def __init__(self):
         super().__init__()
-        self.api = api
+        self.api_six = API_SIX(wgr_data.load_cookies())
         self.fleets = [None] * 6
         self.final_fleet = [None] * 14
         # for testing
@@ -63,7 +64,6 @@ class TabThermopylae(QWidget):
         self.setLayout(main_layout)
 
         self.add_ship()
-
 
     def add_ship(self):
         self.button_group = QButtonGroup()
@@ -110,7 +110,7 @@ class TabThermopylae(QWidget):
     def button2_func(self):
         self.logger.info('this is button 2')
         # TEST
-        Sortie(self.api, [], [], self.logger)
+        Sortie(self.api_six, [], [], self.logger)
 
     def process_finished(self):
         self.logger.info('task is done')

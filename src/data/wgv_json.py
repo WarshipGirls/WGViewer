@@ -2,12 +2,10 @@
 # -*- coding:utf-8 -*-
 import json
 import os
+import pickle
+import requests
 
-from .wgv_path import get_init_dir, get_user_dir, get_temp_dir
-
-"""
-Order functions alphabetically!
-"""
+from .wgv_path import get_init_dir, get_user_dir, get_temp_dir, get_data_dir
 
 
 # ================================
@@ -30,6 +28,12 @@ def _save_json(folder, filename, data):
 # ================================
 # Exports
 # ================================
+
+def load_cookies() -> dict:
+    with open(os.path.join(get_data_dir(), 'user.cookies'), 'rb') as f:
+        data = pickle.load(f)
+    return data
+
 
 def get_api_initGame():
     return _load_json(get_temp_dir(), 'api_initGame.json')

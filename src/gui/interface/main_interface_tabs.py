@@ -28,20 +28,19 @@ class TabBar(QTabBar):
 
 
 class MainInterfaceTabs(QWidget):
-    def __init__(self, parent, api, threadpool, is_realrun):
+    def __init__(self, parent, threadpool, is_realrun):
         super().__init__()
         logging.info("Creating Main Interface Tabs...")
-        self.api = api
         self.parent = parent
         self.threadpool = threadpool
         self.is_realrun = is_realrun
 
         # do NOT change the order of creation
         self.layout = QGridLayout()
-        self.tab_ships = TabShips(self.api, self.is_realrun)
+        self.tab_ships = TabShips(self.is_realrun)
         self.tab_exp = TabExpedition()
         self.tab_adv = TabAdvanceFunctions(self.parent)
-        self.tab_thermopylae = TabThermopylae(self.api)
+        self.tab_thermopylae = TabThermopylae()
         self.tabs = QTabWidget()
         self.tabs.setTabBar(QTabBar())
         self.init_ui()

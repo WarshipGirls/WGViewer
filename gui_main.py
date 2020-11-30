@@ -63,8 +63,9 @@ if __name__ == '__main__':
         logging.warning(dev_warning)
 
         from src.gui.main_interface import MainInterface
+        from src import data as wgr_data
 
-        mi = MainInterface("0", "0", "0", False)
+        mi = MainInterface(wgr_data.load_cookies(), False)
         mi.show()
 
     sys.exit(app.exec_())

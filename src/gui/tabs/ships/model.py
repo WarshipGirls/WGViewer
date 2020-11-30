@@ -10,6 +10,7 @@ from src import data as wgr_data
 from src.func import constants as CONST
 from src.func.helper_function import Helper
 from . import constant as SCONST
+from src.wgr.boat import API_BOAT
 
 
 def get_data_path(relative_path):
@@ -20,10 +21,10 @@ def get_data_path(relative_path):
 
 
 class ShipModel(QStandardItemModel):
-    def __init__(self, view, api):
+    def __init__(self, view):
         super().__init__(view)
         self.view = view
-        self.api = api
+        self.api_boat = API_BOAT(wgr_data.load_cookies())
         self.hlp = Helper()
 
         self.value_opt = SCONST.value_select[0]
@@ -330,12 +331,12 @@ class ShipModel(QStandardItemModel):
             item.setData(-1, Qt.UserRole)
             self.setItem(row, col, item)
             wgr_data.update_equipment_amount(-1, unequip_id)
-            self.api.boat_removeEquipment(ship_id, equip_slot)
+            self.api_boat.removeEquipment(ship_id, equip_slot)
             return
         else:
             pass
 
-        res = self.api.boat_changeEquipment(ship_id, equip_id, equip_slot)
+        res = self.api_boat.changeEquipment(ship_id, equip_id, equip_slot)
         if 'eid' not in res:
             # success
             wgr_data.update_equipment_amount(equip_id, unequip_id)
