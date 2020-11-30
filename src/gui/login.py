@@ -8,23 +8,31 @@ from PyQt5.QtWidgets import (
     QPushButton, QLabel, QLineEdit,
     QComboBox, QMessageBox, QCheckBox,
     QWidget, QDesktopWidget,
-    QGridLayout
+    QGridLayout, QVBoxLayout
 )
 
 from src import data as wgr_data
+from src.exceptions.custom import InterruptExecution
 from src.func.encryptor import Encryptor
 from src.func.login import GameLogin
 from src.func.session import Session
 from src.func import constants as constants
 from .main_interface import MainInterface
 
-class InterruptExecution (Exception):
-    pass
+
+style_sheet = wgr_data.get_color_scheme()
 
 def create_label(text):
     _str = '<font size="4"> ' + text + ' </font>'
     _res = QLabel(_str)
     return _res
+
+def popup_msg(text: str):
+    msg = QMessageBox()
+    msg.setStyleSheet(style_sheet)
+    msg.setWindowTitle("Info")
+    msg.setText(text)
+    msg.exec_()
 
 
 class LoginForm(QWidget):
@@ -33,10 +41,11 @@ class LoginForm(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.sig_login.connect(self.start_login)
+
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.encryptor = Encryptor()
         self.key_filename = '.wgr.key'
-
         self.channel = ""
         self.server = ""
         self.mi = None
@@ -49,11 +58,27 @@ class LoginForm(QWidget):
         self.check_auto = QCheckBox('Auto login on the application start')
         self.login_button = QPushButton('Login')
 
-        self.layout = QGridLayout()
-        self.sig_login.connect(self.check_password)
+        self.container = QWidget()
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self.container)
 
-        self.style_sheet = wgr_data.get_color_scheme()
+        self.layout = QGridLayout(self.container)
 
+        self.init_ui()
+        self.setLayout(main_layout)
+        self.init_ui_qsettings()
+
+        if self.qsettings.value("Login/auto") == "true":
+            try:
+                self.login_button.setEnabled(False) # in case user manually log-in
+                self.check_auto.setText('!! Login auto starts in 5 seconds. Uncheck to pause !!')
+                threading.Thread(target=self.wait_five_seconds).start()
+            except InterruptExecution:
+                pass
+        else:
+            pass
+
+    def init_ui(self):
         if self.qsettings.value("Login/save") == 'true':
             self.qsettings.beginGroup('Login')
             name = self.qsettings.value('username')
@@ -80,61 +105,6 @@ class LoginForm(QWidget):
             self.init_check_save()
             self.init_check_auto()
 
-        self.setLayout(self.layout)
-        self.init_ui_qsettings()
-
-        if self.qsettings.value("Login/auto") == "true":
-            # # self.check_password()
-            # threading.Thread(target=self.wait_five_seconds).start()
-            # # count = 0
-            # # while True:
-            # #     time.sleep(0.01)
-            # #     if count >= 500 or self.check_auto.isChecked() is False:
-            # #         break
-
-            # count = 0
-            # while True:
-            #     print(count)
-            #     time.sleep(0.01)
-            #     if count == 500:
-            #         break
-            #     elif self.check_auto.isChecked() is False:
-            #         print('interrupt!!!!!!!!!!')
-            #         return
-            #     else:
-            #         count += 1
-            # print('start connect!')
-            try:
-                threading.Thread(target=self.wait_five_seconds).start()
-            except InterruptExecution:
-                return
-            # self.check_password()
-
-        else:
-            pass
-
-    def wait_five_seconds(self):
-        # for i in range(500):
-        #     time.sleep(0.01)
-        # print('5 secs passed')
-        count = 0
-        while True:
-            print(count)
-            time.sleep(0.01)
-            if count == 500:
-                break
-            elif self.check_auto.isChecked() is False:
-                print('interrupt!!!!!!!!!!')
-                raise (InterruptExecution('Stop the damn thing'))
-            else:
-                count += 1
-        print('start connect!')
-        self.sig_login.emit()
-        # return
-        # self.check_password()
-
-    # def wait_seconds()
-
     # ================================
     # Initialization
     # ================================
@@ -144,7 +114,7 @@ class LoginForm(QWidget):
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.init_login_button(user_h)
         self.resize(0.26 * user_w, 0.12 * user_h)
-        self.setStyleSheet(self.style_sheet)
+        self.setStyleSheet(style_sheet)
         self.setWindowTitle('Warship Girls Viewer Login')
 
     def init_name_field(self, text=''):
@@ -211,7 +181,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(self.check_auto, 5, 1)
 
     def init_login_button(self, user_h):
-        self.login_button.clicked.connect(self.check_password)
+        self.login_button.clicked.connect(self.start_login)
         # set an empty gap row
         self.layout.addWidget(self.login_button, 7, 0, 1, 2)
         self.layout.setRowMinimumHeight(6, 0.03 * user_h)
@@ -224,6 +194,25 @@ class LoginForm(QWidget):
         self.mi.show()
         self.close()
 
+    def login_failed(self):
+        self.login_button.setText('Login')
+        self.check_auto.setText('Auto login on the application start')
+        self.container.setEnabled(True)
+
+    def wait_five_seconds(self):
+        # It's ugly, but it works
+        count = 0
+        while True:
+            time.sleep(0.01)
+            if count == 500:
+                break
+            elif self.check_auto.isChecked() is False:
+                raise (InterruptExecution('Interrupt Auto Login'))
+            else:
+                count += 1
+        logging.info('LOGIN - Starting auto login')
+        self.sig_login.emit()
+
     def _get_password(self):
         if wgr_data.is_key_exists(self.key_filename) and self.qsettings.contains('Login/password'):
             try:
@@ -231,7 +220,7 @@ class LoginForm(QWidget):
                 res = self.encryptor.decrypt_data(key, self.qsettings.value('Login/password')).decode("utf-8")
             except AttributeError:
                 res = ''
-                self.popup_msg('Login Failed: Key file or config file corrupted.\nNeed to delete them.')
+                popup_msg('Login Failed: Key file or config file corrupted.\nNeed to delete them.')
                 # TODO: reset them
         else:
             res = ''
@@ -257,14 +246,10 @@ class LoginForm(QWidget):
     def on_auto_clicked(self):
         if self.check_auto.isChecked():
             # off -> on
-            # self.check_password()
-            print('yes')
-            pass
+            self.check_auto.setText('Will auto login on next start up')
         else:
-            print('no')
-            # pause ongoing login process
-            # raise InterruptExecution
-            pass
+            self.check_auto.setText('Auto login on the application start')
+            self.login_button.setEnabled(True)
         self.qsettings.setValue("Login/auto", self.check_auto.isChecked())
 
     def update_server_box(self, text):
@@ -304,18 +289,13 @@ class LoginForm(QWidget):
         else:
             logging.error("Invalid server name: {}".format(text))
 
-    def popup_msg(self, text: str):
-        msg = QMessageBox()
-        msg.setStyleSheet(self.style_sheet)
-        msg.setWindowTitle("Info")
-        msg.setText(text)
-        msg.exec_()
-
     @pyqtSlot()
-    def check_password(self):
-        self.login_button.setText('Connecting to server...')
-        self.login_button.setEnabled(False)
+    def start_login(self):
+        self.container.setEnabled(False)
         self.on_save_clicked()
+        self._check_password()
+
+    def _check_password(self):
 
         sess = Session()
         account = GameLogin(constants.version, self.channel, sess, self.login_button)
@@ -334,25 +314,24 @@ class LoginForm(QWidget):
             res1 = account.first_login(_username, _password)
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
-            self.popup_msg("Login Failed: Wrong authentication information")
-            self.login_button.setEnabled(True)
-            self.login_button.setText('Login')
+            popup_msg("Login Failed: Wrong authentication information")
+            self.container.setEnabled(True)
             return
         try:
             res2 = account.second_login(self.server)
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
-            self.popup_msg("Login Failed: Probably due to bad server connection")
-            self.login_button.setEnabled(True)
-            self.login_button.setText('Login')
+            popup_msg("Login Failed: Probably due to bad server connection")
+            self.container.setEnabled(True)
             return
 
         if res1 == True and res2 == True:
             logging.info("LOGIN - SUCCESS!")
-            self.popup_msg('Login Success')
+            popup_msg('Login Success')
             self.mi = MainInterface(self.server, self.channel, account.get_cookies())
             self.login_success()
         else:
-            self.popup_msg("Login Failed: Probably due to bad server connection")
+            popup_msg("Login Failed: Probably due to bad server connection")
+
 
 # End of File
