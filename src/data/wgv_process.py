@@ -117,6 +117,30 @@ def get_exp_list():
         res += _list
     return res
 
+def get_love_list():
+    # url = self.server + 'api/getShipList' + hlp.get_url_end()
+    # raw_data = self.decompress_data(url)
+    # data = json.loads(raw_data)
+    # x = data["userShipVO"]
+    # x.sort(key=lambda y:y["level"], reverse=True)
+    # counter = 0
+    # for s in x:
+    #     if (int(s["love"]) > 60) and (s["love"] != s["loveMax"]) and (s["loveMax"] == 100):
+    #         print("{}. {}\t{}\t{}\t{}/{}".format(counter, s["id"], s["title"], s["level"], s["love"], s["loveMax"]))
+    #         time.sleep(3)
+    #         url = self.server + 'friend/kiss/' + str(s["id"]) + hlp.get_url_end()
+    #         raw_data = self.decompress_data(url)
+    #         data = json.loads(raw_data)
+    #         print(data)
+    #         try:
+    #             if "love" in data["shipVO"]:
+    #                 counter += 1
+    #                 print("kiss success")
+    #         except KeyError:
+    #             pass
+    #     if counter >= 5:
+    #         break
+    pass
 
 def update_equipment_amount(equipped, unequipped):
     # both input are cid (int)

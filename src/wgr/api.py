@@ -11,6 +11,7 @@ class WGR_API:
     """
     Warship Girls (R) - API
     """
+
     def __init__(self, cookies: dict):
         print(cookies)
         self.server = cookies['server']
@@ -47,6 +48,19 @@ class WGR_API:
     def _int_list_to_str(int_list: list) -> str:
         return str(int_list).replace(' ', '')
 
+    def active_getUserData(self):
+        link = 'active/getUserData'
+        return self._api_call(link)
+
+    def bsea_getData(self):
+        link = 'bsea/getData'
+        return self._api_call(link)
+
+    def getLoginAward(self):
+        # link = 'active/getLoginAward/c3ecc6250c89e88d83832e3395efb973/'
+        link = 'active/getLoginAward//'
+        return self._api_call(link)
+
     def getShipList(self):
         link = 'api/getShipList'
         return self._api_call(link)
@@ -55,71 +69,16 @@ class WGR_API:
         link = 'api/initGame?&crazy=1'
         return self._api_call(link)
 
-    def pve_getPveData(self):
-        link = 'pve/getPveData'
+    def live_getUserInfo(self):
+        link = 'live/getUserInfo'
         return self._api_call(link)
 
-
-        # FOLLOWING ARE NOT USED YET
-
-    '''
-
     def pevent_getPveData(self):
-        url = self.server + 'pevent/getPveData' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        with open('pevent_getPveData.json', 'w') as of:
-            json.dump(data, of)
+        link = 'pevent/getPveData'
+        return self._api_call(link)
 
-    def bsea_getData(self):
-        url = self.server + 'bsea/getData' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        with open('bsea_getData.json', 'w') as of:
-            json.dump(data, of)
-
-    def live_getUserInfo(self):
-        url = self.server + 'live/getUserInfo' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        with open('live_getUserInfo.json', 'w') as of:
-            json.dump(data, of)
-
-    # useless
-    def six_getFleetInfo(self):
-        url = self.server + 'six/getFleetInfo' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        with open('six_getFleetInfo.json', 'w') as of:
-            json.dump(data, of)
-
-    def pve_getUserData(self):
-        url = self.server + 'pve/getUserData' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        with open('pve_getUserData.json', 'w') as of:
-            json.dump(data, of)
-
-    def active_getUserData(self):
-        url = self.server + 'active/getUserData' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        with open('active_getUserData.json', 'w') as of:
-            json.dump(data, of)
-
-    def task_getAchievementList(self):
-        url = self.server + 'task/getAchievementList' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        with open('task_getAchievementList.json', 'w') as of:
-            json.dump(data, of)
-
-    def campaign_getUserData(self):
-        url = self.server + 'campaign/getUserData' + self.hlp.get_url_end(self.channel)
-        raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
-        data = json.loads(raw_data)
-        with open('campaign_getUserData.json', 'w') as of:
-            json.dump(data, of)
-    '''
+    def rank_getData(self):
+        link = 'rank/getData/'
+        return self._api_call(link)
 
 # End of File
