@@ -5,8 +5,10 @@ from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QTableWidget, QMainWindow, QTableWidgetItem, QButtonGroup
 
 import src.data as wgr_data
+from src.func.worker import Worker
 
 from .thermopylae.ship_window import ShipSelectWindow
+from .thermopylae.sortie import Sortie
 
 
 class LogHandler(logging.Handler, QObject):
@@ -21,23 +23,14 @@ class LogHandler(logging.Handler, QObject):
         self.sig_log.emit(msg)
 
 
-class Worker(QThread):
-    def __init__(self, func, args):
-        super(Worker, self).__init__()
-        self.func = func
-        self.args = args
-
-    def run(self):
-        self.func(*self.args)
-
-
 class TabThermopylae(QWidget):
-    def __init__(self):
+    def __init__(self, api):
         super().__init__()
+        self.api = api
         self.fleets = [None] * 6
         self.final_fleet = [None] * 14
         # for testing
-        self.final_fleet = [129,6837,3617,449,425,1900,3295,4325,9905,650,6810,9907,9904,11221]
+        self.final_fleet = []
 
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -70,6 +63,7 @@ class TabThermopylae(QWidget):
         self.setLayout(main_layout)
 
         self.add_ship()
+
 
     def add_ship(self):
         self.button_group = QButtonGroup()
@@ -115,6 +109,8 @@ class TabThermopylae(QWidget):
 
     def button2_func(self):
         self.logger.info('this is button 2')
+        # TEST
+        Sortie(self.api, [], [], self.logger)
 
     def process_finished(self):
         self.logger.info('task is done')

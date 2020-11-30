@@ -80,7 +80,7 @@ class WGR_API:
         return self._api_call(link)
 
     def six_setChapterBoat(self, sortie_map: int, fleets: list):
-        assert (len(list) == 14)
+        # sortie_map from 9301 to 9318 in the order of E1 (9301,9302,9303) to E6 (9316,9317,9318)
         link = 'six/setChapterBoat/' + str(sortie_map) + '/' + self._int_list_to_str(fleets)
         return self._api_call(link)
 

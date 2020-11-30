@@ -41,7 +41,7 @@ class MainInterfaceTabs(QWidget):
         self.tab_ships = TabShips(self.api, self.is_realrun)
         self.tab_exp = TabExpedition()
         self.tab_adv = TabAdvanceFunctions(self.parent)
-        self.tab_thermopylae = TabThermopylae()
+        self.tab_thermopylae = TabThermopylae(self.api)
         self.tabs = QTabWidget()
         self.tabs.setTabBar(QTabBar())
         self.init_ui()
