@@ -31,7 +31,6 @@ class MainInterface(QMainWindow):
         self.channel = channel
         self.cookies = cookies
         self.is_realrun = realrun
-        self.side_dock_on = False
 
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.threadpool = QThreadPool()
@@ -47,6 +46,8 @@ class MainInterface(QMainWindow):
         #  Qt.Focus issue)
         self.menu_bar = MainInterfaceMenuBar(self)
         self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.is_realrun)
+        self.side_dock_on = False
+        self.side_dock = None
         self.init_ui()
         self.init_side_dock()
 
@@ -71,20 +72,20 @@ class MainInterface(QMainWindow):
 
     def init_side_dock(self):
         def _create_side_dock():
-            if not self.side_dock_on:
+            if (self.side_dock_on is False) and (self.side_dock is None):
                 self.side_dock = SideDock(self)
                 self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
                 self.side_dock_on = True
             else:
                 pass
 
-        if self.qsettings.contains("UI/init_side_dock"):
-            if self.qsettings.value("UI/init_side_dock") == "true":
+        if self.qsettings.contains("UI/no_side_dock") is True:
+            if self.qsettings.value("UI/no_side_dock") == "true":
                 pass
             else:
                 _create_side_dock()
         else:
-            self.qsettings.setValue("UI/init_side_dock", False)
+            self.qsettings.setValue("UI/no_side_dock", False)
             _create_side_dock()
 
     # ================================
@@ -94,6 +95,7 @@ class MainInterface(QMainWindow):
     @pyqtSlot()
     def on_dock_closed(self):
         self.side_dock_on = False
+        self.side_dock = None
 
     # ================================
     # WGR APIs

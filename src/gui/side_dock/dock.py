@@ -478,8 +478,7 @@ class SideDock(QDockWidget):
             self.sig_closed.emit()
         else:
             event.ignore()
-
-        self.qsettings.setValue("UI/init_side_dock", cb.isChecked())
+        self.qsettings.setValue("UI/no_side_dock", cb.isChecked())
 
     def update_geometry(self):
         y = 0.03 * self.user_screen_h
