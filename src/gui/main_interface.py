@@ -24,7 +24,6 @@ def init_data_files():
 
 class MainInterface(QMainWindow):
     # https://stackoverflow.com/questions/2970312/pyqt4-qtcore-pyqtsignal-object-has-no-attribute-connect
-    # sig_initGame = pyqtSignal(dict)
 
     def __init__(self, server, channel, cookies, realrun=True):
         super().__init__()

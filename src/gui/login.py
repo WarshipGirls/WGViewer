@@ -1,8 +1,9 @@
 import logging
 import requests
 import threading
+import time
 
-from PyQt5.QtCore import QSettings
+from PyQt5.QtCore import QSettings, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import (
     QPushButton, QLabel, QLineEdit,
     QComboBox, QMessageBox, QCheckBox,
@@ -17,6 +18,8 @@ from src.func.session import Session
 from src.func import constants as constants
 from .main_interface import MainInterface
 
+class InterruptExecution (Exception):
+    pass
 
 def create_label(text):
     _str = '<font size="4"> ' + text + ' </font>'
@@ -25,6 +28,9 @@ def create_label(text):
 
 
 class LoginForm(QWidget):
+
+    sig_login = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
@@ -44,6 +50,7 @@ class LoginForm(QWidget):
         self.login_button = QPushButton('Login')
 
         self.layout = QGridLayout()
+        self.sig_login.connect(self.check_password)
 
         self.style_sheet = wgr_data.get_color_scheme()
 
@@ -77,9 +84,54 @@ class LoginForm(QWidget):
         self.init_ui_qsettings()
 
         if self.qsettings.value("Login/auto") == "true":
-            self.check_password()
+            # # self.check_password()
+            # threading.Thread(target=self.wait_five_seconds).start()
+            # # count = 0
+            # # while True:
+            # #     time.sleep(0.01)
+            # #     if count >= 500 or self.check_auto.isChecked() is False:
+            # #         break
+
+            # count = 0
+            # while True:
+            #     print(count)
+            #     time.sleep(0.01)
+            #     if count == 500:
+            #         break
+            #     elif self.check_auto.isChecked() is False:
+            #         print('interrupt!!!!!!!!!!')
+            #         return
+            #     else:
+            #         count += 1
+            # print('start connect!')
+            try:
+                threading.Thread(target=self.wait_five_seconds).start()
+            except InterruptExecution:
+                return
+            # self.check_password()
+
         else:
             pass
+
+    def wait_five_seconds(self):
+        # for i in range(500):
+        #     time.sleep(0.01)
+        # print('5 secs passed')
+        count = 0
+        while True:
+            print(count)
+            time.sleep(0.01)
+            if count == 500:
+                break
+            elif self.check_auto.isChecked() is False:
+                print('interrupt!!!!!!!!!!')
+                raise (InterruptExecution('Stop the damn thing'))
+            else:
+                count += 1
+        print('start connect!')
+        self.sig_login.emit()
+        # return
+        # self.check_password()
 
     # def wait_seconds()
 
@@ -259,6 +311,7 @@ class LoginForm(QWidget):
         msg.setText(text)
         msg.exec_()
 
+    @pyqtSlot()
     def check_password(self):
         self.login_button.setText('Connecting to server...')
         self.login_button.setEnabled(False)
