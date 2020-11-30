@@ -1,13 +1,11 @@
 import logging
-import queue
 import requests
 import threading
 import time
 
-from PyQt5.QtCore import QSettings, pyqtSlot, pyqtSignal, QThread
+from PyQt5.QtCore import QSettings, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import (
-    QPushButton, QLabel, QLineEdit,
-    QComboBox, QMessageBox, QCheckBox,
+    QPushButton, QLabel, QLineEdit, QComboBox, QMessageBox, QCheckBox,
     QWidget, QDesktopWidget,
     QGridLayout, QVBoxLayout
 )
@@ -17,17 +15,18 @@ from src.exceptions.custom import InterruptExecution
 from src.func.encryptor import Encryptor
 from src.func.login import GameLogin
 from src.func.session import Session
-# from src.func.worker import Worker
 from src.func import constants as constants
+from src.func.worker import LoginWorker
 from .main_interface import MainInterface
-
 
 style_sheet = wgr_data.get_color_scheme()
 
-def create_label(text):
+
+def create_label(text: str):
     _str = '<font size="4"> ' + text + ' </font>'
     _res = QLabel(_str)
     return _res
+
 
 def popup_msg(text: str):
     msg = QMessageBox()
@@ -37,59 +36,7 @@ def popup_msg(text: str):
     msg.exec_()
 
 
-
-
-class Worker(QThread):
-    finished = pyqtSignal(object)
-
-    def __init__(self, _func, args, queue, callback, parent=None):
-        super().__init__()      
-        self.queue = queue
-        self._func = _func
-        self.args = args
-        self.finished.connect(callback)
-
-    # def run(self):
-    #     while True:
-    #         arg = self.queue.get() 
-    #         if arg is None: # None means exit
-    #             print("Shutting down")
-    #             return
-    #         self.fun(arg)  
-
-    # def fun(self, arg):
-    #     for i in range(3):
-    #         print('fun: %s' % i)
-    #         # self.sleep(1)
-    #     # self.finished.emit(ResultObj(arg+1))
-    #     self.finished.emit(True)
-    def run(self):
-        # while True:
-        if self.queue.get() is None:
-            return
-        print('-------------')
-        print(self.args)
-        print('-------------')
-        print(*self.args)
-        print('-------------')
-        self.func(self.args)
-
-    def func(self, args):
-        print('==============')
-        print(args)
-        print('==============')
-        print(*args)
-        print('==============')
-        self._func(*args)
-        self.finished.emit(True)
-
-
-
-
-
-
 class LoginForm(QWidget):
-
     sig_login = pyqtSignal()
 
     def __init__(self):
@@ -102,8 +49,9 @@ class LoginForm(QWidget):
         self.channel = ""
         self.server = ""
         self.mi = None
-        self.queue = queue.Queue()
-        # self.result_queue = 
+
+        self.res1 = False
+        self.res2 = False
 
         self.lineEdit_username = QLineEdit()
         self.lineEdit_password = QLineEdit()
@@ -124,17 +72,12 @@ class LoginForm(QWidget):
         self.init_ui_qsettings()
 
         if self.qsettings.value("Login/auto") == "true":
-            # QThread cannot handle exceptions
-            # self.bee = Worker(self.wait_five_seconds, ())
-            # self.bee.finished.connect(self.start_login)
-            # self.bee.terminate()
+            # QThread cannot handle exceptions for this one
             try:
-                self.login_button.setEnabled(False) # in case user manually log-in
+                self.login_button.setEnabled(False)  # in case user manually log-in
                 self.check_auto.setText('!! Login auto starts in 5 seconds. Uncheck to pause !!')
                 threading.Thread(target=self.wait_five_seconds).start()
-                # self.bee.start()
             except InterruptExecution:
-                # print('why the fuck you quit, you should do nothing.')
                 pass
         else:
             pass
@@ -178,7 +121,7 @@ class LoginForm(QWidget):
         self.setStyleSheet(style_sheet)
         self.setWindowTitle('Warship Girls Viewer Login')
 
-    def init_name_field(self, text=''):
+    def init_name_field(self, text: str = ''):
         label_name = create_label('Username')
         self.lineEdit_username.setClearButtonEnabled(True)
 
@@ -187,11 +130,10 @@ class LoginForm(QWidget):
         else:
             self.lineEdit_username.setText(text)
 
-        # addWidget(widget, row_number, col_number, row_span<opt>, col_span<opt>)
         self.layout.addWidget(label_name, 0, 0)
         self.layout.addWidget(self.lineEdit_username, 0, 1)
 
-    def init_password_field(self, text=''):
+    def init_password_field(self, text: str = ''):
         label_password = create_label('Password')
         self.lineEdit_password.setClearButtonEnabled(True)
         self.lineEdit_password.setEchoMode(QLineEdit.Password)
@@ -204,7 +146,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(label_password, 1, 0)
         self.layout.addWidget(self.lineEdit_password, 1, 1)
 
-    def init_platform_field(self, text=''):
+    def init_platform_field(self, text: str = ''):
         label_platform = create_label('Platform')
         # platforms = ["Choose your platform", "CN-iOS", "CN-Android", "International", "JP"]
         platforms = ["Choose your platform", "CN-iOS", "CN-Android"]
@@ -219,7 +161,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(label_platform, 2, 0)
         self.layout.addWidget(self.combo_platform, 2, 1)
 
-    def init_server_field(self, text=''):
+    def init_server_field(self, text: str = ''):
         label_server = create_label('Server')
         self.combo_server.currentTextChanged.connect(self.update_server)
 
@@ -241,11 +183,11 @@ class LoginForm(QWidget):
         self.check_auto.stateChanged.connect(self.on_auto_clicked)
         self.layout.addWidget(self.check_auto, 5, 1)
 
-    def init_login_button(self, user_h):
+    def init_login_button(self, user_h: int):
         self.login_button.clicked.connect(self.start_login)
         # set an empty gap row
         self.layout.addWidget(self.login_button, 7, 0, 1, 2)
-        self.layout.setRowMinimumHeight(6, 0.03 * user_h)
+        self.layout.setRowMinimumHeight(6, int(0.03 * user_h))
 
     # ================================
     # General
@@ -264,24 +206,18 @@ class LoginForm(QWidget):
         # It's ugly, but it works. QThread approach won't work
         count = 0
         while True:
-            logging.debug(count)
+            # logging.debug(count)
             time.sleep(0.01)
-            if count == 100:
+            if count == 500:
                 break
             elif self.check_auto.isChecked() is False:
                 raise InterruptExecution()
-                # self.bee.quit() # quit, but the loop is still running
-                # self.bee.terminate() # this will directly call start_login, and no terminal output
-                # self.bee.requestInterruption() # behave like quit()
-                # self.bee.exit(-1)
-                # print(self.bee.isRunning())
-                # del self.bee # turns out it still running, which results no self.bee error
             else:
                 count += 1
         logging.info('LOGIN - Starting auto login')
         self.sig_login.emit()
 
-    def _get_password(self):
+    def _get_password(self) -> str:
         if wgr_data.is_key_exists(self.key_filename) and self.qsettings.contains('Login/password'):
             try:
                 key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
@@ -320,7 +256,7 @@ class LoginForm(QWidget):
             self.login_button.setEnabled(True)
         self.qsettings.setValue("Login/auto", self.check_auto.isChecked())
 
-    def update_server_box(self, text):
+    def update_server_box(self, text: str):
         self.combo_server.clear()
         if text == "CN-iOS":
             servers = ["列克星敦", "维内托"]
@@ -339,7 +275,7 @@ class LoginForm(QWidget):
             logging.warning("Login server is not chosen.")
         self.combo_server.addItems(servers)
 
-    def update_server(self, text):
+    def update_server(self, text: str):
         if text == "列克星敦":
             self.server = "http://s101.jr.moefantasy.com/"
         elif text == "维内托":
@@ -363,22 +299,20 @@ class LoginForm(QWidget):
         self.on_save_clicked()
         self._check_password()
 
-    def handle_result1(self, result):
-        print('llllllllllllllll')
-        print(result)
+    def handle_result1(self, result: bool):
+        logging.debug('LOGIN - First fetch result {}'.format(result))
         self.res1 = result
-        self.bee2.start()
+        if self.res1 is True:
+            self.bee2.start()
+        else:
+            pass
 
-    def handle_result2(self, result):
-        print('22222222222222')
-        print(result)
+    def handle_result2(self, result: bool):
+        logging.debug('LOGIN - Second fetch result {}'.format(result))
         self.res2 = result
-        # self.bee3 = Worker(self.second_thread, (self.res1, self.res2, self.account),
-        #     self.queue, self.handle_result3)
-        # self.queue.put(3)
-        # self.bee3.terminate()
-        # self.bee3.start()
+
         if self.res1 == True and self.res2 == True:
+            self.login_button.setText('Loading and Initializing...')
             logging.info("LOGIN - SUCCESS!")
             popup_msg('Login Success')
             self.mi = MainInterface(self.server, self.channel, self.account.get_cookies())
@@ -386,49 +320,27 @@ class LoginForm(QWidget):
         else:
             popup_msg("Login Failed (3): Probably due to bad server connection")
 
-    def first_thread(self, acc, uname, pword):
+    def first_fetch(self, login_account: GameLogin, username: str, password: str) -> bool:
         try:
-
-            # self.bee1 = Worker(acc.first_login, (uname, pword),
-                # self.queue, self.handle_result)
-            # self.bee.finished.connect(self.start_login)
-            # self.bee1.terminate()
-            # self.queue.put(1)
-            # self.bee1.start()
-
-            res1 = acc.first_login(uname, pword)
+            res1 = login_account.first_login(username, password)
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
             popup_msg("Login Failed (1): Wrong authentication information")
             self.container.setEnabled(True)
-            return
+            return False
         return res1
 
-    def second_thread(self, acc, svr):
+    def second_fetch(self, login_account: GameLogin, server: str) -> bool:
         try:
-            # self.bee2 = Worker(account.second_login, ([self.server]),
-                # self.queue, self.handle_result)
-            # self.queue.put(2)
-            # self.bee2.start()
-            res2 = acc.second_login(svr)
+            res2 = login_account.second_login(server)
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
             popup_msg("Login Failed (2): Probably due to bad server connection")
             self.container.setEnabled(True)
-            return
+            return False
         return res2
 
-    def third_thread(self, r1, r2, acc):
-        if r1 == True and r2 == True:
-            logging.info("LOGIN - SUCCESS!")
-            popup_msg('Login Success')
-            self.mi = MainInterface(self.server, self.channel, account.get_cookies())
-            self.login_success()
-        else:
-            popup_msg("Login Failed (3): Probably due to bad server connection")
-
     def _check_password(self):
-
         sess = Session()
         self.account = GameLogin(constants.version, self.channel, sess, self.login_button)
         _username = self.lineEdit_username.text()
@@ -441,59 +353,11 @@ class LoginForm(QWidget):
             key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
         self.qsettings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
 
-        res1 = res2 = False
-
-        # self.first_thread(account, _username, _password)
-
-        self.bee1 = Worker(self.first_thread, (self.account, _username, _password),
-            self.queue, self.handle_result1)
-        # self.bee.finished.connect(self.start_login)
-        # self.bee1.terminate()
-        self.queue.put(1)
+        self.bee1 = LoginWorker(self.first_fetch, (self.account, _username, _password), self.handle_result1)
         self.bee1.terminate()
-        self.bee2 = Worker(self.second_thread, (self.account, self.server),
-            self.queue, self.handle_result2)
-        self.queue.put(2)
+        self.bee2 = LoginWorker(self.second_fetch, (self.account, self.server), self.handle_result2)
         self.bee2.terminate()
 
         self.bee1.start()
-        # self.bee2.start()
-        # try:
-
-        #     self.bee1 = Worker(account.first_login, (_username, _password),
-        #         self.queue, self.handle_result)
-        #     # self.bee.finished.connect(self.start_login)
-        #     # self.bee1.terminate()
-        #     self.queue.put(1)
-        #     self.bee1.start()
-
-        #     # res1 = account.first_login(_username, _password)
-        # except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
-        #     logging.error(f"LOGIN - {e}")
-        #     popup_msg("Login Failed: Wrong authentication information")
-        #     self.container.setEnabled(True)
-        #     return
-        # try:
-        #     # self.bee2 = Worker(account.second_login, ([self.server]),
-        #         # self.queue, self.handle_result)
-        #     # self.queue.put(2)
-        #     # self.bee2.start()
-        #     res2 = account.second_login(self.server)
-        # except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
-        #     logging.error(f"LOGIN - {e}")
-        #     popup_msg("Login Failed (2): Probably due to bad server connection")
-        #     self.container.setEnabled(True)
-        #     return
-
-
-
-        # if res1 == True and res2 == True:
-        #     logging.info("LOGIN - SUCCESS!")
-        #     popup_msg('Login Success')
-        #     self.mi = MainInterface(self.server, self.channel, account.get_cookies())
-        #     self.login_success()
-        # else:
-        #     popup_msg("Login Failed (3): Probably due to bad server connection")
-
 
 # End of File
