@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgr_data
-from src.func.wgr_api import WGR_API
+from src.wgr.api import WGR_API
 from src.gui.side_dock.dock import SideDock
 from src.gui.interface.main_interface_tabs import MainInterfaceTabs
 from src.gui.interface.main_interface_menubar import MainInterfaceMenuBar
@@ -25,16 +25,14 @@ def init_data_files():
 class MainInterface(QMainWindow):
     # https://stackoverflow.com/questions/2970312/pyqt4-qtcore-pyqtsignal-object-has-no-attribute-connect
 
-    def __init__(self, server, channel, cookies, realrun=True):
+    def __init__(self, cookies: dict, realrun: bool = True):
         super().__init__()
-        self.server = server
-        self.channel = channel
         self.cookies = cookies
         self.is_realrun = realrun
 
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.threadpool = QThreadPool()
-        self.api = WGR_API(self.server, self.channel, self.cookies)
+        self.api = WGR_API(self.cookies)
 
         # !!! all DATA initialization must occur before any UI initialization !!!
 
@@ -45,7 +43,7 @@ class MainInterface(QMainWindow):
         # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob.
         #  Qt.Focus issue)
         self.menu_bar = MainInterfaceMenuBar(self)
-        self.table_widget = MainInterfaceTabs(self, self.api, self.threadpool, self.is_realrun)
+        self.table_widget = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
         self.side_dock_on = False
         self.side_dock = None
         self.init_ui()
@@ -103,7 +101,7 @@ class MainInterface(QMainWindow):
 
     def api_initGame(self):
         if self.is_realrun:
-            data = self.api.api_initGame()
+            data = self.api.initGame()
             wgr_data.save_api_initGame(data)
         else:
             data = wgr_data.get_api_initGame()
