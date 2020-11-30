@@ -1,7 +1,7 @@
 import json
 
 from time import sleep
-from src.func.wgr_api import WGR_API
+from src.wgr.api import WGR_API
 from logging import Logger
 
 
