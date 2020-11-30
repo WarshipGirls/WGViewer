@@ -35,6 +35,9 @@ class TabThermopylae(QWidget):
     def __init__(self):
         super().__init__()
         self.fleets = [None] * 6
+        self.final_fleet = [None] * 14
+        # for testing
+        self.final_fleet = [129,6837,3617,449,425,1900,3295,4325,9905,650,6810,9907,9904,11221]
 
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
