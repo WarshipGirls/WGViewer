@@ -1,3 +1,5 @@
+import logging
+
 from cryptography.fernet import Fernet
 
 
@@ -26,6 +28,11 @@ class Encryptor:
 
     @staticmethod
     def decrypt_data(key, data):
-        return Fernet(key).decrypt(data)
+        try:
+            return Fernet(key).decrypt(data)
+        except TypeError:
+            logging.error('Key file or config file corrupted.')
+            return False
+
 
 # End of File

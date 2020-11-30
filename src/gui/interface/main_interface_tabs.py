@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src.gui.tabs.advance_functions import TabAdvanceFunctions
+from src.gui.tabs.tab_thermopylae import TabThermopylae
 from src.gui.tabs.tab_ship import TabShips
 from src.gui.tabs.tab_expedition import TabExpedition
 
@@ -40,13 +41,15 @@ class MainInterfaceTabs(QWidget):
         self.tab_ships = TabShips(self.api, self.is_realrun)
         self.tab_exp = TabExpedition()
         self.tab_adv = TabAdvanceFunctions(self.parent)
+        self.tab_thermopylae = TabThermopylae(self.api)
         self.tabs = QTabWidget()
         self.tabs.setTabBar(QTabBar())
         self.init_ui()
 
-        self.tabs.addTab(self.tab_exp, "  Expedition (beta)  ")
-        self.tabs.addTab(self.tab_ships, "  Dock  ")
-        self.tabs.addTab(self.tab_adv, "  Advance (N/A)  ")
+        self.tabs.addTab(self.tab_thermopylae, "Thermopylae")
+        self.tabs.addTab(self.tab_exp, "Expedition (beta)")
+        self.tabs.addTab(self.tab_ships, "Dock")
+        self.tabs.addTab(self.tab_adv, "Advance (N/A)")
 
         self.layout.addWidget(self.tabs, 0, 0)
         self.setLayout(self.layout)

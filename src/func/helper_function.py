@@ -48,11 +48,11 @@ class Helper:
         return new_arg
 
     @staticmethod
-    def ts_to_date(ts):
+    def ts_to_date(ts: int):
         return datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
     @staticmethod
-    def ts_to_countdown(seconds):
+    def ts_to_countdown(seconds: int):
         return str(timedelta(seconds=seconds))
 
 # End of File
