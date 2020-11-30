@@ -57,7 +57,7 @@ def save_equipmentVo(data):
     _save_json(get_user_dir(), 'equipmentVo.json', data)
 
 
-def get_processed_userShipVo():
+def get_processed_userShipVo() -> dict:
     return _load_json(get_user_dir(), 'proc_userShipVo.json')
 
 
