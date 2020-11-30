@@ -1,5 +1,6 @@
 import logging
 import requests
+import threading
 
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import (
@@ -38,7 +39,8 @@ class LoginForm(QWidget):
         self.lineEdit_password = QLineEdit()
         self.combo_platform = QComboBox()
         self.combo_server = QComboBox()
-        self.checkbox = QCheckBox('remember login info (secured by encryption)')
+        self.check_save = QCheckBox('remember login info (secured by encryption)')
+        self.check_auto = QCheckBox('Auto login on the application start')
         self.login_button = QPushButton('Login')
 
         self.layout = QGridLayout()
@@ -50,6 +52,7 @@ class LoginForm(QWidget):
             name = self.qsettings.value('username')
             server = self.qsettings.value('server_text')
             platform = self.qsettings.value('platform_text')
+            auto_login = self.qsettings.value('auto')
             self.qsettings.endGroup()
 
             # Don't change the order
@@ -57,16 +60,25 @@ class LoginForm(QWidget):
             self.init_password_field(self._get_password())
             self.init_server_field(server)
             self.init_platform_field(platform)
-            self.init_checkbox(True)
+            self.init_check_save(True)
+            self.init_check_auto(True)
         else:
             self.init_name_field()
             self.init_password_field()
             self.init_platform_field()
             self.init_server_field()
-            self.init_checkbox()
+            self.init_check_save()
+            self.init_check_auto()
 
         self.setLayout(self.layout)
         self.init_ui_qsettings()
+
+        if self.qsettings.value("Login/auto") == "true":
+            self.check_password()
+        else:
+            pass
+
+    # def wait_seconds()
 
     # ================================
     # Initialization
@@ -133,16 +145,21 @@ class LoginForm(QWidget):
         self.layout.addWidget(label_server, 3, 0)
         self.layout.addWidget(self.combo_server, 3, 1)
 
-    def init_checkbox(self, checked=False):
-        self.checkbox.setChecked(checked)
-        self.checkbox.stateChanged.connect(self.on_check_clicked)
-        self.layout.addWidget(self.checkbox, 4, 1)
+    def init_check_save(self, checked: bool = False):
+        self.check_save.setChecked(checked)
+        self.check_save.stateChanged.connect(self.on_save_clicked)
+        self.layout.addWidget(self.check_save, 4, 1)
+
+    def init_check_auto(self, checked: bool = False):
+        self.check_auto.setChecked(checked)
+        self.check_auto.stateChanged.connect(self.on_auto_clicked)
+        self.layout.addWidget(self.check_auto, 5, 1)
 
     def init_login_button(self, user_h):
         self.login_button.clicked.connect(self.check_password)
         # set an empty gap row
-        self.layout.addWidget(self.login_button, 6, 0, 1, 2)
-        self.layout.setRowMinimumHeight(5, 0.03 * user_h)
+        self.layout.addWidget(self.login_button, 7, 0, 1, 2)
+        self.layout.setRowMinimumHeight(6, 0.03 * user_h)
 
     # ================================
     # General
@@ -164,10 +181,10 @@ class LoginForm(QWidget):
     # Events
     # ================================
 
-    def on_check_clicked(self):
-        if self.checkbox.isChecked():
+    def on_save_clicked(self):
+        if self.check_save.isChecked():
             self.qsettings.beginGroup('Login')
-            self.qsettings.setValue("checked", self.checkbox.isChecked())
+            self.qsettings.setValue("checked", self.check_save.isChecked())
             self.qsettings.setValue("server_text", self.combo_server.currentText())
             self.qsettings.setValue("platform_text", self.combo_platform.currentText())
             self.qsettings.setValue("username", self.lineEdit_username.text())
@@ -176,6 +193,19 @@ class LoginForm(QWidget):
         else:
             self.qsettings.remove("Login")
             wgr_data.del_key_file(self.key_filename)
+
+    def on_auto_clicked(self):
+        if self.check_auto.isChecked():
+            # off -> on
+            # self.check_password()
+            print('yes')
+            pass
+        else:
+            print('no')
+            # pause ongoing login process
+            # raise InterruptExecution
+            pass
+        self.qsettings.setValue("Login/auto", self.check_auto.isChecked())
 
     def update_server_box(self, text):
         self.combo_server.clear()
@@ -224,7 +254,7 @@ class LoginForm(QWidget):
 
         self.login_button.setText('Connecting to server...')
         self.login_button.setEnabled(False)
-        self.on_check_clicked()
+        self.on_save_clicked()
 
         msg = QMessageBox()
         msg.setStyleSheet(self.style_sheet)

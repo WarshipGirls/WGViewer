@@ -40,7 +40,7 @@ class ShipSelectWindow(QMainWindow):
         self.resize(self.width, self.height)
 
         self.tab.setColumnCount(4)
-
+        # TODO remove Lv. 1 ships; add a label to inform user this
         self.ships_info = wgr_data.get_processed_userShipVo()
         for ship_id, ship in self.ships_info.items():
             self.addTableRow(self.tab, ship_id, ship)
