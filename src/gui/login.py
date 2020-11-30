@@ -47,7 +47,7 @@ class LoginForm(QWidget):
 
         self.style_sheet = wgr_data.get_color_scheme()
 
-        if self.qsettings.value("Login/checked") == 'true':
+        if self.qsettings.value("Login/save") == 'true':
             self.qsettings.beginGroup('Login')
             name = self.qsettings.value('username')
             server = self.qsettings.value('server_text')
@@ -61,7 +61,10 @@ class LoginForm(QWidget):
             self.init_server_field(server)
             self.init_platform_field(platform)
             self.init_check_save(True)
-            self.init_check_auto(True)
+            if auto_login == "true":
+                self.init_check_auto(True)
+            else:
+                self.init_check_auto(False)
         else:
             self.init_name_field()
             self.init_password_field()
@@ -171,8 +174,13 @@ class LoginForm(QWidget):
 
     def _get_password(self):
         if wgr_data.is_key_exists(self.key_filename) and self.qsettings.contains('Login/password'):
-            key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
-            res = self.encryptor.decrypt_data(key, self.qsettings.value('Login/password')).decode("utf-8")
+            try:
+                key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
+                res = self.encryptor.decrypt_data(key, self.qsettings.value('Login/password')).decode("utf-8")
+            except AttributeError:
+                res = ''
+                self.popup_msg('Login Failed: Key file or config file corrupted.\nNeed to delete them.')
+                # TODO: reset them
         else:
             res = ''
         return res
@@ -184,7 +192,7 @@ class LoginForm(QWidget):
     def on_save_clicked(self):
         if self.check_save.isChecked():
             self.qsettings.beginGroup('Login')
-            self.qsettings.setValue("checked", self.check_save.isChecked())
+            self.qsettings.setValue("save", self.check_save.isChecked())
             self.qsettings.setValue("server_text", self.combo_server.currentText())
             self.qsettings.setValue("platform_text", self.combo_platform.currentText())
             self.qsettings.setValue("username", self.lineEdit_username.text())
@@ -244,21 +252,17 @@ class LoginForm(QWidget):
         else:
             logging.error("Invalid server name: {}".format(text))
 
-    def check_password(self):
-
-        def _login_failed():
-            msg.setText("Login Failed: Probably due to bad server connection")
-            msg.exec_()
-            self.login_button.setEnabled(True)
-            self.login_button.setText('Login')
-
-        self.login_button.setText('Connecting to server...')
-        self.login_button.setEnabled(False)
-        self.on_save_clicked()
-
+    def popup_msg(self, text: str):
         msg = QMessageBox()
         msg.setStyleSheet(self.style_sheet)
         msg.setWindowTitle("Info")
+        msg.setText(text)
+        msg.exec_()
+
+    def check_password(self):
+        self.login_button.setText('Connecting to server...')
+        self.login_button.setEnabled(False)
+        self.on_save_clicked()
 
         sess = Session()
         account = GameLogin(constants.version, self.channel, sess, self.login_button)
@@ -272,23 +276,30 @@ class LoginForm(QWidget):
             key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
         self.qsettings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
 
+        res1 = res2 = False
         try:
             res1 = account.first_login(_username, _password)
-            res2 = account.second_login(self.server)
-            self.login_button.setText('Loading and Initializing...')
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
-            _login_failed()
+            self.popup_msg("Login Failed: Wrong authentication information")
+            self.login_button.setEnabled(True)
+            self.login_button.setText('Login')
+            return
+        try:
+            res2 = account.second_login(self.server)
+        except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
+            logging.error(f"LOGIN - {e}")
+            self.popup_msg("Login Failed: Probably due to bad server connection")
+            self.login_button.setEnabled(True)
+            self.login_button.setText('Login')
             return
 
         if res1 == True and res2 == True:
             logging.info("LOGIN - SUCCESS!")
-            msg.setText('Login Success')
-            msg.exec_()
-            msg.close()
+            self.popup_msg('Login Success')
             self.mi = MainInterface(self.server, self.channel, account.get_cookies())
             self.login_success()
         else:
-            _login_failed()
+            self.popup_msg("Login Failed: Probably due to bad server connection")
 
 # End of File
