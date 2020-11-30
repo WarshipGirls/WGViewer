@@ -3,9 +3,13 @@ import sys
 # On Windows it looks like cp850 is used for my console. We need it to decode the QByteArray correctly.
 # Based on https://forum.qt.io/topic/85064/qbytearray-to-string/2
 import ctypes
+
+#The QProcess class is used to start external programs and to communicate with them
+
 CP_console = "cp" + str(ctypes.cdll.kernel32.GetConsoleOutputCP())
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class gui(QtWidgets.QMainWindow):
     def __init__(self):
@@ -18,12 +22,12 @@ class gui(QtWidgets.QMainWindow):
 
         # Here we have to decode the QByteArray
         cursor.insertText(str(self.process.readAll().data().decode(CP_console)))
-        self.output.ensureCursorVisible()
+        #self.output.ensureCursorVisible()
 
     def callProgram(self):
         # run the process
         # `start` takes the exec and a list of arguments
-        self.process.start('ping',['127.0.0.1'])
+        self.process.start('ping', ['127.0.0.1'])
 
     def initUI(self):
         # Layout are better for placing widgets
@@ -31,7 +35,9 @@ class gui(QtWidgets.QMainWindow):
         self.runButton = QtWidgets.QPushButton('Run')
         self.runButton.clicked.connect(self.callProgram)
 
-        self.output = QtWidgets.QTextEdit()
+        #self.output = QtWidgets.QTextEdit()
+        self.output = QtWidgets.QTextBrowser()
+        self.output.setReadOnly(True)
 
         layout.addWidget(self.output)
         layout.addWidget(self.runButton)
@@ -51,13 +57,15 @@ class gui(QtWidgets.QMainWindow):
         self.process.finished.connect(lambda: self.runButton.setEnabled(True))
 
 
-#Function Main Start
+# Function Main Start
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    ui=gui()
+    ui = gui()
     ui.show()
     sys.exit(app.exec_())
-#Function Main END
+
+
+# Function Main END
 
 if __name__ == '__main__':
-    main() 
+    main()
