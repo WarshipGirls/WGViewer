@@ -34,6 +34,17 @@ To build executable on Unix OS, update `fix_pyinstaller.py` with your directory 
 > python tools/fix_pyinstaller.py > gui_main.spec  
 > pyinstaller --clean gui_main.spec
 
+## Contributors
+
+[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/0)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/0)
+[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/1)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/1)
+[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/2)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/2)
+[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/3)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/3)
+[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/4)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/4)
+[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/5)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/5)
+[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/6)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/6)
+[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/7)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/7)
+
 ## Disclaimer
 
 Warship Girls Viewer (as "WGViewer") is not a representative and is not associated with Warship Girls (as "the game"), Warship Girls R (as "the game"), or [Moefantasy 幻萌网络](https://www.moefantasy.com/). The copyright of the shipgirl art resources used in the WGViewer belong to Moefantasy.
