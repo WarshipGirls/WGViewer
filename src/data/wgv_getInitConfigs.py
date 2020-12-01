@@ -8,12 +8,14 @@ from time import sleep
 from .wgv_path import get_init_dir
 
 
-# TODO: maybe add init.zip to cloud, and use script to auto update it.
-# https://drive.google.com/file/d/19L7UB00C1oSqYEshP3gRiraTTnzlH19b/view?usp=sharing
 
 # ================================
 # Exports
 # ================================
+
+# https://github.com/WarshipGirls/WGViewer/raw/master/zip/E.zip
+# https://github.com/WarshipGirls/WGViewer/raw/master/zip/S.zip
+# https://github.com/WarshipGirls/WGViewer/raw/master/zip/init.zip
 
 def save_init_data():
     """
