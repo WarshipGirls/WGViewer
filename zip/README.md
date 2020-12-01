@@ -1,5 +1,10 @@
 # Resource zip
 
+## Adding new zip files
+
+1. Ensure the file is zipped correctly, such that the file is not corrupted.
+
+
 ## Adding new images/icons
 
 Please go through following checklist before adding images:
