@@ -37,7 +37,7 @@ class MainInterfaceMenuBar(QMenuBar):
 
     def init_view_menu(self):
         menu = self.addMenu(self.tr("&View"))
-        menu.addAction(self.create_action("&Open Navy Base Overview", self.parent.init_side_dock, "Ctrl+O"))
+        menu.addAction(self.create_action("&Open Navy Base Overview", self.parent.create_side_dock, "Ctrl+O"))
 
     def init_preferences_menu(self):
         menu = self.addMenu(self.tr("&Preferences"))

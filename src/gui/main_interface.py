@@ -68,23 +68,24 @@ class MainInterface(QMainWindow):
         self.setLayout(QHBoxLayout())
         self.setWindowTitle('Warship Girls Viewer')
 
-    def init_side_dock(self):
-        def _create_side_dock():
-            if (self.side_dock_on is False) and (self.side_dock is None):
-                self.side_dock = SideDock(self)
-                self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
-                self.side_dock_on = True
-            else:
-                pass
+    def create_side_dock(self):
+        if (self.side_dock_on is False) and (self.side_dock is None):
+            self.side_dock = SideDock(self)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
+            self.side_dock_on = True
+        else:
+            pass
 
+    def init_side_dock(self):
+        # Following only checks on log-in
         if self.qsettings.contains("UI/no_side_dock") is True:
             if self.qsettings.value("UI/no_side_dock") == "true":
                 pass
             else:
-                _create_side_dock()
+                self.create_side_dock()
         else:
             self.qsettings.setValue("UI/no_side_dock", False)
-            _create_side_dock()
+            self.create_side_dock()
 
     # ================================
     # Events
