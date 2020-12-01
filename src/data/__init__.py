@@ -11,7 +11,7 @@ delete the __init__.py and re-run __auto_gen__.py
 """
     
 from .wgv_getInitConfigs import (
-    save_init_data
+    init_resources
 )
 from .wgv_json import (
     get_api_getShipList, get_api_initGame, get_equipmentVo, get_processed_userShipVo, get_pveExploreVo, get_shipCard, get_shipEquipmnt, get_shipItem, get_tactics_json, get_taskVo, get_userVo, get_user_fleets, get_user_tactics, 
@@ -21,7 +21,7 @@ from .wgv_json import (
 )
 from .wgv_path import (
     clear_cache_folder, 
-    get_data_dir, get_init_dir, get_temp_dir, get_user_dir
+    get_data_dir, get_init_dir, get_temp_dir, get_user_dir, get_zip_dir
 )
 from .wgv_process import (
     find_all_indices, find_index, 
