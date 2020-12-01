@@ -6,7 +6,6 @@ import sys
 from PyQt5.QtGui import QIcon, QFontDatabase
 from PyQt5.QtWidgets import QApplication
 
-from src.data.__auto_gen__ import start_generator
 from src.gui.login import LoginForm
 
 
@@ -39,7 +38,6 @@ def _realrun():
 
 
 def _testrun():
-    assert (True == start_generator())
     dev_warning = "\n\n==== TEST WARNING ====\n"
     dev_warning += "In test run, api calls to server won't work!\n"
     dev_warning += "In order to test offline, one real run (to get server data sample) is required!\n"
