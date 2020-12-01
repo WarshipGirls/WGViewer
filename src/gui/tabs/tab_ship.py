@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgr_data
+from src.wgr.api import WGR_API
 from .ships.delegate import ShipTableDelegate
 from .ships.model import ShipModel
 from .ships.proxy_model import ShipSortFilterProxyModel
@@ -25,10 +26,10 @@ def get_data_path(relative_path):
 
 
 class TabShips(QWidget):
-    def __init__(self, api, is_realrun):
+    def __init__(self, is_realrun):
         super().__init__()
         logging.info("SHIPS - Creating Ships Tab...")
-        self.api = api
+        self.api = WGR_API(wgr_data.load_cookies())
 
         self.content_widget = None
         self.content_layout = None
@@ -48,7 +49,7 @@ class TabShips(QWidget):
             self._testrun()
 
     def _realrun(self):
-        data = self.api.api_getShipList()
+        data = self.api.getShipList()
         wgr_data.save_api_getShipList(data)
         self.on_received_shiplist(data)
 
@@ -81,7 +82,7 @@ class TabShips(QWidget):
         self.content_layout.setStretch(1, 10)
 
         self.table_view = QTableView(self.lower_content_widget)
-        self.table_model = ShipModel(self.table_view, self.api)
+        self.table_model = ShipModel(self.table_view)
         self.table_proxy = ShipSortFilterProxyModel(self)
         self.table_proxy.setSourceModel(self.table_model)
         self.table_view.setModel(self.table_proxy)

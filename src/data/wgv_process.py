@@ -1,7 +1,7 @@
 from .wgv_json import (
     get_user_fleets, get_shipItem, get_userVo,
     get_shipCard, get_shipEquipmnt, get_equipmentVo,
-    save_equipmentVo
+    save_equipmentVo, get_pveExploreVo
 )
 
 
@@ -97,6 +97,50 @@ def get_ship_equips(cid):
             continue
     return res
 
+
+def get_exp_map(fleet_id):
+    _json = get_pveExploreVo()['levels']
+    try:
+        fleet = next(i for i in _json if i['fleetId'] == str(fleet_id))
+        map_name = fleet['exploreId'].replace('000', '-')
+    except StopIteration:
+        map_name = ""
+    return map_name
+
+
+def get_exp_list():
+    exp_list = get_pveExploreVo()['chapters']
+    res = []
+    for i in exp_list:
+        end_idx = 5 if i is not 8 else 3
+        _list = [str(i) + "000" + str(j) for j in range(1, end_idx)]
+        res += _list
+    return res
+
+def get_love_list():
+    # url = self.server + 'api/getShipList' + hlp.get_url_end()
+    # raw_data = self.decompress_data(url)
+    # data = json.loads(raw_data)
+    # x = data["userShipVO"]
+    # x.sort(key=lambda y:y["level"], reverse=True)
+    # counter = 0
+    # for s in x:
+    #     if (int(s["love"]) > 60) and (s["love"] != s["loveMax"]) and (s["loveMax"] == 100):
+    #         print("{}. {}\t{}\t{}\t{}/{}".format(counter, s["id"], s["title"], s["level"], s["love"], s["loveMax"]))
+    #         time.sleep(3)
+    #         url = self.server + 'friend/kiss/' + str(s["id"]) + hlp.get_url_end()
+    #         raw_data = self.decompress_data(url)
+    #         data = json.loads(raw_data)
+    #         print(data)
+    #         try:
+    #             if "love" in data["shipVO"]:
+    #                 counter += 1
+    #                 print("kiss success")
+    #         except KeyError:
+    #             pass
+    #     if counter >= 5:
+    #         break
+    pass
 
 def update_equipment_amount(equipped, unequipped):
     # both input are cid (int)

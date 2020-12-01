@@ -16,6 +16,7 @@ from .wgv_getInitConfigs import (
 from .wgv_json import (
     get_api_getShipList, get_api_initGame, get_equipmentVo, get_processed_userShipVo, get_pveExploreVo, get_shipCard, get_shipEquipmnt, get_shipItem, get_tactics_json, get_taskVo, get_userVo, get_user_fleets, get_user_tactics, 
     init_ships_temp, 
+    load_cookies, 
     save_api_getShipList, save_api_initGame, save_equipmentVo, save_processed_userShipVo, save_pveExploreVo, save_taskVo, save_userVo, save_user_fleets, save_user_tactics
 )
 from .wgv_path import (
@@ -24,7 +25,7 @@ from .wgv_path import (
 )
 from .wgv_process import (
     find_all_indices, find_index, 
-    get_big_success_rate, get_exp_fleets, get_ship_equips, 
+    get_big_success_rate, get_exp_fleets, get_exp_list, get_exp_map, get_ship_equips, 
     update_equipment_amount
 )
 from .wgv_qsettings import (

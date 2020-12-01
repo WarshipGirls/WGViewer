@@ -305,7 +305,7 @@ class LoginForm(QWidget):
         if self.res1 is True:
             self.bee2.start()
         else:
-            pass
+            self.login_failed()
 
     def handle_result2(self, result: bool):
         logging.debug('LOGIN - Second fetch result {}'.format(result))
@@ -315,7 +315,7 @@ class LoginForm(QWidget):
             self.login_button.setText('Loading and Initializing...')
             logging.info("LOGIN - SUCCESS!")
             popup_msg('Login Success')
-            self.mi = MainInterface(self.server, self.channel, self.account.get_cookies())
+            self.mi = MainInterface(self.account.get_cookies())
             self.login_success()
         else:
             popup_msg("Login Failed (3): Probably due to bad server connection")

@@ -1,7 +1,7 @@
 import json
 
 from time import sleep
-from src.func.wgr_api import WGR_API
+from src.wgr.api import WGR_API
 from logging import Logger
 
 
@@ -14,11 +14,12 @@ class Sortie:
     def __init__(self, api: WGR_API, fleets: list, final_fleets: list, sortie_logger: Logger):
         super().__init__()
         self.api = api
-        self.fleets = fleets # main fleets
-        self.final_fleets = final_fleets # fill up required number of boats
+        self.fleets = fleets  # main fleets
+        self.final_fleets = final_fleets  # fill up required number of boats
         self.logger = sortie_logger
 
         self.pre_battle()
+
     '''
     Order:
     
@@ -46,23 +47,21 @@ class Sortie:
         - six_setWarFleet
     '''
 
-
     def pre_battle(self):
         self.logger.info('fuck pycharm')
         self.logger.info('get pve data')
-        a = self.api.six_getPveData()
+        a = self.api.getPveData()
         save_json('a.json', a)
         sleep(2)
         self.logger.info('get fleet info')
-        a = self.api.six_getFleetInfo()
+        a = self.api.getFleetInfo()
         save_json('b.json', a)
         sleep(2)
         self.logger.info('get user data')
-        a = self.api.six_getuserdata()
+        a = self.api.getuserdata()
         save_json('c.json', a)
         sleep(2)
 
         print('fuck you pycharm')
-
 
 # End of File

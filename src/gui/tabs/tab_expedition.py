@@ -2,8 +2,7 @@ import logging
 import os
 import sys
 
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtWidgets import QGridLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
 from .expedition.table import ExpTable
 from .expedition.summary import DailySummary
@@ -28,13 +27,19 @@ class TabExpedition(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        main_layout = QGridLayout(self)
+        main_layout = QHBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
-        main_layout.addWidget(self.table, 0, 0, self.table.get_row_count(), self.table.get_col_count())
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(self.table)
+        left_layout.addWidget(self.summary)
+        left_layout.setStretch(0, 1)
+        left_layout.setStretch(1, 0)
 
-        main_layout.addWidget(self.fleet_table, 0, self.table.get_col_count(), self.fleet_table.get_row_count(), self.fleet_table.get_col_count())
-
-        main_layout.addWidget(self.summary, self.table.get_row_count(), 0, 5, 10)
+        main_layout.addLayout(left_layout)
+        main_layout.addWidget(self.fleet_table)
+        main_layout.setStretch(0, 1)
+        main_layout.setStretch(1, 0)
 
         self.setLayout(main_layout)
 

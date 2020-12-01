@@ -4,13 +4,17 @@ import hashlib
 import hmac
 import json
 import logging
+import os
+import pickle
 import random
+import requests
 import time
 import urllib
 import zlib
 
 from PyQt5.QtWidgets import QPushButton
 
+from src.data.wgv_path import get_data_dir
 from . import constants as constants
 from .helper_function import Helper
 from .session import Session
@@ -28,6 +32,7 @@ class GameLogin:
         self.session = game_session
         self.login_button = login_button
 
+        self.server = ""
         self.uid = None
         self.cookies = None
         self.login_server = ""
@@ -89,6 +94,7 @@ class GameLogin:
         data_dict["t"] = now_time
         data_dict["e"] = self.hlp.get_url_end(self.channel, now_time)
         random.seed()
+        self.server = host
         try:
             # Pull decisive data
             login_url_tmp = host + 'index/login/' + self.uid + '?&' + urllib.parse.urlencode(data_dict)
@@ -168,7 +174,14 @@ class GameLogin:
         self.passport_headers["Authorization"] = "HMS {}:".format(self.portHead) + data
         self.passport_headers["Date"] = times
 
-    def get_cookies(self):
-        return self.cookies
+    def get_cookies(self) -> dict:
+        output = {'server': self.server, 'channel': self.channel, 'cookies': self.cookies}
+        self.save_cookies(output)
+        return output
+
+    @staticmethod
+    def save_cookies(data: dict):
+        with open(os.path.join(get_data_dir(), 'user.cookies'), 'wb') as f:
+            pickle.dump(data, f)
 
 # End of File
