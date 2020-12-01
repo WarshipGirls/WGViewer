@@ -1,8 +1,3 @@
-from .wgv_json import (
-    get_user_fleets, get_shipItem, get_userVo,
-    get_shipCard, get_shipEquipmnt, get_equipmentVo,
-    save_equipmentVo, get_pveExploreVo
-)
 
 
 # ================================
@@ -117,6 +112,7 @@ def get_exp_list():
         res += _list
     return res
 
+
 def get_love_list():
     # url = self.server + 'api/getShipList' + hlp.get_url_end()
     # raw_data = self.decompress_data(url)
@@ -141,6 +137,7 @@ def get_love_list():
     #     if counter >= 5:
     #         break
     pass
+
 
 def update_equipment_amount(equipped, unequipped):
     # both input are cid (int)
@@ -235,5 +232,18 @@ def get_ship_equips(cid):
 
     return _type_to_equips(types)
 """
+
+if __name__ == "__main__":
+    from src.data.wgv_json import (
+        get_user_fleets, get_shipItem, get_userVo,
+        get_shipCard, get_shipEquipmnt, get_equipmentVo,
+        save_equipmentVo, get_pveExploreVo
+    )
+else:
+    from .wgv_json import (
+        get_user_fleets, get_shipItem, get_userVo,
+        get_shipCard, get_shipEquipmnt, get_equipmentVo,
+        save_equipmentVo, get_pveExploreVo
+    )
 
 # End of File
