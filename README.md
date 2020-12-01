@@ -21,7 +21,7 @@ To contribute code,
 
 1. start a Python virtual environment
 2. install required packages: `pip install -r requirements.txt`
-3. make a [pull request](pulls) when your code is ready :)
+3. make a [pull request](../../pulls) when your code is ready :)
 
 ### Packing into executable
 
@@ -49,7 +49,7 @@ To build executable on Unix OS, update `fix_pyinstaller.py` with your directory 
 
 Warship Girls Viewer (as "WGViewer") is not a representative and is not associated with Warship Girls (as "the game"), Warship Girls R (as "the game"), or [Moefantasy 幻萌网络](https://www.moefantasy.com/). The copyright of the shipgirl art resources used in the WGViewer belong to Moefantasy.
 
-WGViewer is intended for educational purposes only. Botting is in violation of the User Agreement of the game; prolonged usage of WGViewer may result in your game account being banned. The developer of WGViewer takes no responsibility for repercussions related to the usage of WGViewer.
+WGViewer is intended for educational purposes only. Botting is in violation of the User Agreement of the game; prolonged usage of WGViewer's automation tool may result in your game account being banned. The developer of WGViewer takes no responsibility for repercussions related to the usage of WGViewer.
 
 Although unlikely, users may sink ships and lose equipment when using WGViewer to conduct combat sorties. While WGViewer has been painstakingly designed to reduce chances of such occurrence, the developer of WGViewer does not take responsibility for any loss of ships and/or resources.
 
