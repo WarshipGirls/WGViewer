@@ -86,6 +86,7 @@ def _download(url: str) -> str:
     filename = url[l:]
     filepath = os.path.join(get_zip_dir(), filename)
 
+    # TODO: maybe show this on GUI
     def _progress(block_num, block_size, total_size):
         downloaded = block_num * block_size
         progress = int((downloaded / total_size) * 100)

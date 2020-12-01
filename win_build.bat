@@ -19,7 +19,7 @@ goto :EOF
 @SET PyVer=%ver:~0,6%%ver:~7,1%%ver:~9,1%
 @Rem Win10 truncate username to 5 letters
 @SET uname=%username:~0,5%
-@C:\Users\%uname%\AppData\Local\Programs\Python\%PyVer%\python.exe fix_pyinstaller.py > ..\gui_main.spec
+C:\Users\%uname%\AppData\Local\Programs\Python\%PyVer%\python.exe fix_pyinstaller.py > ..\gui_main.spec
 @cd ..
-@pyinstaller.exe --clean gui_main.spec
+pyinstaller.exe --clean gui_main.spec
 @goto :EOF
