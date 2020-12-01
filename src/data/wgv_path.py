@@ -11,8 +11,16 @@ from pathlib import Path
 # ================================
 
 
-def _clear_dir(_dir):
+def _clear_dir(_dir, is_all: bool = False) -> bool:
+    if is_all is True:
+        skips = []
+    else:
+        skips = ['zip']
     for filename in os.listdir(_dir):
+        if filename in skips:
+            continue
+        else:
+            pass
         file_path = os.path.join(_dir, filename)
         try:
             if os.path.isfile(file_path) or os.path.islink(file_path):
@@ -21,6 +29,8 @@ def _clear_dir(_dir):
                 shutil.rmtree(file_path)
         except Exception as e:
             logging.error('Failed to delete %s. Reason: %s' % (file_path, e))
+            return False
+    return True
 
 
 # ================================
@@ -28,8 +38,8 @@ def _clear_dir(_dir):
 # ================================
 
 
-def clear_cache_folder():
-    _clear_dir(get_data_dir())
+def clear_cache_folder(is_all: bool = False) -> bool:
+    return _clear_dir(get_data_dir(), is_all)
 
 
 def get_data_dir():
