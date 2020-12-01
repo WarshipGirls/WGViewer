@@ -44,6 +44,7 @@ a.datas += [('assets/favicon.ico','D:\\github\\WGViewer\\assets\\favicon.ico','D
 ]
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
 exe = EXE(pyz,
           a.scripts,
           a.binaries,

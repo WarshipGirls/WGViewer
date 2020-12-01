@@ -7,8 +7,10 @@ This is not limited to just images either. Any file can be packaged along with t
 a.datas += [('images/icon.ico', 'D:\\[workspace]\\App\\src\\images\\icon.ico',  'DATA')]
 
 # TO USE
-Run this scripts, and copy paste output to the *.spec file. Do clean the old fix.
+Run this script in tool/,
+and copy paste output to the *.spec file. Do clean the old fix.
 '''
+
 
 spec_root = "\'D:\\\github\\\WGViewer\'"
 def header(spec_root):
@@ -31,6 +33,7 @@ a = Analysis(['gui_main.py'],
     return t
 
 def datas_import():
+
     excluding = ['.md', '.MD', '.zip', '.ZIP']
     os.chdir("..")
     root_dir = os.path.dirname(os.path.realpath(__file__))
@@ -54,6 +57,7 @@ def datas_import():
 def footer():
     t = """
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
 exe = EXE(pyz,
           a.scripts,
           a.binaries,
@@ -76,3 +80,4 @@ exe = EXE(pyz,
 print(header(spec_root))
 print(datas_import())
 print(footer())
+

@@ -13,7 +13,7 @@ class Worker(QThread):
         self.func(*self.args)
 
 
-class LoginWorker(QThread):
+class CallbackWorker(QThread):
     finished = pyqtSignal(object)
 
     def __init__(self, _func, args, callback):

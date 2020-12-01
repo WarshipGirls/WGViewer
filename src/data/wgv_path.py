@@ -49,7 +49,16 @@ def get_data_dir():
 
 
 def get_init_dir():
-    p = os.path.join(get_data_dir(), 'init')
+    p = os.path.join(get_data_dir(), 'zip', 'init')
+    if not os.path.exists(p):
+        os.makedirs(p)
+    else:
+        pass
+    return p
+
+
+def get_temp_dir():
+    p = os.path.join(get_data_dir(), 'temp')
     if not os.path.exists(p):
         os.makedirs(p)
     else:
@@ -66,8 +75,8 @@ def get_user_dir():
     return p
 
 
-def get_temp_dir():
-    p = os.path.join(get_data_dir(), 'temp')
+def get_zip_dir():
+    p = os.path.join(get_data_dir(), 'zip')
     if not os.path.exists(p):
         os.makedirs(p)
     else:

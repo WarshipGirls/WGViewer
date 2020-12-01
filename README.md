@@ -14,11 +14,10 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 - [Python3](https://www.python.org/)
 - [PyQt5](https://doc.qt.io/qtforpython/) (w/o Qt Designer)
+- [PyInstaller](https://www.pyinstaller.org/)
 - Platforms:
 	- Windows 10
 	- Ubuntu 20.04
-
-Nice tools to have: [Fiddler 4](https://www.telerik.com/fiddler), [Python debugger](https://docs.python.org/3/library/pdb.html).
 
 ### Contribution
 

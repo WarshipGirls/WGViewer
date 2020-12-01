@@ -7,7 +7,6 @@ import logging
 import os
 import pickle
 import random
-import requests
 import time
 import urllib
 import zlib
