@@ -40,7 +40,7 @@ def init_data_imports():
 if __name__ == '__main__':
     assert (len(sys.argv) == 2)
     # Comment out following when using pyinstaller
-    logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     logging.info("Warship Girls Viewer started...")
     app = QApplication([])
