@@ -4,7 +4,7 @@ import logging
 from requests import exceptions
 from time import sleep
 
-from src.func.helper_function import Helper
+from src.func.helper import Helper
 
 
 class WGR_API:
@@ -13,7 +13,6 @@ class WGR_API:
     """
 
     def __init__(self, cookies: dict):
-        print(cookies)
         self.server = cookies['server']
         self.channel = cookies['channel']
         self.cookies = cookies['cookies']

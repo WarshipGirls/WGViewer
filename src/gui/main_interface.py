@@ -16,7 +16,7 @@ from src.gui.interface.main_interface_menubar import MainInterfaceMenuBar
 def init_data_files():
     num = len(os.listdir(wgr_data.get_init_dir()))
     # As of 5.0.0, there should be 30 files
-    if num != 30:
+    if num < 30:
         wgr_data.save_init_data()
     else:
         pass

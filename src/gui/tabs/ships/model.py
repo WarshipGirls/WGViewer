@@ -8,7 +8,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
 from src import data as wgr_data
 from src.func import constants as CONST
-from src.func.helper_function import Helper
+from src.func.helper import Helper
 from . import constant as SCONST
 from src.wgr.boat import API_BOAT
 
@@ -377,8 +377,8 @@ class ShipModel(QStandardItemModel):
                         i = wgr_data.find_index(self.tactics_json, 'cid', self.user_tactics[idx]['cid'])
                         t = self.tactics_json[i]
                         title = t['title'] + " " + str(t['level'])
-                        d1 = re.sub(r'\^.+?00000000', '', t["desc"])
-                        d2 = re.sub(r'\^.+?00000000', '', t["desc2"])
+                        d1 = self.hlp.clear_desc(t["desc"])
+                        d2 = self.hlp.clear_desc(t["desc2"])
                         desc = d1 + "\n" + d2
 
                         item = QStandardItem(title)

@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import QPushButton
 
 from src.data.wgv_path import get_data_dir
 from . import constants as constants
-from .helper_function import Helper
+from .helper import Helper
 from .session import Session
 
 
