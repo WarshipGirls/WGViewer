@@ -1,7 +1,7 @@
 import os
-import webbrowser
 
-from PyQt5.QtCore import QCoreApplication, QSettings
+from PyQt5.QtCore import QCoreApplication, QSettings, QUrl
+from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from src import data as wgr_data
@@ -34,6 +34,9 @@ class MainInterfaceMenuBar(QMenuBar):
         else:
             pass
         return q
+
+    def _link(self, url: str):
+        QDesktopServices.openUrl(QUrl(url))
 
     def init_file_menu(self):
         # The ampersand in the menu item's text sets Alt+F as a shortcut for this menu.
@@ -112,7 +115,7 @@ class MainInterfaceMenuBar(QMenuBar):
         reply = QMessageBox.question(self, 'Report', "Do you want to submit a bug or make an suggestion?",
                                      QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            webbrowser.open_new('https://github.com/WarshipGirls/WGViewer/issues/new')
+            self._link('https://github.com/WarshipGirls/WGViewer/issues/new')
         else:
             pass
 
