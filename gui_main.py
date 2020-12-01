@@ -34,7 +34,6 @@ def init_fonts():
 
 
 def _realrun():
-    login_form = LoginForm()
     login_form.show()
     login_form.raise_()
 
@@ -46,34 +45,34 @@ def _testrun():
     dev_warning += "In order to test offline, one real run (to get server data sample) is required!\n"
     dev_warning += "==== WARNING  END ====\n"
     logging.warning(dev_warning)
-
-    from src.gui.main_interface import MainInterface
-    from src import data as wgr_data
-
-    mi = MainInterface(wgr_data.load_cookies(), False)
     mi.show()
 
 
 if __name__ == '__main__':
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # !! Comment out following when using pyinstaller !!
-    # !! and set if-expression to 1   (i.e. _realrun) !!
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    assert (len(sys.argv) == 2)
-    logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    logging.info("Warship Girls Viewer started...")
     app = QApplication([])
     set_app_icon()
     init_qsettings()
     init_fonts()
 
-    # python gui_main.py 0  # test run
-    # python gui_main.py 1  # real run
-    if int(sys.argv[1]):
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        # running in a PyInstaller bundle
+        login_form = LoginForm()
         _realrun()
     else:
-        _testrun()
+        # running in a normal Python process
+        assert (len(sys.argv) == 2)
+        logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        logging.info("Warship Girls Viewer started...")
+
+        if int(sys.argv[1]):
+            login_form = LoginForm()
+            _realrun()
+        else:
+            from src.gui.main_interface import MainInterface
+            from src import data as wgr_data
+            mi = MainInterface(wgr_data.load_cookies(), False)
+            _testrun()
 
     sys.exit(app.exec_())
 
