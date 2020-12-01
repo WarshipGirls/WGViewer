@@ -57,8 +57,8 @@ class Helper:
         return str(timedelta(seconds=seconds))
 
     @staticmethod
-    def clear_desc(input: str) -> str:
+    def clear_desc(text: str) -> str:
         # This garbage code (like ^C454545FF00000000) is probably due to cocoa?
-        return re.sub(r'\^.+?00000000', '', input)
+        return re.sub(r'\^.+?00000000', '', text)
 
 # End of File

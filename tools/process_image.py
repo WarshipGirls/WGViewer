@@ -26,7 +26,7 @@ def crop_images():
     For cropping ship images, 363x88 -> 156x88
     """
     img_dir = "./S/"
-    res_dir = "../src/assets/S/"
+    res_dir = "./proc_S/"
     if not os.path.exists(res_dir):
         os.makedirs(res_dir)
     else:
@@ -62,7 +62,7 @@ def resize_images():
     For resizing equipment images, 512x512 -> 64x64
     """
     img_dir = "./equip_512/"
-    res_dir = "../src/assets/E/"
+    res_dir = "./proc_E/"
     if not os.path.exists(res_dir):
         os.makedirs(res_dir)
     else:

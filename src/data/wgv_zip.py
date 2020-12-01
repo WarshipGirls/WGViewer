@@ -125,10 +125,10 @@ def init_resources():
 
 if __name__ == "__main__":
     try:
-        from src.data.wgv_path import get_init_dir, get_zip_dir
+        from src.data.wgv_path import get_zip_dir
     except ModuleNotFoundError:
-        from wgv_path import get_init_dir, get_zip_dir
+        from wgv_path import get_zip_dir
 else:
-    from .wgv_path import get_init_dir, get_zip_dir
+    from .wgv_path import get_zip_dir
 
 # End of File

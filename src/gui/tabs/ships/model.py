@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import sys
 
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot
@@ -75,7 +74,7 @@ class ShipModel(QStandardItemModel):
     def set_data(self, _data):
         self.ships_raw_data = _data
 
-        for i in range(28): # up to (not including) 28
+        for i in range(28):  # up to (not including) 28
             self.ships_data.append([])
         for s in self.ships_raw_data:
             self.ships_data[s["type"]].append(s)
@@ -119,9 +118,9 @@ class ShipModel(QStandardItemModel):
             return None
 
         # QTableWidgetItem requires unique assignment; thus, same pic cannot assign twice. Differ from QIcon
-        img_path = "assets/S/" + prefix + mid + ".png"
+        img_path = "S/" + prefix + mid + ".png"
         img = QPixmap()
-        is_loaded = img.load(get_data_path(img_path))
+        is_loaded = img.load(os.path.join(wgr_data.get_zip_dir(), get_data_path(img_path)))
         if is_loaded:
             thumbnail = QStandardItem()
             thumbnail.setData(QVariant(img.scaled(78, 44)), Qt.DecorationRole)
@@ -130,7 +129,7 @@ class ShipModel(QStandardItemModel):
             self.setItem(row, 0, thumbnail)
         else:
             tmp = QPixmap()
-            tmp.load(get_data_path("assets/S/0v0.png"))
+            tmp.load(os.path.join(wgr_data.get_zip_dir(), get_data_path("S/0v0.png")))
             tmp2 = QStandardItem()
             tmp2.setData(QVariant(tmp.scaled(78, 44)), Qt.DecorationRole)
             tmp2.setData(cid, Qt.UserRole)
@@ -299,8 +298,8 @@ class ShipModel(QStandardItemModel):
                 continue
             else:
                 pass
-            raw_path = "assets/E/equip_L_" + str(int(e[3:6])) + ".png"
-            img_path = get_data_path(raw_path)
+            raw_path = "E/equip_L_" + str(int(e[3:6])) + ".png"
+            img_path = os.path.join(wgr_data.get_zip_dir(), get_data_path(raw_path))
 
             img = QPixmap()
             is_loaded = img.load(img_path)
@@ -331,12 +330,12 @@ class ShipModel(QStandardItemModel):
             item.setData(-1, Qt.UserRole)
             self.setItem(row, col, item)
             wgr_data.update_equipment_amount(-1, unequip_id)
-            self.api_boat.removeEquipment(ship_id, equip_slot)
+            self.api_boat.removeEquipment(str(ship_id), str(equip_slot))
             return
         else:
             pass
 
-        res = self.api_boat.changeEquipment(ship_id, equip_id, equip_slot)
+        res = self.api_boat.changeEquipment(str(ship_id), str(equip_id), str(equip_slot))
         if 'eid' not in res:
             # success
             wgr_data.update_equipment_amount(equip_id, unequip_id)
@@ -344,8 +343,8 @@ class ShipModel(QStandardItemModel):
             logging.error('Equipment change is failed.')
             return
 
-        raw_path = "assets/E/equip_L_" + str(int(equip_id[3:6])) + ".png"
-        img_path = get_data_path(raw_path)
+        raw_path = "E/equip_L_" + str(int(equip_id[3:6])) + ".png"
+        img_path = os.path.join(wgr_data.get_zip_dir(), get_data_path(raw_path))
         img = QPixmap()
         is_loaded = img.load(img_path)
         if is_loaded:

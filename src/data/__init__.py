@@ -10,9 +10,6 @@ If error comes from __init__.py, due largely to asynchronous update,
 delete the __init__.py and re-run __auto_gen__.py
 """
     
-from .wgv_getInitConfigs import (
-    init_resources
-)
 from .wgv_json import (
     get_api_getShipList, get_api_initGame, get_equipmentVo, get_processed_userShipVo, get_pveExploreVo, get_shipCard, get_shipEquipmnt, get_shipItem, get_tactics_json, get_taskVo, get_userVo, get_user_fleets, get_user_tactics, 
     init_ships_temp, 
@@ -32,4 +29,7 @@ from .wgv_qsettings import (
     del_key_file, 
     get_color_scheme, get_key_path, get_qsettings_file, 
     is_key_exists
+)
+from .wgv_zip import (
+    init_resources
 )

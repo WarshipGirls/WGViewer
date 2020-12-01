@@ -13,11 +13,11 @@ from src.gui.interface.main_interface_tabs import MainInterfaceTabs
 from src.gui.interface.main_interface_menubar import MainInterfaceMenuBar
 
 
-def init_data_files():
-    num = len(os.listdir(wgr_data.get_init_dir()))
-    # As of 5.0.0, there should be 30 files
-    if num < 30:
-        wgr_data.save_init_data()
+def init_zip_files():
+    dir_size = sum(entry.stat().st_size for entry in os.scandir(wgr_data.get_zip_dir()))
+    # E.zip + S.zip + init.zip ~= 34M+
+    if dir_size < 30000000:
+        wgr_data.init_resources()
     else:
         pass
 
@@ -37,7 +37,7 @@ class MainInterface(QMainWindow):
         # !!! all DATA initialization must occur before any UI initialization !!!
 
         # TODO TODO multi-threading
-        init_data_files()
+        init_zip_files()
         self.api_initGame()
 
         # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob.
