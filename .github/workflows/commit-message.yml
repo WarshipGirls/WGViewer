@@ -23,4 +23,4 @@ jobs:
         uses: mristin/opinionated-commit-message@v2.2.0
         with:
           allow-one-liners: 'true'
-          path-to-additional-verbs: '.github/workflows/additional-verbs.txt'
+          path-to-additional-verbs: 'tools/additional-verbs.txt'
