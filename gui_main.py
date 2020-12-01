@@ -33,41 +33,47 @@ def init_fonts():
     QFontDatabase().addApplicationFont(get_data_path('assets/fonts/Consolas.ttf'))
 
 
-def init_data_imports():
+def _realrun():
+    login_form = LoginForm()
+    login_form.show()
+    login_form.raise_()
+
+
+def _testrun():
     assert (True == start_generator())
+    dev_warning = "\n\n==== TEST WARNING ====\n"
+    dev_warning += "In test run, api calls to server won't work!\n"
+    dev_warning += "In order to test offline, one real run (to get server data sample) is required!\n"
+    dev_warning += "==== WARNING  END ====\n"
+    logging.warning(dev_warning)
+
+    from src.gui.main_interface import MainInterface
+    from src import data as wgr_data
+
+    mi = MainInterface(wgr_data.load_cookies(), False)
+    mi.show()
 
 
 if __name__ == '__main__':
-    # assert (len(sys.argv) == 2)
-    # Comment out following when using pyinstaller
-    # logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # !! Comment out following when using pyinstaller !!
+    # !! and set if-expression to 1   (i.e. _realrun) !!
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    assert (len(sys.argv) == 2)
+    logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     logging.info("Warship Girls Viewer started...")
     app = QApplication([])
     set_app_icon()
     init_qsettings()
     init_fonts()
-    # init_data_imports()
 
     # python gui_main.py 0  # test run
     # python gui_main.py 1  # real run
     if int(sys.argv[1]):
-    # if 1:
-        login_form = LoginForm()
-        login_form.show()
-        login_form.raise_()
+        _realrun()
     else:
-        dev_warning = "\n\n==== TEST WARNING ====\n"
-        dev_warning += "In test run, api calls to server won't work!\n"
-        dev_warning += "In order to test offline, one real run (to get server data sample) is required!\n"
-        dev_warning += "==== WARNING  END ====\n"
-        logging.warning(dev_warning)
-
-        from src.gui.main_interface import MainInterface
-        from src import data as wgr_data
-
-        mi = MainInterface(wgr_data.load_cookies(), False)
-        mi.show()
+        _testrun()
 
     sys.exit(app.exec_())
 
