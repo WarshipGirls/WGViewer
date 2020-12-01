@@ -41,7 +41,6 @@ class TabShips(QWidget):
         self.lower_layout = None
         self.search_line = None
         self.init_ui()
-        self.init_assets()
 
         if is_realrun:
             self._realrun()
@@ -105,25 +104,6 @@ class TabShips(QWidget):
         self.table_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setShowGrid(False)
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-
-    @staticmethod
-    def init_assets():
-        # TODO: find drive that serves ppl in/out GFW
-        # TODO: pyinstaller seems not packing zip
-        # s_link = 'https://drive.google.com/file/d/1v5VO1b_Phl66xJJgk4TAXjGa_XHjbl-k/view?usp=sharing'
-        # e_link = 'https://drive.google.com/file/d/1CeluorrRqqhrKeNUo18UelKXhTxE8dsU/view?usp=sharing'
-        logging.info('SHIPS - Loading necessary assets files...')
-        if os.path.isdir(get_data_path('assets/S')):
-            pass
-        else:
-            with zipfile.ZipFile(get_data_path('assets/S.zip'), 'r') as zip_ref:
-                zip_ref.extractall(get_data_path('assets'))
-
-        if os.path.isdir(get_data_path('assets/E')):
-            pass
-        else:
-            with zipfile.ZipFile(get_data_path('assets/E.zip'), 'r') as zip_ref:
-                zip_ref.extractall(get_data_path('assets'))
 
     @pyqtSlot(dict)
     def on_received_shiplist(self, data):

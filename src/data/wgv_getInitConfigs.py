@@ -90,15 +90,4 @@ if __name__ == "__main__":
 else:
     from .wgv_path import get_init_dir
 
-
-# https://github.com/WarshipGirls/WGViewer/raw/master/zip/E.zip
-# https://github.com/WarshipGirls/WGViewer/raw/master/zip/S.zip
-# https://github.com/WarshipGirls/WGViewer/raw/master/zip/init.zip
-
-def test():
-    print('hi')
-
-
-test()
-
 # End of File
