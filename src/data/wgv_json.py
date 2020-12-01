@@ -3,9 +3,6 @@
 import json
 import os
 import pickle
-import requests
-
-from .wgv_path import get_init_dir, get_user_dir, get_temp_dir, get_data_dir
 
 
 # ================================
@@ -142,5 +139,11 @@ def init_ships_temp():
             json.dump(data, f, ensure_ascii=False, indent=4)
 
     return data
+
+
+if __name__ == "__main__":
+    from src.data.wgv_path import get_init_dir, get_user_dir, get_temp_dir, get_data_dir
+else:
+    from .wgv_path import get_init_dir, get_user_dir, get_temp_dir, get_data_dir
 
 # End of File

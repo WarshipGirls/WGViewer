@@ -3,8 +3,6 @@ import qdarkstyle
 
 from PyQt5.QtCore import QSettings
 
-from .wgv_path import get_data_dir
-
 
 def get_color_scheme():
     qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
@@ -33,5 +31,11 @@ def del_key_file(key_file):
         os.remove(os.path.join(get_data_dir(), key_file))
     else:
         pass
+
+
+if __name__ == "__main__":
+    from src.data.wgv_path import get_data_dir
+else:
+    from .wgv_path import get_data_dir
 
 # End of File
