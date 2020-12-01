@@ -377,8 +377,8 @@ class ShipModel(QStandardItemModel):
                         i = wgr_data.find_index(self.tactics_json, 'cid', self.user_tactics[idx]['cid'])
                         t = self.tactics_json[i]
                         title = t['title'] + " " + str(t['level'])
-                        d1 = re.sub(r'\^.+?00000000', '', t["desc"])
-                        d2 = re.sub(r'\^.+?00000000', '', t["desc2"])
+                        d1 = self.hlp.clear_desc(t["desc"])
+                        d2 = self.hlp.clear_desc(t["desc2"])
                         desc = d1 + "\n" + d2
 
                         item = QStandardItem(title)

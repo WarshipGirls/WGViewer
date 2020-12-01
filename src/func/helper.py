@@ -1,4 +1,5 @@
 import hashlib
+import re
 import time
 import zlib
 
@@ -54,5 +55,10 @@ class Helper:
     @staticmethod
     def ts_to_countdown(seconds: int):
         return str(timedelta(seconds=seconds))
+
+    @staticmethod
+    def clear_desc(input: str) -> str:
+        # This garbage code (like ^C454545FF00000000) is probably due to cocoa?
+        return re.sub(r'\^.+?00000000', '', input)
 
 # End of File

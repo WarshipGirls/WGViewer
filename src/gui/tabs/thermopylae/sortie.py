@@ -48,20 +48,22 @@ class Sortie:
     '''
 
     def pre_battle(self):
-        self.logger.info('fuck pycharm')
-        self.logger.info('get pve data')
-        a = self.api.getPveData()
-        save_json('a.json', a)
-        sleep(2)
-        self.logger.info('get fleet info')
-        a = self.api.getFleetInfo()
-        save_json('b.json', a)
-        sleep(2)
-        self.logger.info('get user data')
-        a = self.api.getuserdata()
-        save_json('c.json', a)
-        sleep(2)
+        # Ensure User can do E6
+        self.logger.info('pre battle')
+        # self.logger.info('fuck pycharm')
+        # self.logger.info('get pve data')
+        # a = self.api.getPveData()
+        # save_json('a.json', a)
+        # sleep(2)
+        # self.logger.info('get fleet info')
+        # a = self.api.getFleetInfo()
+        # save_json('b.json', a)
+        # sleep(2)
+        # self.logger.info('get user data')
+        # a = self.api.getuserdata()
+        # save_json('c.json', a)
+        # sleep(2)
 
-        print('fuck you pycharm')
+        # print('fuck you pycharm')
 
 # End of File
