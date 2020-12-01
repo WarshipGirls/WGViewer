@@ -208,8 +208,6 @@ fabric.properties
 
 .idea/
 *.json
-src/assets/E
-src/assets/S
 example_json/
 tools/S/
 tools/equip_512/

@@ -11,6 +11,7 @@ from src import data as wgr_data
 
 
 # TODO TODO
+'''
 class PopupFleets(QMainWindow):
     def __init__(self, curr_fleet: list, ships_info: object):
         super().__init__()
@@ -34,6 +35,7 @@ class PopupFleets(QMainWindow):
     def set_one_ship(self, row, ship_id, info):
         self.tab.setItem(row, 0, QTableWidgetItem(info['Name']))
         self.tab.setItem()
+'''
 
 
 class ExpFleets(QWidget):

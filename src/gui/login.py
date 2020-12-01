@@ -16,10 +16,8 @@ from src.func.encryptor import Encryptor
 from src.func.login import GameLogin
 from src.func.session import Session
 from src.func import constants as constants
-from src.func.worker import LoginWorker
-from .main_interface import MainInterface
-
-style_sheet = wgr_data.get_color_scheme()
+from src.func.worker import CallbackWorker
+from .main_interface import MainInterface 
 
 
 def create_label(text: str):
@@ -30,7 +28,7 @@ def create_label(text: str):
 
 def popup_msg(text: str):
     msg = QMessageBox()
-    msg.setStyleSheet(style_sheet)
+    msg.setStyleSheet(wgr_data.get_color_scheme())
     msg.setWindowTitle("Info")
     msg.setText(text)
     msg.exec_()
@@ -57,7 +55,7 @@ class LoginForm(QWidget):
         self.lineEdit_password = QLineEdit()
         self.combo_platform = QComboBox()
         self.combo_server = QComboBox()
-        self.check_save = QCheckBox('remember login info (secured by encryption)')
+        self.check_save = QCheckBox('remember login info locally (secured by encryption)')
         self.check_auto = QCheckBox('Auto login on the application start')
         self.login_button = QPushButton('Login')
 
@@ -118,7 +116,7 @@ class LoginForm(QWidget):
         user_h = QDesktopWidget().screenGeometry(-1).height()
         self.init_login_button(user_h)
         self.resize(0.26 * user_w, 0.12 * user_h)
-        self.setStyleSheet(style_sheet)
+        self.setStyleSheet(wgr_data.get_color_scheme())
         self.setWindowTitle('Warship Girls Viewer Login')
 
     def init_name_field(self, text: str = ''):
@@ -353,9 +351,9 @@ class LoginForm(QWidget):
             key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
         self.qsettings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
 
-        self.bee1 = LoginWorker(self.first_fetch, (self.account, _username, _password), self.handle_result1)
+        self.bee1 = CallbackWorker(self.first_fetch, (self.account, _username, _password), self.handle_result1)
         self.bee1.terminate()
-        self.bee2 = LoginWorker(self.second_fetch, (self.account, self.server), self.handle_result2)
+        self.bee2 = CallbackWorker(self.second_fetch, (self.account, self.server), self.handle_result2)
         self.bee2.terminate()
 
         self.bee1.start()

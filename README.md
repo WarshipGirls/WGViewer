@@ -12,33 +12,26 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 ## Development
 
-- [Python3](https://www.python.org/)
-- [PyQt5](https://doc.qt.io/qtforpython/) (w/o Qt Designer)
-- Platforms:
-	- Windows 10
-	- Ubuntu 20.04
-
-Nice tools to have: [Fiddler 4](https://www.telerik.com/fiddler), [Python debugger](https://docs.python.org/3/library/pdb.html).
+- [Python3](https://www.python.org/), [PyQt5](https://doc.qt.io/qtforpython/) (w/o Qt Designer), [PyInstaller](https://www.pyinstaller.org/)
+- Windows 10, Ubuntu 20.04
 
 ### Contribution
 
 To contribute code,
 
 1. start a Python virtual environment
-2. install required packages:
-
-> pip install -r requirements.txt
-
-3. make a pull request when your code is ready :)
+2. install required packages: `pip install -r requirements.txt`
+3. make a [pull request](pulls) when your code is ready :)
 
 ### Packing into executable
 
 To build executable on Windows OS, run
 
-> build.bat
+> win_build.bat
 
-To build executable on Unix OS, run
+To build executable on Unix OS, update `fix_pyinstaller.py` with your directory location, run
 
+> python tools/fix_pyinstaller.py > gui_main.spec  
 > pyinstaller --clean gui_main.spec
 
 ## Disclaimer
