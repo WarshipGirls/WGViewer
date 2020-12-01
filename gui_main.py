@@ -38,7 +38,7 @@ def init_data_imports():
 
 
 if __name__ == '__main__':
-    assert (len(sys.argv) == 2)
+    # assert (len(sys.argv) == 2)
     # Comment out following when using pyinstaller
     # logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -47,11 +47,12 @@ if __name__ == '__main__':
     set_app_icon()
     init_qsettings()
     init_fonts()
-    init_data_imports()
+    # init_data_imports()
 
     # python gui_main.py 0  # test run
     # python gui_main.py 1  # real run
     if int(sys.argv[1]):
+    # if 1:
         login_form = LoginForm()
         login_form.show()
         login_form.raise_()
