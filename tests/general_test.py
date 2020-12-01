@@ -2,7 +2,6 @@ import os
 import unittest
 
 from tests.utils import get_project_root
-from src.data.__auto_gen__ import start_generator
 
 ROOT_DIR = get_project_root()
 
@@ -49,10 +48,27 @@ class DirectoryIntegrityTests(unittest.TestCase):
         self.assertEqual(is_dir_empty(_dir), False)
 
 
-class FunctionalTests(unittest.TestCase):
+class FileIntegrityTests(unittest.TestCase):
 
-    def test_data_init_generator(self):
-        self.assertEqual(start_generator(), True)
+    def test_requirements_exists(self):
+        _dir = ROOT_DIR.joinpath('requirements.txt')
+        self.assertEqual(_dir.exists(), True)
+        self.assertEqual(_dir.is_dir(), False)
+
+    def test_license_exists(self):
+        _dir = ROOT_DIR.joinpath('LICENSE')
+        self.assertEqual(_dir.exists(), True)
+        self.assertEqual(_dir.is_dir(), False)
+
+    def test_readme_exists(self):
+        _dir = ROOT_DIR.joinpath('README.md')
+        self.assertEqual(_dir.exists(), True)
+        self.assertEqual(_dir.is_dir(), False)
+
+    def test_win_build_exists(self):
+        _dir = ROOT_DIR.joinpath('win_build.bat')
+        self.assertEqual(_dir.exists(), True)
+        self.assertEqual(_dir.is_dir(), False)
 
 
 if __name__ == '__main__':
