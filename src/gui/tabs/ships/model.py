@@ -8,8 +8,9 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 from src import data as wgr_data
 from src.func import constants as CONST
 from src.func.helper import Helper
-from . import constant as SCONST
+from src.utils import clear_desc, ts_to_date
 from src.wgr.boat import API_BOAT
+from . import constant as SCONST
 
 
 def get_data_path(relative_path):
@@ -139,10 +140,10 @@ class ShipModel(QStandardItemModel):
 
     def set_name(self, *args):
         wig = QStandardItem(args[1])
-        s = "Met on " + self.hlp.ts_to_date(int(args[3]))
+        s = "Met on " + ts_to_date(int(args[3]))
         if args[2] == 1:
             wig.setIcon(self.ring_icon)
-            s += "\nMarried on " + self.hlp.ts_to_date(int(args[4]))
+            s += "\nMarried on " + ts_to_date(int(args[4]))
         else:
             pass
         wig.setToolTip(s)
@@ -376,8 +377,8 @@ class ShipModel(QStandardItemModel):
                         i = wgr_data.find_index(self.tactics_json, 'cid', self.user_tactics[idx]['cid'])
                         t = self.tactics_json[i]
                         title = t['title'] + " " + str(t['level'])
-                        d1 = self.hlp.clear_desc(t["desc"])
-                        d2 = self.hlp.clear_desc(t["desc2"])
+                        d1 = clear_desc(t["desc"])
+                        d2 = clear_desc(t["desc2"])
                         desc = d1 + "\n" + d2
 
                         item = QStandardItem(title)

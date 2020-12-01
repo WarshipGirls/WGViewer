@@ -17,21 +17,14 @@ from src.func.login import GameLogin
 from src.func.session import Session
 from src.func import constants as constants
 from src.func.worker import CallbackWorker
-from .main_interface import MainInterface 
+from src.utils import popup_msg
+from .main_interface import MainInterface
 
 
 def create_label(text: str):
     _str = '<font size="4"> ' + text + ' </font>'
     _res = QLabel(_str)
     return _res
-
-
-def popup_msg(text: str):
-    msg = QMessageBox()
-    msg.setStyleSheet(wgr_data.get_color_scheme())
-    msg.setWindowTitle("Info")
-    msg.setText(text)
-    msg.exec_()
 
 
 class LoginForm(QWidget):
