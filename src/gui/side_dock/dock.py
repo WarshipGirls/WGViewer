@@ -12,14 +12,13 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QTableView, QAbstractItemView,
     QVBoxLayout, QHBoxLayout,
-    QDesktopWidget, QDockWidget, QWidget,
-    QLabel, QLineEdit, QMessageBox, QCheckBox
+    QDockWidget, QWidget, QLabel, QLineEdit, QMessageBox, QCheckBox
 )
 
 from src import data as wgr_data
 from src.func import constants as CONST
 from src.func.helper import Helper
-from src.utils import clear_desc
+from src.utils import clear_desc, get_user_resolution
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 
@@ -37,7 +36,7 @@ class SideDock(QDockWidget):
 
     def __init__(self, parent):
         super(SideDock, self).__init__(parent)
-        self.user_screen_h = QDesktopWidget().screenGeometry(-1).height()
+        _, self.user_screen_h = get_user_resolution()
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.hlp = Helper()
 
@@ -100,7 +99,7 @@ class SideDock(QDockWidget):
     def init_ui(self):
         self.setFloating(False)
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        self.setMinimumWidth(0.4 * self.user_screen_h)
+        self.setMinimumWidth(int(0.4 * self.user_screen_h))
         self.setWindowTitle("Navy Base Overview")
 
         self.init_name_info()

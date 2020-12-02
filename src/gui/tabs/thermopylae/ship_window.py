@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgr_data
+from src.utils import get_user_resolution
 
 
 def get_data_path(relative_path):
@@ -25,9 +26,9 @@ class ShipSelectWindow(QMainWindow):
         self.parent = parent
         self.button_id = button_id
 
-        # TODO hardcoding
-        self.width = 300
-        self.height = 600
+        user_w, user_h = get_user_resolution()
+        self.width = int(0.16 * user_w)
+        self.height = int(0.55 * user_h)
         self.id_list = []
         self.lock_icon = QIcon(get_data_path("assets/icons/lock_64.png"))
 
