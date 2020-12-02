@@ -14,7 +14,7 @@ for para in paragraphs:
     word_list = wrapper.wrap(text=para)
     for element in word_list:
         output += element
-        output += "\n"
+        output += "  \n"  # markdown 2 trailing whitespaces
     output += "\n"
 output = output[:-1]
 

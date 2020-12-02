@@ -48,7 +48,7 @@ class MainInterfaceMenuBar(QMenuBar):
 
     def init_help_menu(self):
         menu = self.addMenu(self.tr("&Help"))
-        menu.addAction(self.create_action("&Report a bug", self.submit_issue))
+        menu.addAction(self.create_action("&Bug Report / Feature Request", self.submit_issue))
         menu.addSeparator()
         menu.addAction(self.create_action("&About Warship Girls Viewer", self.open_author_info))
 
@@ -109,15 +109,19 @@ class MainInterfaceMenuBar(QMenuBar):
         else:
             pass
 
-    def open_author_info(self):
+    @staticmethod
+    def open_author_info():
         def get_hyperlink(link, text):
             return "<a style=\"color:hotpink;text-align: center;\" href='" + link + "'>" + text + "</a>"
 
         msg_str = '<h1>Warship Girls Viewer</h1>'
-        msg_str += "\n"
-        msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
-        msg_str += "\n"
-        msg_str += "<p style=\"text-align: center;\">&copy; MIT License</p>"
-        QMessageBox.about(self, "About", msg_str)
+        msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'WGViewer @ Github')
+        msg_str += '<br><br>'
+        msg_str += "<p style=\"text-align: center;\">&copy; GNU General Public License v3.0</p>"
+        msg = QMessageBox()
+        msg.setStyleSheet(wgr_data.get_color_scheme())
+        msg.setWindowTitle('About Warship Girls Viewer')
+        msg.setText(msg_str)
+        msg.exec_()
 
 # End of File
