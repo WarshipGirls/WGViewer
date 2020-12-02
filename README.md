@@ -1,6 +1,6 @@
 # Warship Girls Viewer
 
-[![license:mit](https://img.shields.io/badge/license-mit-blue.svg)](https://opensource.org/licenses/MIT)
+[![license:gpl-3.0](https://img.shields.io/badge/license-GPLv3-brightgreen)](https://opensource.org/licenses/GPL-3.0)
 
 > NO STABLE RELEASE YET. PROJECT IS ON ACTIVE DEVELOPMENT.
 
@@ -36,21 +36,12 @@ To build executable on Unix OS, update `fix_pyinstaller.py` with your directory 
 > python tools/fix_pyinstaller.py > gui_main.spec  
 > pyinstaller --clean gui_main.spec
 
-## Contributors
-
-[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/0)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/0)
-[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/1)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/1)
-[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/2)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/2)
-[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/3)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/3)
-[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/4)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/4)
-[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/5)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/5)
-[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/6)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/6)
-[![](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/images/7)](https://sourcerer.io/fame/pwyq/WarshipGirls/WGViewer/links/7)
-
 ## Disclaimer
 
 The terms & conditions of this software can be found [here](DISCLAIMER.md)
 
 ## Licenses
 
-The code is licensed under [The MIT License](https://github.com/WarshipGirls/WGViewer/blob/master/LICENSE)
+The code is licensed under [GNU General Public License v3.0](https://github.com/WarshipGirls/WGViewer/blob/master/LICENSE)
+
+The copyright of the shipgirl art resources used in the WGViewer belong to Moefantasy.

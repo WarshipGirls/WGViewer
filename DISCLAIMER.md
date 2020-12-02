@@ -1,7 +1,6 @@
 Warship Girls Viewer (as "WGViewer") is not a representative and is not  
 associated with Warship Girls (as "the game"), Warship Girls R (as "the game"),  
-or Moefantasy 幻萌网络. The copyright of the shipgirl art resources used in the  
-WGViewer belong to Moefantasy.  
+or Moefantasy 幻萌网络.  
 
 WGViewer is intended for educational purposes only. Botting is in violation of  
 the User Agreement of the game; prolonged usage of WGViewer's automation  
