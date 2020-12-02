@@ -52,18 +52,13 @@ class LoginForm(QWidget):
 
 
 
-        t = '<a href="https://github.com/WarshipGirls/WGViewer#disclaimer"> I have read and understand disclaimer</a>'
-        t = 'asdfasdf'
-        t = 'I have read and understood'
 
         self.check_disclaimer = None
-        self.check_disclaimer = QCheckBox(t)
-        # self.check_disclaimer.setContentsMargins(0,0,0,0)
+        self.check_disclaimer = QCheckBox('I have read and understood')
         # TODO? trailing space
         # To limit the trailing space of the checkbox text; still, there is ~2 whitespaces width space presents
         # set text all in label would cause user unable to click text to toggle checkbox; differs from other checkbox, (bad design IMO)
         self.check_disclaimer.setMaximumWidth(160) # TODO
-        # Leading whitespaces to align with disclaimer checkbox trailing spaces
         self.check_save = QCheckBox('Store login info locally with encryption')
         self.check_auto = QCheckBox('Auto login on the application start')
         self.login_button = QPushButton('Login')
@@ -74,34 +69,14 @@ class LoginForm(QWidget):
 
         self.layout = QGridLayout(self.container)
 
-        # check_box_layout = QVBoxLayout()
-        # check_box_layout.addWidget(QCheckBox('a'))
-        # check_box_layout.addWidget(QCheckBox('a'))
-        # check_box_layout.addWidget(QCheckBox('a'))
-
-        # label =
-
-        # label = QLabel('fuck you mama')
-        # self.layout.addWidget(self.check_disclaimer, 4, 1)
-        # self.layout.addWidget(label, 4, 2)
         self.init_ui()
         self.setLayout(main_layout)
         self.init_ui_qsettings()
 
-        # test_layout = self.create_check_disclaimer()
-        # main_layout.addLayout(test_layout)
-        # main_layout.addWidget(self.check_save)
-        # main_layout.addWidget(self.check_auto)
-        # main_layout.addLayout(check_box_layout)
-        # main_layout.addWidget(self.login_button)
-
         label = QLabel()
         disclaimer = '<a href=\"{}\"> Terms and Conditions </a>'.format('TODO')
-        # label.setText('I have read and understood {}'.format(disclaimer))
         label.setText('{}'.format(disclaimer))
         label.linkActivated.connect(self.open_disclaimer)
-        # label.setContentsMargins(0,0,0,0)
-        # label.setMaximumWidth(20)
         self.layout.addWidget(label, 4, 2)
 
         self.layout.setColumnStretch(0, 0)
@@ -118,24 +93,6 @@ class LoginForm(QWidget):
                 pass
         else:
             pass
-
-    def create_check_disclaimer(self):
-        label = QLabel()
-        disclaimer = '<a href=\"{}\"> Terms and Conditions </a>'.format('TODO')
-        label.setText('I have read and understood {}'.format(disclaimer))
-        label.linkActivated.connect(self.open_disclaimer)
-
-        self.check_disclaimer = QCheckBox()
-        self.check_disclaimer.setChecked(False)
-        self.check_disclaimer.stateChanged.connect(self.on_disclaimer_clicked)
-        # self.layout.addWidget(self.check_disclaimer, 4, 1)
-
-
-        h_layout = QHBoxLayout(self)
-        h_layout.addWidget(self.check_disclaimer)
-        h_layout.addWidget(label)
-        # self.layout.addLayout(h_layout, 4, 1)
-        return h_layout
 
     def open_disclaimer(self):
         popup_msg('this is a test', 'test')
