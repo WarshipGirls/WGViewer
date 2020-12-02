@@ -28,7 +28,7 @@ class Helper:
         return url_end
 
     def decompress_data(self, url, cookies, *data):
-        if len(data) is 0:
+        if len(data) == 0:
             content = self.sess.get(url=url, headers=constants.header, cookies=cookies, timeout=10).content
         else:
             h = constants.header
