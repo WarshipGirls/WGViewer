@@ -13,6 +13,10 @@ def clear_desc(text: str) -> str:
     return re.sub(r'\^.+?00000000', '', text)
 
 
+def get_app_version() -> str:
+    return '0.1.0'
+
+
 def get_user_resolution() -> Tuple[int, int]:
     # use this info to re-scale, so to avoid hardcoding
     user_w = QDesktopWidget().screenGeometry(-1).width()

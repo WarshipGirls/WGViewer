@@ -1,6 +1,9 @@
 import os
 import unittest
 
+from packaging import version
+
+from src.utils import get_app_version
 from tests.utils import get_project_root, get_file_size
 
 ROOT_DIR = get_project_root()
@@ -80,11 +83,15 @@ class TestFileIntegrity(unittest.TestCase):
         self.assertEqual(_file.is_dir(), False)
         self.assertNotEqual(get_file_size(_file), 0)
 
-    def test_version_exists(self):
+    def test_version_file_valid(self):
         _file = ROOT_DIR.joinpath('version')
         self.assertEqual(_file.exists(), True)
         self.assertEqual(_file.is_dir(), False)
         self.assertNotEqual(get_file_size(_file), 0)
+        with open(_file, 'r') as f:
+            ver = f.read()
+        self.assertEqual(ver, get_app_version())
+        self.assertEqual(type(version.parse(ver)), version.Version)
 
 
 if __name__ == '__main__':

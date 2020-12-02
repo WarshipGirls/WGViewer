@@ -19,22 +19,7 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 ### Contribution
 
-To contribute code,
-
-1. start a Python virtual environment
-2. install required packages: `pip install -r requirements.txt`
-3. make a [pull request](../../pulls) when your code is ready :)
-
-### Packing into executable
-
-To build executable on Windows OS, run
-
-> win_build.bat
-
-To build executable on Unix OS, update `fix_pyinstaller.py` with your directory location, run
-
-> python tools/fix_pyinstaller.py > gui_main.spec  
-> pyinstaller --clean gui_main.spec
+WGViewer welcomes contributor! Please see the [contribution guide](CONTRIBUTING.md) for more information.
 
 ## Disclaimer
 
