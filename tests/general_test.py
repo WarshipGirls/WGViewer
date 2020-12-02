@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from tests.utils import get_project_root
+from tests.utils import get_project_root, get_file_size
 
 ROOT_DIR = get_project_root()
 
@@ -51,24 +51,34 @@ class DirectoryIntegrityTests(unittest.TestCase):
 class FileIntegrityTests(unittest.TestCase):
 
     def test_requirements_exists(self):
-        _dir = ROOT_DIR.joinpath('requirements.txt')
-        self.assertEqual(_dir.exists(), True)
-        self.assertEqual(_dir.is_dir(), False)
+        _file = ROOT_DIR.joinpath('requirements.txt')
+        self.assertEqual(_file.exists(), True)
+        self.assertEqual(_file.is_dir(), False)
+        self.assertNotEqual(get_file_size(_file), 0)
 
     def test_license_exists(self):
-        _dir = ROOT_DIR.joinpath('LICENSE')
-        self.assertEqual(_dir.exists(), True)
-        self.assertEqual(_dir.is_dir(), False)
+        _file = ROOT_DIR.joinpath('LICENSE')
+        self.assertEqual(_file.exists(), True)
+        self.assertEqual(_file.is_dir(), False)
+        self.assertNotEqual(get_file_size(_file), 0)
 
     def test_readme_exists(self):
-        _dir = ROOT_DIR.joinpath('README.md')
-        self.assertEqual(_dir.exists(), True)
-        self.assertEqual(_dir.is_dir(), False)
+        _file = ROOT_DIR.joinpath('README.md')
+        self.assertEqual(_file.exists(), True)
+        self.assertEqual(_file.is_dir(), False)
+        self.assertNotEqual(get_file_size(_file), 0)
 
     def test_win_build_exists(self):
-        _dir = ROOT_DIR.joinpath('win_build.bat')
-        self.assertEqual(_dir.exists(), True)
-        self.assertEqual(_dir.is_dir(), False)
+        _file = ROOT_DIR.joinpath('win_build.bat')
+        self.assertEqual(_file.exists(), True)
+        self.assertEqual(_file.is_dir(), False)
+        self.assertNotEqual(get_file_size(_file), 0)
+
+    def test_disclaimer_exists(self):
+        _file = ROOT_DIR.joinpath('DISCLAIMER.md')
+        self.assertEqual(_file.exists(), True)
+        self.assertEqual(_file.is_dir(), False)
+        self.assertNotEqual(get_file_size(_file), 0)
 
 
 if __name__ == '__main__':
