@@ -116,6 +116,8 @@ class MainInterfaceMenuBar(QMenuBar):
         msg_str = '<h1>Warship Girls Viewer</h1>'
         msg_str += "\n"
         msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
+        msg_str += "\n"
+        msg_str += "<p style=\"text-align: center;\">&copy; MIT License</p>"
         QMessageBox.about(self, "About", msg_str)
 
 # End of File

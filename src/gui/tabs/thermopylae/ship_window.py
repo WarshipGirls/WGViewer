@@ -30,6 +30,7 @@ class ShipSelectWindow(QMainWindow):
         self.width = int(0.16 * user_w)
         self.height = int(0.55 * user_h)
         self.id_list = []
+        self.ships_info = None
         self.lock_icon = QIcon(get_data_path("assets/icons/lock_64.png"))
 
         self.tab = QTableWidget()
@@ -44,7 +45,7 @@ class ShipSelectWindow(QMainWindow):
         # TODO remove Lv. 1 ships; add a label to inform user this
         self.ships_info = wgr_data.get_processed_userShipVo()
         for ship_id, ship in self.ships_info.items():
-            self.addTableRow(self.tab, ship_id, ship)
+            self.add_table_row(self.tab, ship_id, ship)
 
         # self.tab.horizontalHeader().setStretchLastSection(True)
         self.tab.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -68,7 +69,8 @@ class ShipSelectWindow(QMainWindow):
         window.setLayout(content_layout)
         self.setCentralWidget(window)
 
-    def addTableRow(self, table, ship_id, ship):
+    @staticmethod
+    def add_table_row(table, ship_id, ship):
         ship_name = ship['Name']
         ship_type = ship['Class']
         ship_lvl = "Lv." + ship['Lv.']
