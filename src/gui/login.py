@@ -53,12 +53,15 @@ class LoginForm(QWidget):
 
 
         t = '<a href="https://github.com/WarshipGirls/WGViewer#disclaimer"> I have read and understand disclaimer</a>'
+        t = 'asdfasdf'
+        t = ''
 
         self.check_disclaimer = None
         self.check_disclaimer = QCheckBox(t)
-
-        self.check_save = QCheckBox('remember login info locally (secured by encryption)')
-        self.check_auto = QCheckBox('Auto login on the application start')
+        self.check_disclaimer.setMaximumWidth(20) # TODO
+        # Leading whitespaces to align with disclaimer checkbox trailing spaces
+        self.check_save = QCheckBox('  Store login info locally with encryption')
+        self.check_auto = QCheckBox('  Auto login on the application start')
         self.login_button = QPushButton('Login')
 
         self.container = QWidget()
@@ -88,11 +91,21 @@ class LoginForm(QWidget):
         # main_layout.addLayout(check_box_layout)
         # main_layout.addWidget(self.login_button)
 
+        label = QLabel()
+        disclaimer = '<a href=\"{}\"> Terms and Conditions </a>'.format('TODO')
+        label.setText('I have read and understood {}'.format(disclaimer))
+        label.linkActivated.connect(self.open_disclaimer)
+        self.layout.addWidget(label, 4, 2)
+
+        self.layout.setColumnStretch(0, 0)
+        self.layout.setColumnStretch(1, 1)
+        self.layout.setColumnStretch(2, 1)
+
         if self.qsettings.value("Login/auto") == "true":
             # QThread cannot handle exceptions for this one
             try:
                 self.login_button.setEnabled(False)  # in case user manually log-in
-                self.check_auto.setText('!! Login auto starts in 5 seconds. Uncheck to pause !!')
+                self.check_auto.setText('  !! Login auto starts in 5 seconds. Uncheck to pause !!')
                 threading.Thread(target=self.wait_five_seconds).start()
             except InterruptExecution:
                 pass
@@ -172,7 +185,7 @@ class LoginForm(QWidget):
             self.lineEdit_username.setText(text)
 
         self.layout.addWidget(label_name, 0, 0)
-        self.layout.addWidget(self.lineEdit_username, 0, 1)
+        self.layout.addWidget(self.lineEdit_username, 0, 1, 1, 2)
 
     def init_password_field(self, text: str = ''):
         label_password = create_label('Password')
@@ -185,7 +198,7 @@ class LoginForm(QWidget):
             self.lineEdit_password.setText(text)
 
         self.layout.addWidget(label_password, 1, 0)
-        self.layout.addWidget(self.lineEdit_password, 1, 1)
+        self.layout.addWidget(self.lineEdit_password, 1, 1, 1, 2)
 
     def init_platform_field(self, text: str = ''):
         label_platform = create_label('Platform')
@@ -200,7 +213,7 @@ class LoginForm(QWidget):
             self.combo_platform.setCurrentText(text)
 
         self.layout.addWidget(label_platform, 2, 0)
-        self.layout.addWidget(self.combo_platform, 2, 1)
+        self.layout.addWidget(self.combo_platform, 2, 1, 1, 2)
 
     def init_server_field(self, text: str = ''):
         label_server = create_label('Server')
@@ -212,7 +225,7 @@ class LoginForm(QWidget):
             self.combo_server.setCurrentText(text)
 
         self.layout.addWidget(label_server, 3, 0)
-        self.layout.addWidget(self.combo_server, 3, 1)
+        self.layout.addWidget(self.combo_server, 3, 1, 1, 2)
 
     def init_check_disclaimer(self, checked: bool = False):
         self.check_disclaimer.setChecked(checked)
@@ -222,17 +235,17 @@ class LoginForm(QWidget):
     def init_check_save(self, checked: bool = False):
         self.check_save.setChecked(checked)
         self.check_save.stateChanged.connect(self.on_save_clicked)
-        self.layout.addWidget(self.check_save, 5, 1)
+        self.layout.addWidget(self.check_save, 5, 1, 1, 2)
 
     def init_check_auto(self, checked: bool = False):
         self.check_auto.setChecked(checked)
         self.check_auto.stateChanged.connect(self.on_auto_clicked)
-        self.layout.addWidget(self.check_auto, 6, 1)
+        self.layout.addWidget(self.check_auto, 6, 1, 1, 2)
 
     def init_login_button(self, user_h: int):
         self.login_button.clicked.connect(self.start_login)
         # set an empty gap row
-        self.layout.addWidget(self.login_button, 8, 0, 1, 2)
+        self.layout.addWidget(self.login_button, 8, 0, 1, 3)
         self.layout.setRowMinimumHeight(7, int(0.03 * user_h))
 
     # ================================
@@ -245,7 +258,7 @@ class LoginForm(QWidget):
 
     def login_failed(self):
         self.login_button.setText('Login')
-        self.check_auto.setText('Auto login on the application start')
+        self.check_auto.setText('  Auto login on the application start')
         self.container.setEnabled(True)
 
     def wait_five_seconds(self):
@@ -300,9 +313,9 @@ class LoginForm(QWidget):
     def on_auto_clicked(self):
         if self.check_auto.isChecked():
             # off -> on
-            self.check_auto.setText('Will auto login on next start up')
+            self.check_auto.setText('  Will auto login on next start up')
         else:
-            self.check_auto.setText('Auto login on the application start')
+            self.check_auto.setText('  Auto login on the application start')
             self.login_button.setEnabled(True)
         self.qsettings.setValue("Login/auto", self.check_auto.isChecked())
 
