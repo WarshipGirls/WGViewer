@@ -80,6 +80,12 @@ class FileIntegrityTests(unittest.TestCase):
         self.assertEqual(_file.is_dir(), False)
         self.assertNotEqual(get_file_size(_file), 0)
 
+    def test_version_exists(self):
+        _file = ROOT_DIR.joinpath('version')
+        self.assertEqual(_file.exists(), True)
+        self.assertEqual(_file.is_dir(), False)
+        self.assertNotEqual(get_file_size(_file), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
