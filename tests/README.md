@@ -6,6 +6,4 @@ To run tests, use
 > pytest tests          # for testing all tests
 
 
-## Adding New Tests
-
-If something frequently failed, then it should be added in pytest.
+- New features should come with corresponding tests

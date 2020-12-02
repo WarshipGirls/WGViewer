@@ -20,10 +20,11 @@ def ts_to_countdown(seconds: int) -> str:
     return str(timedelta(seconds=seconds))
 
 
-def popup_msg(text: str):
+def popup_msg(text: str, title: str = None):
     msg = QMessageBox()
     msg.setStyleSheet(wgr_data.get_color_scheme())
-    msg.setWindowTitle("Info")
+    t = title if title is not None else "Info"
+    msg.setWindowTitle(t)
     msg.setText(text)
     msg.exec_()
 

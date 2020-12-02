@@ -5,9 +5,9 @@ import time
 
 from PyQt5.QtCore import QSettings, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import (
-    QPushButton, QLabel, QLineEdit, QComboBox, QMessageBox, QCheckBox,
+    QPushButton, QLabel, QLineEdit, QComboBox, QCheckBox,
     QWidget, QDesktopWidget,
-    QGridLayout, QVBoxLayout
+    QGridLayout, QVBoxLayout, QHBoxLayout
 )
 
 from src import data as wgr_data
@@ -48,6 +48,15 @@ class LoginForm(QWidget):
         self.lineEdit_password = QLineEdit()
         self.combo_platform = QComboBox()
         self.combo_server = QComboBox()
+        # TODO: implement qlabel with qcheckbox
+
+
+
+        t = '<a href="https://github.com/WarshipGirls/WGViewer#disclaimer"> I have read and understand disclaimer</a>'
+
+        self.check_disclaimer = None
+        self.check_disclaimer = QCheckBox(t)
+
         self.check_save = QCheckBox('remember login info locally (secured by encryption)')
         self.check_auto = QCheckBox('Auto login on the application start')
         self.login_button = QPushButton('Login')
@@ -58,9 +67,26 @@ class LoginForm(QWidget):
 
         self.layout = QGridLayout(self.container)
 
+        # check_box_layout = QVBoxLayout()
+        # check_box_layout.addWidget(QCheckBox('a'))
+        # check_box_layout.addWidget(QCheckBox('a'))
+        # check_box_layout.addWidget(QCheckBox('a'))
+
+        # label =
+
+        # label = QLabel('fuck you mama')
+        # self.layout.addWidget(self.check_disclaimer, 4, 1)
+        # self.layout.addWidget(label, 4, 2)
         self.init_ui()
         self.setLayout(main_layout)
         self.init_ui_qsettings()
+
+        # test_layout = self.create_check_disclaimer()
+        # main_layout.addLayout(test_layout)
+        # main_layout.addWidget(self.check_save)
+        # main_layout.addWidget(self.check_auto)
+        # main_layout.addLayout(check_box_layout)
+        # main_layout.addWidget(self.login_button)
 
         if self.qsettings.value("Login/auto") == "true":
             # QThread cannot handle exceptions for this one
@@ -73,12 +99,34 @@ class LoginForm(QWidget):
         else:
             pass
 
+    def create_check_disclaimer(self):
+        label = QLabel()
+        disclaimer = '<a href=\"{}\"> Terms and Conditions </a>'.format('TODO')
+        label.setText('I have read and understood {}'.format(disclaimer))
+        label.linkActivated.connect(self.open_disclaimer)
+
+        self.check_disclaimer = QCheckBox()
+        self.check_disclaimer.setChecked(False)
+        self.check_disclaimer.stateChanged.connect(self.on_disclaimer_clicked)
+        # self.layout.addWidget(self.check_disclaimer, 4, 1)
+
+
+        h_layout = QHBoxLayout(self)
+        h_layout.addWidget(self.check_disclaimer)
+        h_layout.addWidget(label)
+        # self.layout.addLayout(h_layout, 4, 1)
+        return h_layout
+
+    def open_disclaimer(self):
+        popup_msg('this is a test', 'test')
+
     def init_ui(self):
         if self.qsettings.value("Login/save") == 'true':
             self.qsettings.beginGroup('Login')
             name = self.qsettings.value('username')
             server = self.qsettings.value('server_text')
             platform = self.qsettings.value('platform_text')
+            disclaimer = self.qsettings.value('disclaimer')
             auto_login = self.qsettings.value('auto')
             self.qsettings.endGroup()
 
@@ -87,6 +135,7 @@ class LoginForm(QWidget):
             self.init_password_field(self._get_password())
             self.init_server_field(server)
             self.init_platform_field(platform)
+            self.init_check_disclaimer(True)
             self.init_check_save(True)
             if auto_login == "true":
                 self.init_check_auto(True)
@@ -97,6 +146,7 @@ class LoginForm(QWidget):
             self.init_password_field()
             self.init_platform_field()
             self.init_server_field()
+            self.init_check_disclaimer()
             self.init_check_save()
             self.init_check_auto()
 
@@ -164,21 +214,26 @@ class LoginForm(QWidget):
         self.layout.addWidget(label_server, 3, 0)
         self.layout.addWidget(self.combo_server, 3, 1)
 
+    def init_check_disclaimer(self, checked: bool = False):
+        self.check_disclaimer.setChecked(checked)
+        self.check_disclaimer.stateChanged.connect(self.on_disclaimer_clicked)
+        self.layout.addWidget(self.check_disclaimer, 4, 1)
+
     def init_check_save(self, checked: bool = False):
         self.check_save.setChecked(checked)
         self.check_save.stateChanged.connect(self.on_save_clicked)
-        self.layout.addWidget(self.check_save, 4, 1)
+        self.layout.addWidget(self.check_save, 5, 1)
 
     def init_check_auto(self, checked: bool = False):
         self.check_auto.setChecked(checked)
         self.check_auto.stateChanged.connect(self.on_auto_clicked)
-        self.layout.addWidget(self.check_auto, 5, 1)
+        self.layout.addWidget(self.check_auto, 6, 1)
 
     def init_login_button(self, user_h: int):
         self.login_button.clicked.connect(self.start_login)
         # set an empty gap row
-        self.layout.addWidget(self.login_button, 7, 0, 1, 2)
-        self.layout.setRowMinimumHeight(6, int(0.03 * user_h))
+        self.layout.addWidget(self.login_button, 8, 0, 1, 2)
+        self.layout.setRowMinimumHeight(7, int(0.03 * user_h))
 
     # ================================
     # General
@@ -224,6 +279,10 @@ class LoginForm(QWidget):
     # ================================
     # Events
     # ================================
+
+    def on_disclaimer_clicked(self):
+        print(self.check_disclaimer.isChecked())
+        self.qsettings.setValue('Login/disclaimer', self.check_disclaimer.isChecked())
 
     def on_save_clicked(self):
         if self.check_save.isChecked():
@@ -286,9 +345,12 @@ class LoginForm(QWidget):
 
     @pyqtSlot()
     def start_login(self):
-        self.container.setEnabled(False)
-        self.on_save_clicked()
-        self._check_password()
+        if self.check_disclaimer.isChecked() is True:
+            self.container.setEnabled(False)
+            self.on_save_clicked()
+            self._check_password()
+        else:
+            popup_msg('Read disclaimer and check to proceed')
 
     def handle_result1(self, result: bool):
         logging.debug('LOGIN - First fetch result {}'.format(result))
