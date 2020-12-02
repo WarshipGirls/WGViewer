@@ -1,25 +1,33 @@
 import os
+import sys
 
 from PyQt5.QtCore import Qt, pyqtSlot, QThreadPool, QSettings
-from PyQt5.QtWidgets import (
-    QMainWindow, QHBoxLayout
-)
+from PyQt5.QtGui import QCloseEvent, QHideEvent
+from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
 
 from src import data as wgr_data
 from src.gui.side_dock.dock import SideDock
 from src.gui.interface.main_interface_tabs import MainInterfaceTabs
 from src.gui.interface.main_interface_menubar import MainInterfaceMenuBar
-from src.utils import get_user_resolution
+from src.gui.system_tray import TrayIcon
+from src.utils import get_user_resolution, _quit_application
 from src.wgr.api import WGR_API
 
 
-def init_zip_files():
+def init_zip_files() -> None:
     dir_size = sum(entry.stat().st_size for entry in os.scandir(wgr_data.get_zip_dir()))
     # E.zip + S.zip + init.zip ~= 34M+
     if dir_size < 30000000:
         wgr_data.init_resources()
     else:
         pass
+
+
+def get_data_path(relative_path: str) -> str:
+    # This needs to be in current file
+    bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
+    res = os.path.join(bundle_dir, relative_path)
+    return relative_path if not os.path.exists(res) else res
 
 
 class MainInterface(QMainWindow):
@@ -46,6 +54,7 @@ class MainInterface(QMainWindow):
         self.table_widget = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
         self.side_dock_on = False
         self.side_dock = None
+        self.tray = None
         self.init_ui()
         self.init_side_dock()
 
@@ -53,10 +62,10 @@ class MainInterface(QMainWindow):
     # Initialization
     # ================================
 
-    def set_color_scheme(self):
+    def set_color_scheme(self) -> None:
         self.setStyleSheet(wgr_data.get_color_scheme())
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         self.set_color_scheme()
         user_w, user_h = get_user_resolution()
         self.resize(int(0.67 * user_w), int(0.67 * user_h))
@@ -75,7 +84,7 @@ class MainInterface(QMainWindow):
         else:
             pass
 
-    def init_side_dock(self):
+    def init_side_dock(self) -> None:
         # Following only checks on log-in
         if self.qsettings.contains("UI/no_side_dock") is True:
             if self.qsettings.value("UI/no_side_dock") == "true":
@@ -86,20 +95,33 @@ class MainInterface(QMainWindow):
             self.qsettings.setValue("UI/no_side_dock", False)
             self.create_side_dock()
 
+    def init_tray_icon(self) -> None:
+        self.tray = TrayIcon(self, get_data_path('assets/favicon.ico'))
+
     # ================================
     # Events
     # ================================
 
     @pyqtSlot()
-    def on_dock_closed(self):
+    def on_dock_closed(self) -> None:
         self.side_dock_on = False
         self.side_dock = None
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        _quit_application()
+
+    def hideEvent(self, event: QHideEvent) -> None:
+        self.hide()
+        if self.tray is None:
+            self.init_tray_icon()
+        else:
+            pass
 
     # ================================
     # WGR APIs
     # ================================
 
-    def api_initGame(self):
+    def api_initGame(self) -> None:
         if self.is_realrun:
             data = self.api.initGame()
             wgr_data.save_api_initGame(data)

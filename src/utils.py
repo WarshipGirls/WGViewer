@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timedelta
 from typing import Tuple
 
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, QCoreApplication
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QMessageBox, QDesktopWidget
 from src import data as wgr_data
@@ -20,7 +20,7 @@ def get_user_resolution() -> Tuple[int, int]:
     return user_w, user_h
 
 
-def open_disclaimer():
+def open_disclaimer() -> None:
     # Hardcoding for now
     t = "<h2>DISCLAIMER</h2>\n"
     t += """
@@ -45,7 +45,7 @@ def open_disclaimer():
     popup_msg(t, 'Terms and Conditions')
 
 
-def popup_msg(text: str, title: str = None):
+def popup_msg(text: str, title: str = None) -> None:
     msg = QMessageBox()
     msg.setStyleSheet(wgr_data.get_color_scheme())
     t = title if title is not None else "Info"
@@ -54,15 +54,20 @@ def popup_msg(text: str, title: str = None):
     msg.exec_()
 
 
-def open_url(url: str):
+def open_url(url: str) -> None:
     QDesktopServices.openUrl(QUrl(url))
+
+
+def _quit_application() -> None:
+    # TODO: in the future, save unfinished tasks
+    QCoreApplication.exit()
 
 
 def ts_to_countdown(seconds: int) -> str:
     return str(timedelta(seconds=seconds))
 
 
-def ts_to_date(ts: int):
+def ts_to_date(ts: int) -> str:
     return datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 # End of File

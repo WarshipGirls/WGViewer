@@ -9,35 +9,35 @@ from PyQt5.QtWidgets import QApplication
 from src.gui.login import LoginForm
 
 
-def get_data_path(relative_path):
+def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
     return relative_path if not os.path.exists(res) else res
 
 
-def set_app_icon():
-    app.setWindowIcon(QIcon(get_data_path('assets/favicon.ico')))
+def set_app_icon() -> None:
+    WGV_APP.setWindowIcon(APP_ICON)
     app_id = u'PWYQ.WarshipGirlsViewer.WGViewer.version'  # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
 
 
-def init_qsettings():
-    app.setOrganizationName("WarshipGirls")
-    app.setOrganizationDomain("https://github.com/WarshipGirls")
-    app.setApplicationName("Warship Girls Viewer")
+def init_qsettings() -> None:
+    WGV_APP.setOrganizationName("WarshipGirls")
+    WGV_APP.setOrganizationDomain("https://github.com/WarshipGirls")
+    WGV_APP.setApplicationName("Warship Girls Viewer")
 
 
-def init_fonts():
+def init_fonts() -> None:
     QFontDatabase().addApplicationFont(get_data_path('assets/fonts/Consolas.ttf'))
 
 
-def _realrun():
+def _realrun() -> None:
     login_form.show()
     login_form.raise_()
 
 
-def _testrun():
+def _testrun() -> None:
     dev_warning = "\n\n==== TEST WARNING ====\n"
     dev_warning += "In test run, api calls to server won't work!\n"
     dev_warning += "In order to test offline, one real run (to get server data sample) is required!\n"
@@ -48,7 +48,9 @@ def _testrun():
 
 if __name__ == '__main__':
 
-    app = QApplication([])
+    WGV_APP = QApplication([])
+    APP_ICON = QIcon(get_data_path('assets/favicon.ico'))
+
     set_app_icon()
     init_qsettings()
     init_fonts()
@@ -70,10 +72,11 @@ if __name__ == '__main__':
             from src.data.__auto_gen__ import start_generator
             from src.gui.main_interface import MainInterface
             from src import data as wgr_data
-            assert(True == start_generator())
+
+            assert (True == start_generator())
             mi = MainInterface(wgr_data.load_cookies(), False)
             _testrun()
 
-    sys.exit(app.exec_())
+    sys.exit(WGV_APP.exec_())
 
 # End of File
