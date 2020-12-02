@@ -21,7 +21,7 @@ To contribute code,
 
 1. start a Python virtual environment
 2. install required packages: `pip install -r requirements.txt`
-3. make a [pull request](pulls) when your code is ready :)
+3. make a [pull request](../../pulls) when your code is ready :)
 
 ### Packing into executable
 
