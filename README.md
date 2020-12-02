@@ -1,5 +1,7 @@
 # Warship Girls Viewer
 
+[![license:mit](https://img.shields.io/badge/license-mit-blue.svg)](https://opensource.org/licenses/MIT)
+
 > NO STABLE RELEASE YET. PROJECT IS ON ACTIVE DEVELOPMENT.
 
 This project, `WGViewer`, is inspired by [Kancolle Viewer](https://github.com/poooi/poi) and [one of Warship Girls auto scripts](https://github.com/ProtectorMoe). The goal of the project is to create a cross-platform (Windows/Mac/Unix) game viewer and automation tool.
