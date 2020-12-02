@@ -1,21 +1,21 @@
 import hashlib
-import re
 import time
 import zlib
-
-from datetime import datetime, timedelta
 
 from .session import Session
 from . import constants as constants
 
 
 class Helper:
+    """
+    This Class is meant for game URL connections only
+    """
+
     def __init__(self, sess=None):
         if sess is None:
             self.sess = Session()
         else:
             self.sess = sess
-        # self.sess = sess or Session()
 
     @staticmethod
     def get_url_end(channel, now_time=str(int(round(time.time() * 1000)))):
@@ -28,7 +28,7 @@ class Helper:
         return url_end
 
     def decompress_data(self, url, cookies, *data):
-        if len(data) is 0:
+        if len(data) == 0:
             content = self.sess.get(url=url, headers=constants.header, cookies=cookies, timeout=10).content
         else:
             h = constants.header
@@ -47,18 +47,5 @@ class Helper:
         for index, key in arg.items():
             new_arg[index] = str(key)
         return new_arg
-
-    @staticmethod
-    def ts_to_date(ts: int):
-        return datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-
-    @staticmethod
-    def ts_to_countdown(seconds: int):
-        return str(timedelta(seconds=seconds))
-
-    @staticmethod
-    def clear_desc(text: str) -> str:
-        # This garbage code (like ^C454545FF00000000) is probably due to cocoa?
-        return re.sub(r'\^.+?00000000', '', text)
 
 # End of File

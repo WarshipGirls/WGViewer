@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgr_data
+from src.utils import get_user_resolution
 from . import constant as SCONST
 
 
@@ -28,9 +29,9 @@ class EquipPopup(QMainWindow):
         self.cid = int(cid)
         self.button_enable = button_enable
 
-        # TODO hardcoding
-        self.width = 600
-        self.height = 600
+        user_w, user_h = get_user_resolution()
+        self.width = int(user_w * 0.32)
+        self.height = int(user_h * 0.55)
         self.id_list = []
         self.lock_icon = QIcon(get_data_path("assets/icons/lock_64.png"))
         self.trans = SCONST.equip_spec

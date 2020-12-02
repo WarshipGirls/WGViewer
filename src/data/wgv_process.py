@@ -107,7 +107,7 @@ def get_exp_list():
     exp_list = get_pveExploreVo()['chapters']
     res = []
     for i in exp_list:
-        end_idx = 5 if i is not 8 else 3
+        end_idx = 5 if i != 8 else 3
         _list = [str(i) + "000" + str(j) for j in range(1, end_idx)]
         res += _list
     return res

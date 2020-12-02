@@ -1,18 +1,10 @@
 import os
-import webbrowser
 
 from PyQt5.QtCore import QCoreApplication, QSettings
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from src import data as wgr_data
-
-
-def popup_msg(text: str):
-    msg = QMessageBox()
-    msg.setStyleSheet(wgr_data.get_color_scheme())
-    msg.setWindowTitle("Info")
-    msg.setText(text)
-    msg.exec_()
+from src.utils import popup_msg, open_url
 
 
 class MainInterfaceMenuBar(QMenuBar):
@@ -73,7 +65,8 @@ class MainInterfaceMenuBar(QMenuBar):
     def open_cache_folder():
         os.startfile(wgr_data.get_data_dir())
 
-    def clear_user_cache(self):
+    @staticmethod
+    def clear_user_cache():
         res = wgr_data.clear_cache_folder(False)
         if res is True:
             popup_msg('Clear success')
@@ -85,12 +78,12 @@ class MainInterfaceMenuBar(QMenuBar):
                                      QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
             res = wgr_data.clear_cache_folder(True)
+            if res is True:
+                popup_msg('Clear success')
+            else:
+                popup_msg('Clear failed')
         else:
             pass
-        if res is True:
-            popup_msg('Clear success')
-        else:
-            popup_msg('Clear failed')
 
     # ================================
     # Preferences QActions
@@ -112,7 +105,7 @@ class MainInterfaceMenuBar(QMenuBar):
         reply = QMessageBox.question(self, 'Report', "Do you want to submit a bug or make an suggestion?",
                                      QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            webbrowser.open_new('https://github.com/WarshipGirls/WGViewer/issues/new')
+            open_url('https://github.com/WarshipGirls/WGViewer/issues/new')
         else:
             pass
 
@@ -123,6 +116,8 @@ class MainInterfaceMenuBar(QMenuBar):
         msg_str = '<h1>Warship Girls Viewer</h1>'
         msg_str += "\n"
         msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'GitHub - WGViewer')
+        msg_str += "\n"
+        msg_str += "<p style=\"text-align: center;\">&copy; MIT License</p>"
         QMessageBox.about(self, "About", msg_str)
 
 # End of File

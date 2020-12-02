@@ -2,15 +2,15 @@ import os
 
 from PyQt5.QtCore import Qt, pyqtSlot, QThreadPool, QSettings
 from PyQt5.QtWidgets import (
-    QMainWindow, QHBoxLayout,
-    QDesktopWidget
+    QMainWindow, QHBoxLayout
 )
 
 from src import data as wgr_data
-from src.wgr.api import WGR_API
 from src.gui.side_dock.dock import SideDock
 from src.gui.interface.main_interface_tabs import MainInterfaceTabs
 from src.gui.interface.main_interface_menubar import MainInterfaceMenuBar
+from src.utils import get_user_resolution
+from src.wgr.api import WGR_API
 
 
 def init_zip_files():
@@ -58,9 +58,8 @@ class MainInterface(QMainWindow):
 
     def init_ui(self):
         self.set_color_scheme()
-        user_w = QDesktopWidget().screenGeometry(-1).width()
-        user_h = QDesktopWidget().screenGeometry(-1).height()
-        self.resize(0.67 * user_w, 0.67 * user_h)
+        user_w, user_h = get_user_resolution()
+        self.resize(int(0.67 * user_w), int(0.67 * user_h))
 
         self.setMenuBar(self.menu_bar)
         self.setCentralWidget(self.table_widget)

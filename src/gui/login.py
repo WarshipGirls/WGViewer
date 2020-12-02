@@ -5,8 +5,7 @@ import time
 
 from PyQt5.QtCore import QSettings, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import (
-    QPushButton, QLabel, QLineEdit, QComboBox, QMessageBox, QCheckBox,
-    QWidget, QDesktopWidget,
+    QPushButton, QLabel, QLineEdit, QComboBox, QCheckBox, QWidget,
     QGridLayout, QVBoxLayout
 )
 
@@ -17,21 +16,14 @@ from src.func.login import GameLogin
 from src.func.session import Session
 from src.func import constants as constants
 from src.func.worker import CallbackWorker
-from .main_interface import MainInterface 
+from src.utils import popup_msg, get_user_resolution, open_disclaimer
+from .main_interface import MainInterface
 
 
 def create_label(text: str):
     _str = '<font size="4"> ' + text + ' </font>'
     _res = QLabel(_str)
     return _res
-
-
-def popup_msg(text: str):
-    msg = QMessageBox()
-    msg.setStyleSheet(wgr_data.get_color_scheme())
-    msg.setWindowTitle("Info")
-    msg.setText(text)
-    msg.exec_()
 
 
 class LoginForm(QWidget):
@@ -47,7 +39,6 @@ class LoginForm(QWidget):
         self.channel = ""
         self.server = ""
         self.mi = None
-
         self.res1 = False
         self.res2 = False
 
@@ -55,20 +46,27 @@ class LoginForm(QWidget):
         self.lineEdit_password = QLineEdit()
         self.combo_platform = QComboBox()
         self.combo_server = QComboBox()
-        self.check_save = QCheckBox('remember login info locally (secured by encryption)')
+        self.check_disclaimer = QCheckBox('I have read and understood')
+        # TODO? trailing space
+        # To limit the trailing space of the checkbox text with max width; still, there is ~2 whitespaces width space presents
+        # set text all in label would cause user unable to click text to toggle checkbox; differs from other checkbox, (bad design IMO)
+        user_w, _ = get_user_resolution()
+        self.check_disclaimer.setMaximumWidth(int(0.083 * user_w))
+        self.check_save = QCheckBox('Store login info locally with encryption')
         self.check_auto = QCheckBox('Auto login on the application start')
         self.login_button = QPushButton('Login')
 
         self.container = QWidget()
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.container)
-
         self.layout = QGridLayout(self.container)
 
         self.init_ui()
         self.setLayout(main_layout)
-        self.init_ui_qsettings()
 
+        self.auto_start()
+
+    def auto_start(self):
         if self.qsettings.value("Login/auto") == "true":
             # QThread cannot handle exceptions for this one
             try:
@@ -80,12 +78,17 @@ class LoginForm(QWidget):
         else:
             pass
 
+    # ================================
+    # Initialization
+    # ================================
+
     def init_ui(self):
         if self.qsettings.value("Login/save") == 'true':
             self.qsettings.beginGroup('Login')
             name = self.qsettings.value('username')
             server = self.qsettings.value('server_text')
             platform = self.qsettings.value('platform_text')
+            disclaimer = self.qsettings.value('disclaimer')
             auto_login = self.qsettings.value('auto')
             self.qsettings.endGroup()
 
@@ -94,6 +97,10 @@ class LoginForm(QWidget):
             self.init_password_field(self._get_password())
             self.init_server_field(server)
             self.init_platform_field(platform)
+            if disclaimer == "True":
+                self.init_check_disclaimer(True)
+            else:
+                self.init_check_disclaimer(False)
             self.init_check_save(True)
             if auto_login == "true":
                 self.init_check_auto(True)
@@ -104,18 +111,17 @@ class LoginForm(QWidget):
             self.init_password_field()
             self.init_platform_field()
             self.init_server_field()
+            self.init_check_disclaimer()
             self.init_check_save()
             self.init_check_auto()
 
-    # ================================
-    # Initialization
-    # ================================
-
-    def init_ui_qsettings(self):
-        user_w = QDesktopWidget().screenGeometry(-1).width()
-        user_h = QDesktopWidget().screenGeometry(-1).height()
+        self.init_disclaimer_link()
+        self.layout.setColumnStretch(0, 0)
+        self.layout.setColumnStretch(1, 1)
+        self.layout.setColumnStretch(2, 1)
+        user_w, user_h = get_user_resolution()
         self.init_login_button(user_h)
-        self.resize(0.26 * user_w, 0.12 * user_h)
+        self.resize(int(0.26 * user_w), int(0.12 * user_h))
         self.setStyleSheet(wgr_data.get_color_scheme())
         self.setWindowTitle('Warship Girls Viewer Login')
 
@@ -129,7 +135,7 @@ class LoginForm(QWidget):
             self.lineEdit_username.setText(text)
 
         self.layout.addWidget(label_name, 0, 0)
-        self.layout.addWidget(self.lineEdit_username, 0, 1)
+        self.layout.addWidget(self.lineEdit_username, 0, 1, 1, 2)
 
     def init_password_field(self, text: str = ''):
         label_password = create_label('Password')
@@ -142,7 +148,7 @@ class LoginForm(QWidget):
             self.lineEdit_password.setText(text)
 
         self.layout.addWidget(label_password, 1, 0)
-        self.layout.addWidget(self.lineEdit_password, 1, 1)
+        self.layout.addWidget(self.lineEdit_password, 1, 1, 1, 2)
 
     def init_platform_field(self, text: str = ''):
         label_platform = create_label('Platform')
@@ -157,7 +163,7 @@ class LoginForm(QWidget):
             self.combo_platform.setCurrentText(text)
 
         self.layout.addWidget(label_platform, 2, 0)
-        self.layout.addWidget(self.combo_platform, 2, 1)
+        self.layout.addWidget(self.combo_platform, 2, 1, 1, 2)
 
     def init_server_field(self, text: str = ''):
         label_server = create_label('Server')
@@ -169,23 +175,35 @@ class LoginForm(QWidget):
             self.combo_server.setCurrentText(text)
 
         self.layout.addWidget(label_server, 3, 0)
-        self.layout.addWidget(self.combo_server, 3, 1)
+        self.layout.addWidget(self.combo_server, 3, 1, 1, 2)
+
+    def init_check_disclaimer(self, checked: bool = False):
+        self.check_disclaimer.setChecked(checked)
+        self.check_disclaimer.stateChanged.connect(self.on_disclaimer_clicked)
+        self.layout.addWidget(self.check_disclaimer, 4, 1)
+
+    def init_disclaimer_link(self):
+        label = QLabel()
+        disclaimer = '<a href=\"{}\"> Terms and Conditions </a>'.format('TODO')
+        label.setText('{}'.format(disclaimer))
+        label.linkActivated.connect(open_disclaimer)
+        self.layout.addWidget(label, 4, 2)
 
     def init_check_save(self, checked: bool = False):
         self.check_save.setChecked(checked)
         self.check_save.stateChanged.connect(self.on_save_clicked)
-        self.layout.addWidget(self.check_save, 4, 1)
+        self.layout.addWidget(self.check_save, 5, 1, 1, 2)
 
     def init_check_auto(self, checked: bool = False):
         self.check_auto.setChecked(checked)
         self.check_auto.stateChanged.connect(self.on_auto_clicked)
-        self.layout.addWidget(self.check_auto, 5, 1)
+        self.layout.addWidget(self.check_auto, 6, 1, 1, 2)
 
     def init_login_button(self, user_h: int):
         self.login_button.clicked.connect(self.start_login)
         # set an empty gap row
-        self.layout.addWidget(self.login_button, 7, 0, 1, 2)
-        self.layout.setRowMinimumHeight(6, int(0.03 * user_h))
+        self.layout.addWidget(self.login_button, 8, 0, 1, 3)
+        self.layout.setRowMinimumHeight(7, int(0.03 * user_h))
 
     # ================================
     # General
@@ -222,7 +240,7 @@ class LoginForm(QWidget):
                 res = self.encryptor.decrypt_data(key, self.qsettings.value('Login/password')).decode("utf-8")
             except AttributeError:
                 res = ''
-                popup_msg('Login Failed: Key file or config file corrupted.\nNeed to delete them.')
+                popup_msg('Error: Key file or config file may be corrupted.')
                 # TODO: reset them
         else:
             res = ''
@@ -231,6 +249,10 @@ class LoginForm(QWidget):
     # ================================
     # Events
     # ================================
+
+    def on_disclaimer_clicked(self):
+        print(self.check_disclaimer.isChecked())
+        self.qsettings.setValue('Login/disclaimer', self.check_disclaimer.isChecked())
 
     def on_save_clicked(self):
         if self.check_save.isChecked():
@@ -293,9 +315,12 @@ class LoginForm(QWidget):
 
     @pyqtSlot()
     def start_login(self):
-        self.container.setEnabled(False)
-        self.on_save_clicked()
-        self._check_password()
+        if self.check_disclaimer.isChecked() is True:
+            self.container.setEnabled(False)
+            self.on_save_clicked()
+            self._check_password()
+        else:
+            popup_msg('Read disclaimer and check to proceed')
 
     def handle_result1(self, result: bool):
         logging.debug('LOGIN - First fetch result {}'.format(result))

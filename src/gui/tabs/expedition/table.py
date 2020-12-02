@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgr_data
+from src.utils import get_user_resolution
 
 
 class ExpTable(QWidget):
@@ -61,8 +62,8 @@ class ExpTable(QWidget):
         self.table_view.setSelectionBehavior(QTableView.SelectRows)
         self.table_view.setEditTriggers(QTableView.NoEditTriggers)
         for i in range(self.get_row_count()):
-            # HARDCODING
-            self.table_view.setRowHeight(i, 20)
+            _, h = get_user_resolution()
+            self.table_view.setRowHeight(i, int(0.019 * h))
 
     def init_header_ui(self):
         for c in [3, 7, 11]:

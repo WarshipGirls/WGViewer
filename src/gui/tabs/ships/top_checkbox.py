@@ -21,7 +21,6 @@ class TopCheckboxes(QWidget):
         self.second_boxes = []
         self.value_dropdown = None
 
-        # HARDCODING
         for i in range(22):
             self.layout.setColumnStretch(i, 1)
 

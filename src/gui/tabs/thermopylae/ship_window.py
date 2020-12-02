@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgr_data
+from src.utils import get_user_resolution
 
 
 def get_data_path(relative_path):
@@ -25,10 +26,11 @@ class ShipSelectWindow(QMainWindow):
         self.parent = parent
         self.button_id = button_id
 
-        # TODO hardcoding
-        self.width = 300
-        self.height = 600
+        user_w, user_h = get_user_resolution()
+        self.width = int(0.16 * user_w)
+        self.height = int(0.55 * user_h)
         self.id_list = []
+        self.ships_info = None
         self.lock_icon = QIcon(get_data_path("assets/icons/lock_64.png"))
 
         self.tab = QTableWidget()
@@ -43,7 +45,7 @@ class ShipSelectWindow(QMainWindow):
         # TODO remove Lv. 1 ships; add a label to inform user this
         self.ships_info = wgr_data.get_processed_userShipVo()
         for ship_id, ship in self.ships_info.items():
-            self.addTableRow(self.tab, ship_id, ship)
+            self.add_table_row(self.tab, ship_id, ship)
 
         # self.tab.horizontalHeader().setStretchLastSection(True)
         self.tab.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -67,7 +69,8 @@ class ShipSelectWindow(QMainWindow):
         window.setLayout(content_layout)
         self.setCentralWidget(window)
 
-    def addTableRow(self, table, ship_id, ship):
+    @staticmethod
+    def add_table_row(table, ship_id, ship):
         ship_name = ship['Name']
         ship_type = ship['Class']
         ship_lvl = "Lv." + ship['Lv.']

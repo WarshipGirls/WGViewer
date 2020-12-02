@@ -67,8 +67,10 @@ if __name__ == '__main__':
             login_form = LoginForm()
             _realrun()
         else:
+            from src.data.__auto_gen__ import start_generator
             from src.gui.main_interface import MainInterface
             from src import data as wgr_data
+            assert(True == start_generator())
             mi = MainInterface(wgr_data.load_cookies(), False)
             _testrun()
 

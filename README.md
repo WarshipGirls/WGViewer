@@ -1,5 +1,7 @@
 # Warship Girls Viewer
 
+[![license:mit](https://img.shields.io/badge/license-mit-blue.svg)](https://opensource.org/licenses/MIT)
+
 > NO STABLE RELEASE YET. PROJECT IS ON ACTIVE DEVELOPMENT.
 
 This project, `WGViewer`, is inspired by [Kancolle Viewer](https://github.com/poooi/poi) and [one of Warship Girls auto scripts](https://github.com/ProtectorMoe). The goal of the project is to create a cross-platform (Windows/Mac/Unix) game viewer and automation tool.
@@ -47,11 +49,7 @@ To build executable on Unix OS, update `fix_pyinstaller.py` with your directory 
 
 ## Disclaimer
 
-Warship Girls Viewer (as "WGViewer") is not a representative and is not associated with Warship Girls (as "the game"), Warship Girls R (as "the game"), or [Moefantasy 幻萌网络](https://www.moefantasy.com/). The copyright of the shipgirl art resources used in the WGViewer belong to Moefantasy.
-
-WGViewer is intended for educational purposes only. Botting is in violation of the User Agreement of the game; prolonged usage of WGViewer's automation tool may result in your game account being banned. The developer of WGViewer takes no responsibility for repercussions related to the usage of WGViewer.
-
-Although unlikely, users may sink ships and lose equipment when using WGViewer to conduct combat sorties. While WGViewer has been painstakingly designed to reduce chances of such occurrence, the developer of WGViewer does not take responsibility for any loss of ships and/or resources.
+The terms & conditions of this software can be found [here](DISCLAIMER.md)
 
 ## Licenses
 
