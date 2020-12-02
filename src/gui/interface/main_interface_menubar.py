@@ -48,7 +48,7 @@ class MainInterfaceMenuBar(QMenuBar):
 
     def init_help_menu(self):
         menu = self.addMenu(self.tr("&Help"))
-        menu.addAction(self.create_action("&Report a bug", self.submit_issue))
+        menu.addAction(self.create_action("&Bug Report / Feature Request", self.submit_issue))
         menu.addSeparator()
         menu.addAction(self.create_action("&About Warship Girls Viewer", self.open_author_info))
 
