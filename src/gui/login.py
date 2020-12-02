@@ -54,14 +54,18 @@ class LoginForm(QWidget):
 
         t = '<a href="https://github.com/WarshipGirls/WGViewer#disclaimer"> I have read and understand disclaimer</a>'
         t = 'asdfasdf'
-        t = ''
+        t = 'I have read and understood'
 
         self.check_disclaimer = None
         self.check_disclaimer = QCheckBox(t)
-        self.check_disclaimer.setMaximumWidth(20) # TODO
+        # self.check_disclaimer.setContentsMargins(0,0,0,0)
+        # TODO? trailing space
+        # To limit the trailing space of the checkbox text; still, there is ~2 whitespaces width space presents
+        # set text all in label would cause user unable to click text to toggle checkbox; differs from other checkbox, (bad design IMO)
+        self.check_disclaimer.setMaximumWidth(160) # TODO
         # Leading whitespaces to align with disclaimer checkbox trailing spaces
-        self.check_save = QCheckBox('  Store login info locally with encryption')
-        self.check_auto = QCheckBox('  Auto login on the application start')
+        self.check_save = QCheckBox('Store login info locally with encryption')
+        self.check_auto = QCheckBox('Auto login on the application start')
         self.login_button = QPushButton('Login')
 
         self.container = QWidget()
@@ -93,8 +97,11 @@ class LoginForm(QWidget):
 
         label = QLabel()
         disclaimer = '<a href=\"{}\"> Terms and Conditions </a>'.format('TODO')
-        label.setText('I have read and understood {}'.format(disclaimer))
+        # label.setText('I have read and understood {}'.format(disclaimer))
+        label.setText('{}'.format(disclaimer))
         label.linkActivated.connect(self.open_disclaimer)
+        # label.setContentsMargins(0,0,0,0)
+        # label.setMaximumWidth(20)
         self.layout.addWidget(label, 4, 2)
 
         self.layout.setColumnStretch(0, 0)
@@ -105,7 +112,7 @@ class LoginForm(QWidget):
             # QThread cannot handle exceptions for this one
             try:
                 self.login_button.setEnabled(False)  # in case user manually log-in
-                self.check_auto.setText('  !! Login auto starts in 5 seconds. Uncheck to pause !!')
+                self.check_auto.setText('!! Login auto starts in 5 seconds. Uncheck to pause !!')
                 threading.Thread(target=self.wait_five_seconds).start()
             except InterruptExecution:
                 pass
@@ -258,7 +265,7 @@ class LoginForm(QWidget):
 
     def login_failed(self):
         self.login_button.setText('Login')
-        self.check_auto.setText('  Auto login on the application start')
+        self.check_auto.setText('Auto login on the application start')
         self.container.setEnabled(True)
 
     def wait_five_seconds(self):
@@ -313,9 +320,9 @@ class LoginForm(QWidget):
     def on_auto_clicked(self):
         if self.check_auto.isChecked():
             # off -> on
-            self.check_auto.setText('  Will auto login on next start up')
+            self.check_auto.setText('Will auto login on next start up')
         else:
-            self.check_auto.setText('  Auto login on the application start')
+            self.check_auto.setText('Auto login on the application start')
             self.login_button.setEnabled(True)
         self.qsettings.setValue("Login/auto", self.check_auto.isChecked())
 
