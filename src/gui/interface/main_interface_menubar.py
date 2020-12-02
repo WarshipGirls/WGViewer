@@ -1,10 +1,10 @@
 import os
 
-from PyQt5.QtCore import QCoreApplication, QSettings
+from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from src import data as wgr_data
-from src.utils import popup_msg, open_url
+from src.utils import popup_msg, open_url, _quit_application
 
 
 class MainInterfaceMenuBar(QMenuBar):
@@ -34,7 +34,7 @@ class MainInterfaceMenuBar(QMenuBar):
         menu.addAction(self.create_action("Clear User Cache", self.clear_user_cache))
         menu.addAction(self.create_action("Clear All Cache", self.clear_all_cache))
         menu.addSeparator()
-        menu.addAction(self.create_action("Quit", self.quit_application))
+        menu.addAction(self.create_action("Quit", _quit_application))
 
     def init_view_menu(self):
         menu = self.addMenu(self.tr("&View"))
@@ -58,8 +58,7 @@ class MainInterfaceMenuBar(QMenuBar):
 
     @staticmethod
     def quit_application():
-        # TODO: in the future, save unfinished tasks
-        QCoreApplication.exit()
+        _quit_application()
 
     @staticmethod
     def open_cache_folder():
