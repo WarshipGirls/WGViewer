@@ -1,3 +1,4 @@
+import os
 import re
 from datetime import datetime, timedelta
 from typing import Tuple
@@ -65,6 +66,10 @@ def open_url(url: str) -> None:
 def _quit_application() -> None:
     # TODO: in the future, save unfinished tasks
     QCoreApplication.exit()
+
+
+def _force_quit(code: int) -> None:
+    os._exit(code)
 
 
 def ts_to_countdown(seconds: int) -> str:

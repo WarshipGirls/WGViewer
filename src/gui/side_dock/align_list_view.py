@@ -97,7 +97,7 @@ class ExpListView(AlignListView):
         super().__init__()
 
     def on_click(self, index):
-        print('exp')
+        # print('exp')
         pass
         # explore/getResult/{exp_map}
         # explore/Start/{fleet}/{exp_map}
