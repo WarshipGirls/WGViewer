@@ -53,4 +53,6 @@ The terms & conditions of this software can be found [here](DISCLAIMER.md)
 
 ## Licenses
 
-The code is licensed under [The MIT License](https://github.com/WarshipGirls/WGViewer/blob/master/LICENSE)
+The code is licensed under [GNU General Public License v3.0](https://github.com/WarshipGirls/WGViewer/blob/master/LICENSE)
+
+The copyright of the shipgirl art resources used in the WGViewer belong to Moefantasy.
