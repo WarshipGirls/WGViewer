@@ -10,7 +10,7 @@ def is_dir_empty(path):
     return len(os.listdir(path)) == 0
 
 
-class DirectoryIntegrityTests(unittest.TestCase):
+class TestDirectoryIntegrity(unittest.TestCase):
 
     def test_screenshots_dir_exists(self):
         _dir = ROOT_DIR.joinpath('screenshots')
@@ -48,7 +48,7 @@ class DirectoryIntegrityTests(unittest.TestCase):
         self.assertEqual(is_dir_empty(_dir), False)
 
 
-class FileIntegrityTests(unittest.TestCase):
+class TestFileIntegrity(unittest.TestCase):
 
     def test_requirements_exists(self):
         _file = ROOT_DIR.joinpath('requirements.txt')
