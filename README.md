@@ -15,7 +15,6 @@ Please see [at this directory](screenshots). Updating as work progresses.
 ## Development
 
 - [Python3](https://www.python.org/), [PyQt5](https://doc.qt.io/qtforpython/) (w/o Qt Designer), [PyInstaller](https://www.pyinstaller.org/)
-- Windows 10, Ubuntu 20.04
 
 ### Contribution
 
