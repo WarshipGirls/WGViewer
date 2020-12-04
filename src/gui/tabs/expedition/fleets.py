@@ -116,7 +116,7 @@ class ExpFleets(QWidget):
         self.tab.setCellWidget(row, col, w)
 
     def add_map_dropdown(self, row, col):
-        print(self.maps)
+        # print(self.maps)
         w = QWidget()
         b = QComboBox()
         b.addItems(self.maps)

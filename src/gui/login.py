@@ -15,8 +15,9 @@ from src.func.encryptor import Encryptor
 from src.func.login import GameLogin
 from src.func.session import Session
 from src.func import constants as constants
+from src.func.version_check import VersionCheck
 from src.func.worker import CallbackWorker
-from src.utils import popup_msg, get_user_resolution, open_disclaimer
+from src.utils import get_user_resolution, open_disclaimer, popup_msg
 from .main_interface import MainInterface
 
 
@@ -31,8 +32,9 @@ class LoginForm(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.sig_login.connect(self.start_login)
+        VersionCheck()
 
+        self.sig_login.connect(self.start_login)
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.encryptor = Encryptor()
         self.key_filename = '.wgr.key'
@@ -251,7 +253,6 @@ class LoginForm(QWidget):
     # ================================
 
     def on_disclaimer_clicked(self):
-        print(self.check_disclaimer.isChecked())
         self.qsettings.setValue('Login/disclaimer', self.check_disclaimer.isChecked())
 
     def on_save_clicked(self):

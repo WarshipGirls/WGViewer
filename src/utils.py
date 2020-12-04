@@ -1,3 +1,4 @@
+import os
 import re
 from datetime import datetime, timedelta
 from typing import Tuple
@@ -11,6 +12,10 @@ from src import data as wgr_data
 def clear_desc(text: str) -> str:
     # This garbage code (like ^C454545FF00000000) is probably due to cocoa?
     return re.sub(r'\^.+?00000000', '', text)
+
+
+def get_app_version() -> str:
+    return '0.1.0'
 
 
 def get_user_resolution() -> Tuple[int, int]:
@@ -61,6 +66,10 @@ def open_url(url: str) -> None:
 def _quit_application() -> None:
     # TODO: in the future, save unfinished tasks
     QCoreApplication.exit()
+
+
+def _force_quit(code: int) -> None:
+    os._exit(code)
 
 
 def ts_to_countdown(seconds: int) -> str:

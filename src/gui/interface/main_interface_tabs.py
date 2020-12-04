@@ -45,9 +45,9 @@ class MainInterfaceTabs(QWidget):
         self.tabs.setTabBar(QTabBar())
         self.init_ui()
 
-        self.tabs.addTab(self.tab_thermopylae, "Thermopylae (beta)")
-        self.tabs.addTab(self.tab_exp, "Expedition (beta)")
         self.tabs.addTab(self.tab_ships, "Dock")
+        self.tabs.addTab(self.tab_exp, "Expedition (dev)")
+        self.tabs.addTab(self.tab_thermopylae, "Thermopylae (dev)")
         self.tabs.addTab(self.tab_adv, "Advance (N/A)")
 
         self.layout.addWidget(self.tabs, 0, 0)
