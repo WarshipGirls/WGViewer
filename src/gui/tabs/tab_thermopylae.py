@@ -106,7 +106,7 @@ class TabThermopylae(QWidget):
             sleep(1)
 
     def on_sortie(self):
-        self.logger.info('User clicked sortieing button...')
+        logging.info('User clicked sortieing button...')
         # TODO TODO TEST
         Sortie(self.api_six, [], [], self.logger)
 

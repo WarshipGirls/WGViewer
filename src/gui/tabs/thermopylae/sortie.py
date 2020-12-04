@@ -1,6 +1,7 @@
 import json
 
 from time import sleep
+from src.utils import get_curr_time
 from src.wgr.api import WGR_API
 from logging import Logger
 
@@ -18,6 +19,7 @@ class Sortie:
         self.final_fleets = final_fleets  # fill up required number of boats
         self.logger = sortie_logger
 
+        self.logger.info(f"{get_curr_time()} - Start E6 sortieing...")
         self.pre_battle()
 
     '''
@@ -49,18 +51,17 @@ class Sortie:
 
     def pre_battle(self):
         # Ensure User can do E6
-        self.logger.info('pre battle')
-        # self.logger.info('get pve data')
+        self.logger.info(f'{get_curr_time()} - Start pre battle checking...')
         # a = self.api.getPveData()
         # save_json('a.json', a)
         # sleep(2)
-        # self.logger.info('get fleet info')
-        # a = self.api.getFleetInfo()
-        # save_json('b.json', a)
-        # sleep(2)
-        # self.logger.info('get user data')
-        # a = self.api.getuserdata()
-        # save_json('c.json', a)
-        # sleep(2)
+        self.logger.info('get fleet info')
+        a = self.api.getFleetInfo()
+        save_json('b.json', a)
+        sleep(2)
+        self.logger.info('get user data')
+        a = self.api.getuserdata()
+        save_json('c.json', a)
+        sleep(2)
 
 # End of File

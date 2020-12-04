@@ -18,6 +18,10 @@ def get_app_version() -> str:
     return '0.1.0'
 
 
+def get_curr_time() -> str:
+    return datetime.now().strftime("%H:%M:%S")
+
+
 def get_user_resolution() -> Tuple[int, int]:
     # use this info to re-scale, so to avoid hardcoding
     user_w = QDesktopWidget().screenGeometry(-1).width()
