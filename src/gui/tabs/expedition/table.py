@@ -108,7 +108,7 @@ class ExpTable(QWidget):
     # Data processing
     # ================================
 
-    def load_csv(self, csv_path):
+    def load_csv(self, csv_path) -> object:
         with open(csv_path, "r") as f:
             for row in csv.reader(f):
                 items = [QStandardItem(field) for field in row]

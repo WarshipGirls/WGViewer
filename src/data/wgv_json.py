@@ -11,7 +11,7 @@ import pickle
 
 def _load_json(folder, filename):
     path = os.path.join(folder, filename)
-    with open(path, encoding='utf-8') as fin:
+    with open(path, 'r', encoding='utf-8') as fin:
         t = json.load(fin)
     return t
 

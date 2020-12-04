@@ -46,6 +46,9 @@ class MainInterfaceTabs(QWidget):
         self.init_ui()
 
         self.add_tab("tab_thermopylae")
+        # TODO TODO now tab_dock init important data
+        #   either make tab dock as default (must run)
+        #   or run tab dock functions save & load important data later
         # self.add_tab("tab_dock")
         # self.add_tab("tab_exp")
         # self.add_tab("tab_adv")
