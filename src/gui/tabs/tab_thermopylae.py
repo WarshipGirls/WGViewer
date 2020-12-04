@@ -8,20 +8,9 @@ import src.data as wgr_data
 from src.func.worker import Worker
 
 from src.wgr.six import API_SIX
+from src.func.log_handler import LogHandler
 from .thermopylae.ship_window import ShipSelectWindow
 from .thermopylae.sortie import Sortie
-
-
-class LogHandler(logging.Handler, QObject):
-    sig_log = pyqtSignal(str)
-
-    def __init__(self):
-        logging.Handler.__init__(self)
-        QObject.__init__(self)
-
-    def emit(self, log_record):
-        msg = str(log_record.getMessage())
-        self.sig_log.emit(msg)
 
 
 class TabThermopylae(QWidget):

@@ -6,6 +6,8 @@ import sys
 from PyQt5.QtGui import QIcon, QFontDatabase
 from PyQt5.QtWidgets import QApplication
 
+from src.gui.login import LoginForm
+
 
 def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
@@ -64,8 +66,6 @@ if __name__ == '__main__':
         logging.info("Warship Girls Viewer started...")
 
         if int(sys.argv[1]):
-            from src.gui.login import LoginForm
-
             login_form = LoginForm()
             _realrun()
         else:
