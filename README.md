@@ -18,7 +18,7 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 ### Contribution
 
-WGViewer welcomes contributor! Please see the [contribution guide](CONTRIBUTING.md) for more information.
+WGViewer welcomes contributors! Please see the [contribution guide](CONTRIBUTING.md) for more information.
 
 ## Disclaimer
 

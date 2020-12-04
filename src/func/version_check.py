@@ -11,7 +11,11 @@ from src.utils import get_app_version, open_url, _force_quit, popup_msg
 class VersionCheck:
     def __init__(self):
         self.latest_ver = None
-        self.check_version()
+
+        try:
+            self.check_version()
+        except urllib.error.HTTPError as e:
+            logging.error(e)
 
     def check_version(self) -> None:
         url = 'https://raw.githubusercontent.com/WarshipGirls/WGViewer/master/version'
@@ -64,8 +68,8 @@ class VersionCheck:
         return r
 
     def is_update(self, title: str, body: str) -> bool:
-        t = 'New WGViewer Available - {}'.format(title)
-        b = 'WGViewer v{} is available. This is {} update.'.format(self.latest_ver, body)
+        t = f'New WGViewer Available - {title}'
+        b = f'WGViewer v{self.latest_ver} is available. This is {body} update.'
         b += "\nDo you wish to download the latest version?"
         reply = QMessageBox.question(self, t, b, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         # Lesson: Use `==` when comparing QMessageBox options

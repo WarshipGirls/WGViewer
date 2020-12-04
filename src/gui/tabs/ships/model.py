@@ -310,7 +310,7 @@ class ShipModel(QStandardItemModel):
                 thumbnail.setData(e, Qt.UserRole)  # hide Equipment cid
                 self.setItem(args[0], col, thumbnail)
             else:
-                logging.warning('Image for equipment {} is absent.'.format(e))
+                logging.warning(f'Image for equipment {e} is absent.')
             col += 1
 
         rest = 4 - len(args[1])
@@ -354,7 +354,7 @@ class ShipModel(QStandardItemModel):
             thumbnail.setData(equip_id, Qt.UserRole)
             self.setItem(row, col, thumbnail)
         else:
-            logging.warning('Image for equipment {} is absent.'.format(equip_id))
+            logging.warning(f'Image for equipment {equip_id} is absent.')
 
     def set_tactics(self, *args):
         # stupid MoeFantasy makes it inefficient; can't access tactics LV by ship data

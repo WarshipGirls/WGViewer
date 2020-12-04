@@ -111,7 +111,7 @@ def _unzip_file(filename: str):
         with zipfile.ZipFile(path, 'r') as zip_ref:
             zip_ref.extractall(get_zip_dir())
     else:
-        logging.error('Filepath not exists: {}'.format(path))
+        logging.error(f'Filepath not exists: {path}')
 
 
 def _unzip_all(filenames: list):

@@ -108,9 +108,9 @@ class EquipPopup(QMainWindow):
             if not isinstance(data[key], int) or (key == 'star'):
                 pass
             elif key == 'range':
-                res.append('{}\t{}'.format(self.trans[key], SCONST.range_to_str[data[key]]))
+                res.append(f'{self.trans[key]}\t{SCONST.range_to_str[data[key]]}')
             else:
-                res.append('{}\t{}'.format(self.trans[key], data[key]))
+                res.append(f'{self.trans[key]}\t{data[key]}')
         return '\n'.join(res)
 
     def update_equip(self, index):

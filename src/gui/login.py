@@ -11,13 +11,14 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgr_data
 from src.exceptions.custom import InterruptExecution
+from src.exceptions.wgr_error import WarshipGirlsExceptions
 from src.func.encryptor import Encryptor
 from src.func.login import GameLogin
 from src.func.session import Session
 from src.func import constants as constants
 from src.func.version_check import VersionCheck
 from src.func.worker import CallbackWorker
-from src.utils import get_user_resolution, open_disclaimer, popup_msg
+from src.utils import get_user_resolution, open_disclaimer, popup_msg, get_app_version
 from .main_interface import MainInterface
 
 
@@ -99,7 +100,7 @@ class LoginForm(QWidget):
             self.init_password_field(self._get_password())
             self.init_server_field(server)
             self.init_platform_field(platform)
-            if disclaimer == "True":
+            if disclaimer == "true":
                 self.init_check_disclaimer(True)
             else:
                 self.init_check_disclaimer(False)
@@ -125,7 +126,7 @@ class LoginForm(QWidget):
         self.init_login_button(user_h)
         self.resize(int(0.26 * user_w), int(0.12 * user_h))
         self.setStyleSheet(wgr_data.get_color_scheme())
-        self.setWindowTitle('Warship Girls Viewer Login')
+        self.setWindowTitle(f'Warship Girls Viewer v{get_app_version()} Login')
 
     def init_name_field(self, text: str = ''):
         label_name = create_label('Username')
@@ -187,7 +188,7 @@ class LoginForm(QWidget):
     def init_disclaimer_link(self):
         label = QLabel()
         disclaimer = '<a href=\"{}\"> Terms and Conditions </a>'.format('TODO')
-        label.setText('{}'.format(disclaimer))
+        label.setText(f'{disclaimer}')
         label.linkActivated.connect(open_disclaimer)
         self.layout.addWidget(label, 4, 2)
 
@@ -263,6 +264,7 @@ class LoginForm(QWidget):
             self.qsettings.setValue("platform_text", self.combo_platform.currentText())
             self.qsettings.setValue("username", self.lineEdit_username.text())
             self.qsettings.setValue("password", self._get_password())
+            self.qsettings.setValue("disclaimer", self.check_disclaimer.isChecked())
             self.qsettings.endGroup()
         else:
             self.qsettings.remove("Login")
@@ -312,7 +314,7 @@ class LoginForm(QWidget):
         elif text == "":
             logging.warning("Server is not manually chosen.")
         else:
-            logging.error("Invalid server name: {}".format(text))
+            logging.error(f"Invalid server name: {text}")
 
     @pyqtSlot()
     def start_login(self):
@@ -324,7 +326,7 @@ class LoginForm(QWidget):
             popup_msg('Read disclaimer and check to proceed')
 
     def handle_result1(self, result: bool):
-        logging.debug('LOGIN - First fetch result {}'.format(result))
+        logging.debug(f'LOGIN - First fetch result {result}')
         self.res1 = result
         if self.res1 is True:
             self.bee2.start()
@@ -332,7 +334,7 @@ class LoginForm(QWidget):
             self.login_failed()
 
     def handle_result2(self, result: bool):
-        logging.debug('LOGIN - Second fetch result {}'.format(result))
+        logging.debug(f'LOGIN - Second fetch result {result}')
         self.res2 = result
 
         if self.res1 == True and self.res2 == True:
@@ -347,6 +349,12 @@ class LoginForm(QWidget):
     def first_fetch(self, login_account: GameLogin, username: str, password: str) -> bool:
         try:
             res1 = login_account.first_login(username, password)
+        except WarshipGirlsExceptions as e:
+            # TODO: May crash; cannot test w/o own simulation; need to wait next maintenance
+            logging.error(f"LOGIN - {e}")
+            popup_msg(f"{e}")
+            self.container.setEnabled(True)
+            return False
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
             popup_msg("Login Failed (1): Wrong authentication information")

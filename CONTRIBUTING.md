@@ -43,8 +43,3 @@ The order of the version notation is:
 ```
 (any int) > rev > r > post > c = pre > beta > b > a > dev
 ```
-
-(If you are curious of how to reach this conclusion, please check this [post by the developer of WGViewer][post].)
-
-[post]: https://blog.yanqing-wu.com/tech/2020/02/15/Determine-Order-Of-Element-From-A-Blackbox/
-
