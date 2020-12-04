@@ -19,8 +19,8 @@ class API_SIX(WGR_API):
         link = 'six/cha11enge/' + formation
         return self._api_call(link)
 
-    def getuserdata(self):
-        link = 'six/getuserdata'
+    def getUserData(self):
+        link = 'six/getuserdata'        # no typo, all lowercase
         return self._api_call(link)
 
     def getFleetInfo(self):
