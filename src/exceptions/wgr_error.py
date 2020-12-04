@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-from typing import NoReturn
+from typing import NoReturn     # Differ than None; NoReturn for abnormally end a function
 
 
 def get_data_path(relative_path: str) -> str:

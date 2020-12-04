@@ -5,6 +5,7 @@ from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from src import data as wgr_data
+from src.func import constants
 from src.utils import popup_msg, open_url, _quit_application
 
 
@@ -18,6 +19,7 @@ class MainInterfaceMenuBar(QMenuBar):
         self.init_file_menu()
         self.init_tabs_menu()
         self.init_view_menu()
+        self.init_links_menu()
         self.init_preferences_menu()
         self.init_help_menu()
 
@@ -52,9 +54,14 @@ class MainInterfaceMenuBar(QMenuBar):
 
     def init_preferences_menu(self) -> None:
         menu = self.addMenu(self.tr("&Preferences"))
+        # sub menu
         scheme = menu.addMenu("Color Scheme")
         scheme.addAction(self.create_action("Dark", self.use_qdarkstyle))
         scheme.addAction(self.create_action("Native Bright", self.use_native_style))
+
+    def init_links_menu(self) -> None:
+        menu = self.addMenu(self.tr("&Links"))
+        menu.addAction(self.create_action("Show Game App Download Links", self.show_download_links))
 
     def init_help_menu(self) -> None:
         menu = self.addMenu(self.tr("&Help"))
@@ -95,6 +102,40 @@ class MainInterfaceMenuBar(QMenuBar):
             pass
 
     # ================================
+    # Links QActions
+    # ================================
+
+    @staticmethod
+    def show_download_links() -> None:
+        def get_hyperlink(link, text) -> str:
+            return f"<a href=\"{link}\">{text}</a>"
+
+        base_url = "http://bspackage.moefantasy.com/jn/"
+        cn_android_full_link = base_url + f"warshipgirlsr_cn_censor_v{constants.version}.apk"
+        cn_ios_user_android_full_link = base_url + f"warshipgirlsr_ios_cn_censor_v{constants.version}.apk"
+
+        cn_android_base_link = base_url + f"warshipgirlsr_cn_censor_base_v{constants.version}.apk?"
+        cn_ios_user_android_base_link = base_url + f"warshipgirlsr_ios_cn_censor_base_v{constants.version}.apk?"
+
+        msg_str = "<h1> Warship Girls Official Download Links</h1>"
+        msg_str += "<br>"
+        msg_str += "Click link will auto start downloading in your default browser."
+        msg_str += "<br><br>"
+        msg_str += get_hyperlink(cn_android_full_link, 'CN Android full package')
+        msg_str += "<br>"
+        msg_str += get_hyperlink(cn_ios_user_android_full_link, 'CN Android(iOS server) full package')
+        msg_str += "<br><br>"
+        msg_str += get_hyperlink(cn_android_base_link, 'CN Android base package')
+        msg_str += "<br>"
+        msg_str += get_hyperlink(cn_ios_user_android_base_link, 'CN Android(iOS server) base package')
+
+        msg = QMessageBox()
+        msg.setStyleSheet(wgr_data.get_color_scheme())
+        msg.setWindowTitle('Official Game App Download Links')
+        msg.setText(msg_str)
+        msg.exec_()
+
+    # ================================
     # Preferences QActions
     # ================================
 
@@ -120,7 +161,7 @@ class MainInterfaceMenuBar(QMenuBar):
 
     @staticmethod
     def open_author_info() -> None:
-        def get_hyperlink(link, text):
+        def get_hyperlink(link, text) -> str:
             return "<a style=\"color:hotpink;text-align: center;\" href='" + link + "'>" + text + "</a>"
 
         msg_str = '<h1>Warship Girls Viewer</h1>'
