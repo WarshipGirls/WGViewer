@@ -29,7 +29,7 @@ class TabThermopylae(QWidget):
 
         self.button_group = None
         self.button1 = None
-        self.button2 = None
+        self.sortie_button = None
         self.init_left_layout()
 
         text_box = QTextEdit()
@@ -57,13 +57,13 @@ class TabThermopylae(QWidget):
         self.add_ship()
 
     def init_left_layout(self) -> None:
-        self.button1 = QPushButton('start')
-        self.button2 = QPushButton('just printing some random str')
+        self.button1 = QPushButton('start random process')
+        self.sortie_button = QPushButton('Start Thermopylae E6 sortieing...')
         self.button1.clicked.connect(self.button1_on_click)
-        self.button2.clicked.connect(self.button2_func)
+        self.sortie_button.clicked.connect(self.on_sortie)
 
         self.left_layout.addWidget(self.button1)
-        self.left_layout.addWidget(self.button2)
+        self.left_layout.addWidget(self.sortie_button)
 
     def add_ship(self):
         self.button_group = QButtonGroup()
@@ -105,9 +105,9 @@ class TabThermopylae(QWidget):
             self.logger.info(i)
             sleep(1)
 
-    def button2_func(self):
-        self.logger.info('this is button 2')
-        # TEST
+    def on_sortie(self):
+        self.logger.info('User clicked sortieing button...')
+        # TODO TODO TEST
         Sortie(self.api_six, [], [], self.logger)
 
     def process_finished(self):
