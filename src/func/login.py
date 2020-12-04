@@ -14,6 +14,7 @@ import zlib
 from PyQt5.QtWidgets import QPushButton
 
 from src.data.wgv_path import get_data_dir
+from src.exceptions.wgr_error import get_error
 from . import constants as constants
 from .helper import Helper
 from .session import Session
@@ -52,6 +53,12 @@ class GameLogin:
         # Pull version Info
         response_version = self.session.get(url=url_version, headers=constants.header, timeout=10)
         response_version = json.loads(response_version.text)
+
+        if 'eid' in response_version:
+            get_error(response_version['eid'])
+            return False
+        else:
+            pass
 
         # Pull version number, login address
         # self.version = response_version["version"]["newVersionId"]

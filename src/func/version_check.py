@@ -11,7 +11,11 @@ from src.utils import get_app_version, open_url, _force_quit, popup_msg
 class VersionCheck:
     def __init__(self):
         self.latest_ver = None
-        self.check_version()
+
+        try:
+            self.check_version()
+        except urllib.error.HTTPError as e:
+            logging.error(e)
 
     def check_version(self) -> None:
         url = 'https://raw.githubusercontent.com/WarshipGirls/WGViewer/master/version'

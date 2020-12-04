@@ -11,13 +11,14 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgr_data
 from src.exceptions.custom import InterruptExecution
+from src.exceptions.wgr_error import WarshipGirlsExceptions
 from src.func.encryptor import Encryptor
 from src.func.login import GameLogin
 from src.func.session import Session
 from src.func import constants as constants
 from src.func.version_check import VersionCheck
 from src.func.worker import CallbackWorker
-from src.utils import get_user_resolution, open_disclaimer, popup_msg
+from src.utils import get_user_resolution, open_disclaimer, popup_msg, get_app_version
 from .main_interface import MainInterface
 
 
@@ -125,7 +126,7 @@ class LoginForm(QWidget):
         self.init_login_button(user_h)
         self.resize(int(0.26 * user_w), int(0.12 * user_h))
         self.setStyleSheet(wgr_data.get_color_scheme())
-        self.setWindowTitle('Warship Girls Viewer Login')
+        self.setWindowTitle(f'Warship Girls Viewer v{get_app_version()} Login')
 
     def init_name_field(self, text: str = ''):
         label_name = create_label('Username')
@@ -317,16 +318,12 @@ class LoginForm(QWidget):
 
     @pyqtSlot()
     def start_login(self):
-        try:
-            if self.check_disclaimer.isChecked() is True:
-                self.container.setEnabled(False)
-                self.on_save_clicked()
-                self._check_password()
-            else:
-                popup_msg('Read disclaimer and check to proceed')
-        except Exception as e:
-            print(e)
-            quit()
+        if self.check_disclaimer.isChecked() is True:
+            self.container.setEnabled(False)
+            self.on_save_clicked()
+            self._check_password()
+        else:
+            popup_msg('Read disclaimer and check to proceed')
 
     def handle_result1(self, result: bool):
         logging.debug(f'LOGIN - First fetch result {result}')
@@ -352,6 +349,12 @@ class LoginForm(QWidget):
     def first_fetch(self, login_account: GameLogin, username: str, password: str) -> bool:
         try:
             res1 = login_account.first_login(username, password)
+        except WarshipGirlsExceptions as e:
+            # TODO: May crash; cannot test w/o own simulation; need to wait next maintenance
+            logging.error(f"LOGIN - {e}")
+            popup_msg(f"{e}")
+            self.container.setEnabled(True)
+            return False
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
             popup_msg("Login Failed (1): Wrong authentication information")
