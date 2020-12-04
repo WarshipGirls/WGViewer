@@ -2,6 +2,7 @@ from .api import WGR_API
 
 
 class API_SIX(WGR_API):
+    # TODO find purchase ticket
     def __init__(self, cookies):
         super().__init__(cookies)
 
@@ -45,6 +46,10 @@ class API_SIX(WGR_API):
 
     def readyFire(self, sub_map_id: str):
         link = 'six/readyFire/' + sub_map_id
+        return self._api_call(link)
+
+    def resetChapter(self, sortie_map: str):
+        link = 'resetChapter/' + sortie_map
         return self._api_call(link)
 
     def selectBoat(self, selected_boats: list, skill_card: str = '0'):
