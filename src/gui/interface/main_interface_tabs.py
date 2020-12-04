@@ -92,7 +92,7 @@ class MainInterfaceTabs(QWidget):
 
     def close_tab(self, index: int) -> None:
         tab = self.tabs.widget(index)
-        logging.info('TAB - {} is closed.'.format(tab.objectName()))
+        logging.info(f'TAB - {tab.objectName()} is closed.')
         tab.deleteLater()
         self.tabs.removeTab(index)
 

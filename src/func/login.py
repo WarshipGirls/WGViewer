@@ -170,7 +170,7 @@ class GameLogin:
         data = mac.digest()
         data = base64.b64encode(data).decode("utf-8")
 
-        self.passport_headers["Authorization"] = "HMS {}:".format(self.portHead) + data
+        self.passport_headers["Authorization"] = f"HMS {self.portHead}:{data}" 
         self.passport_headers["Date"] = times
 
     def get_cookies(self) -> dict:

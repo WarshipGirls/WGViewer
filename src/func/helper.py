@@ -22,9 +22,7 @@ class Helper:
         url_time = now_time
         md5_raw = url_time + 'ade2688f1904e9fb8d2efdb61b5e398a'
         md5 = hashlib.md5(md5_raw.encode('utf-8')).hexdigest()
-        url_end = '&t={time}&e={key}&version={version}&channel={channel}&gz=1&market=3'
-        url_end_dict = {'time': url_time, 'key': md5, 'channel': channel, 'version': constants.version}
-        url_end = url_end.format(**url_end_dict)
+        url_end = f'&t={url_time}&e={md5}&version={constants.version}&channel={channel}&gz=1&market=3'
         return url_end
 
     def decompress_data(self, url, cookies, *data):

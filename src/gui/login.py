@@ -187,7 +187,7 @@ class LoginForm(QWidget):
     def init_disclaimer_link(self):
         label = QLabel()
         disclaimer = '<a href=\"{}\"> Terms and Conditions </a>'.format('TODO')
-        label.setText('{}'.format(disclaimer))
+        label.setText(f'{disclaimer}')
         label.linkActivated.connect(open_disclaimer)
         self.layout.addWidget(label, 4, 2)
 
@@ -312,7 +312,7 @@ class LoginForm(QWidget):
         elif text == "":
             logging.warning("Server is not manually chosen.")
         else:
-            logging.error("Invalid server name: {}".format(text))
+            logging.error(f"Invalid server name: {text}")
 
     @pyqtSlot()
     def start_login(self):
@@ -324,7 +324,7 @@ class LoginForm(QWidget):
             popup_msg('Read disclaimer and check to proceed')
 
     def handle_result1(self, result: bool):
-        logging.debug('LOGIN - First fetch result {}'.format(result))
+        logging.debug(f'LOGIN - First fetch result {result}')
         self.res1 = result
         if self.res1 is True:
             self.bee2.start()
@@ -332,7 +332,7 @@ class LoginForm(QWidget):
             self.login_failed()
 
     def handle_result2(self, result: bool):
-        logging.debug('LOGIN - Second fetch result {}'.format(result))
+        logging.debug(f'LOGIN - Second fetch result {result}')
         self.res2 = result
 
         if self.res1 == True and self.res2 == True:

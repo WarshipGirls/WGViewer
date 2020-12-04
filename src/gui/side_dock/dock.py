@@ -383,13 +383,13 @@ class SideDock(QDockWidget):
             lvl_tooltip = str(x["exp"]) + " / " + str(x["nextLevelExpNeed"]) + ", resource soft cap = " + str(data["userVo"]["resourcesTops"][0])
             self.lvl_label.setToolTip(lvl_tooltip)
             ship_icon = get_data_path('assets/icons/ship_16.png')
-            ship_str = "<html><img src='{}'></html> ".format(ship_icon) + str(x["shipNum"]) + " / " + str(x["shipNumTop"])
+            ship_str = f"<html><img src='{ship_icon}'></html> " + str(x["shipNum"]) + " / " + str(x["shipNumTop"])
             self.ship_count_label.setText(ship_str)
             equip_icon = get_data_path('assets/icons/equip_16.png')
-            equip_str = "<html><img src='{}'></html> ".format(equip_icon) + str(x["equipmentNum"]) + " / " + str(x["equipmentNumTop"])
+            equip_str = f"<html><img src='{equip_icon}'></html> " + str(x["equipmentNum"]) + " / " + str(x["equipmentNumTop"])
             self.equip_count_label.setText(equip_str)
             collect_icon = get_data_path('assets/icons/collect_16.png')
-            collect_str = "<html><img src='{}'></html> ".format(collect_icon) + str(len(data["unlockShip"])) + " / " + str(x["basicShipNum"])
+            collect_str = f"<html><img src='{collect_icon}'></html> " + str(len(data["unlockShip"])) + " / " + str(x["basicShipNum"])
             self.collect_count_label.setText(collect_str)
 
             self.sign_widget.setText(data["friendVo"]["sign"])
@@ -450,7 +450,7 @@ class SideDock(QDockWidget):
                 else:
                     lim_flag = False
                 prefix = CONST.task_type[i['type']]
-                title = "{}\t{}".format(prefix, i['title'])  # {:15s} works on terminal but not PyQt...
+                title = f"{prefix}\t{i['title']}"
                 self.tasklist_view.add_item(title, stat, desc, lim_flag)
 
             m = data["marketingData"]["activeList"]

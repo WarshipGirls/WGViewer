@@ -64,8 +64,8 @@ class VersionCheck:
         return r
 
     def is_update(self, title: str, body: str) -> bool:
-        t = 'New WGViewer Available - {}'.format(title)
-        b = 'WGViewer v{} is available. This is {} update.'.format(self.latest_ver, body)
+        t = f'New WGViewer Available - {title}'
+        b = f'WGViewer v{self.latest_ver} is available. This is {body} update.'
         b += "\nDo you wish to download the latest version?"
         reply = QMessageBox.question(self, t, b, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         # Lesson: Use `==` when comparing QMessageBox options
