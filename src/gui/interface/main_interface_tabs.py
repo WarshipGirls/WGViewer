@@ -37,23 +37,23 @@ class MainInterfaceTabs(QWidget):
 
         # do NOT change the order of creation
         self.layout = QGridLayout()
-        self.tab_ships = TabShips(self.is_realrun)
-        self.tab_exp = TabExpedition()
-        self.tab_adv = TabAdvanceFunctions(self.parent)
-        self.tab_thermopylae = TabThermopylae()
+        self.tab_ships = None
+        self.tab_exp = None
+        self.tab_adv = None
+        self.tab_thermopylae = None
         self.tabs = QTabWidget()
         self.tabs.setTabBar(QTabBar())
         self.init_ui()
 
-        self.tabs.addTab(self.tab_ships, "Dock")
-        self.tabs.addTab(self.tab_exp, "Expedition (dev)")
-        self.tabs.addTab(self.tab_thermopylae, "Thermopylae (dev)")
-        self.tabs.addTab(self.tab_adv, "Advance (N/A)")
+        self.add_tab("dock")
+        self.add_tab("exp")
+        self.add_tab("thermopylae")
+        self.add_tab("adv")
 
         self.layout.addWidget(self.tabs, 0, 0)
         self.setLayout(self.layout)
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         self.tabs.setTabBar(TabBar())
         self.tabs.setTabsClosable(True)
         self.tabs.setMovable(True)
@@ -62,8 +62,37 @@ class MainInterfaceTabs(QWidget):
         self.tabs.setUsesScrollButtons(True)
         self.tabs.tabCloseRequested.connect(self.close_tab)
 
-    def close_tab(self, index):
+    def add_tab(self, dock_name: str) -> None:
+        if dock_name is "dock":
+            if self.tab_ships is not None:
+                pass
+            else:
+                self.tab_ships = TabShips(self.is_realrun)
+                self.tabs.addTab(self.tab_ships, "Dock")
+        elif dock_name is "exp":
+            if self.tab_exp is not None:
+                pass
+            else:
+                self.tab_exp = TabExpedition()
+                self.tabs.addTab(self.tab_exp, "Expedition (dev)")
+        elif dock_name is "thermopylae":
+            if self.tab_thermopylae is not None:
+                pass
+            else:
+                self.tab_thermopylae = TabThermopylae()
+                self.tabs.addTab(self.tab_thermopylae, "Thermopylae (dev")
+        elif dock_name is "adv":
+            if self.tab_adv is not None:
+                pass
+            else:
+                self.tab_adv = TabAdvanceFunctions(self.parent)
+                self.tabs.addTab(self.tab_adv, "Advance (N/A)")
+        else:
+            logging.error("TAB - Invalid tab name for creation.")
+
+    def close_tab(self, index: int) -> None:
         tab = self.tabs.widget(index)
+        logging.info('TAB - {} is closed.'.format(tab.objectName()))
         tab.deleteLater()
         self.tabs.removeTab(index)
 

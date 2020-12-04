@@ -27,6 +27,7 @@ class LogHandler(logging.Handler, QObject):
 class TabThermopylae(QWidget):
     def __init__(self):
         super().__init__()
+        self.setObjectName('tab_thermopylae')
         self.api_six = API_SIX(wgr_data.load_cookies())
         self.fleets = [None] * 6
         self.final_fleet = [None] * 14

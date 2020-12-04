@@ -36,9 +36,13 @@ class MainInterfaceMenuBar(QMenuBar):
         menu.addSeparator()
         menu.addAction(self.create_action("Quit", _quit_application))
 
+    def init_tabs_menu(self):
+        menu = self.addMenu(self.tr("&Tabs"))
+        menu.addAction((self.create_action("Open Dock Tab")))
+
     def init_view_menu(self):
         menu = self.addMenu(self.tr("&View"))
-        menu.addAction(self.create_action("&Open Navy Base Overview", self.parent.create_side_dock, "Ctrl+O"))
+        menu.addAction(self.create_action("Open &Navy Base Overview", self.parent.create_side_dock, "Ctrl+N"))
 
     def init_preferences_menu(self):
         menu = self.addMenu(self.tr("&Preferences"))

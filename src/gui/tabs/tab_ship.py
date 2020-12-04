@@ -31,6 +31,7 @@ class TabShips(QWidget):
         logging.info("SHIPS - Creating Ships Tab...")
         self.api = WGR_API(wgr_data.load_cookies())
 
+        self.setObjectName('tab_dock')
         self.content_widget = None
         self.content_layout = None
         self.upper_content_widget = None

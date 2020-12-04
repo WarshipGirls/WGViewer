@@ -19,6 +19,7 @@ def get_data_path(relative_path):
 class TabExpedition(QWidget):
     def __init__(self):
         super().__init__()
+        self.setObjectName('tab_exp')
         csv_path = get_data_path('assets/data/exp_data.csv')
         self.table = ExpTable(csv_path)
         self.summary = DailySummary()
