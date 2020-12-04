@@ -99,7 +99,7 @@ class LoginForm(QWidget):
             self.init_password_field(self._get_password())
             self.init_server_field(server)
             self.init_platform_field(platform)
-            if disclaimer == "True":
+            if disclaimer == "true":
                 self.init_check_disclaimer(True)
             else:
                 self.init_check_disclaimer(False)
@@ -263,6 +263,7 @@ class LoginForm(QWidget):
             self.qsettings.setValue("platform_text", self.combo_platform.currentText())
             self.qsettings.setValue("username", self.lineEdit_username.text())
             self.qsettings.setValue("password", self._get_password())
+            self.qsettings.setValue("disclaimer", self.check_disclaimer.isChecked())
             self.qsettings.endGroup()
         else:
             self.qsettings.remove("Login")
@@ -316,12 +317,16 @@ class LoginForm(QWidget):
 
     @pyqtSlot()
     def start_login(self):
-        if self.check_disclaimer.isChecked() is True:
-            self.container.setEnabled(False)
-            self.on_save_clicked()
-            self._check_password()
-        else:
-            popup_msg('Read disclaimer and check to proceed')
+        try:
+            if self.check_disclaimer.isChecked() is True:
+                self.container.setEnabled(False)
+                self.on_save_clicked()
+                self._check_password()
+            else:
+                popup_msg('Read disclaimer and check to proceed')
+        except Exception as e:
+            print(e)
+            quit()
 
     def handle_result1(self, result: bool):
         logging.debug(f'LOGIN - First fetch result {result}')
