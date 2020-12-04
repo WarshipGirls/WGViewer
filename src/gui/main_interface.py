@@ -10,7 +10,7 @@ from src.gui.side_dock.dock import SideDock
 from src.gui.interface.main_interface_tabs import MainInterfaceTabs
 from src.gui.interface.main_interface_menubar import MainInterfaceMenuBar
 from src.gui.system_tray import TrayIcon
-from src.utils import get_user_resolution, _quit_application
+from src.utils import get_app_version, get_user_resolution, _quit_application
 from src.wgr.api import WGR_API
 
 
@@ -75,7 +75,7 @@ class MainInterface(QMainWindow):
         self.setCentralWidget(self.main_tabs)
 
         self.setLayout(QHBoxLayout())
-        self.setWindowTitle('Warship Girls Viewer')
+        self.setWindowTitle(f"Warship Girls Viewer v{get_app_version()}")
 
     def create_side_dock(self):
         if (self.side_dock_on is False) and (self.side_dock is None):
