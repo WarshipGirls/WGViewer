@@ -26,12 +26,12 @@ def get_data_path(relative_path):
 
 
 class TabShips(QWidget):
-    def __init__(self, is_realrun):
+    def __init__(self, tab_name: str, is_realrun: bool):
         super().__init__()
         logging.info("SHIPS - Creating Ships Tab...")
         self.api = WGR_API(wgr_data.load_cookies())
 
-        self.setObjectName('tab_dock')
+        self.setObjectName(tab_name)
         self.content_widget = None
         self.content_layout = None
         self.upper_content_widget = None

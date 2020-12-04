@@ -45,10 +45,10 @@ class MainInterfaceTabs(QWidget):
         self.tabs.setTabBar(QTabBar())
         self.init_ui()
 
-        self.add_tab("dock")
-        self.add_tab("exp")
-        self.add_tab("thermopylae")
-        self.add_tab("adv")
+        self.add_tab("tab_dock")
+        self.add_tab("tab_exp")
+        self.add_tab("tab_thermopylae")
+        self.add_tab("tab_adv")
 
         self.layout.addWidget(self.tabs, 0, 0)
         self.setLayout(self.layout)
@@ -62,38 +62,47 @@ class MainInterfaceTabs(QWidget):
         self.tabs.setUsesScrollButtons(True)
         self.tabs.tabCloseRequested.connect(self.close_tab)
 
-    def add_tab(self, dock_name: str) -> None:
-        if dock_name is "dock":
-            if self.tab_ships is not None:
-                pass
-            else:
-                self.tab_ships = TabShips(self.is_realrun)
-                self.tabs.addTab(self.tab_ships, "Dock")
-        elif dock_name is "exp":
-            if self.tab_exp is not None:
-                pass
-            else:
-                self.tab_exp = TabExpedition()
-                self.tabs.addTab(self.tab_exp, "Expedition (dev)")
-        elif dock_name is "thermopylae":
-            if self.tab_thermopylae is not None:
-                pass
-            else:
-                self.tab_thermopylae = TabThermopylae()
-                self.tabs.addTab(self.tab_thermopylae, "Thermopylae (dev")
-        elif dock_name is "adv":
-            if self.tab_adv is not None:
-                pass
-            else:
-                self.tab_adv = TabAdvanceFunctions(self.parent)
-                self.tabs.addTab(self.tab_adv, "Advance (N/A)")
+    def add_tab(self, tab_name: str) -> None:
+        logging.info(f"TAB - Creating {tab_name}")
+        if tab_name is "tab_adv" and self.tab_adv is None:
+            self.tab_adv = TabAdvanceFunctions(tab_name)
+            self.tabs.addTab(self.tab_adv, "Advance (N/A)")
+        elif tab_name is "tab_dock" and self.tab_ships is None:
+            self.tab_ships = TabShips(tab_name, self.is_realrun)
+            self.tabs.addTab(self.tab_ships, "Dock")
+        elif tab_name is "tab_exp" and self.tab_exp is None:
+            self.tab_exp = TabExpedition(tab_name)
+            self.tabs.addTab(self.tab_exp, "Expedition (dev)")
+        elif tab_name is "tab_thermopylae" and self.tab_thermopylae is None:
+            self.tab_thermopylae = TabThermopylae(tab_name)
+            self.tabs.addTab(self.tab_thermopylae, "Thermopylae (dev")
         else:
-            logging.error("TAB - Invalid tab name for creation.")
+            logging.error(f"TAB - Invalid tab name {tab_name} for creation.")
 
     def close_tab(self, index: int) -> None:
         tab = self.tabs.widget(index)
         logging.info(f'TAB - {tab.objectName()} is closed.')
+
+        # TODO reopen tab will create a new object
+        #   should we save the old data
+        #   or let the user decide?
+
+        self.reset_tab_object(tab.objectName())
         tab.deleteLater()
         self.tabs.removeTab(index)
+
+    def reset_tab_object(self, tab_obj_name: str) -> None:
+        # Lesson: `is` for pointing to the same object, `==` for pointing to the same value
+        if tab_obj_name == "tab_adv":
+            self.tab_adv = None
+        elif tab_obj_name == "tab_dock":
+            self.tab_ships = None
+        elif tab_obj_name == "tab_exp":
+            self.tab_exp = None
+        elif tab_obj_name == "tab_thermopylae":
+            self.tab_thermopylae = None
+        else:
+            logging.error(f"TAB - Failed to reset {tab_obj_name} to None.")
+
 
 # End of File

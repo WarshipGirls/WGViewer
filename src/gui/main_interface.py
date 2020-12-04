@@ -50,8 +50,9 @@ class MainInterface(QMainWindow):
 
         # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob.
         #  Qt.Focus issue)
+        # Tabs must be created before menu bar, as menu bar reference main_tabs
+        self.main_tabs = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
         self.menu_bar = MainInterfaceMenuBar(self)
-        self.table_widget = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
         self.side_dock_on = False
         self.side_dock = None
         self.tray = None
@@ -71,7 +72,7 @@ class MainInterface(QMainWindow):
         self.resize(int(0.67 * user_w), int(0.67 * user_h))
 
         self.setMenuBar(self.menu_bar)
-        self.setCentralWidget(self.table_widget)
+        self.setCentralWidget(self.main_tabs)
 
         self.setLayout(QHBoxLayout())
         self.setWindowTitle('Warship Girls Viewer')
