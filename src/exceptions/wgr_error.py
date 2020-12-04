@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from typing import NoReturn
 
 
 def get_data_path(relative_path: str) -> str:
@@ -10,15 +11,19 @@ def get_data_path(relative_path: str) -> str:
     return relative_path if not os.path.exists(res) else res
 
 
-class WGR_ERROR:
-    def __init__(self):
-        with open(get_data_path('assets/data/errorCode.json'), 'r', encoding='utf-8') as f:
-            self.error_json = json.load(f)
+class WarshipGirlsException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
 
-    def get_info(self, error_code: str) -> str:
-        if error_code in self.error_json:
-            return self.error_json[error_code]
-        else:
-            return "UNKNOWN ERROR"
+
+with open(get_data_path('assets/data/errorCode.json'), 'r', encoding='utf-8') as f:
+    error_json = json.load(f)
+
+
+def get_error(error_code: str) -> NoReturn:
+    if error_code in error_json:
+        raise WarshipGirlsException(error_json[error_code])
+    else:
+        raise WarshipGirlsException("UNKNOWN ERROR")
 
 # End of File
