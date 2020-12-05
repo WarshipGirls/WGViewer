@@ -340,7 +340,10 @@ class LoginForm(QWidget):
         if self.res1 == True and self.res2 == True:
             self.login_button.setText('Loading and Initializing...')
             logging.info("LOGIN - SUCCESS!")
-            popup_msg('Login Success')
+            if self.check_auto.isChecked() is True:
+                pass
+            else:
+                popup_msg('Login Success')
             self.mi = MainInterface(self.account.get_cookies())
             self.login_success()
         else:
