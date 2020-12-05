@@ -15,7 +15,7 @@ def clear_desc(text: str) -> str:
 
 
 def get_app_version() -> str:
-    return '0.1.1'
+    return '0.1.1dev'
 
 
 def get_curr_time() -> str:
