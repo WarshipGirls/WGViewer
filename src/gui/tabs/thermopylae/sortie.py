@@ -27,7 +27,7 @@ class Sortie:
         self.fleets = None
         self.can_start = False
         self.logger.info("Start E6 sortieing...")
-        # self.pre_battle()
+        self.pre_battle()
 
     '''
     Order:

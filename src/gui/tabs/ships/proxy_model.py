@@ -40,7 +40,12 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         return self._info[str(cid)]['rarity']
 
     def ship_id_to_country(self, cid: int) -> int:
-        return self._info[str(cid)]['country']
+        try:
+            return self._info[str(cid)]['country']
+        except KeyError:
+            print(self._info)
+            print(type(cid))
+
 
     def set_name_filter(self, regex):
         """
