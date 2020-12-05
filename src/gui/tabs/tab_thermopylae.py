@@ -24,8 +24,14 @@ class TabThermopylae(QWidget):
         self.final_fleet = []
 
         self.main_layout = QHBoxLayout(self)
+        # TODO separate bar info
+        self.button_container = QWidget()
         self.left_layout = QVBoxLayout()
         self.right_layout = QVBoxLayout()
+
+        self.ticket_label = None
+        self.purchasable_label = None
+        self.set_info_bar()
 
         self.button_group = None
         self.button1 = None
@@ -45,6 +51,30 @@ class TabThermopylae(QWidget):
         self.logger.addHandler(log_handler)
 
         self.init_ui()
+        Sortie(self, self.api_six, [], [], self.logger)
+
+    def set_info_bar(self):
+        w = QWidget()
+        layout = QHBoxLayout(w)
+        layout.setContentsMargins(0,0,0,0)
+        ticket_tag = QLabel("Remaining Sortie Tickets")
+        self.ticket_label = QLabel("?")
+        can_buy_tag = QLabel("Purchasable Tickets")
+        self.purchasable_label = QLabel("?")
+        layout.addWidget(ticket_tag)
+        layout.addWidget(self.ticket_label)
+        layout.addWidget(can_buy_tag)
+        layout.addWidget(self.purchasable_label)
+        w.setLayout(layout)
+        for i in range(4):
+            layout.setStretch(i, 0)
+        self.left_layout.addWidget(w)
+
+    def update_ticket(self, data: int):
+        self.ticket_label.setText(str(data))
+
+    def update_purchasable(self, data: int):
+        self.purchasable_label.setText(str(data))
 
     def init_ui(self) -> None:
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -54,7 +84,7 @@ class TabThermopylae(QWidget):
         self.main_layout.setStretch(1, 1)
         self.setLayout(self.main_layout)
 
-        self.add_ship()
+        # self.add_ship()
 
     def init_left_layout(self) -> None:
         self.button1 = QPushButton('start random process')
@@ -66,6 +96,7 @@ class TabThermopylae(QWidget):
         self.left_layout.addWidget(self.sortie_button)
 
     def add_ship(self):
+        # TODO long term let user select boats here; now just use last fleets
         self.button_group = QButtonGroup()
         # for ship_id in self.fleets:
         for i in range(len(self.fleets)):
@@ -78,6 +109,11 @@ class TabThermopylae(QWidget):
             l.clicked.connect(lambda _, _i=i: self.popup_select_window(_i))
             self.button_group.addButton(l)
             self.left_layout.addWidget(l)
+
+    def disable_sortie(self):
+        self.button_group.set
+        a = QButtonGroup()
+        a.set
 
     def handle_selection(self, ship_info: list, button_id: int):
         b = self.button_group.buttons()[button_id]
@@ -107,8 +143,7 @@ class TabThermopylae(QWidget):
 
     def on_sortie(self):
         logging.info('User clicked sortieing button...')
-        # TODO TODO TEST
-        Sortie(self.api_six, [], [], self.logger)
+        # TODO TODO this is not multi-threading
 
     def process_finished(self):
         self.logger.info('task is done')
