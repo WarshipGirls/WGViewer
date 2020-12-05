@@ -1,5 +1,7 @@
 # Warship Girls Viewer
 
+![alt text](docs/banner.png "Warship Girls Viewer | WGViewer")
+
 [![license:gpl-3.0](https://img.shields.io/badge/license-GPLv3-brightgreen)](https://opensource.org/licenses/GPL-3.0)
 
 > NO STABLE RELEASE YET. PROJECT IS ON ACTIVE DEVELOPMENT.
