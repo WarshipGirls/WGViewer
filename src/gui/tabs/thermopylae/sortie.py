@@ -87,11 +87,11 @@ class Sortie:
             save_json('six_getUserData.json', d)
             sleep(2)
         else:
-            with open('six_getPveData.json', 'w', encoding='utf-8') as f:
+            with open('six_getPveData.json', 'r', encoding='utf-8') as f:
                 f.read()
-            with open('six_getFleetInfo.json', 'w', encoding='utf-8') as f:
+            with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
                 f.read()
-            with open('six_getUserData.json', 'w', encoding='utf-8') as f:
+            with open('six_getUserData.json', 'r', encoding='utf-8') as f:
                 f.read()
 
         # self.can_start = self.set_info()

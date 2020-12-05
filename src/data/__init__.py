@@ -31,5 +31,6 @@ from .wgv_qsettings import (
     is_key_exists
 )
 from .wgv_zip import (
-    init_resources
+    init_resources, 
+    save_init_data
 )
