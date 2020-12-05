@@ -1,5 +1,7 @@
 # Contribution Guide
 
+## Start
+
 To contribute code,
 
 1. start a Python virtual environment
@@ -17,10 +19,11 @@ To build executable on Unix OS, update `fix_pyinstaller.py` with your directory 
 > python tools/fix_pyinstaller.py > gui_main.spec  
 > pyinstaller --clean gui_main.spec
 
+---
 
-### Publish New Release
+## Publish New Release
 
-#### Version Naming
+### Version Naming
 
 WGViewer uses [packaging.version](https://packaging.pypa.io/en/latest/version.html) to test version naming.
 
