@@ -4,8 +4,6 @@ import sys
 
 from typing import NoReturn  # Differ than None; NoReturn for abnormally end a function
 
-from src.utils import popup_msg
-
 
 def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
