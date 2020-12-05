@@ -4,7 +4,7 @@
 
 - Avatar: Warship Girls `San Francisco` (pre Mod I.); ID: 240
 	- artist: `ハオ`
-	- In the history: [Wiki: USS San Francisco (CA-38)][wiki]
+	- In the history: [Wiki - USS San Francisco (CA-38)][wiki]
 
 ## Banner
 
@@ -22,7 +22,7 @@
 			- `W` as in Warship: RGB(255, 0, 0)
 			- `G` as in Girls: RGB(11, 125, 129)
 			- `Viewer`: RGB(0, 176, 240)
-			- rest: RGB(0, 0, 0)
+			- rest characters: RGB(0, 0, 0)
 		- Position
 			- Note: The title box is shrink to a point where one more pixel shrinking would cause a line-wrap
 			- Its right border is right next to the transparent border of the Icon
@@ -31,7 +31,8 @@
 		- Text: `Admiral's Best C.O.`
 		- Font: `Constantia`
 		- Font Size: `36`
-		- Color: RGB(0, 0, 0)
+		- Color
+		    - RGB(0, 0, 0)
 		- Position:
 			- Its top border is 0.74cm (approx. 27.9 pixels) below the border of Title
 	- Background:

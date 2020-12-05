@@ -17,35 +17,42 @@ class TestDirectoryIntegrity(unittest.TestCase):
 
     def test_screenshots_dir_exists(self):
         _dir = ROOT_DIR.joinpath('screenshots')
-
         self.assertEqual(_dir.exists(), True)
         self.assertEqual(_dir.is_dir(), True)
         self.assertEqual(is_dir_empty(_dir), False)
 
     def test_zip_dir_exists(self):
         _dir = ROOT_DIR.joinpath('zip')
-
         self.assertEqual(_dir.exists(), True)
         self.assertEqual(_dir.is_dir(), True)
         self.assertEqual(is_dir_empty(_dir), False)
 
     def test_tools_dir_exists(self):
         _dir = ROOT_DIR.joinpath('tools')
-
         self.assertEqual(_dir.exists(), True)
         self.assertEqual(_dir.is_dir(), True)
         self.assertEqual(is_dir_empty(_dir), False)
 
     def test_assets_dir_exists(self):
         _dir = ROOT_DIR.joinpath('assets')
-
         self.assertEqual(_dir.exists(), True)
         self.assertEqual(_dir.is_dir(), True)
         self.assertEqual(is_dir_empty(_dir), False)
 
     def test_tests_dir_exists(self):
         _dir = ROOT_DIR.joinpath('tests')
+        self.assertEqual(_dir.exists(), True)
+        self.assertEqual(_dir.is_dir(), True)
+        self.assertEqual(is_dir_empty(_dir), False)
 
+    def test_src_dir_exists(self):
+        _dir = ROOT_DIR.joinpath('src')
+        self.assertEqual(_dir.exists(), True)
+        self.assertEqual(_dir.is_dir(), True)
+        self.assertEqual(is_dir_empty(_dir), False)
+
+    def test_docs_dir_exists(self):
+        _dir = ROOT_DIR.joinpath('docs')
         self.assertEqual(_dir.exists(), True)
         self.assertEqual(_dir.is_dir(), True)
         self.assertEqual(is_dir_empty(_dir), False)
@@ -92,6 +99,11 @@ class TestFileIntegrity(unittest.TestCase):
             ver = f.read()
         self.assertEqual(ver, get_app_version())
         self.assertEqual(type(version.parse(ver)), version.Version)
+
+    def test_banner_valid(self):
+        _file = ROOT_DIR.joinpath('docs', 'banner.png')
+        self.assertEqual(_file.exists(), True)
+        self.assertNotEqual(get_file_size(_file), 0)
 
 
 if __name__ == '__main__':

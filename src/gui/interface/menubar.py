@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import Callable
 
 from PyQt5.QtCore import QSettings
@@ -7,6 +8,13 @@ from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 from src import data as wgr_data
 from src.func import constants
 from src.utils import popup_msg, open_url, _quit_application
+
+
+def get_data_path(relative_path: str) -> str:
+    # This needs to be in current file
+    bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
+    res = os.path.join(bundle_dir, relative_path)
+    return relative_path if not os.path.exists(res) else res
 
 
 class MainInterfaceMenuBar(QMenuBar):
@@ -65,7 +73,7 @@ class MainInterfaceMenuBar(QMenuBar):
         menu.addAction(self.create_action("Show Game App Download Links", self.show_download_links))
 
     # def init_developers_menu(self) -> None:
-        # menu = self.addMenu(self.tr("&Developers"))
+    # menu = self.addMenu(self.tr("&Developers"))
 
     def init_help_menu(self) -> None:
         menu = self.addMenu(self.tr("&Help"))
@@ -166,9 +174,12 @@ class MainInterfaceMenuBar(QMenuBar):
     @staticmethod
     def open_author_info() -> None:
         def get_hyperlink(link, text) -> str:
-            return "<a style=\"color:hotpink;text-align: center;\" href='" + link + "'>" + text + "</a>"
+            return "<a style=\"color:hotpink;\" href='" + link + "'>" + text + "</a>"
 
-        msg_str = '<h1>Warship Girls Viewer</h1>'
+        banner_path = get_data_path('docs/banner.png')
+        msg_str = f'<img src=\"{banner_path}\" width=\"400\" height=\"120\">'
+        msg_str += '<br><br>'
+        msg_str += "> "
         msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'WGViewer @ Github')
         msg_str += '<br><br>'
         msg_str += "<p style=\"text-align: center;\">&copy; GNU General Public License v3.0</p>"

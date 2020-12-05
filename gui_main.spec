@@ -15,6 +15,7 @@ a = Analysis(['gui_main.py'],
              noarchive=False)
 
 a.datas += [('assets/favicon.ico','D:\\github\\WGViewer\\assets\\favicon.ico','DATA'),
+('docs/banner.png','D:\\github\\WGViewer\\docs\\banner.png','DATA'),
 ('assets/data/exp_data.csv','D:\\github\\WGViewer\\assets\\data\\exp_data.csv','DATA'),
 ('assets/fonts/Consolas.ttf','D:\\github\\WGViewer\\assets\\fonts\\Consolas.ttf','DATA'),
 ('assets/icons/collect_16.png','D:\\github\\WGViewer\\assets\\icons\\collect_16.png','DATA'),
