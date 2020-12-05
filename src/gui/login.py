@@ -33,7 +33,7 @@ class LoginForm(QWidget):
 
     def __init__(self):
         super().__init__()
-        VersionCheck()
+        VersionCheck(self)
 
         self.sig_login.connect(self.start_login)
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
