@@ -1,19 +1,25 @@
 # import json
+import json
 import logging
 import os
 import zipfile
 
 # import requests
 import urllib.request
+
 # from urllib.error import URLError
 # from time import sleep
+from time import sleep
+from urllib.error import URLError
+
+import requests
 
 equip_zip_url = "https://github.com/WarshipGirls/WGViewer/raw/master/zip/E.zip"
 ship_zip_url = "https://github.com/WarshipGirls/WGViewer/raw/master/zip/S.zip"
 init_zip_url = "https://github.com/WarshipGirls/WGViewer/raw/master/zip/init.zip"
 my_urls = [equip_zip_url, ship_zip_url, init_zip_url]
 
-"""
+
 def save_init_data():
     logging.info('Initializing data for first-time user... This may take 30+ seconds...')
     storage_dir = get_init_dir()
@@ -28,6 +34,7 @@ def save_init_data():
         except (TimeoutError, requests.exceptions.ConnectionError):
             logging.error('Data initializing failed. Trying again...')
             sleep(5)
+
 
 def _save_data_by_attr(storage_dir, data_dict, field):
     try:
@@ -77,7 +84,6 @@ def _check_data_ver(storage_dir):
                 res = [False, d]
                 logging.info('getInitConfigs data is updating.')
     return res
-"""
 
 
 def _download(url: str) -> str:
@@ -125,12 +131,8 @@ def init_resources():
 
 
 if __name__ == "__main__":
-    try:
-        from src.data.wgv_path import get_zip_dir
-    except ModuleNotFoundError:
-        from wgv_path import get_zip_dir
+    from src.data.wgv_path import get_zip_dir, get_init_dir
 else:
-    from .wgv_path import get_zip_dir
-
+    from .wgv_path import get_zip_dir, get_init_dir
 
 # End of File
