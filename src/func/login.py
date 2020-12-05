@@ -75,7 +75,7 @@ class GameLogin:
         return True
 
     def cheat_sess(self, host: str, link: str):
-        self.login_button.setText(link)
+        self.login_button.setText("Loading " + link)
 
         time.sleep(0.5)
         url_cheat = host + link + self.hlp.get_url_end(self.channel)

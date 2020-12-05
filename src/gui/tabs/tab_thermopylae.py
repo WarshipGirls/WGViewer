@@ -14,9 +14,11 @@ from .thermopylae.sortie import Sortie
 
 
 class TabThermopylae(QWidget):
-    def __init__(self, tab_name: str):
+    def __init__(self, tab_name: str, is_realrun: bool):
         super().__init__()
         self.setObjectName(tab_name)
+        self.is_realrun = is_realrun
+
         self.api_six = API_SIX(wgr_data.load_cookies())
         self.fleets = [None] * 6
         self.final_fleet = [None] * 14
@@ -51,7 +53,7 @@ class TabThermopylae(QWidget):
         self.logger.addHandler(log_handler)
 
         self.init_ui()
-        Sortie(self, self.api_six, [], [], self.logger)
+        self.sortie = Sortie(self, self.api_six, [], [], self.logger, self.is_realrun)
 
     def set_info_bar(self):
         w = QWidget()

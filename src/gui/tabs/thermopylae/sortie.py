@@ -14,19 +14,20 @@ def save_json(name, data):
 class Sortie:
     # This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
     # TODO long term
-    def __init__(self, parent, api: WGR_API, fleets: list, final_fleets: list, sortie_logger: Logger):
+    def __init__(self, parent, api: WGR_API, fleets: list, final_fleets: list, sortie_logger: Logger, is_realrun: bool):
         super().__init__()
         self.parent = parent
         self.api = api
         self.fleets = fleets  # main fleets
         self.final_fleets = final_fleets  # fill up required number of boats
         self.logger = sortie_logger
+        self.is_realrun = is_realrun
 
         self.user_data = None
         self.fleets = None
         self.can_start = False
         self.logger.info("Start E6 sortieing...")
-        self.pre_battle()
+        # self.pre_battle()
 
     '''
     Order:
@@ -73,29 +74,35 @@ class Sortie:
     def pre_battle(self):
         # TODO under dev
         self.logger.info("Start pre battle checking...")
-        # a = self.api.getPveData()
-        # save_json('a.json', a)
-        # sleep(2)
-        # self.logger.info('get fleet info')
-        # a = self.api.getFleetInfo()
-        # save_json('b.json', a)
-        # sleep(2)
 
-        # self.logger.info('get user data')
-        # self.user_data = self.api.getUserdata()
-        # with open('c.json', 'r', encoding='utf-8') as f:
-        with open('c.json', 'r') as f:
-            self.user_data = json.load(f)
-        # save_json('c.json', a)
-        # sleep(2)
+        if self.is_realrun is True:
+            # TODO: make them parallel
+            d = self.api.getPveData()
+            save_json('six_getPveData.json', d)
+            sleep(2)
+            d = self.api.getFleetInfo()
+            save_json('six_getFleetInfo.json', d)
+            sleep(2)
+            d = self.api.getUserData()
+            save_json('six_getUserData.json', d)
+            sleep(2)
+        else:
+            with open('six_getPveData.json', 'w', encoding='utf-8') as f:
+                f.read()
+            with open('six_getFleetInfo.json', 'w', encoding='utf-8') as f:
+                f.read()
+            with open('six_getUserData.json', 'w', encoding='utf-8') as f:
+                f.read()
 
-        self.can_start = self.set_info()
+        # self.can_start = self.set_info()
+        self.can_start = True
         if self.can_start is False:
             self.logger.warning("You have not passed E6, which disqualified you for using this function. Exiting")
         else:
             self.logger.warning("Pre-battle settings is done.")
 
     def set_info(self) -> bool:
+        # TODO free up dock space if needed
         res = False
         if self.user_data['levelId'] != "9318":
             self.logger.warning("You have not passed E6 manually.")
