@@ -1,7 +1,6 @@
 
 ![alt text](docs/banner.png "Warship Girls Viewer | WGViewer")
 
-
 [![license:gpl-3.0](https://img.shields.io/badge/license-GPLv3-brightgreen)](https://opensource.org/licenses/GPL-3.0)
 
 This project, `WGViewer`, is inspired by [Kancolle Viewer poi][poi] and [one of Warship Girls auto scripts][ProtectorMoe].
@@ -19,10 +18,36 @@ Please see [at this directory](screenshots). Updating as work progresses.
 ## Development
 
 - [Python3](https://www.python.org/), [PyQt5](https://doc.qt.io/qtforpython/) (w/o Qt Designer), [PyInstaller](https://www.pyinstaller.org/)
+- [Fiddler](https://www.telerik.com/download/fiddler)
+
+### Compiling From Source
+
+#### Windows
+
+```
+# 1. start a virtual environment
+# 2. install required packages
+> pip install -r requirements.txt
+# 3. run auto build batch script
+> win_build.bat
+```
+
+#### Unix
+
+```
+# 1. start a virtual environment
+# 2. install required packages
+> pip install -r requirements.txt
+# 3. update fix_pyinstaller.py with your directory location, run
+# 4. run commands
+> python tools/fix_pyinstaller.py > gui_main.spec  
+> pyinstaller --clean gui_main.spec
+```
 
 ### Contribution
 
-WGViewer welcomes contributors! Please see the [contribution guide](CONTRIBUTING.md) for more information.
+WGViewer welcomes contributors!
+Please see the [contribution guide](CONTRIBUTING.md) for more information.
 
 ## Disclaimer
 
