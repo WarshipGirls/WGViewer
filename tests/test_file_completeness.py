@@ -105,6 +105,10 @@ class TestFileIntegrity(unittest.TestCase):
         self.assertEqual(_file.exists(), True)
         self.assertNotEqual(get_file_size(_file), 0)
 
+    def test_code_of_conduct_valid(self):
+        _file = ROOT_DIR.joinpath('CODE_OF_CONDUCT.md')
+        self.assertEqual(_file.exists(), True)
+        self.assertNotEqual(get_file_size(_file), 0)
 
 if __name__ == '__main__':
     unittest.main()
