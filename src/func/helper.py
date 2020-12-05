@@ -20,6 +20,7 @@ class Helper:
     @staticmethod
     def get_url_end(channel, now_time=str(int(round(time.time() * 1000)))):
         url_time = now_time
+        # TODO: how to get the key in the first place? The encryption of URL part is the single point of failure of the app
         md5_raw = url_time + 'ade2688f1904e9fb8d2efdb61b5e398a'
         md5 = hashlib.md5(md5_raw.encode('utf-8')).hexdigest()
         url_end = f'&t={url_time}&e={md5}&version={constants.version}&channel={channel}&gz=1&market=3'
