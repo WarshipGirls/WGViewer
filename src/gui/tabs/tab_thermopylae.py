@@ -58,7 +58,7 @@ class TabThermopylae(QWidget):
     def set_info_bar(self):
         w = QWidget()
         layout = QHBoxLayout(w)
-        layout.setContentsMargins(0,0,0,0)
+        layout.setContentsMargins(0, 0, 0, 0)
         ticket_tag = QLabel("Remaining Sortie Tickets")
         self.ticket_label = QLabel("?")
         can_buy_tag = QLabel("Purchasable Tickets")
@@ -113,9 +113,7 @@ class TabThermopylae(QWidget):
             self.left_layout.addWidget(l)
 
     def disable_sortie(self):
-        self.button_group.set
-        a = QButtonGroup()
-        a.set
+        pass
 
     def handle_selection(self, ship_info: list, button_id: int):
         b = self.button_group.buttons()[button_id]
