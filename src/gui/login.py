@@ -345,6 +345,7 @@ class LoginForm(QWidget):
             self.login_success()
         else:
             popup_msg("Login Failed (3): Probably due to bad server connection")
+            self.container.setEnabled(True)
 
     def first_fetch(self, login_account: GameLogin, username: str, password: str) -> bool:
         try:
