@@ -20,7 +20,8 @@ def _download(url: str) -> str:
     def _progress(block_num, block_size, total_size):
         downloaded = block_num * block_size
         progress = int((downloaded / total_size) * 100)
-        logging.info("Download Progress", str(progress), "%")
+        output_str = "Download progress " + str(progress) + "%."
+        logging.info(output_str)
 
     local_filename, _ = urllib.request.urlretrieve(url=url, filename=filepath, reporthook=_progress)
     return filename
