@@ -88,6 +88,7 @@ class ShipModel(QStandardItemModel):
                     self.add_ship(self.rowCount() - 1, ship)
 
     def add_ship(self, row, d):
+        logging.info(f"SHIP - Populating {row}")
         self.set_thumbnail(row, str(d["shipCid"]))
         self.set_name(row, d["title"], d["married"], d["create_time"], d["marry_time"])
         self.set_id(row, d["id"], d["isLocked"])

@@ -207,7 +207,6 @@ fabric.properties
 .idea/codestream.xml
 
 .idea/
-*.json
 example_json/
 tools/S/
 tools/equip_512/

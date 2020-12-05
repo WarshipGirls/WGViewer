@@ -21,6 +21,7 @@ class MainInterfaceMenuBar(QMenuBar):
         self.init_view_menu()
         self.init_links_menu()
         self.init_preferences_menu()
+        # self.init_developers_menu()
         self.init_help_menu()
 
     def create_action(self, text: str, handler: Callable, shortcut=None) -> QAction:
@@ -62,6 +63,9 @@ class MainInterfaceMenuBar(QMenuBar):
     def init_links_menu(self) -> None:
         menu = self.addMenu(self.tr("&Links"))
         menu.addAction(self.create_action("Show Game App Download Links", self.show_download_links))
+
+    # def init_developers_menu(self) -> None:
+        # menu = self.addMenu(self.tr("&Developers"))
 
     def init_help_menu(self) -> None:
         menu = self.addMenu(self.tr("&Help"))

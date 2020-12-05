@@ -6,6 +6,7 @@ import sys
 from PyQt5.QtGui import QIcon, QFontDatabase
 from PyQt5.QtWidgets import QApplication
 
+from src.utils import get_app_version
 from src.gui.login import LoginForm
 
 
@@ -16,10 +17,14 @@ def get_data_path(relative_path: str) -> str:
     return relative_path if not os.path.exists(res) else res
 
 
-def set_app_icon() -> None:
+def init_app_settings() -> None:
     WGV_APP.setWindowIcon(APP_ICON)
     app_id = u'PWYQ.WarshipGirlsViewer.WGViewer.version'  # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+
+    # This property holds the base name of the desktop entry for this application
+    WGV_APP.setDesktopFileName("WGViewer")
+    WGV_APP.setApplicationVersion(get_app_version())
 
 
 def init_qsettings() -> None:
@@ -51,7 +56,7 @@ if __name__ == '__main__':
     WGV_APP = QApplication([])
     APP_ICON = QIcon(get_data_path('assets/favicon.ico'))
 
-    set_app_icon()
+    init_app_settings()
     init_qsettings()
     init_fonts()
 

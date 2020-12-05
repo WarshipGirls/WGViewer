@@ -57,7 +57,7 @@ class TabShips(QWidget):
         logging.debug("SHIPS - Starting tests...")
         data = wgr_data.get_api_getShipList()
         # logging.error(len(data['userShipVO']))
-        # data['userShipVO'] = data['userShipVO'][:5]
+        data['userShipVO'] = data['userShipVO'][:5]
         self.on_received_shiplist(data)
 
     def init_ui(self):

@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (
     QWidget, QTabWidget, QGridLayout, QTabBar
 )
 
+from src.func.worker import CallbackWorker
 from src.gui.tabs.advance_functions import TabAdvanceFunctions
 from src.gui.tabs.tab_thermopylae import TabThermopylae
 from src.gui.tabs.tab_ship import TabShips
@@ -49,11 +50,13 @@ class MainInterfaceTabs(QWidget):
         #   either make tab dock as default (must run)
         #   or run tab dock functions save & load important data later
         if self.is_realrun is True:
+            # TODO loading speed is really slow
             self.add_tab("tab_dock")
             self.add_tab("tab_exp")
             self.add_tab("tab_thermopylae")
             self.add_tab("tab_adv")
         else:
+            self.add_tab("tab_dock")
             self.add_tab("tab_thermopylae")
 
         self.layout.addWidget(self.tabs, 0, 0)
@@ -80,7 +83,7 @@ class MainInterfaceTabs(QWidget):
             self.tab_exp = TabExpedition(tab_name)
             self.tabs.addTab(self.tab_exp, "Expedition (dev)")
         elif tab_name == "tab_thermopylae" and self.tab_thermopylae is None:
-            self.tab_thermopylae = TabThermopylae(tab_name)
+            self.tab_thermopylae = TabThermopylae(tab_name, self.is_realrun)
             self.tabs.addTab(self.tab_thermopylae, "Thermopylae (dev)")
         else:
             logging.error(f"TAB - Invalid tab name {tab_name} for creation.")

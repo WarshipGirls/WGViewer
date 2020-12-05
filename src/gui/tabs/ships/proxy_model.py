@@ -37,10 +37,16 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         logging.debug('SHIP - Proxy Model init done.')
 
     def ship_id_to_rarity(self, cid: int) -> int:
-        return self._info[str(cid)]['rarity']
+        try:
+            return self._info[str(cid)]['rarity']
+        except KeyError:
+            logging.error(f'proxy {cid} not exist!')
 
     def ship_id_to_country(self, cid: int) -> int:
-        return self._info[str(cid)]['country']
+        try:
+            return self._info[str(cid)]['country']
+        except KeyError:
+            logging.error(f'proxy {cid} not exist!')
 
     def set_name_filter(self, regex):
         """

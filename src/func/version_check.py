@@ -9,8 +9,9 @@ from src.utils import get_app_version, open_url, _force_quit, popup_msg
 
 
 class VersionCheck:
-    def __init__(self):
+    def __init__(self, parent):
         self.latest_ver = None
+        self.parent = parent
 
         try:
             self.check_version()
@@ -71,7 +72,7 @@ class VersionCheck:
         t = f'New WGViewer Available - {title}'
         b = f'WGViewer v{self.latest_ver} is available. This is {body} update.'
         b += "\nDo you wish to download the latest version?"
-        reply = QMessageBox.question(self, t, b, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        reply = QMessageBox.question(self.parent, t, b, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         # Lesson: Use `==` when comparing QMessageBox options
         if reply == QMessageBox.Yes:
             return True

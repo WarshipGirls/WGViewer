@@ -61,7 +61,6 @@ class BathListView(AlignListView):
         pass
         # boat/repair/{ship cid}/{slot}
         # boat/rubdown/{ship cid}
-        # TODO: instant repair
 
 
 class BuildListView(AlignListView):
@@ -73,9 +72,7 @@ class BuildListView(AlignListView):
         # dock/buildBoat/{slot}/{fuel}/{ammo}/{steel}/{baux}
         # dock/getBoat/{slot}
         # TODO: build 10 boats
-        # TODO: instant build
         # TODO: cancel build
-        # TODO: dismantle boat
 
 
 class DevListView(AlignListView):
@@ -89,7 +86,6 @@ class DevListView(AlignListView):
         # dock/getEquipment/2/
         # TODO: build 10 equips
         # TODO: cancel dev
-        # TODO: instant build
 
 
 class ExpListView(AlignListView):
@@ -102,7 +98,6 @@ class ExpListView(AlignListView):
         # explore/getResult/{exp_map}
         # explore/Start/{fleet}/{exp_map}
         # TODO: cancel exp
-        # TODO: change ship
 
 
 class TaskListView(AlignListView):
