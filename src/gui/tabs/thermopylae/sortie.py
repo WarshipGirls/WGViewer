@@ -24,6 +24,7 @@ class Sortie:
         self.final_fleets = final_fleets  # fill up required number of boats
         self.logger = sortie_logger
         self.is_realrun = is_realrun
+        self.sleep_time = 3
 
         self.fleet_info = None
         self.map_data = None
@@ -39,6 +40,7 @@ class Sortie:
 
         self.logger.info("Init E6...")
         self.pre_battle()
+
 
     '''
     Order:
@@ -87,13 +89,13 @@ class Sortie:
             # This is fast; no need for parallelism for now
             self.fleet_info = self.api.getFleetInfo()
             save_json('six_getFleetInfo.json', self.fleet_info)
-            sleep(2)
+            sleep(self.sleep_time)
             self.map_data = self.api.getPveData()
             save_json('six_getPveData.json', self.map_data)  # TODO only for testing
-            sleep(2)
+            sleep(self.sleep_time)
             self.user_data = self.api.getUserData()
             save_json('six_getUserData.json', self.user_data)  # TODO only for testing
-            sleep(2)
+            sleep(self.sleep_time)
         else:
             with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
                 self.fleet_info = json.load(f)
@@ -109,7 +111,6 @@ class Sortie:
             self.logger.warning("Pre-battle settings is done.")
 
         self.logger.info("Setting final fleets:")
-        self.logger.info(len(self.final_fleets))
         for ship_id in self.final_fleets:
             ship = self.user_ships[str(ship_id)]
             output_str = f"{ship_id}, {ship['Name']}"
@@ -166,9 +167,6 @@ class Sortie:
             return False
 
         self.points = self.user_data['strategic_point']
-        print(self.points)
-        print("last_fleets")
-        print(last_fleets)
         if len(last_fleets) != 22:
             self.logger.warning("Invalid last boats settings.")
             res = False
@@ -186,7 +184,6 @@ class Sortie:
             pass
 
         data = self.api.readyFire(self.init_sub_map)
-        print(data)
         if 'eid' in data:
             get_error(data['eid'])
             return
@@ -195,7 +192,6 @@ class Sortie:
 
         # get 11009211 and 11008211
         data = self.api.newNext(str(next_node))
-        print(data)
         if 'eid' in data:
             get_error(data['eid'])
         else:
@@ -209,7 +205,12 @@ class Sortie:
 
     def get_ship_store(self, is_refresh: str = '0'):
         data = self.api.canSelectList(is_refresh)
-        print(data)
+
+        while '$ssss' not in data:
+            self.logger.info('Getting ship store data again...')
+            data = self.api.canSelectList(is_refresh)
+            sleep(self.sleep_time)
+
         info = data['$ssss']
         for d in info:
             output_str = f'{self.user_ships[str(d[1])]} - LV {d[0]} - COST {d[2]}'

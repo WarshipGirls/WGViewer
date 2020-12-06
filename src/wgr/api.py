@@ -1,8 +1,12 @@
 import json
 import logging
 
+
 from requests import exceptions
+from requests.utils import cookiejar_from_dict
 from time import sleep
+from urllib.request import Request, urlopen, build_opener, HTTPCookieProcessor
+from urllib.error import URLError
 
 from src.func.helper import Helper
 
@@ -22,14 +26,14 @@ class WGR_API:
         self.sleep_time = 5
 
     def _api_call(self, link: str) -> object:
+        # This uses requests.sessions.Session().get() / post()
         data = None
         url = self.server + link + self.hlp.get_url_end(self.channel)
-        print(url)
         res = False
         tries = 0
         while not res:
             try:
-                raw_data = self.hlp.decompress_data(url=url, cookies=self.cookies)
+                raw_data = self.hlp.session_get(url=url, cookies=self.cookies)
                 data = json.loads(raw_data)
                 res = True
             except (TimeoutError, exceptions.ReadTimeout) as e:
@@ -37,6 +41,41 @@ class WGR_API:
                 logging.warning('Trying reconnecting...')
                 sleep(self.sleep_time)
             tries += 1
+            if tries >= self.max_retry:
+                logging.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
+                break
+            else:
+                pass
+        return data
+
+    def _api_urlopen(self, link: str) -> object:
+        # This uses urllib.request.urlopen
+        data = None
+        url = self.server + link + self.hlp.get_url_end(self.channel)
+        res = False
+        tries = 0
+        print('--------------------------------')
+        print(url)
+        print('--------------------------------')
+
+        cj = cookiejar_from_dict(self.cookies)
+        opener = build_opener(HTTPCookieProcessor(cj))
+
+        _req = Request(url=url)
+        _req.add_header(key='Accept-Encoding', val='identity')
+        _req.add_header(key='Connection', val='Keep-Alive')
+        _req.add_header(key='User-Agent', val='Dalvik/2.1.0 (Linux; U; Android 9.1.1; SAMSUNG-SM-G900A Build/LMY47X)')
+        while not res:
+            try:
+                data = opener.open(_req, timeout=10).read()
+                res = True
+            except (TimeoutError, URLError) as e:
+                logging.error(e)
+                logging.warning('urlopen trying reconnecting...')
+
+            tries += 1
+            sleep(self.sleep_time)
+
             if tries >= self.max_retry:
                 logging.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
                 break
