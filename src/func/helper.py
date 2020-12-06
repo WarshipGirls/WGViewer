@@ -26,7 +26,7 @@ class Helper:
         url_end = f'&t={url_time}&e={md5}&version={constants.version}&channel={channel}&gz=1&market=3'
         return url_end
 
-    def decompress_data(self, url, cookies, *data):
+    def session_get(self, url, cookies, *data):
         if len(data) == 0:
             content = self.sess.get(url=url, headers=constants.header, cookies=cookies, timeout=10).content
         else:
@@ -34,6 +34,7 @@ class Helper:
             # https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
             h["Content-Type"] = "application/x-www-form-urlencoded"
             content = self.sess.post(url=url, data=str(data[0]), headers=h, cookies=cookies, timeout=10).content
+        # decompress data
         try:
             data = zlib.decompress(content)
         except zlib.error:
