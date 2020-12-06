@@ -117,7 +117,7 @@ class Sortie:
             if ship['Class'] == "SS":
                 self.fleets.append(ship_id)
                 output_str += ", MAIN FORCE"
-            elif ship['cid'] in [11008211, 10009211]:  # TODO: fix this for now
+            elif ship['cid'] in [11008211, 11009211]:  # TODO: fix this for now
                 self.escort_destroyers.append(ship_id)
                 output_str += ", ESCORT DD"
             elif ship['cid'] == 10031913:
@@ -199,6 +199,7 @@ class Sortie:
 
         self.get_ship_store()
 
+        print(self.escort_destroyers)
         data = self.api.selectBoat(self.escort_destroyers)
         print(data)
         self.points = data['strategic_point']

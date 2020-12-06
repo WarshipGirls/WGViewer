@@ -1,13 +1,19 @@
 # Version Log
 
+Document important changes, from the most impactful to the least impactful, and order by completeness level
+
 ## 0.1.1dev
 
+- Matched official game version v5.1.0
 - Optimized Login UX by using QThreads and improved overall login robustness
+- Optimized build process
 - Added various new options to Menu Bar
+- Enabled minimizing to system tray
 - Set up PyTest
 - Set up GitHub Workflow for auto examining PyInstaller builds and running PyTests
-- Initiated Thermopylae E6 Auto Sortie
 - Designed WGViewer banner
+- Improved various GitHub docs
+- Initiated Thermopylae E6 Auto Sortie
 
 ## 0.1.0
 
