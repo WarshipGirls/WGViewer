@@ -16,6 +16,11 @@ class API_SIX(WGR_API):
         link = 'six/canSelectList/' + is_refresh
         return self._api_call(link)
 
+    def changeAdjutant(self, adjutant_id: str):
+        # 10082 / 10182 / 10282
+        link = 'six/changeAdjutant/' + adjutant_id
+        return self._api_call(link)
+
     def challenge(self, formation: str):
         link = 'six/cha11enge/' + formation
         return self._api_call(link)

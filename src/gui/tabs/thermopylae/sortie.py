@@ -2,7 +2,8 @@ import json
 
 from time import sleep
 from src.wgr.api import WGR_API  # only for typehints
-from src.utils import popup_msg
+from src.exceptions.wgr_error import get_error
+from src import data as wgr_data
 from logging import Logger
 
 
@@ -14,6 +15,7 @@ def save_json(name, data):
 class Sortie:
     # This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
     # TODO long term
+    # RIGHT NOW everything pre-battle is fixed
     def __init__(self, parent, api: WGR_API, fleets: list, final_fleets: list, sortie_logger: Logger, is_realrun: bool):
         super().__init__()
         self.parent = parent
@@ -23,20 +25,24 @@ class Sortie:
         self.logger = sortie_logger
         self.is_realrun = is_realrun
 
+        self.fleet_info = None
+        self.map_data = None
         self.user_data = None
-        self.fleets = None
         self.can_start = False
-        self.logger.info("Start E6 sortieing...")
+        self.boat_pool = []         # host existing boats
+        self.escort_destroyers = []  # For 2DD to pass first few levels only, 萤火虫，布雷恩
+        self.escort_carrier = -1  # For 1CV to pass first few levels only, 不挠
+        self.points = -1
+        self.init_map = "10006"
+        self.init_sub_map = "9316"  # TODO
+        self.user_ships = wgr_data.get_processed_userShipVo()
+
+        self.logger.info("Init E6...")
         self.pre_battle()
 
     '''
     Order:
     
-    one time
-        - six_getPveData
-        - six_getFleetInfo
-        - six_getuserdata
-        - six_setChapterBoat
     on sub maps
         - six_readyFire
         - six_useAdjutant
@@ -68,55 +74,155 @@ class Sortie:
             len E1/2 = 14, E3/4 = 18, E5/6 = 22
         -> level_id  ( I believe this is the user reached level)
             9301 (E1 map1) 9303 (E1 map3) 9304 (E2 map1) 9316 (E6 map 1)
+    levellist
+    "levelId": "9314",
+    "status": "3",  # sub map
     
     '''
 
     def pre_battle(self):
-        # TODO under dev
         self.logger.info("Start pre battle checking...")
 
         if self.is_realrun is True:
-            # TODO: make them parallel
-            d = self.api.getPveData()
-            save_json('six_getPveData.json', d)
+            # This is fast; no need for parallelism for now
+            self.fleet_info = self.api.getFleetInfo()
+            save_json('six_getFleetInfo.json', self.fleet_info)
             sleep(2)
-            d = self.api.getFleetInfo()
-            save_json('six_getFleetInfo.json', d)
+            self.map_data = self.api.getPveData()
+            save_json('six_getPveData.json', self.map_data)  # TODO only for testing
             sleep(2)
-            d = self.api.getUserData()
-            save_json('six_getUserData.json', d)
+            self.user_data = self.api.getUserData()
+            save_json('six_getUserData.json', self.user_data)  # TODO only for testing
             sleep(2)
         else:
-            with open('six_getPveData.json', 'r', encoding='utf-8') as f:
-                f.read()
             with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
-                f.read()
+                self.fleet_info = json.load(f)
+            with open('six_getPveData.json', 'r', encoding='utf-8') as f:
+                self.map_data = json.load(f)
             with open('six_getUserData.json', 'r', encoding='utf-8') as f:
-                f.read()
+                self.user_data = json.load(f)
 
-        # self.can_start = self.set_info()
-        self.can_start = True
+        self.can_start = self.set_info()
         if self.can_start is False:
-            self.logger.warning("You have not passed E6, which disqualified you for using this function. Exiting")
+            self.logger.warning("Failed to init pre-battle settings due to above reason.")
         else:
             self.logger.warning("Pre-battle settings is done.")
 
+        self.logger.info("Setting final fleets:")
+        self.logger.info(len(self.final_fleets))
+        for ship_id in self.final_fleets:
+            ship = self.user_ships[str(ship_id)]
+            output_str = f"{ship_id}, {ship['Name']}"
+            if ship['Class'] == "SS":
+                self.fleets.append(ship_id)
+                output_str += ", MAIN FORCE"
+            elif ship['cid'] in [11008211, 10009211]:  # TODO: fix this for now
+                self.escort_destroyers.append(ship_id)
+                output_str += ", ESCORT DD"
+            elif ship['cid'] == 10031913:
+                self.escort_carrier = ship_id
+                output_str += ", ESCORT CV"
+            # Lesson: do not output various stuff at once, concat them together; otherwise TypeError
+            self.logger.info(output_str)
+
+        self.get_curr_points()
+
+        # TODO issue#82
+        # data = self.api.setChapterBoat(self.init_map, self.final_fleets)
+        # if 'eid' in data:
+        #     get_error(data['eid'])
+        # else:
+        #     print(data)
+        self.parent.sortie_button.setEnabled(True)
+
     def set_info(self) -> bool:
+
         # TODO free up dock space if needed
-        res = False
-        if self.user_data['levelId'] != "9318":
-            self.logger.warning("You have not passed E6 manually.")
-            res = False
+        user_e6 = next(i for i in self.user_data['chapterList'] if i['id'] == "10006")
+        if self.user_data['levelId'] != "9316":
+            self.logger.warning("You are in the middle of a battle. Exiting")
+            return False
+        elif self.user_data['npcId'] != "931821001":
+            # Try to detect if user passed E6; TODO not sure if this is legit
+            self.logger.warning("You have not passed E6 manually. Exiting")
+            return False
         else:
-            res = True
+            pass
         self.parent.update_ticket(self.user_data['ticket'])
         self.parent.update_purchasable(self.user_data['canChargeNum'])
-        last_fleets = next(i for i in self.user_data['chapterList'] if i['id'] == "10006")['boats']
+
+        # check if the sortie "final fleet" is set or not
+        b = self.fleet_info['chapterInfo']['boats']
+        if len(b) == 0:
+            self.logger.info('User has not entered E6. Select from old settings.')
+            last_fleets = user_e6['boats']
+        elif len(b) == 22 and self.fleet_info['chapterInfo']['level_id'] == "9316":
+            # TODO long term; pick up where user left?
+            self.logger.info('User has entered E6-1. Will retreat for a fresh start')
+            last_fleets = b
+        else:
+            self.logger.info('Invalid settings for using this function.')
+            self.logger.info('Ensure you have passed E6-3, AND you are not in a battle OR in E6-1.')
+            return False
+
+        self.points = self.user_data['strategic_point']
+        print(self.points)
+        print("last_fleets")
+        print(last_fleets)
         if len(last_fleets) != 22:
             self.logger.warning("Invalid last boats settings.")
             res = False
         else:
+            self.final_fleets = last_fleets
             res = True
         return res
+
+    def start_sortie(self) -> None:
+        self.logger.info('Retreating...')
+        data = self.api.withdraw()
+        if data is None:
+            self.logger.info("Retreat success. Fresh start is ready.")
+        else:
+            pass
+
+        data = self.api.readyFire(self.init_sub_map)
+        print(data)
+        if 'eid' in data:
+            get_error(data['eid'])
+            return
+        else:
+            next_node = self.get_next_node(data['$currentVo']['nodeId'])
+
+        # get 11009211 and 11008211
+        data = self.api.newNext(str(next_node))
+        print(data)
+        if 'eid' in data:
+            get_error(data['eid'])
+        else:
+            pass
+
+        self.get_ship_store()
+
+        data = self.api.selectBoat(self.escort_destroyers)
+        print(data)
+        self.points = data['strategic_point']
+
+    def get_ship_store(self, is_refresh: str = '0'):
+        data = self.api.canSelectList(is_refresh)
+        print(data)
+        info = data['$ssss']
+        for d in info:
+            output_str = f'{self.user_ships[str(d[1])]} - LV {d[0]} - COST {d[2]}'
+            self.logger.info(output_str)
+        return data
+
+    def get_next_node(self, node_id: str) -> int:
+        node = next(i for i in self.map_data['combatLevelNode'] if i['id'] == node_id)
+        # Always choose the upper path
+        return node['next_node'][0]
+
+    def get_curr_points(self):
+        self.logger.info(f'Now have {self.points} strategic points left.')
+        return self.points
 
 # End of File

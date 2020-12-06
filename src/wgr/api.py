@@ -24,6 +24,7 @@ class WGR_API:
     def _api_call(self, link: str) -> object:
         data = None
         url = self.server + link + self.hlp.get_url_end(self.channel)
+        print(url)
         res = False
         tries = 0
         while not res:
@@ -45,7 +46,8 @@ class WGR_API:
 
     @staticmethod
     def _int_list_to_str(int_list: list) -> str:
-        return str(int_list).replace(' ', '')
+        res = str(int_list).replace(' ', '')
+        return res
 
     def active_getUserData(self):
         link = 'active/getUserData'

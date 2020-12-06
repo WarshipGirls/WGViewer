@@ -93,6 +93,7 @@ class TabThermopylae(QWidget):
         self.sortie_button = QPushButton('Start Thermopylae E6 sortieing...')
         self.button1.clicked.connect(self.button1_on_click)
         self.sortie_button.clicked.connect(self.on_sortie)
+        self.sortie_button.setEnabled(False)
 
         self.left_layout.addWidget(self.button1)
         self.left_layout.addWidget(self.sortie_button)
@@ -144,6 +145,7 @@ class TabThermopylae(QWidget):
     def on_sortie(self):
         logging.info('User clicked sortieing button...')
         # TODO TODO this is not multi-threading
+        self.sortie.start_sortie()
 
     def process_finished(self):
         self.logger.info('task is done')

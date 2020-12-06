@@ -20,6 +20,7 @@ class Session:
         self.session.keep_alive = False
 
     def get(self, url, **kwargs):
+        # TODO https://stackoverflow.com/questions/23496750/how-to-prevent-python-requests-from-percent-encoding-my-urls
         for i in range(self.max_retry):
             try:
                 r = self.session.get(url=url, **kwargs)
