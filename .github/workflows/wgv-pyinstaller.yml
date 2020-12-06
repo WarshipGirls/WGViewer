@@ -1,4 +1,4 @@
-name: 'WGV PyInstaller Build'
+name: 'build'
 
 #on: [push]
 on:
