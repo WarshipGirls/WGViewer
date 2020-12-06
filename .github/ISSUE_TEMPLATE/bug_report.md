@@ -10,6 +10,10 @@ assignees: ''
 **Describe the bug**
 A clear and concise description of what the bug is.
 
+**WGViewer version**
+
+(The version number is shown on the app's title bar)
+
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
