@@ -2,7 +2,7 @@ import hashlib
 import time
 import zlib
 
-from .session import Session
+from .session import GameSession
 from . import constants as constants
 
 
@@ -13,7 +13,7 @@ class Helper:
 
     def __init__(self, sess=None):
         if sess is None:
-            self.sess = Session()
+            self.sess = GameSession()
         else:
             self.sess = sess
 

@@ -14,7 +14,7 @@ from src.exceptions.custom import InterruptExecution
 from src.exceptions.wgr_error import WarshipGirlsExceptions
 from src.func.encryptor import Encryptor
 from src.func.login import GameLogin
-from src.func.session import Session
+from src.func.session import GameSession
 from src.func import constants as constants
 from src.func.version_check import VersionCheck
 from src.func.worker import CallbackWorker
@@ -377,7 +377,7 @@ class LoginForm(QWidget):
         return res2
 
     def _check_password(self):
-        sess = Session()
+        sess = GameSession()
         self.account = GameLogin(constants.version, self.channel, sess, self.login_button)
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()

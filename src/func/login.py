@@ -17,7 +17,7 @@ from src.data.wgv_path import get_data_dir
 from src.exceptions.wgr_error import get_error
 from . import constants as constants
 from .helper import Helper
-from .session import Session
+from .session import GameSession
 
 
 class GameLogin:
@@ -26,7 +26,7 @@ class GameLogin:
     2nd login: return nothing; init data
     """
 
-    def __init__(self, game_version: str, game_channel: str, game_session: Session, login_button: QPushButton):
+    def __init__(self, game_version: str, game_channel: str, game_session: GameSession, login_button: QPushButton):
         self.version = game_version
         self.channel = game_channel
         self.session = game_session
