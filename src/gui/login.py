@@ -339,7 +339,7 @@ class LoginForm(QWidget):
         self.res2 = result
 
         if self.res1 == True and self.res2 == True:
-            self.login_button.setText('Loading and Initializing...')
+            self.login_button.setText('Loading and Initializing... (rendering time varies with dock size)')
             logging.info("LOGIN - SUCCESS!")
             if self.check_auto.isChecked() is True:
                 pass

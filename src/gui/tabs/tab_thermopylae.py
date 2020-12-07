@@ -51,8 +51,10 @@ class TabThermopylae(QWidget):
         self.bee.terminate()
 
         # TODO: add specific loggers for different parts?
+        # TODO: https://docs.python.org/3/library/logging.html#logging.getLogger
         self.logger = logging.getLogger('TabThermopylae')
         log_handler = LogHandler()
+        log_handler.setLevel(level=logging.info)
         log_handler.sig_log.connect(text_box.append)
         self.logger.addHandler(log_handler)
 
