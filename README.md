@@ -13,7 +13,7 @@
 
 This project, `WGViewer`, is inspired by [Kancolle Viewer poi][poi] and [one of Warship Girls auto scripts][ProtectorMoe].
 The goal of the project is to create a cross-desktop-platform game viewer and automation tool.
-The basic process is to hack the game and use its native APIs to mimic an official client's behaviors ([legal issue disclaimer](DISCLAIMER.md)).
+The idea is to hack the game and use its native APIs to mimic an official client's behaviors ([legal issue disclaimer](DISCLAIMER.md)).
 
 The official sites of the mobile game, Warship Girls (R), are [here (CN)][CN], [here (JP)][JP] and [here (International)][Intl].
 
@@ -23,8 +23,12 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 ## Development
 
-- [Python3](https://www.python.org/), [PyQt5](https://doc.qt.io/qtforpython/) (w/o Qt Designer), [PyInstaller](https://www.pyinstaller.org/)
-- [Fiddler](https://www.telerik.com/download/fiddler)
+- Primary:
+    - [Python3](https://www.python.org/), [PyQt5](https://doc.qt.io/qtforpython/) (w/o Qt Designer), [PyInstaller](https://www.pyinstaller.org/)
+- Secondary:    
+    - [Fiddler](https://www.telerik.com/download/fiddler) (monitoring web traffic)
+    - [HeroKu](https://www.heroku.com/) (host scheduled `WGViewer-tools` scripts)
+    - [Docker](https://www.docker.com/) (use existing docker-image to package cross-platform `WGViewer`)
 
 ### Compiling From Source
 
