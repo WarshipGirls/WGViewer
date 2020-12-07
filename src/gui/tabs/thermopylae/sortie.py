@@ -26,7 +26,7 @@ class Sortie:
         self.logger = sortie_logger
         self.is_realrun = is_realrun
 
-        self.sleep_time = 5  # TODO random this every time
+        self.sleep_time = 3  # TODO random this every time
         self.max_retry = 5
 
         self.fleet_info = None
@@ -81,25 +81,37 @@ class Sortie:
     
     '''
 
-    def pre_battle_calls(self) -> bool:
+    def _get_fleet_info(self):
         if self.is_realrun is True:
-            # This is fast; no need for parallelism for now
             self.fleet_info = self.api.getFleetInfo()
-            save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
-            sleep(self.sleep_time)
-            self.map_data = self.api.getPveData()
-            save_json('six_getPveData.json', self.map_data)  # TODO only for testing
-            sleep(self.sleep_time)
-            self.user_data = self.api.getUserData()
-            save_json('six_getUserData.json', self.user_data)  # TODO only for testing
-            sleep(self.sleep_time)
+            # save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
         else:
             with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
                 self.fleet_info = json.load(f)
+
+    def _get_pve_data(self):
+        if self.is_realrun is True:
+            self.map_data = self.api.getPveData()
+            # save_json('six_getPveData.json', self.map_data)  # TODO only for testing
+        else:
             with open('six_getPveData.json', 'r', encoding='utf-8') as f:
                 self.map_data = json.load(f)
+
+    def _get_user_data(self):
+        if self.is_realrun is True:
+            self.user_data = self.api.getUserData()
+            # save_json('six_getUserData.json', self.user_data)  # TODO only for testing
+        else:
             with open('six_getUserData.json', 'r', encoding='utf-8') as f:
                 self.user_data = json.load(f)
+
+    def pre_battle_calls(self) -> bool:
+        self._get_fleet_info()
+        sleep(self.sleep_time)
+        self._get_pve_data()
+        sleep(self.sleep_time)
+        self._get_user_data()
+        sleep(self.sleep_time)
 
         self.can_start = self.pre_battle_set_info()
         if self.can_start is False:
