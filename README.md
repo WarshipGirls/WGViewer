@@ -1,15 +1,15 @@
 
 ![alt text](assets/banner.png "Warship Girls Viewer | WGViewer")
 
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/WarshipGirls/WGViewer?include_prereleases)
-![build](https://github.com/WarshipGirls/WGViewer/workflows/build/badge.svg)
-![pytest](https://github.com/WarshipGirls/WGViewer/workflows/pytest/badge.svg)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/WarshipGirls/WGViewer?include_prereleases)](https://github.com/WarshipGirls/WGViewer/releases)
+[![build](https://github.com/WarshipGirls/WGViewer/workflows/build/badge.svg)](https://github.com/WarshipGirls/WGViewer/actions?query=workflow%3Abuild)
+[![pytest](https://github.com/WarshipGirls/WGViewer/workflows/pytest/badge.svg)](https://github.com/WarshipGirls/WGViewer/actions?query=workflow%3Apytest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-![GitHub issues](https://img.shields.io/github/issues/WarshipGirls/WGViewer)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/WarshipGirls/WGViewer)
-![GitHub Org's stars](https://img.shields.io/github/stars/WarshipGirls?style=social)
-![GitHub all releases](https://img.shields.io/github/downloads/WarshipGirls/WGViewer/total)
+[![GitHub issues](https://img.shields.io/github/issues/WarshipGirls/WGViewer)](https://github.com/WarshipGirls/WGViewer/issues)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/w/WarshipGirls/WGViewer)](https://github.com/WarshipGirls/WGViewer/graphs/contributors)
+[![GitHub Org's stars](https://img.shields.io/github/stars/WarshipGirls?style=social)](https://github.com/WarshipGirls/WGViewer)
+[![GitHub all releases](https://img.shields.io/github/downloads/WarshipGirls/WGViewer/total)](https://github.com/WarshipGirls/WGViewer/releases)
 
 This project, `WGViewer`, is inspired by [Kancolle Viewer poi][poi] and [one of Warship Girls auto scripts][ProtectorMoe].
 The goal of the project is to create a cross-desktop-platform game viewer and automation tool.
