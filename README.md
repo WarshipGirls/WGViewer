@@ -4,6 +4,9 @@
 ![build](https://github.com/WarshipGirls/WGViewer/workflows/build/badge.svg)
 ![pytest](https://github.com/WarshipGirls/WGViewer/workflows/pytest/badge.svg)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+![GitHub issues](https://img.shields.io/github/issues/WarshipGirls/WGViewer)
+![GitHub Org's stars](https://img.shields.io/github/stars/WarshipGirls?style=social)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/WarshipGirls/WGViewer)
 
 This project, `WGViewer`, is inspired by [Kancolle Viewer poi][poi] and [one of Warship Girls auto scripts][ProtectorMoe].
 The goal of the project is to create a cross-desktop-platform game viewer and automation tool.
