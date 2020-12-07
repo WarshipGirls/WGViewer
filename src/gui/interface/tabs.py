@@ -51,10 +51,10 @@ class MainInterfaceTabs(QWidget):
         #   or run tab dock functions save & load important data later
         if self.is_realrun is True:
             # TODO loading speed is really slow
-            # self.add_tab("tab_dock")
-            # self.add_tab("tab_exp")
+            self.add_tab("tab_dock")
+            self.add_tab("tab_exp")
             self.add_tab("tab_thermopylae")
-            # self.add_tab("tab_adv")
+            self.add_tab("tab_adv")
         else:
             # self.add_tab("tab_dock")
             self.add_tab("tab_thermopylae")
