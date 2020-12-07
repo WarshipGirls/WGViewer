@@ -1,5 +1,5 @@
 
-![alt text](docs/banner.png "Warship Girls Viewer | WGViewer")
+![alt text](assets/banner.png "Warship Girls Viewer | WGViewer")
 
 ![build](https://github.com/WarshipGirls/WGViewer/workflows/build/badge.svg)
 ![pytest](https://github.com/WarshipGirls/WGViewer/workflows/pytest/badge.svg)
