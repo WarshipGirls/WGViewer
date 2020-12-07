@@ -16,6 +16,11 @@ class API_SIX(WGR_API):
         link = 'six/canSelectList/' + is_refresh
         return self._api_call(link)
 
+    def changeAdjutant(self, adjutant_id: str):
+        # 10082 / 10182 / 10282
+        link = 'six/changeAdjutant/' + adjutant_id
+        return self._api_call(link)
+
     def challenge(self, formation: str):
         link = 'six/cha11enge/' + formation
         return self._api_call(link)
@@ -53,8 +58,9 @@ class API_SIX(WGR_API):
         return self._api_call(link)
 
     def selectBoat(self, selected_boats: list, skill_card: str = '0'):
+        # TODO change all lists inputs to urlopen call
         link = 'six/selectBoat/' + self._int_list_to_str(selected_boats) + '/' + skill_card
-        return self._api_call(link)
+        return self._api_urlopen(link)
 
     def setChapterBoat(self, sortie_map: str, fleets: list):
         # sortie_map from 9301 to 9318 in the order of E1 (9301,9302,9303) to E6 (9316,9317,9318)

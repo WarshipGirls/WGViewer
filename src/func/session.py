@@ -4,9 +4,9 @@ import logging
 from time import sleep
 
 
-class Session:
+class GameSession:
     def __init__(self):
-        self.session = requests.session()
+        self.session = requests.sessions.Session()
         self.max_retry = 5
         self.sleep_time = 3
 
@@ -16,10 +16,11 @@ class Session:
         )
 
     def new_session(self):
-        self.session = requests.session()
+        self.session = requests.sessions.Session()
         self.session.keep_alive = False
 
     def get(self, url, **kwargs):
+        # TODO https://stackoverflow.com/questions/23496750/how-to-prevent-python-requests-from-percent-encoding-my-urls
         for i in range(self.max_retry):
             try:
                 r = self.session.get(url=url, **kwargs)

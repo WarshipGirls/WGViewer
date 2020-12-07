@@ -14,7 +14,7 @@ from src.exceptions.custom import InterruptExecution
 from src.exceptions.wgr_error import WarshipGirlsExceptions
 from src.func.encryptor import Encryptor
 from src.func.login import GameLogin
-from src.func.session import Session
+from src.func.session import GameSession
 from src.func import constants as constants
 from src.func.version_check import VersionCheck
 from src.func.worker import CallbackWorker
@@ -218,6 +218,7 @@ class LoginForm(QWidget):
 
     def login_failed(self):
         self.login_button.setText('Login')
+        self.login_button.setEnabled(True)
         self.check_auto.setText('Auto login on the application start')
         self.container.setEnabled(True)
 
@@ -347,8 +348,8 @@ class LoginForm(QWidget):
             self.mi = MainInterface(self.account.get_cookies())
             self.login_success()
         else:
+            self.login_failed()
             popup_msg("Login Failed (3): Probably due to bad server connection")
-            self.container.setEnabled(True)
 
     def first_fetch(self, login_account: GameLogin, username: str, password: str) -> bool:
         try:
@@ -356,13 +357,13 @@ class LoginForm(QWidget):
         except WarshipGirlsExceptions as e:
             # TODO: May crash; cannot test w/o own simulation; need to wait next maintenance
             logging.error(f"LOGIN - {e}")
+            self.login_failed()
             popup_msg(f"{e}")
-            self.container.setEnabled(True)
             return False
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
+            self.login_failed()
             popup_msg("Login Failed (1): Wrong authentication information")
-            self.container.setEnabled(True)
             return False
         return res1
 
@@ -371,13 +372,13 @@ class LoginForm(QWidget):
             res2 = login_account.second_login(server)
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
+            self.login_failed()
             popup_msg("Login Failed (2): Probably due to bad server connection")
-            self.container.setEnabled(True)
             return False
         return res2
 
     def _check_password(self):
-        sess = Session()
+        sess = GameSession()
         self.account = GameLogin(constants.version, self.channel, sess, self.login_button)
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()

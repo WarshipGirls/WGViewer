@@ -17,7 +17,7 @@ from src.data.wgv_path import get_data_dir
 from src.exceptions.wgr_error import get_error
 from . import constants as constants
 from .helper import Helper
-from .session import Session
+from .session import GameSession
 
 
 class GameLogin:
@@ -26,7 +26,7 @@ class GameLogin:
     2nd login: return nothing; init data
     """
 
-    def __init__(self, game_version: str, game_channel: str, game_session: Session, login_button: QPushButton):
+    def __init__(self, game_version: str, game_channel: str, game_session: GameSession, login_button: QPushButton):
         self.version = game_version
         self.channel = game_channel
         self.session = game_session
@@ -106,10 +106,11 @@ class GameLogin:
             login_url_tmp = host + 'index/login/' + self.uid + '?&' + urllib.parse.urlencode(data_dict)
             self.session.get(url=login_url_tmp, headers=constants.header, cookies=self.cookies, timeout=10)
 
+            # TODO: all of these are redundant
             self.cheat_sess(host, 'pevent/getPveData/')
-            self.cheat_sess(host, 'shop/canBuy/1/')
+            # self.cheat_sess(host, 'shop/canBuy/1/')
             self.cheat_sess(host, 'live/getUserInfo')
-            self.cheat_sess(host, 'live/getMusicList/')
+            # self.cheat_sess(host, 'live/getMusicList/')
             self.cheat_sess(host, 'bsea/getData/')
             self.cheat_sess(host, 'active/getUserData')
             self.cheat_sess(host, 'pve/getUserData/')
@@ -163,7 +164,11 @@ class GameLogin:
 
         login_url = self.login_server + "index/hmLogin/" + tokens + self.hlp.get_url_end(self.channel)
         login_response = self.session.get(url=login_url, headers=constants.header, timeout=10)
-        login_text = json.loads(zlib.decompress(login_response.content))
+        try:
+            login_text = json.loads(zlib.decompress(login_response.content))
+        except zlib.error as e:
+            logging.error(e)    # incorrect header check
+            return {}
 
         self.cookies = login_response.cookies.get_dict()
         self.uid = str(login_text['userId'])

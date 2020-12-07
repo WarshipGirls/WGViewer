@@ -21,9 +21,7 @@ To build executable on Unix OS, update `fix_pyinstaller.py` with your directory 
 
 ---
 
-## Publish New Release
-
-### Version Naming
+## Version Naming
 
 WGViewer uses [packaging.version](https://packaging.pypa.io/en/latest/version.html) to test version naming.
 
@@ -45,4 +43,15 @@ The order of the version notation is:
 
 ```
 (any int) > rev > r > post > c = pre > beta > b > a > dev
+```
+
+---
+
+## Branch Naming
+
+A branch name consists of a version number and the branch's responsibility (be specific and focused). For example:
+
+```
+v0.1.0-side-dock
+v0.1.1dev-docs
 ```

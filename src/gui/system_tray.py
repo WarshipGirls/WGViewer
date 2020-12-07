@@ -33,7 +33,8 @@ class TrayIcon(QSystemTrayIcon):
         self.activated.connect(self.activate_handler)
 
     def activate_handler(self, reason):
-        if reason == QSystemTrayIcon.DoubleClick:
+        # Most Windows apps use 1-click
+        if reason == QSystemTrayIcon.Trigger:
             self.toggle_display()
         else:
             pass

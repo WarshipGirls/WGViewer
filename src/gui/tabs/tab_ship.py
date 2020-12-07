@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-import zipfile
 
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (
@@ -114,6 +113,7 @@ class TabShips(QWidget):
             # First sort by level, then sort by cid
             sorted_ships = sorted(data["userShipVO"], key=lambda x: (x['level'], x['shipCid']), reverse=True)
             self.table_model.set_data(sorted_ships)
+            # print("!!! RESTORE THIS AFTER TESTING !!!")
             self.table_model.save_table_data()
             logging.info("SHIPS - Success initialized table and saved table data.")
 
