@@ -1,21 +1,21 @@
 
 ![alt text](assets/banner.png "Warship Girls Viewer | WGViewer")
 
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/WarshipGirls/WGViewer?include_prereleases)
 ![build](https://github.com/WarshipGirls/WGViewer/workflows/build/badge.svg)
 ![pytest](https://github.com/WarshipGirls/WGViewer/workflows/pytest/badge.svg)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 ![GitHub issues](https://img.shields.io/github/issues/WarshipGirls/WGViewer)
-![GitHub Org's stars](https://img.shields.io/github/stars/WarshipGirls?style=social)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/WarshipGirls/WGViewer)
+![GitHub Org's stars](https://img.shields.io/github/stars/WarshipGirls?style=social)
+![GitHub all releases](https://img.shields.io/github/downloads/WarshipGirls/WGViewer/total)
 
 This project, `WGViewer`, is inspired by [Kancolle Viewer poi][poi] and [one of Warship Girls auto scripts][ProtectorMoe].
 The goal of the project is to create a cross-desktop-platform game viewer and automation tool.
 The basic process is to hack the game and use its native APIs to mimic an official client's behaviors ([legal issue disclaimer](DISCLAIMER.md)).
 
-The official sites of the mobile game, Warship Girls (R), are [here (CN server)][CN], [here (JP server)][JP] and [here (International server)][Intl].
-
-> NO STABLE RELEASE YET. PROJECT IS ON ACTIVE DEVELOPMENT  
-> Developer version is ready via self compiling
+The official sites of the mobile game, Warship Girls (R), are [here (CN)][CN], [here (JP)][JP] and [here (International)][Intl].
 
 ## Screenshots
 
