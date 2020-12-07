@@ -1,7 +1,9 @@
 
 ![alt text](docs/banner.png "Warship Girls Viewer | WGViewer")
 
-[![license:gpl-3.0](https://img.shields.io/badge/license-GPLv3-brightgreen)](https://opensource.org/licenses/GPL-3.0)
+![build](https://github.com/WarshipGirls/WGViewer/workflows/build/badge.svg)
+![pytest](https://github.com/WarshipGirls/WGViewer/workflows/pytest/badge.svg)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 This project, `WGViewer`, is inspired by [Kancolle Viewer poi][poi] and [one of Warship Girls auto scripts][ProtectorMoe].
 The goal of the project is to create a cross-desktop-platform game viewer and automation tool.
@@ -47,7 +49,13 @@ Please see [at this directory](screenshots). Updating as work progresses.
 ### Contribution
 
 WGViewer welcomes contributors!
-Please see the [contribution guide](CONTRIBUTING.md) for more information.
+
+If you know "hello world" in any programming language, please see the [contribution guide](CONTRIBUTING.md) for more information.
+
+If you don't know coding but still want to help WGViewer becomes better, you may
+- upload missing ship images ([here](https://github.com/WarshipGirls/WGViewer/issues/43))
+- add missing translations ([here](https://github.com/WarshipGirls/WGViewer/blob/master/src/func/shipname.py)).
+- report bugs or make suggestions! ([here](https://github.com/WarshipGirls/WGViewer/issues))
 
 ## Disclaimer
 
