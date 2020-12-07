@@ -121,8 +121,7 @@ class Sortie:
         self.logger.info("Setting final fleets:")
         for ship_id in self.final_fleets:
             ship = self.user_ships[str(ship_id)]
-            # output_str = f"{ship_id}{ship['Name']}"
-            output_str = "{:10s}{:20s}".format(str(ship_id), ship['Name'])
+            output_str = "{:10s}{:15s}".format(str(ship_id), ship['Name'])
             if ship['Class'] == "SS":
                 self.fleets.append(ship_id)
                 output_str += "\tMAIN FORCE"
@@ -135,7 +134,7 @@ class Sortie:
             # Lesson: do not output various stuff at once, concat them together; otherwise TypeError
             self.logger.info(output_str)
 
-        self.parent.sortie_button.setEnabled(True)
+        self.parent.button_sortie.setEnabled(True)
 
     def pre_battle_set_info(self) -> bool:
         # TODO free up dock space if needed
@@ -178,10 +177,29 @@ class Sortie:
         self.logger.info('Retreating...')
 
         self.helper.api_withdraw()
+        if self.helper.is_exit is True:
+            self.parent.button_sortie.setEnabled(True)
+            return
         next_node = self.helper.api_readyFire()
+        if self.helper.is_exit is True:
+            self.parent.button_sortie.setEnabled(True)
+            return
+
         self.helper.api_newNext(next_node)
+        if self.helper.is_exit is True:
+            self.parent.button_sortie.setEnabled(True)
+            return
 
         shop_data = self.helper.get_ship_store()
+        print(shop_data)
+        if self.helper.is_exit is True:
+            self.parent.button_sortie.setEnabled(True)
+            return
+
         self.helper.buy_ships(self.escort_DD, shop_data)
+
+        if self.helper.is_exit is True:
+            self.parent.button_sortie.setEnabled(True)
+            return
 
 # End of File

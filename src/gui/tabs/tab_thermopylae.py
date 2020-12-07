@@ -2,6 +2,7 @@ import logging
 from time import sleep
 
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QTableWidget, QMainWindow, QTableWidgetItem, QButtonGroup
 
 import src.data as wgr_data
@@ -15,6 +16,7 @@ from .thermopylae.sortie import Sortie
 
 class TabThermopylae(QWidget):
     def __init__(self, tab_name: str, is_realrun: bool):
+        # TODO reorganize
         super().__init__()
         self.setObjectName(tab_name)
         self.is_realrun = is_realrun
@@ -37,10 +39,11 @@ class TabThermopylae(QWidget):
 
         self.button_group = None
         self.button1 = None
-        self.sortie_button = None
+        self.button_sortie = None
         self.init_left_layout()
 
         text_box = QTextEdit()
+        text_box.setFont(QFont('Consolas'))
         text_box.setReadOnly(True)
         self.right_layout.addWidget(text_box)
         self.bee = Worker(self.test_process, ())
@@ -55,6 +58,10 @@ class TabThermopylae(QWidget):
 
         self.init_ui()
         self.sortie = Sortie(self, self.api_six, [], [], self.logger, self.is_realrun)
+
+        self.bee_sortie = Worker(self.sortie.start_sortie, ())
+        self.bee_sortie.finished.connect(self.sortie_finished)
+        self.bee_sortie.terminate()
 
     def set_info_bar(self):
         w = QWidget()
@@ -91,13 +98,13 @@ class TabThermopylae(QWidget):
 
     def init_left_layout(self) -> None:
         self.button1 = QPushButton('start random process')
-        self.sortie_button = QPushButton('Start Thermopylae E6 sortieing...')
+        self.button_sortie = QPushButton('Start Thermopylae E6 sortieing...')
         self.button1.clicked.connect(self.button1_on_click)
-        self.sortie_button.clicked.connect(self.on_sortie)
-        self.sortie_button.setEnabled(False)
+        self.button_sortie.clicked.connect(self.on_sortie)
+        self.button_sortie.setEnabled(False)
 
         self.left_layout.addWidget(self.button1)
-        self.left_layout.addWidget(self.sortie_button)
+        self.left_layout.addWidget(self.button_sortie)
 
     def add_ship(self):
         # TODO long term let user select boats here; now just use last fleets
@@ -146,10 +153,16 @@ class TabThermopylae(QWidget):
     def on_sortie(self):
         logging.info('User clicked sortieing button...')
         # TODO TODO this is not multi-threading
-        self.sortie.start_sortie()
+        self.button_sortie.setEnabled(False)
+        self.bee_sortie.start()
+        # self.sortie.start_sortie()
 
     def process_finished(self):
         self.logger.info('task is done')
         self.button1.setEnabled(True)
+
+    def sortie_finished(self):
+        self.logger.info('==== Sortie is done! ====')
+        self.button_sortie.setEnabled(True)
 
 # End of File
