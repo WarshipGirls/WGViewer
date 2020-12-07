@@ -23,8 +23,12 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 ## Development
 
-- [Python3](https://www.python.org/), [PyQt5](https://doc.qt.io/qtforpython/) (w/o Qt Designer), [PyInstaller](https://www.pyinstaller.org/)
-- [Fiddler](https://www.telerik.com/download/fiddler)
+- Primary:
+    - [Python3](https://www.python.org/), [PyQt5](https://doc.qt.io/qtforpython/) (w/o Qt Designer), [PyInstaller](https://www.pyinstaller.org/)
+- Secondary:    
+    - [Fiddler](https://www.telerik.com/download/fiddler) (monitoring web traffic)
+    - [HeroKu](https://www.heroku.com/) (host scheduled `WGViewer-tools` scripts)
+    - [Docker](https://www.docker.com/) (use existing docker-image to package cross-platform `WGViewer`)
 
 ### Compiling From Source
 
