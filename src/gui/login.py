@@ -55,7 +55,7 @@ class LoginForm(QWidget):
         # set text all in label would cause user unable to click text to toggle checkbox; differs from other checkbox, (bad design IMO)
         user_w, _ = get_user_resolution()
         self.check_disclaimer.setMaximumWidth(int(0.083 * user_w))
-        self.check_save = QCheckBox('Store login info locally with encryption. Toggle to delete')
+        self.check_save = QCheckBox('Store login info locally with encryption')
         self.check_auto = QCheckBox('Auto login on the application start')
         self.login_button = QPushButton('Login')
 
@@ -270,6 +270,12 @@ class LoginForm(QWidget):
         else:
             self.qsettings.remove("Login")
             wgr_data.del_key_file(self.key_filename)
+            self.lineEdit_username.clear()
+            self.lineEdit_password.clear()
+            self.combo_platform.setCurrentText(self.combo_platform.itemText(0))
+            self.combo_server.setCurrentText(self.combo_server.itemText(0))
+            self.check_disclaimer.setChecked(False)
+            self.check_auto.setChecked(False)
 
     def on_auto_clicked(self):
         if self.check_auto.isChecked():

@@ -50,8 +50,6 @@ class TabThermopylae(QWidget):
         self.bee.finished.connect(self.process_finished)
         self.bee.terminate()
 
-        # TODO: add specific loggers for different parts?
-        # TODO: https://docs.python.org/3/library/logging.html#logging.getLogger
         self.logger = logging.getLogger('TabThermopylae')
         log_handler = LogHandler()
         log_handler.setLevel(level=logging.INFO)
@@ -59,7 +57,7 @@ class TabThermopylae(QWidget):
         self.logger.addHandler(log_handler)
 
         self.init_ui()
-        self.sortie = Sortie(self, self.api_six, [], [], self.logger, self.is_realrun)
+        self.sortie = Sortie(self, self.api_six, [], [], self.is_realrun)
 
         self.bee_sortie = Worker(self.sortie.start_sortie, ())
         self.bee_sortie.finished.connect(self.sortie_finished)

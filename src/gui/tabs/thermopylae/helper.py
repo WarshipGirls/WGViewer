@@ -1,15 +1,15 @@
 from time import sleep
 from typing import Callable
-from logging import Logger
+from logging import getLogger
 
 from src.wgr.api import WGR_API  # only for typehints
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 
 
 class SortieHelper:
-    def __init__(self, api: WGR_API, logger: Logger, user_ships: dict, map_data: dict):
+    def __init__(self, api: WGR_API, user_ships: dict, map_data: dict):
         self.api = api
-        self.logger = logger
+        self.logger = getLogger('TabThermopylae')
         self.user_ships = user_ships
         self.map_data = map_data
 

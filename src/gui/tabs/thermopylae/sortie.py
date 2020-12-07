@@ -1,7 +1,7 @@
 import json
 
 from time import sleep
-from logging import Logger
+from logging import getLogger
 
 from src import data as wgr_data
 from src.wgr.api import WGR_API  # only for typehints
@@ -17,13 +17,13 @@ class Sortie:
     # This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
     # TODO long term
     # RIGHT NOW everything pre-battle is fixed
-    def __init__(self, parent, api: WGR_API, fleets: list, final_fleets: list, sortie_logger: Logger, is_realrun: bool):
+    def __init__(self, parent, api: WGR_API, fleets: list, final_fleets: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
         self.api = api
         self.fleets = fleets  # main fleets
         self.final_fleets = final_fleets  # fill up required number of boats
-        self.logger = sortie_logger
+        self.logger = getLogger('TabThermopylae')
         self.is_realrun = is_realrun
 
         self.sleep_time = 3  # TODO random this every time
@@ -126,7 +126,7 @@ class Sortie:
         if self.pre_battle_calls() is False:
             return
 
-        self.helper = SortieHelper(self.api, self.logger, self.user_ships, self.map_data)
+        self.helper = SortieHelper(self.api, self.user_ships, self.map_data)
 
         self.logger.info("Setting final fleets:")
         for ship_id in self.final_fleets:
