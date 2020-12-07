@@ -1,12 +1,14 @@
 import os
 import sys
 from typing import Callable
+from urllib.request import urlopen
 
-from PyQt5.QtCore import QSettings
+from PyQt5.QtCore import QSettings, pyqtSlot
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from src import data as wgr_data
 from src.func import constants
+from src.gui.custom_widgets import ScrollBoxWindow
 from src.utils import popup_msg, open_url, _quit_application
 
 
@@ -23,6 +25,7 @@ class MainInterfaceMenuBar(QMenuBar):
         super().__init__()
         self.parent = parent
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
+        self.version_log = None
 
         self.init_file_menu()
         self.init_tabs_menu()
@@ -79,6 +82,7 @@ class MainInterfaceMenuBar(QMenuBar):
         menu = self.addMenu(self.tr("&Help"))
         menu.addAction(self.create_action("&Bug Report / Feature Request", self.submit_issue))
         menu.addSeparator()
+        menu.addAction(self.create_action("WGViewer &Version Logs", self.open_version_log))
         menu.addAction(self.create_action("&About Warship Girls Viewer", self.open_author_info))
 
     # ================================
@@ -135,11 +139,11 @@ class MainInterfaceMenuBar(QMenuBar):
         msg_str += "<br><br>"
         msg_str += get_hyperlink(cn_android_full_link, 'CN Android full package')
         msg_str += "<br>"
-        msg_str += get_hyperlink(cn_ios_user_android_full_link, 'CN Android(iOS server) full package')
+        msg_str += get_hyperlink(cn_ios_user_android_full_link, 'CN Android (iOS server) full package')
         msg_str += "<br><br>"
         msg_str += get_hyperlink(cn_android_base_link, 'CN Android base package')
         msg_str += "<br>"
-        msg_str += get_hyperlink(cn_ios_user_android_base_link, 'CN Android(iOS server) base package')
+        msg_str += get_hyperlink(cn_ios_user_android_base_link, 'CN Android (iOS server) base package')
 
         msg = QMessageBox()
         msg.setStyleSheet(wgr_data.get_color_scheme())
@@ -171,6 +175,17 @@ class MainInterfaceMenuBar(QMenuBar):
         else:
             pass
 
+    def open_version_log(self) -> None:
+        text = urlopen('https://raw.githubusercontent.com/WarshipGirls/WGViewer/master/docs/version_log.md').read().decode('ascii')
+        self.version_log = ScrollBoxWindow(self, 'WGViewer Version Logs', text)
+        self.version_log.setStyleSheet(wgr_data.get_color_scheme())
+        self.version_log.show()
+
+    @pyqtSlot()
+    def delete_version_log(self) -> None:
+        self.version_log.deleteLater()
+        self.version_log = None
+
     @staticmethod
     def open_author_info() -> None:
         def get_hyperlink(link, text) -> str:
@@ -185,7 +200,7 @@ class MainInterfaceMenuBar(QMenuBar):
         msg_str += "<p style=\"text-align: center;\">&copy; GNU General Public License v3.0</p>"
         msg = QMessageBox()
         msg.setStyleSheet(wgr_data.get_color_scheme())
-        msg.setWindowTitle('About Warship Girls Viewer')
+        msg.setWindowTitle('About Warship Girls Viewer (WGViewer)')
         msg.setText(msg_str)
         msg.exec_()
 
