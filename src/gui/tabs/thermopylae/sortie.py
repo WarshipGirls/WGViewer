@@ -202,7 +202,11 @@ class Sortie:
         print(self.escort_destroyers)
         data = self.api.selectBoat(self.escort_destroyers)
         print(data)
-        self.points = data['strategic_point']
+        # print('buy one by one???')
+        # data = self.api.selectBoat([self.escort_destroyers[0]])
+        # print(data)
+        # data = self.api.selectBoat([self.escort_destroyers[1]])
+        # print(data)
 
     def get_ship_store(self, is_refresh: str = '0'):
         data = self.api.canSelectList(is_refresh)

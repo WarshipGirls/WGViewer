@@ -40,6 +40,7 @@ class WGR_API:
                 logging.error(e)
                 logging.warning('Trying reconnecting...')
                 sleep(self.sleep_time)
+
             tries += 1
             if tries >= self.max_retry:
                 logging.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
@@ -54,28 +55,25 @@ class WGR_API:
         url = self.server + link + self.hlp.get_url_end(self.channel)
         res = False
         tries = 0
-        print('--------------------------------')
-        print(url)
-        print('--------------------------------')
 
         cj = cookiejar_from_dict(self.cookies)
         opener = build_opener(HTTPCookieProcessor(cj))
 
         _req = Request(url=url)
+        # TODO hard-coding
         _req.add_header(key='Accept-Encoding', val='identity')
         _req.add_header(key='Connection', val='Keep-Alive')
         _req.add_header(key='User-Agent', val='Dalvik/2.1.0 (Linux; U; Android 9.1.1; SAMSUNG-SM-G900A Build/LMY47X)')
         while not res:
             try:
-                data = opener.open(_req, timeout=10).read()
+                data = opener.open(_req, timeout=10).read().decode('latin-1')
                 res = True
             except (TimeoutError, URLError) as e:
                 logging.error(e)
                 logging.warning('urlopen trying reconnecting...')
+                sleep(self.sleep_time)
 
             tries += 1
-            sleep(self.sleep_time)
-
             if tries >= self.max_retry:
                 logging.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
                 break
