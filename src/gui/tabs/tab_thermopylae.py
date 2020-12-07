@@ -97,12 +97,23 @@ class TabThermopylae(QWidget):
         # self.add_ship()
 
     def init_left_layout(self) -> None:
+        t = QTextEdit()
+        msg = "Notes\n"
+        msg += "1. As of now, this auto sortie function is only for user who passed E6 manually;\n"
+        msg += "2. As of now, there are limitations on what ship should be set:\n"
+        msg += "    - DD 'Glowworm' and 'Amethyst', and CV 'Indomitable' are required\n"
+        msg += "    - 6 high level SS are required\n"
+        msg += "3. Adjutant 紫貂 (default) and Habakkuk (purchased in shop) are required;\n"
+        msg += "4. The function is NOT fully completed yet.\n"
+        msg += "5. The font looks small; I know!\n"
+        t.setText(msg)
         self.button1 = QPushButton('start random process')
         self.button_sortie = QPushButton('Start Thermopylae E6 sortieing...')
         self.button1.clicked.connect(self.button1_on_click)
         self.button_sortie.clicked.connect(self.on_sortie)
         self.button_sortie.setEnabled(False)
 
+        self.left_layout.addWidget(t)
         self.left_layout.addWidget(self.button1)
         self.left_layout.addWidget(self.button_sortie)
 
