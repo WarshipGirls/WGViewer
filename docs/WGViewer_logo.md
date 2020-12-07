@@ -1,4 +1,4 @@
-# LOGO
+# LOGO Design Documentation
 
 Both the App Icon and Banner files can be found under `assets` directory.
 
