@@ -58,7 +58,6 @@ class WGR_API:
 
         cj = cookiejar_from_dict(self.cookies)
         opener = build_opener(HTTPCookieProcessor(cj))
-
         _req = Request(url=url)
         # TODO hard-coding
         _req.add_header(key='Accept-Encoding', val='identity')
