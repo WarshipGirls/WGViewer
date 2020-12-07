@@ -85,6 +85,7 @@ class Sortie:
         if self.is_realrun is True:
             self.fleet_info = self.api.getFleetInfo()
             # save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
+            sleep(self.sleep_time)
         else:
             with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
                 self.fleet_info = json.load(f)
@@ -93,6 +94,7 @@ class Sortie:
         if self.is_realrun is True:
             self.map_data = self.api.getPveData()
             # save_json('six_getPveData.json', self.map_data)  # TODO only for testing
+            sleep(self.sleep_time)
         else:
             with open('six_getPveData.json', 'r', encoding='utf-8') as f:
                 self.map_data = json.load(f)
@@ -101,17 +103,15 @@ class Sortie:
         if self.is_realrun is True:
             self.user_data = self.api.getUserData()
             # save_json('six_getUserData.json', self.user_data)  # TODO only for testing
+            sleep(self.sleep_time)
         else:
             with open('six_getUserData.json', 'r', encoding='utf-8') as f:
                 self.user_data = json.load(f)
 
     def pre_battle_calls(self) -> bool:
         self._get_fleet_info()
-        sleep(self.sleep_time)
         self._get_pve_data()
-        sleep(self.sleep_time)
         self._get_user_data()
-        sleep(self.sleep_time)
 
         self.can_start = self.pre_battle_set_info()
         if self.can_start is False:
@@ -131,7 +131,7 @@ class Sortie:
         self.logger.info("Setting final fleets:")
         for ship_id in self.final_fleets:
             ship = self.user_ships[str(ship_id)]
-            output_str = "{:10s}{:15s}".format(str(ship_id), ship['Name'])
+            output_str = "{:8s}{:17s}".format(str(ship_id), ship['Name'])
             if ship['Class'] == "SS":
                 self.fleets.append(ship_id)
                 output_str += "\tMAIN FORCE"
