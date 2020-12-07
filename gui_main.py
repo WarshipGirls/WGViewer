@@ -60,6 +60,8 @@ if __name__ == '__main__':
     init_qsettings()
     init_fonts()
 
+    # https://stackoverflow.com/q/43109355/14561914
+    logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
         # running in a PyInstaller bundle
         login_form = LoginForm()
@@ -67,7 +69,6 @@ if __name__ == '__main__':
     else:
         # running in a normal Python process
         assert (len(sys.argv) == 2)
-        logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logging.info("Warship Girls Viewer started...")
 
         if int(sys.argv[1]):

@@ -45,9 +45,6 @@ class ExpFleets(QWidget):
         self.tab = QTableWidget()
         self.tab.setRowCount(30)
         self.tab.setColumnCount(4)
-        for i in range(self.tab.rowCount()):
-            for j in range(self.tab.rowCount()):
-                self.tab.setItem(i, j, QTableWidgetItem(str([i, j, i, j, i, j])))
 
         self.init_ui()
 
@@ -95,7 +92,7 @@ class ExpFleets(QWidget):
 
         # self.add_button(row, col, 'START', self.start_exp, fleet_id)
         self.add_map_dropdown(row, col)
-        self.add_button(row, col + 1, 'STOP', self.stop_exp, fleet_id)
+        self.add_button(row, col + 1, 'STOP (N/A)', self.stop_exp, fleet_id)
         row += 1
 
         for ship_id in self.fleets[fleet_id]:

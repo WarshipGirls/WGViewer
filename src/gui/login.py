@@ -270,6 +270,12 @@ class LoginForm(QWidget):
         else:
             self.qsettings.remove("Login")
             wgr_data.del_key_file(self.key_filename)
+            self.lineEdit_username.clear()
+            self.lineEdit_password.clear()
+            self.combo_platform.setCurrentText(self.combo_platform.itemText(0))
+            self.combo_server.setCurrentText(self.combo_server.itemText(0))
+            self.check_disclaimer.setChecked(False)
+            self.check_auto.setChecked(False)
 
     def on_auto_clicked(self):
         if self.check_auto.isChecked():
@@ -339,12 +345,13 @@ class LoginForm(QWidget):
         self.res2 = result
 
         if self.res1 == True and self.res2 == True:
-            self.login_button.setText('Loading and Initializing...')
+            self.login_button.setText('Loading and Initializing... (rendering time varies with dock size)')
             logging.info("LOGIN - SUCCESS!")
-            if self.check_auto.isChecked() is True:
-                pass
-            else:
-                popup_msg('Login Success')
+            # No popup msg on Login Success
+            # if self.check_auto.isChecked() is True:
+            #     pass
+            # else:
+            #     popup_msg('Login Success')
             self.mi = MainInterface(self.account.get_cookies())
             self.login_success()
         else:

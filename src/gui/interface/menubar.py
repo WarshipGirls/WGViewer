@@ -176,7 +176,7 @@ class MainInterfaceMenuBar(QMenuBar):
         def get_hyperlink(link, text) -> str:
             return "<a style=\"color:hotpink;\" href='" + link + "'>" + text + "</a>"
 
-        banner_path = get_data_path('docs/banner.png')
+        banner_path = get_data_path('assets/banner.png')
         msg_str = f'<img src=\"{banner_path}\" width=\"400\" height=\"120\">'
         msg_str += '<br><br>'
         msg_str += "> "

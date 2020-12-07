@@ -1,7 +1,7 @@
 import json
 
 from time import sleep
-from logging import Logger
+from logging import getLogger
 
 from src import data as wgr_data
 from src.wgr.api import WGR_API  # only for typehints
@@ -17,16 +17,16 @@ class Sortie:
     # This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
     # TODO long term
     # RIGHT NOW everything pre-battle is fixed
-    def __init__(self, parent, api: WGR_API, fleets: list, final_fleets: list, sortie_logger: Logger, is_realrun: bool):
+    def __init__(self, parent, api: WGR_API, fleets: list, final_fleets: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
         self.api = api
         self.fleets = fleets  # main fleets
         self.final_fleets = final_fleets  # fill up required number of boats
-        self.logger = sortie_logger
+        self.logger = getLogger('TabThermopylae')
         self.is_realrun = is_realrun
 
-        self.sleep_time = 5  # TODO random this every time
+        self.sleep_time = 3  # TODO random this every time
         self.max_retry = 5
 
         self.fleet_info = None
@@ -81,25 +81,37 @@ class Sortie:
     
     '''
 
-    def pre_battle_calls(self) -> bool:
+    def _get_fleet_info(self):
         if self.is_realrun is True:
-            # This is fast; no need for parallelism for now
             self.fleet_info = self.api.getFleetInfo()
-            save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
-            sleep(self.sleep_time)
-            self.map_data = self.api.getPveData()
-            save_json('six_getPveData.json', self.map_data)  # TODO only for testing
-            sleep(self.sleep_time)
-            self.user_data = self.api.getUserData()
-            save_json('six_getUserData.json', self.user_data)  # TODO only for testing
+            # save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
             sleep(self.sleep_time)
         else:
             with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
                 self.fleet_info = json.load(f)
+
+    def _get_pve_data(self):
+        if self.is_realrun is True:
+            self.map_data = self.api.getPveData()
+            # save_json('six_getPveData.json', self.map_data)  # TODO only for testing
+            sleep(self.sleep_time)
+        else:
             with open('six_getPveData.json', 'r', encoding='utf-8') as f:
                 self.map_data = json.load(f)
+
+    def _get_user_data(self):
+        if self.is_realrun is True:
+            self.user_data = self.api.getUserData()
+            # save_json('six_getUserData.json', self.user_data)  # TODO only for testing
+            sleep(self.sleep_time)
+        else:
             with open('six_getUserData.json', 'r', encoding='utf-8') as f:
                 self.user_data = json.load(f)
+
+    def pre_battle_calls(self) -> bool:
+        self._get_fleet_info()
+        self._get_pve_data()
+        self._get_user_data()
 
         self.can_start = self.pre_battle_set_info()
         if self.can_start is False:
@@ -114,12 +126,12 @@ class Sortie:
         if self.pre_battle_calls() is False:
             return
 
-        self.helper = SortieHelper(self.api, self.logger, self.user_ships, self.map_data)
+        self.helper = SortieHelper(self.api, self.user_ships, self.map_data)
 
         self.logger.info("Setting final fleets:")
         for ship_id in self.final_fleets:
             ship = self.user_ships[str(ship_id)]
-            output_str = "{:10s}{:15s}".format(str(ship_id), ship['Name'])
+            output_str = "{:8s}{:17s}".format(str(ship_id), ship['Name'])
             if ship['Class'] == "SS":
                 self.fleets.append(ship_id)
                 output_str += "\tMAIN FORCE"
@@ -183,13 +195,12 @@ class Sortie:
             self.parent.button_sortie.setEnabled(True)
             return
 
-        self.helper.api_newNext(next_node)
+        self.helper.api_newNext(str(next_node))
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
             return
 
         shop_data = self.helper.get_ship_store()
-        print(shop_data)
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
             return

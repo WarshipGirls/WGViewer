@@ -1,5 +1,8 @@
 # Contribution Guide
 
+- [WGViewer issue page](https://github.com/WarshipGirls/WGViewer/issues)
+- [WGViewer-tools issue page](https://github.com/WarshipGirls/WGViewer-tools/issues)
+
 ## Start
 
 To contribute code,
@@ -19,7 +22,6 @@ To build executable on Unix OS, update `fix_pyinstaller.py` with your directory 
 > python tools/fix_pyinstaller.py > gui_main.spec  
 > pyinstaller --clean gui_main.spec
 
----
 
 ## Version Naming
 
@@ -45,7 +47,6 @@ The order of the version notation is:
 (any int) > rev > r > post > c = pre > beta > b > a > dev
 ```
 
----
 
 ## Branch Naming
 
@@ -55,3 +56,9 @@ A branch name consists of a version number and the branch's responsibility (be s
 v0.1.0-side-dock
 v0.1.1dev-docs
 ```
+
+## Coding Styles
+
+- This project followed most PEP standards
+- Use indentation = 4 spaces
+- For pure natural language strings, use double-quote; otherwise (involves variables), use single-quote

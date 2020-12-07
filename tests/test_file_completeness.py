@@ -101,7 +101,7 @@ class TestFileIntegrity(unittest.TestCase):
         self.assertEqual(type(version.parse(ver)), version.Version)
 
     def test_banner_valid(self):
-        _file = ROOT_DIR.joinpath('docs', 'banner.png')
+        _file = ROOT_DIR.joinpath('assets', 'banner.png')
         self.assertEqual(_file.exists(), True)
         self.assertNotEqual(get_file_size(_file), 0)
 

@@ -42,26 +42,28 @@ class TabThermopylae(QWidget):
         self.button_sortie = None
         self.init_left_layout()
 
-        text_box = QTextEdit()
-        text_box.setFont(QFont('Consolas'))
-        text_box.setReadOnly(True)
-        self.right_layout.addWidget(text_box)
+        self.text_box = QTextEdit()
+        self.init_right_layout()
         self.bee = Worker(self.test_process, ())
         self.bee.finished.connect(self.process_finished)
         self.bee.terminate()
 
-        # TODO: add specific loggers for different parts?
-        self.logger = logging.getLogger('TabThermopylae')
-        log_handler = LogHandler()
-        log_handler.sig_log.connect(text_box.append)
-        self.logger.addHandler(log_handler)
+        self.logger = self.create_logger()
 
         self.init_ui()
-        self.sortie = Sortie(self, self.api_six, [], [], self.logger, self.is_realrun)
+        self.sortie = Sortie(self, self.api_six, [], [], self.is_realrun)
 
         self.bee_sortie = Worker(self.sortie.start_sortie, ())
         self.bee_sortie.finished.connect(self.sortie_finished)
         self.bee_sortie.terminate()
+
+    def create_logger(self):
+        logger = logging.getLogger('TabThermopylae')
+        log_handler = LogHandler()
+        log_handler.sig_log.connect(self.text_box.append)
+        logger.addHandler(log_handler)
+        log_handler.setLevel(level=logging.INFO)
+        return logger
 
     def set_info_bar(self):
         w = QWidget()
@@ -99,13 +101,13 @@ class TabThermopylae(QWidget):
     def init_left_layout(self) -> None:
         t = QTextEdit()
         msg = "Notes\n"
-        msg += "1. As of now, this auto sortie function is only for user who passed E6 manually;\n"
+        msg += "1. As of now, this auto sortie function is ONLY for players who passed E6 manually;\n"
         msg += "2. As of now, there are limitations on what ship should be set:\n"
         msg += "    - DD 'Glowworm' and 'Amethyst', and CV 'Indomitable' are required\n"
         msg += "    - 6 high level SS are required\n"
         msg += "3. Adjutant 紫貂 (default) and Habakkuk (purchased in shop) are required;\n"
-        msg += "4. The function is NOT fully completed yet.\n"
-        msg += "5. The font looks small; I know!\n"
+        msg += "4. The function is NOT completed yet.\n"
+        t.setFontPointSize(10)
         t.setText(msg)
         self.button1 = QPushButton('start random process')
         self.button_sortie = QPushButton('Start Thermopylae E6 sortieing...')
@@ -116,6 +118,12 @@ class TabThermopylae(QWidget):
         self.left_layout.addWidget(t)
         self.left_layout.addWidget(self.button1)
         self.left_layout.addWidget(self.button_sortie)
+
+    def init_right_layout(self) -> None:
+        self.text_box.setFont(QFont('Consolas'))
+        self.text_box.setFontPointSize(10)
+        self.text_box.setReadOnly(True)
+        self.right_layout.addWidget(self.text_box)
 
     def add_ship(self):
         # TODO long term let user select boats here; now just use last fleets
@@ -173,7 +181,7 @@ class TabThermopylae(QWidget):
         self.button1.setEnabled(True)
 
     def sortie_finished(self):
-        self.logger.info('==== Sortie is done! ====')
+        self.logger.info('==== Sortie (dev) is done! ====')
         self.button_sortie.setEnabled(True)
 
 # End of File

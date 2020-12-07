@@ -1,5 +1,7 @@
 # LOGO
 
+Both the App Icon and Banner files can be found under `assets` directory.
+
 ## App Icon
 
 - Avatar: Warship Girls `San Francisco` (pre Mod I.); ID: 240

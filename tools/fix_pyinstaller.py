@@ -11,8 +11,9 @@ Run this script in tool/,
 and copy paste output to the *.spec file. Do clean the old fix.
 '''
 
-
 spec_root = "\'D:\\\github\\\WGViewer\'"
+
+
 def header(spec_root):
     t = """# -*- mode: python ; coding: utf-8 -*-
 import sys
@@ -32,8 +33,8 @@ a = Analysis(['gui_main.py'],
 """.format(spec_root)
     return t
 
-def datas_import():
 
+def datas_import():
     excluding = ['.md', '.MD', '.zip', '.ZIP']
     os.chdir("..")
     root_dir = os.path.dirname(os.path.realpath(__file__))
@@ -53,6 +54,7 @@ def datas_import():
                 t += res_str
     t += "]"
     return t
+
 
 def footer():
     t = """
@@ -77,7 +79,7 @@ exe = EXE(pyz,
 """
     return t
 
+
 print(header(spec_root))
 print(datas_import())
 print(footer())
-
