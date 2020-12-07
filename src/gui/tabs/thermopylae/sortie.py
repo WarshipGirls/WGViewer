@@ -37,7 +37,6 @@ class Sortie:
         self.boat_pool = []  # host existing boats
         self.escort_DD = []  # For 2DD to pass first few levels only, 萤火虫，布雷恩
         self.escort_CV = -1  # For 1CV to pass first few levels only, 不挠
-        self.init_map = "10006"  # TODO not used
         self.user_ships = wgr_data.get_processed_userShipVo()
 
         self.logger.info("Init E6...")
@@ -45,7 +44,6 @@ class Sortie:
 
     '''
     Order:
-    
     on sub maps
         - six_readyFire
         - six_useAdjutant

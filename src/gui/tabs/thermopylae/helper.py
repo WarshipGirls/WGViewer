@@ -72,6 +72,7 @@ class SortieHelper:
             data = self.api.readyFire(self.init_sub_map)
             if 'eid' in data:
                 get_error(data['eid'])
+                next_node_id = -1
                 res = False
             else:
                 next_node = self.get_next_node(data['$currentVo']['nodeId'])
@@ -146,11 +147,11 @@ class SortieHelper:
     # Non-WGR methods
     # ================================
 
-    def get_curr_points(self):
+    def get_curr_points(self) -> int:
         self.logger.info(f'Now have {self.points} strategic points left.')
         return self.points
 
-    def get_next_node(self, node_id: str) -> int:
+    def get_next_node(self, node_id: str) -> dict:
         node = next(i for i in self.map_data['combatLevelNode'] if i['id'] == node_id)
         return node
 

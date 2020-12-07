@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import (
     QWidget, QTabWidget, QGridLayout, QTabBar
 )
 
-from src.func.worker import CallbackWorker
 from src.gui.tabs.advance_functions import TabAdvanceFunctions
 from src.gui.tabs.tab_thermopylae import TabThermopylae
 from src.gui.tabs.tab_ship import TabShips

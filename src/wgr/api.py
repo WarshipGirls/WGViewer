@@ -5,7 +5,7 @@ import logging
 from requests import exceptions
 from requests.utils import cookiejar_from_dict
 from time import sleep
-from urllib.request import Request, urlopen, build_opener, HTTPCookieProcessor
+from urllib.request import Request, build_opener, HTTPCookieProcessor
 from urllib.error import URLError
 
 from src.func.helper import Helper
