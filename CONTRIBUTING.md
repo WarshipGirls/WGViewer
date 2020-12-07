@@ -59,5 +59,6 @@ v0.1.1dev-docs
 
 ## Coding Styles
 
-- This project followed most PEP standards.
+- This project followed most PEP standards
 - Use indentation = 4 spaces
+- For pure natural language strings, use double-quote; otherwise (involves variables), use single-quote
