@@ -181,7 +181,7 @@ class TabThermopylae(QWidget):
         self.button1.setEnabled(True)
 
     def sortie_finished(self):
-        self.logger.info('==== Sortie is done! ====')
+        self.logger.info('==== Sortie (dev) is done! ====')
         self.button_sortie.setEnabled(True)
 
 # End of File

@@ -75,10 +75,10 @@ class SortieHelper:
                 next_node_id = -1
                 res = False
             else:
-                next_node = self.get_next_node(data['$currentVo']['nodeId'])
+                self.logger.info('Entering map succeed!')
+                next_node = self.get_map_node(data['$currentVo']['nodeId'])
                 # Always choose the upper path
                 next_node_id = next_node['next_node'][0]
-                self.logger.info(f'Proceed to {next_node["flag"]}')
                 res = True
             return [res, next_node_id]
 
@@ -87,13 +87,14 @@ class SortieHelper:
     def api_newNext(self, next_node: str):
         def _newNext() -> list:
             # get 11009211 and 11008211
-            data = self.api.newNext(str(next_node))
+            data = self.api.newNext(next_node)
             if 'eid' in data:
                 get_error(data['eid'])
                 res = False
             else:
+                _flag = self.get_map_node(next_node)['flag']
+                self.logger.info(f"Proceed to {_flag} succeed!")
                 res = True
-                self.logger.info(f"Proceed to {next_node} succeed")
             return [res, data]
 
         return self._reconnecting_calls(_newNext, 'enter next node')
@@ -102,7 +103,7 @@ class SortieHelper:
         def _canSelectList() -> list:
             data = self.api.canSelectList(is_refresh)
             if '$ssss' in data:
-                self.logger.info('Visiting shop succeed')
+                self.logger.info('Visiting shop succeed!')
                 res = True
             elif 'eid' in data:
                 get_error(data['eid'])
@@ -151,8 +152,12 @@ class SortieHelper:
         self.logger.info(f'Now have {self.points} strategic points left.')
         return self.points
 
-    def get_next_node(self, node_id: str) -> dict:
-        node = next(i for i in self.map_data['combatLevelNode'] if i['id'] == node_id)
+    def get_map_node(self, node_id: str) -> dict:
+        try:
+            node = next(i for i in self.map_data['combatLevelNode'] if i['id'] == node_id)
+        except StopIteration:
+            self.logger.error('Access wrong nodes.')
+            node = {}
         return node
 
 # End of File

@@ -195,13 +195,12 @@ class Sortie:
             self.parent.button_sortie.setEnabled(True)
             return
 
-        self.helper.api_newNext(next_node)
+        self.helper.api_newNext(str(next_node))
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
             return
 
         shop_data = self.helper.get_ship_store()
-        print(shop_data)
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
             return
