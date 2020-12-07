@@ -110,5 +110,34 @@ class TestFileIntegrity(unittest.TestCase):
         self.assertEqual(_file.exists(), True)
         self.assertNotEqual(get_file_size(_file), 0)
 
+    def test_pull_request_template_valid(self):
+        _file = ROOT_DIR.joinpath('.github', 'PULL_REQUEST_TEMPLATE')
+        self.assertEqual(_file.exists(), True)
+        self.assertNotEqual(get_file_size(_file), 0)
+
+    def test_funding_valid(self):
+        _file = ROOT_DIR.joinpath('.github', 'FUNDING.yml')
+        self.assertEqual(_file.exists(), True)
+        self.assertNotEqual(get_file_size(_file), 0)
+
+    def test_workflows_valid(self):
+        _file = ROOT_DIR.joinpath('.github', 'workflows', 'run-pytest.yml')
+        self.assertEqual(_file.exists(), True)
+        self.assertNotEqual(get_file_size(_file), 0)
+
+        _file = ROOT_DIR.joinpath('.github', 'workflows', 'wgv-pyinstaller.yml')
+        self.assertEqual(_file.exists(), True)
+        self.assertNotEqual(get_file_size(_file), 0)
+
+    def test_issue_template_valid(self):
+        _file = ROOT_DIR.joinpath('.github', 'ISSUE_TEMPLATE', 'bug_report.md')
+        self.assertEqual(_file.exists(), True)
+        self.assertNotEqual(get_file_size(_file), 0)
+
+        _file = ROOT_DIR.joinpath('.github', 'ISSUE_TEMPLATE', 'feature_request.md')
+        self.assertEqual(_file.exists(), True)
+        self.assertNotEqual(get_file_size(_file), 0)
+
+
 if __name__ == '__main__':
     unittest.main()

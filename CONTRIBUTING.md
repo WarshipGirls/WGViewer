@@ -1,7 +1,9 @@
 # Contribution Guide
 
-- [WGViewer issue page](https://github.com/WarshipGirls/WGViewer/issues)
-- [WGViewer-tools issue page](https://github.com/WarshipGirls/WGViewer-tools/issues)
+You could help on:
+- [WGViewer issues](https://github.com/WarshipGirls/WGViewer/issues)
+- [WGViewer-tools issues](https://github.com/WarshipGirls/WGViewer-tools/issues)
+- Code in-line TODOs
 
 ## Start
 
