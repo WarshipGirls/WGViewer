@@ -14,9 +14,10 @@ import zlib
 from PyQt5.QtWidgets import QPushButton
 
 from src.data.wgv_path import get_data_dir
+from src.utils.general import get_app_version
 from src.exceptions.wgr_error import get_error
-from .helper import Helper
-from .session import GameSession
+from .helper import LoginHelper
+from .session import LoginSession
 
 HEADER = {
     'Accept-Encoding': 'identity',
@@ -25,7 +26,7 @@ HEADER = {
 }
 
 ANDROID_DATA_DICT = {
-    'client_version': version,
+    'client_version': get_app_version(),
     'phone_type': 'samsung note 9',
     'phone_version': '9.1.1',
     'ratio': '2960*1440',
@@ -38,11 +39,11 @@ ANDROID_DATA_DICT = {
     'gz': '1',
     'market': '2',
     'channel': '100015',
-    'version': version
+    'version': get_app_version()
 }
 
 IOS_DATA_DICT = {
-    'client_version': version,
+    'client_version': get_app_version(),
     'phone_type': '',
     'phone_version': '13.7',
     'ratio': '2160*1620',
@@ -55,7 +56,7 @@ IOS_DATA_DICT = {
     'gz': '1',
     'market': '2',
     'channel': '100020',
-    'version': version
+    'version': get_app_version()
 }
 
 
@@ -65,7 +66,7 @@ class GameLogin:
     2nd login: return nothing; init data
     """
 
-    def __init__(self, game_version: str, game_channel: str, game_session: GameSession, login_button: QPushButton):
+    def __init__(self, game_version: str, game_channel: str, game_session: LoginSession, login_button: QPushButton):
         self.version = game_version
         self.channel = game_channel
         self.session = game_session
@@ -84,7 +85,7 @@ class GameLogin:
             "Content-Type": "application/json; charset=UTF-8"
         }
 
-        self.hlp = Helper(self.session)
+        self.hlp = LoginHelper(self.session)
 
     def first_login(self, username: str, password: str) -> bool:
         logging.info("LOGIN - first server fetching...")
@@ -113,7 +114,7 @@ class GameLogin:
 
         return True
 
-    def cheat_sess(self, host: str, link: str):
+    def cheat_sess(self, host: str, link: str) -> None:
         self.login_button.setText("Loading " + link)
 
         time.sleep(0.5)
@@ -213,7 +214,7 @@ class GameLogin:
         self.uid = str(login_text['userId'])
         return login_text
 
-    def refresh_headers(self, url: str):
+    def refresh_headers(self, url: str) -> None:
         times = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
         data = "POST\n" + times + "\n" + "/" + url.split("/", 3)[-1]
         # encryption
@@ -230,7 +231,7 @@ class GameLogin:
         return output
 
     @staticmethod
-    def save_cookies(data: dict):
+    def save_cookies(data: dict) -> None:
         with open(os.path.join(get_data_dir(), 'user.cookies'), 'wb') as f:
             pickle.dump(data, f)
 

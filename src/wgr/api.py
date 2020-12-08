@@ -9,7 +9,7 @@ from time import sleep
 from urllib.request import Request, build_opener, HTTPCookieProcessor
 from urllib.error import URLError
 
-from src.func.helper import Helper
+from src.gui.login.helper import LoginHelper
 
 
 class WGR_API:
@@ -22,11 +22,11 @@ class WGR_API:
         self.channel = cookies['channel']
         self.cookies = cookies['cookies']
 
-        self.hlp = Helper()
+        self.hlp = LoginHelper()
         self.max_retry = 10
         self.sleep_time = 5
 
-    def _api_call(self, link: str) -> object:
+    def _api_call(self, link: str) -> dict:
         # This uses requests.sessions.Session().get() / post()
         data = None
         url = self.server + link + self.hlp.get_url_end(self.channel)
@@ -50,7 +50,7 @@ class WGR_API:
                 pass
         return data
 
-    def _api_urlopen(self, link: str) -> object:
+    def _api_urlopen(self, link: str) -> dict:
         # TODO: use this minimally! Currently the returned data is unreadable
         # This uses urllib.request.urlopen
         data = None

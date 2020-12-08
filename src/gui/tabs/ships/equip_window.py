@@ -1,6 +1,7 @@
 import sys
 import os
 
+from PyQt5.QtCore import QModelIndex
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QWidget, QPushButton, QMainWindow,
@@ -10,10 +11,11 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgv_data
 from src.utils.wgv_pyqt import get_user_resolution
+from .delegate import ShipTableDelegate
 from . import constant as SCONST
 
 
-def get_data_path(relative_path):
+def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
@@ -21,7 +23,7 @@ def get_data_path(relative_path):
 
 
 class EquipPopup(QMainWindow):
-    def __init__(self, parent, row, col, cid, button_enable):
+    def __init__(self, parent: ShipTableDelegate, row: int, col: int, cid: int, button_enable: bool):
         super().__init__()
         self.parent = parent
         self._row = row
@@ -44,7 +46,7 @@ class EquipPopup(QMainWindow):
         else:
             self.button.setEnabled(False)
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         self.setStyleSheet(wgv_data.get_color_scheme())
         self.setWindowTitle('WGViewer - Equipment Selection')
         self.resize(self.width, self.height)
@@ -78,7 +80,7 @@ class EquipPopup(QMainWindow):
         window.setLayout(content_layout)
         self.setCentralWidget(window)
 
-    def addTableRow(self, table, data):
+    def addTableRow(self, table: QTableWidget, data: dict) -> None:
         self.id_list.append(data['equipmentCid'])
         row = table.rowCount()
         table.setRowCount(row + 1)
@@ -102,7 +104,7 @@ class EquipPopup(QMainWindow):
             desc += ("\n" + data['data']['desc'])
         table.setItem(row, 3, QTableWidgetItem(desc))
 
-    def get_spec(self, data):
+    def get_spec(self, data: dict) -> str:
         res = []
         for key in data:
             if not isinstance(data[key], int) or (key == 'star'):
@@ -113,12 +115,12 @@ class EquipPopup(QMainWindow):
                 res.append(f'{self.trans[key]}\t{data[key]}')
         return '\n'.join(res)
 
-    def update_equip(self, index):
+    def update_equip(self, index: QModelIndex) -> None:
         e_id = self.id_list[index.row()]
         self.parent.handle_event(self._row, self._col, e_id)
         self.button.setEnabled(True)
 
-    def unequip(self):
+    def unequip(self) -> None:
         self.parent.handle_event(self._row, self._col, -1)
 
 # End of File

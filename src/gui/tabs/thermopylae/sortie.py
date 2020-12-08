@@ -85,7 +85,7 @@ class Sortie:
     
     '''
 
-    def _get_fleet_info(self):
+    def _get_fleet_info(self) -> None:
         if self.is_realrun is True:
             self.fleet_info = self.api.getFleetInfo()
             # save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
@@ -94,7 +94,7 @@ class Sortie:
             with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
                 self.fleet_info = json.load(f)
 
-    def _get_pve_data(self):
+    def _get_pve_data(self) -> None:
         if self.is_realrun is True:
             self.map_data = self.api.getPveData()
             # save_json('six_getPveData.json', self.map_data)  # TODO only for testing
@@ -103,7 +103,7 @@ class Sortie:
             with open('six_getPveData.json', 'r', encoding='utf-8') as f:
                 self.map_data = json.load(f)
 
-    def _get_user_data(self):
+    def _get_user_data(self) -> None:
         if self.is_realrun is True:
             self.user_data = self.api.getUserData()
             # save_json('six_getUserData.json', self.user_data)  # TODO only for testing
@@ -124,7 +124,7 @@ class Sortie:
             self.logger.warning("Pre-battle checking is done.")
         return self.can_start
 
-    def pre_battle(self):
+    def pre_battle(self) -> None:
         self.logger.info("Start pre battle checking...")
 
         if self.pre_battle_calls() is False:

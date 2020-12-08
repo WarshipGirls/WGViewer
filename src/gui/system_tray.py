@@ -5,7 +5,7 @@ from src.utils.wgv_pyqt import quit_application
 
 
 class TrayIcon(QSystemTrayIcon):
-    def __init__(self, parent, icon_path):
+    def __init__(self, parent, icon_path: str):
         super().__init__(parent)
         # All members need to be self referenced (including QAction;
         # otherwise will be collected
@@ -32,7 +32,7 @@ class TrayIcon(QSystemTrayIcon):
 
         self.activated.connect(self.activate_handler)
 
-    def activate_handler(self, reason):
+    def activate_handler(self, reason: QSystemTrayIcon.ActivationReason) -> None:
         # Most Windows apps use 1-click
         if reason == QSystemTrayIcon.Trigger:
             self.toggle_display()

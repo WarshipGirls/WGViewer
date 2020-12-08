@@ -1,3 +1,5 @@
+from typing import Callable
+
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (
@@ -6,12 +8,14 @@ from PyQt5.QtWidgets import (
 )
 
 from . import constant as SCONST
+from .model import ShipModel
+from .proxy_model import ShipSortFilterProxyModel
 
 
 class TopCheckboxes(QWidget):
     sig_value_select = pyqtSignal(str)
 
-    def __init__(self, parent, model, proxy):
+    def __init__(self, parent, model: ShipModel, proxy: ShipSortFilterProxyModel):
         super().__init__()
         self.layout = QGridLayout(parent)
         self.model = model
@@ -34,13 +38,13 @@ class TopCheckboxes(QWidget):
 
         self.sig_value_select.connect(self.model.on_stats_changed)
 
-    def init_button(self):
+    def init_button(self) -> None:
         button = QPushButton("CLEAR\nALL\nFILTER\nCRITERIA")
         button.clicked.connect(self._clear_filters)
         self.layout.addWidget(button, 0, 0, 3, 1)
         self.layout.setColumnStretch(0, 0)
 
-    def init_dropdowns(self):
+    def init_dropdowns(self) -> None:
         self.add_dropdown_on_index("COUNTRY", SCONST.country_select, self.proxy.set_country_filter, 0, 1, 4)
         self.add_dropdown_on_index("RARITY", SCONST.rarity_select, self.proxy.set_rarity_filter, 0, 5, 2)
         self.add_dropdown_on_text("TYPE", SCONST.type_size_select, self.proxy.set_type_filter, 0, 7, 2)
@@ -51,7 +55,7 @@ class TopCheckboxes(QWidget):
         # value populating is slow, takes extra step
         self.value_dropdown = self.add_dropdown_on_text("VALUE", SCONST.value_select, self.value_handler, 0, 17, 3)
 
-    def init_ship_boxes(self):
+    def init_ship_boxes(self) -> None:
         # in the ascending order of ship types (int)
         first_row_types = ["CV", "CVL", "AV", "BB", "BBV", "BC", "CA", "CAV", "CLT", "CL"]
         second_row_types = ["BM", "DD", "SSV", "SS", "SC", "AP", "ASDG", "AADG", "CB", "BBG"]
@@ -68,7 +72,7 @@ class TopCheckboxes(QWidget):
             self.layout.addWidget(b, 2, k * 2 + 1, 1, 2)
             self.second_boxes[k].stateChanged.connect(lambda _, _b=self.second_boxes[k]: self.proxy.set_checkbox_filter(_b))
 
-    def _add_dropdown(self, label, combobox, x, y, y_span):
+    def _add_dropdown(self, label: str, combobox: QComboBox, x: int, y: int, y_span: int) -> None:
         w = QWidget()
         wl = QHBoxLayout()
         w.setLayout(wl)
@@ -79,14 +83,14 @@ class TopCheckboxes(QWidget):
         wl.setStretch(1, 8)
         self.layout.addWidget(w, x, y, 1, y_span)
 
-    def add_dropdown_on_index(self, label, choices, handler, x, y, y_span=1):
+    def add_dropdown_on_index(self, label: str, choices: list, handler: Callable, x: int, y: int, y_span: int = 1) -> None:
         lc = QComboBox()
         lc.addItems(choices)
         lc.currentIndexChanged.connect(handler)
         lc.setFont(QFont('Consolas'))
         self._add_dropdown(label, lc, x, y, y_span)
 
-    def add_dropdown_on_text(self, label, choices, handler, x, y, y_span=1):
+    def add_dropdown_on_text(self, label: str, choices: list, handler: Callable, x: int, y: int, y_span: int = 1) -> QComboBox:
         lc = QComboBox()
         lc.addItems(choices)
         lc.currentTextChanged.connect(handler)
@@ -94,11 +98,11 @@ class TopCheckboxes(QWidget):
         self._add_dropdown(label, lc, x, y, y_span)
         return lc
 
-    def value_handler(self, text):
+    def value_handler(self, text: str) -> None:
         # TODO https://github.com/WarshipGirls/WGViewer/issues/21
         self.sig_value_select.emit(text)
 
-    def _clear_filters(self):
+    def _clear_filters(self) -> None:
         self.proxy.set_country_filter(None)
         self.proxy.set_rarity_filter(None)
         self.proxy.set_type_filter(None)

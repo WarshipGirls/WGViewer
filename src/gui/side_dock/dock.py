@@ -19,14 +19,13 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgv_data
 from src import utils as wgv_utils
-from src.func.helper import Helper
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 
 TASK_TYPE = {'1': "SINGLE", '2': "DAILY", '3': "WEEKLY", '4': "LIMITED TIME"}
 
 
-def get_data_path(relative_path):
+def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
@@ -41,7 +40,6 @@ class SideDock(QDockWidget):
         super(SideDock, self).__init__(parent)
         _, self.user_screen_h = wgv_utils.get_user_resolution()
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
-        self.hlp = Helper()
 
         # index 0 for daily, 1 for weekly, 2+ for tasks/events
         self.task_counter_desc_labels = []
@@ -254,7 +252,7 @@ class SideDock(QDockWidget):
         cn_time = utc_time.astimezone(pytz.timezone('Asia/Shanghai'))
         local_time = utc_time.astimezone()
 
-        def datetime_to_unixtime(t):
+        def datetime_to_unixtime(t: datetime) -> float:
             return time.mktime(t.timetuple())
 
         if cn_time.hour < 3:

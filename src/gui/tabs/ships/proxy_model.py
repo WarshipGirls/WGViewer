@@ -1,9 +1,11 @@
 import ast
 import logging
 import re
+from typing import Callable
 
-from PyQt5.QtCore import Qt, QSortFilterProxyModel
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QModelIndex, QRegExp
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QCheckBox
 
 from src import data as wgv_data
 from . import constant as SCONST
@@ -48,7 +50,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         except KeyError:
             logging.error(f'proxy {cid} not exist!')
 
-    def set_name_filter(self, regex):
+    def set_name_filter(self, regex: str) -> None:
         """
         reg = string, auto mapped to QString in Py3
         """
@@ -59,42 +61,42 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.name_reg = regex
         self.invalidateFilter()
 
-    def set_lock_filter(self, is_lock):
+    def set_lock_filter(self, is_lock: [None, str]) -> None:
         self.lock_opt = is_lock
         self.invalidateFilter()
 
-    def set_level_filter(self, level):
+    def set_level_filter(self, level: [None, str]) -> None:
         self.level_opt = level
         self.invalidateFilter()
 
-    def set_mod_filter(self, mod):
+    def set_mod_filter(self, mod: [None, str]) -> None:
         self.mod_opt = mod
         self.invalidateFilter()
 
-    def set_type_filter(self, type_size):
+    def set_type_filter(self, type_size: [None, str]) -> None:
         self.type_size_opt = type_size
         self.invalidateFilter()
 
-    def set_rarity_filter(self, rarity):
+    def set_rarity_filter(self, rarity: [None, str]) -> None:
         self.rarity_opt = rarity
         self.invalidateFilter()
 
-    def set_marry_filter(self, married):
+    def set_marry_filter(self, married: [None, str]) -> None:
         self.marry_opt = married
         self.invalidateFilter()
 
-    def set_country_filter(self, country):
+    def set_country_filter(self, country: [None, str]) -> None:
         self.country_opt = country
         self.invalidateFilter()
 
-    def set_checkbox_filter(self, x):
+    def set_checkbox_filter(self, x: [None, QCheckBox]) -> None:
         if x is None:
             self.checkboxes_opt = {}
         else:
             self.checkboxes_opt[x.text()] = x.isChecked()
         self.invalidateFilter()
 
-    def _customFilterAcceptsRow(self, source_row, source_parent, opt, col, func):
+    def _customFilterAcceptsRow(self, source_row: int, source_parent: QModelIndex, opt: str, col: int, func: Callable) -> list:
         res = []
         if opt is None:
             res.append(source_row if source_row != 0 else True)
@@ -106,7 +108,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                 res = func(opt, idx)
         return res
 
-    def checkboxFilterAcceptsRow(self, source_row, source_parent, opt, col):
+    def checkboxFilterAcceptsRow(self, source_row: int, source_parent: QModelIndex, opt: dict, col: int) -> list:
         res = []
         if not any(opt):
             res.append(source_row if source_row != 0 else True)
@@ -122,7 +124,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
                     res.append(opt[ship_class] == True)
         return res
 
-    def nameFilterAcceptsRow(self, source_row, source_parent, opt, col):
+    def nameFilterAcceptsRow(self, source_row: int, source_parent: QModelIndex, opt: str, col: int) -> list:
         def f(o, i):
             r = []
             name = self.sourceModel().data(i, Qt.DisplayRole)
@@ -135,7 +137,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
-    def lockFilterAcceptsRow(self, source_row, source_parent, opt, col):
+    def lockFilterAcceptsRow(self, source_row: int, source_parent: QModelIndex, opt: str, col: int) -> list:
         def f(o, i):
             r = []
             lock = self.sourceModel().data(i, Qt.DecorationRole)  # Detect if have ICON
@@ -149,7 +151,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
-    def levelFilterAcceptsRow(self, source_row, source_parent, opt, col):
+    def levelFilterAcceptsRow(self, source_row: int, source_parent: QModelIndex, opt: str, col: int) -> list:
         def f(o, i):
             r = []
             level = self.sourceModel().data(i, Qt.DisplayRole)
@@ -169,7 +171,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
-    def modFilterAcceptsRow(self, source_row, source_parent, opt, col):
+    def modFilterAcceptsRow(self, source_row: int, source_parent: QModelIndex, opt: str, col: int) -> list:
         def f(o, i):
             r = []
             mod = self.sourceModel().data(i, Qt.UserRole)[:3]
@@ -183,7 +185,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
-    def sizeFilterAcceptsRow(self, source_row, source_parent, opt, col):
+    def sizeFilterAcceptsRow(self, source_row: int, source_parent: QModelIndex, opt: str, col: int) -> list:
         def f(o, i):
             r = []
             s = self.sourceModel().data(i, Qt.UserRole)[-2:]
@@ -199,7 +201,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
-    def typeFilterAcceptsRow(self, source_row, source_parent, opt, col):
+    def typeFilterAcceptsRow(self, source_row: int, source_parent: QModelIndex, opt: str, col: int) -> list:
         def f(o, i):
             r = []
             t = self.sourceModel().data(i, Qt.DisplayRole)
@@ -215,7 +217,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
-    def rarityFilterAcceptsRow(self, source_row, source_parent, opt, col):
+    def rarityFilterAcceptsRow(self, source_row: int, source_parent: QModelIndex, opt: str, col: int) -> list:
         def f(o, i):  # o is QComboBox index
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
@@ -228,7 +230,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         return self._customFilterAcceptsRow(source_row, source_parent, opt, col, f)
 
-    def countryFilterAcceptsRow(self, source_row, source_parent, opt, col):
+    def countryFilterAcceptsRow(self, source_row: int, source_parent: QModelIndex, opt: str, col: int) -> list:
         def f(o, i):  # o is QComboBox index
             res = []
             cid = self.sourceModel().data(i, Qt.UserRole)
@@ -245,7 +247,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
     # QSortFilterProxyModel virtual functions
     # ================================================================
 
-    def filterAcceptsRow(self, source_row, source_parent):
+    def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex) -> bool:
 
         cond1 = False == any(self.checkboxes_opt)
         cond2 = False == any(
@@ -311,13 +313,13 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         country_res = self.countryFilterAcceptsRow(source_row, source_parent, self.country_opt, 0)
         return all(country_res)
 
-    def setFilterRegExp(self, string):
+    def setFilterRegExp(self, string: QRegExp) -> None:
         return super().setFilterRegExp(string)
 
-    def setFilterKeyColumn(self, column):
+    def setFilterKeyColumn(self, column: int) -> None:
         return super().setFilterKeyColumn(column)
 
-    def lessThan(self, source_left, source_right):
+    def lessThan(self, source_left: QModelIndex, source_right: QModelIndex) -> bool:
         if source_left.isValid() and source_right.isValid():
             l = source_left.data()
             r = source_right.data()

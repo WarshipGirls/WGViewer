@@ -7,7 +7,7 @@ from PyQt5.QtGui import QIcon, QFontDatabase
 from PyQt5.QtWidgets import QApplication
 
 from src.utils.general import get_app_version
-from src.gui.login import LoginForm
+from src.gui.login.form import LoginForm
 
 
 def get_data_path(relative_path: str) -> str:

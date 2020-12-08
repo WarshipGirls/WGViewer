@@ -7,7 +7,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QAbstractTableModel
 
 
-def get_data_path(relative_path):
+def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
@@ -105,77 +105,77 @@ class ResourceTableModel(QAbstractTableModel):
     '''
 
     @pyqtSlot(int)
-    def update_fuel(self, new_val: int):
+    def update_fuel(self, new_val: int) -> None:
         idx = self.index(0, 0)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_ammo(self, new_val: int):
+    def update_ammo(self, new_val: int) -> None:
         idx = self.index(0, 1)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_steel(self, new_val: int):
+    def update_steel(self, new_val: int) -> None:
         idx = self.index(0, 2)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_bauxite(self, new_val: int):
+    def update_bauxite(self, new_val: int) -> None:
         idx = self.index(0, 3)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_gold(self, new_val: int):
+    def update_gold(self, new_val: int) -> None:
         idx = self.index(0, 4)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_repair(self, new_val: int):
+    def update_repair(self, new_val: int) -> None:
         idx = self.index(1, 0)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_build(self, new_val: int):
+    def update_build(self, new_val: int) -> None:
         idx = self.index(1, 1)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_bp_construct(self, new_val: int):
+    def update_bp_construct(self, new_val: int) -> None:
         idx = self.index(1, 2)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_bp_dev(self, new_val: int):
+    def update_bp_dev(self, new_val: int) -> None:
         idx = self.index(1, 3)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_revive(self, new_val: int):
+    def update_revive(self, new_val: int) -> None:
         idx = self.index(1, 4)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_DD(self, new_val: int):
+    def update_DD(self, new_val: int) -> None:
         idx = self.index(2, 0)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_CA(self, new_val: int):
+    def update_CA(self, new_val: int) -> None:
         idx = self.index(2, 1)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_BB(self, new_val: int):
+    def update_BB(self, new_val: int) -> None:
         idx = self.index(2, 2)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_CV(self, new_val: int):
+    def update_CV(self, new_val: int) -> None:
         idx = self.index(2, 3)
         self.setData(idx, new_val, Qt.UserRole)
 
     @pyqtSlot(int)
-    def update_SS(self, new_val: int):
+    def update_SS(self, new_val: int) -> None:
         idx = self.index(2, 4)
         self.setData(idx, new_val, Qt.UserRole)
 

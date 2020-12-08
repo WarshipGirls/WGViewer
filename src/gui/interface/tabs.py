@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 
-from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtCore import QSize, Qt, QThreadPool
 from PyQt5.QtWidgets import (
     QWidget, QTabWidget, QGridLayout, QTabBar
 )
@@ -13,7 +13,7 @@ from src.gui.tabs.tab_ship import TabShips
 from src.gui.tabs.tab_expedition import TabExpedition
 
 
-def get_data_path(relative_path):
+def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
@@ -21,14 +21,14 @@ def get_data_path(relative_path):
 
 
 class TabBar(QTabBar):
-    def tabSizeHint(self, index):
+    def tabSizeHint(self, index: int) -> QSize:
         size = QTabBar.tabSizeHint(self, index)
         w = int(self.width() / self.count())
         return QSize(w, size.height())
 
 
 class MainInterfaceTabs(QWidget):
-    def __init__(self, parent, threadpool, is_realrun):
+    def __init__(self, parent, threadpool: QThreadPool, is_realrun: bool):
         super().__init__()
         logging.info("Creating Main Interface Tabs...")
         self.parent = parent

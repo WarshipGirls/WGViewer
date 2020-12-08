@@ -8,7 +8,7 @@ from packaging import version
 from src import utils as wgv_utils
 
 
-class VersionCheck:
+class WGViewerVersionCheck:
     def __init__(self, parent):
         self.latest_ver = None
         self.parent = parent

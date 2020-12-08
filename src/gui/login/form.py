@@ -14,15 +14,14 @@ from src import utils as wgv_utils
 from src.exceptions.custom import InterruptExecution
 from src.exceptions.wgr_error import WarshipGirlsExceptions
 from src.func.encryptor import Encryptor
-from src.func.login import GameLogin
-from src.func.session import GameSession
-from src.func import constants as constants
-from src.func.version_check import VersionCheck
 from src.func.worker import CallbackWorker
-from .main_interface import MainInterface
+from src.gui.main_interface import MainInterface
+from .game_login import GameLogin
+from .session import LoginSession
+from .version_check import WGViewerVersionCheck
 
 
-def create_label(text: str):
+def create_label(text: str) -> QLabel:
     _str = '<font size="4"> ' + text + ' </font>'
     _res = QLabel(_str)
     return _res
@@ -33,7 +32,7 @@ class LoginForm(QWidget):
 
     def __init__(self):
         super().__init__()
-        VersionCheck(self)
+        WGViewerVersionCheck(self)
 
         self.sig_login.connect(self.start_login)
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
@@ -57,7 +56,7 @@ class LoginForm(QWidget):
         self.check_disclaimer.setMaximumWidth(int(0.083 * user_w))
         self.check_save = QCheckBox('Store login info locally with encryption')
         self.check_auto = QCheckBox('Auto login on the application start')
-        self.login_button = QPushButton('Login')
+        self.login_button = QPushButton('')
 
         self.container = QWidget()
         main_layout = QVBoxLayout()
@@ -69,7 +68,7 @@ class LoginForm(QWidget):
 
         self.auto_start()
 
-    def auto_start(self):
+    def auto_start(self) -> None:
         if self.qsettings.value("Login/auto") == "true":
             # QThread cannot handle exceptions for this one
             try:
@@ -85,7 +84,7 @@ class LoginForm(QWidget):
     # Initialization
     # ================================
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         if self.qsettings.value("Login/save") == 'true':
             self.qsettings.beginGroup('Login')
             name = self.qsettings.value('username')
@@ -128,7 +127,7 @@ class LoginForm(QWidget):
         self.setStyleSheet(wgv_data.get_color_scheme())
         self.setWindowTitle(f'Warship Girls Viewer v{wgv_utils.get_app_version()} Login')
 
-    def init_name_field(self, text: str = ''):
+    def init_name_field(self, text: str = '') -> None:
         label_name = create_label('Username')
         self.lineEdit_username.setClearButtonEnabled(True)
 
@@ -140,7 +139,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(label_name, 0, 0)
         self.layout.addWidget(self.lineEdit_username, 0, 1, 1, 2)
 
-    def init_password_field(self, text: str = ''):
+    def init_password_field(self, text: str = '') -> None:
         label_password = create_label('Password')
         self.lineEdit_password.setClearButtonEnabled(True)
         self.lineEdit_password.setEchoMode(QLineEdit.Password)
@@ -153,7 +152,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(label_password, 1, 0)
         self.layout.addWidget(self.lineEdit_password, 1, 1, 1, 2)
 
-    def init_platform_field(self, text: str = ''):
+    def init_platform_field(self, text: str = '') -> None:
         label_platform = create_label('Platform')
         # platforms = ["Choose your platform", "CN-iOS", "CN-Android", "International", "JP"]
         platforms = ["Choose your platform", "CN-iOS", "CN-Android"]
@@ -168,7 +167,7 @@ class LoginForm(QWidget):
         self.layout.addWidget(label_platform, 2, 0)
         self.layout.addWidget(self.combo_platform, 2, 1, 1, 2)
 
-    def init_server_field(self, text: str = ''):
+    def init_server_field(self, text: str = '') -> None:
         label_server = create_label('Server')
         self.combo_server.currentTextChanged.connect(self.update_server)
 
@@ -180,29 +179,29 @@ class LoginForm(QWidget):
         self.layout.addWidget(label_server, 3, 0)
         self.layout.addWidget(self.combo_server, 3, 1, 1, 2)
 
-    def init_check_disclaimer(self, checked: bool = False):
+    def init_check_disclaimer(self, checked: bool = False) -> None:
         self.check_disclaimer.setChecked(checked)
         self.check_disclaimer.stateChanged.connect(self.on_disclaimer_clicked)
         self.layout.addWidget(self.check_disclaimer, 4, 1)
 
-    def init_disclaimer_link(self):
+    def init_disclaimer_link(self) -> None:
         label = QLabel()
         disclaimer = '<a href=\"{}\"> Terms and Conditions </a>'.format('TODO')
         label.setText(f'{disclaimer}')
         label.linkActivated.connect(wgv_utils.open_disclaimer)
         self.layout.addWidget(label, 4, 2)
 
-    def init_check_save(self, checked: bool = False):
+    def init_check_save(self, checked: bool = False) -> None:
         self.check_save.setChecked(checked)
         self.check_save.stateChanged.connect(self.on_save_clicked)
         self.layout.addWidget(self.check_save, 5, 1, 1, 2)
 
-    def init_check_auto(self, checked: bool = False):
+    def init_check_auto(self, checked: bool = False) -> None:
         self.check_auto.setChecked(checked)
         self.check_auto.stateChanged.connect(self.on_auto_clicked)
         self.layout.addWidget(self.check_auto, 6, 1, 1, 2)
 
-    def init_login_button(self, user_h: int):
+    def init_login_button(self, user_h: int) -> None:
         self.login_button.clicked.connect(self.start_login)
         # set an empty gap row
         self.layout.addWidget(self.login_button, 8, 0, 1, 3)
@@ -212,17 +211,17 @@ class LoginForm(QWidget):
     # General
     # ================================
 
-    def login_success(self):
+    def login_success(self) -> None:
         self.mi.show()
         self.close()
 
-    def login_failed(self):
+    def login_failed(self) -> None:
         self.login_button.setText('Login')
         self.login_button.setEnabled(True)
         self.check_auto.setText('Auto login on the application start')
         self.container.setEnabled(True)
 
-    def wait_five_seconds(self):
+    def wait_five_seconds(self) -> None:
         # It's ugly, but it works. QThread approach won't work
         count = 0
         while True:
@@ -254,10 +253,10 @@ class LoginForm(QWidget):
     # Events
     # ================================
 
-    def on_disclaimer_clicked(self):
+    def on_disclaimer_clicked(self) -> None:
         self.qsettings.setValue('Login/disclaimer', self.check_disclaimer.isChecked())
 
-    def on_save_clicked(self):
+    def on_save_clicked(self) -> None:
         if self.check_save.isChecked():
             self.qsettings.beginGroup('Login')
             self.qsettings.setValue("save", self.check_save.isChecked())
@@ -277,7 +276,7 @@ class LoginForm(QWidget):
             self.check_disclaimer.setChecked(False)
             self.check_auto.setChecked(False)
 
-    def on_auto_clicked(self):
+    def on_auto_clicked(self) -> None:
         if self.check_auto.isChecked():
             # off -> on
             self.check_auto.setText('Will auto login on next start up')
@@ -286,7 +285,7 @@ class LoginForm(QWidget):
             self.login_button.setEnabled(True)
         self.qsettings.setValue("Login/auto", self.check_auto.isChecked())
 
-    def update_server_box(self, text: str):
+    def update_server_box(self, text: str) -> None:
         self.combo_server.clear()
         if text == "CN-iOS":
             servers = ["列克星敦", "维内托"]
@@ -305,7 +304,7 @@ class LoginForm(QWidget):
             logging.warning("Login server is not chosen.")
         self.combo_server.addItems(servers)
 
-    def update_server(self, text: str):
+    def update_server(self, text: str) -> None:
         if text == "列克星敦":
             self.server = "http://s101.jr.moefantasy.com/"
         elif text == "维内托":
@@ -324,7 +323,7 @@ class LoginForm(QWidget):
             logging.error(f"Invalid server name: {text}")
 
     @pyqtSlot()
-    def start_login(self):
+    def start_login(self) -> None:
         if self.check_disclaimer.isChecked() is True:
             self.container.setEnabled(False)
             self.on_save_clicked()
@@ -332,7 +331,7 @@ class LoginForm(QWidget):
         else:
             wgv_utils.popup_msg('Read disclaimer and check to proceed')
 
-    def handle_result1(self, result: bool):
+    def handle_result1(self, result: bool) -> None:
         logging.debug(f'LOGIN - First fetch result {result}')
         self.res1 = result
         if self.res1 is True:
@@ -340,7 +339,7 @@ class LoginForm(QWidget):
         else:
             self.login_failed()
 
-    def handle_result2(self, result: bool):
+    def handle_result2(self, result: bool) -> None:
         logging.debug(f'LOGIN - Second fetch result {result}')
         self.res2 = result
 
@@ -384,9 +383,9 @@ class LoginForm(QWidget):
             return False
         return res2
 
-    def _check_password(self):
-        sess = GameSession()
-        self.account = GameLogin(constants.version, self.channel, sess, self.login_button)
+    def _check_password(self) -> None:
+        sess = LoginSession()
+        self.account = GameLogin(wgv_utils.get_game_version(), self.channel, sess, self.login_button)
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()
 

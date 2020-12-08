@@ -1,9 +1,10 @@
 import hashlib
 import time
 import zlib
+from typing import Union
 
 from src.utils.general import get_game_version
-from .session import GameSession
+from src.gui.login.session import LoginSession
 
 HEADER = {
     'Accept-Encoding': 'identity',
@@ -12,19 +13,19 @@ HEADER = {
 }
 
 
-class Helper:
+class LoginHelper:
     """
     This Class is meant for game URL connections only
     """
 
-    def __init__(self, sess=None):
+    def __init__(self, sess: [LoginSession, None] = None):
         if sess is None:
-            self.sess = GameSession()
+            self.sess = LoginSession()
         else:
             self.sess = sess
 
     @staticmethod
-    def get_url_end(channel, now_time=str(int(round(time.time() * 1000)))):
+    def get_url_end(channel: str, now_time: str = str(int(round(time.time() * 1000)))) -> str:
         url_time = now_time
         # TODO: how to get the key in the first place? The encryption of URL part is the single point of failure of the app
         md5_raw = url_time + 'ade2688f1904e9fb8d2efdb61b5e398a'
@@ -32,7 +33,7 @@ class Helper:
         url_end = f'&t={url_time}&e={md5}&version={get_game_version()}&channel={channel}&gz=1&market=3'
         return url_end
 
-    def session_get(self, url, cookies, *data):
+    def session_get(self, url: str, cookies: dict, *data) -> Union[str, bytes]:
         if len(data) == 0:
             content = self.sess.get(url=url, headers=HEADER, cookies=cookies, timeout=10).content
         else:
@@ -48,7 +49,7 @@ class Helper:
         return data
 
     @staticmethod
-    def str_arg(**arg):
+    def str_arg(**arg) -> dict:
         new_arg = {}
         for index, key in arg.items():
             new_arg[index] = str(key)

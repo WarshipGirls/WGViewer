@@ -13,7 +13,7 @@ from src import data as wgv_data
 from src.utils.wgv_pyqt import get_user_resolution
 
 
-def get_data_path(relative_path):
+def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
@@ -21,7 +21,7 @@ def get_data_path(relative_path):
 
 
 class ShipSelectWindow(QMainWindow):
-    def __init__(self, parent, button_id):
+    def __init__(self, parent, button_id: int):
         super().__init__()
         self.parent = parent
         self.button_id = button_id
@@ -36,7 +36,7 @@ class ShipSelectWindow(QMainWindow):
         self.tab = QTableWidget()
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         self.setStyleSheet(wgv_data.get_color_scheme())
         self.setWindowTitle('WGViewer - Ship Selection')
         self.resize(self.width, self.height)
@@ -70,7 +70,7 @@ class ShipSelectWindow(QMainWindow):
         self.setCentralWidget(window)
 
     @staticmethod
-    def add_table_row(table, ship_id, ship):
+    def add_table_row(table: QTableWidget, ship_id: int, ship: dict) -> None:
         ship_name = ship['Name']
         ship_type = ship['Class']
         ship_lvl = "Lv." + ship['Lv.']
@@ -82,7 +82,7 @@ class ShipSelectWindow(QMainWindow):
         table.setItem(row, 2, QTableWidgetItem(ship_name))
         table.setItem(row, 3, QTableWidgetItem(ship_lvl))
 
-    def set_ship(self, index: QModelIndex):
+    def set_ship(self, index: QModelIndex) -> None:
         res = [None] * 4
         for i in range(4):
             res[i] = self.tab.item(index.row(), i).data(Qt.DisplayRole)

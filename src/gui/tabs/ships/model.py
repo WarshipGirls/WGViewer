@@ -4,16 +4,16 @@ import sys
 
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
+from PyQt5.QtWidgets import QTableView
 
 from src import data as wgv_data
 from src import utils as wgv_utils
-from src.func.helper import Helper
 from src.utils.general import clear_desc, ts_to_date
 from src.wgr.boat import API_BOAT
 from . import constant as SCONST
 
 
-def get_data_path(relative_path):
+def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
@@ -21,11 +21,10 @@ def get_data_path(relative_path):
 
 
 class ShipModel(QStandardItemModel):
-    def __init__(self, view):
+    def __init__(self, view: QTableView):
         super().__init__(view)
         self.view = view
         self.api_boat = API_BOAT(wgv_data.load_cookies())
-        self.hlp = Helper()
 
         self.value_opt = SCONST.value_select[0]
         self.headers = SCONST.header
@@ -43,7 +42,7 @@ class ShipModel(QStandardItemModel):
         self.setColumnCount(len(self.headers))
         self.setHorizontalHeaderLabels(self.headers)
 
-    def save_table_data(self):
+    def save_table_data(self) -> None:
         all_ships = {}
         for row in range(self.rowCount()):
             # Qt.DisplayRole (default), Qt.UserRole (hidden), Qt.DecorationRole (icon)
@@ -63,16 +62,16 @@ class ShipModel(QStandardItemModel):
             # TODO skill cid after implementing skill
         wgv_data.save_processed_userShipVo(all_ships)
 
-    def init_icons(self):
+    def init_icons(self) -> None:
         # To avoid repeatedly loading same icon, preload them
         self.ring_icon = QIcon(get_data_path("assets/icons/ring_60.png"))
         self.lock_icon = QIcon(get_data_path("assets/icons/lock_64.png"))
 
-    def init_json(self):
+    def init_json(self) -> None:
         self.tactics_json = wgv_data.get_tactics_json()
         self.user_tactics = wgv_data.get_user_tactics()
 
-    def set_data(self, _data):
+    def set_data(self, _data: dict) -> None:
         self.ships_raw_data = _data
 
         for i in range(28):  # up to (not including) 28
@@ -87,7 +86,7 @@ class ShipModel(QStandardItemModel):
                     self.insertRow(self.rowCount())
                     self.add_ship(self.rowCount() - 1, ship)
 
-    def add_ship(self, row, d):
+    def add_ship(self, row: int, d: dict) -> None:
         logging.info(f"SHIP - Populating {row}")
         self.set_thumbnail(row, str(d["shipCid"]))
         self.set_name(row, d["title"], d["married"], d["create_time"], d["marry_time"])
@@ -100,7 +99,7 @@ class ShipModel(QStandardItemModel):
         self.set_equips(row, d["equipmentArr"])
         self.set_tactics(row, d['tactics'])
 
-    def set_thumbnail(self, row, cid):
+    def set_thumbnail(self, row: int, cid: str) -> None:
         """ Column 0
         Set ship image (thumbnail) and categorize ships by cid along the way.
         """
@@ -139,7 +138,7 @@ class ShipModel(QStandardItemModel):
             err = "Image path does not exist: " + img_path
             logging.warning(err)
 
-    def set_name(self, *args):
+    def set_name(self, *args) -> None:
         wig = QStandardItem(args[1])
         s = "Met on " + ts_to_date(int(args[3]))
         if args[2] == 1:
@@ -150,7 +149,7 @@ class ShipModel(QStandardItemModel):
         wig.setToolTip(s)
         self.setItem(args[0], 1, wig)
 
-    def set_id(self, *args):
+    def set_id(self, *args) -> None:
         wig = QStandardItem(str(args[1]))
         if args[2] == 1:
             wig.setIcon(self.lock_icon)
@@ -159,11 +158,11 @@ class ShipModel(QStandardItemModel):
             pass
         self.setItem(args[0], 2, wig)
 
-    def set_class(self, *args):
+    def set_class(self, *args) -> None:
         wig = QStandardItem(wgv_utils.get_ship_type(args[1]))
         self.setItem(args[0], 3, wig)
 
-    def set_level(self, *args):
+    def set_level(self, *args) -> None:
         wig = QStandardItem(str(args[1]))
 
         if args[3] != -1:
@@ -174,7 +173,7 @@ class ShipModel(QStandardItemModel):
         self.setItem(args[0], 6, wig)
 
     @pyqtSlot(str)
-    def on_stats_changed(self, *args):
+    def on_stats_changed(self, *args) -> None:
         """
         Getting check box update signal
         """
@@ -185,7 +184,7 @@ class ShipModel(QStandardItemModel):
 
         self.update_stats()
 
-    def update_stats(self):
+    def update_stats(self) -> None:
         for row in range(self.rowCount()):
             _id_idx = self.index(row, 2)
             _id = int(self.data(_id_idx, Qt.DisplayRole))
@@ -243,7 +242,7 @@ class ShipModel(QStandardItemModel):
             else:
                 pass
 
-    def set_stats(self, *args):
+    def set_stats(self, *args) -> None:
         # set current ship stats as default
 
         # Design thinking: I thought set eye-catching color for not-full hp. 
@@ -275,7 +274,7 @@ class ShipModel(QStandardItemModel):
         wig_b = QStandardItem(bauxite)
         self.setItem(args[0], 19, wig_b)
 
-    def set_slots(self, *args):
+    def set_slots(self, *args) -> None:
         if any(args[1]) and any(args[2]):
             slot = " - "
         else:
@@ -287,7 +286,7 @@ class ShipModel(QStandardItemModel):
         wig = QStandardItem(slot)
         self.setItem(args[0], 20, wig)
 
-    def set_equips(self, *args):
+    def set_equips(self, *args) -> None:
 
         col = 21
         for e in args[1]:
@@ -321,12 +320,12 @@ class ShipModel(QStandardItemModel):
             self.setItem(args[0], col, item)
             col += 1
 
-    def update_one_equip(self, row, col, equip_id):
+    def update_one_equip(self, row: int, col: int, equip_id: int) -> None:
         ship_id = self.index(row, 2).data()
         unequip_id = self.index(row, col).data(Qt.UserRole)
         equip_slot = col - 21
 
-        if equip_id == "-1":
+        if str(equip_id) == "-1":
             # unequip; setItem deletes previous item
             item = QStandardItem()
             item.setData(-1, Qt.UserRole)
@@ -357,7 +356,7 @@ class ShipModel(QStandardItemModel):
         else:
             logging.warning(f'Image for equipment {equip_id} is absent.')
 
-    def set_tactics(self, *args):
+    def set_tactics(self, *args) -> None:
         # stupid MoeFantasy makes it inefficient; can't access tactics LV by ship data
         # TODO: switch tactics like equip
         col = 25

@@ -26,7 +26,7 @@ class SortieHelper:
         }
         self.logger.debug('SortieHelper is initiated')
 
-    def is_exit(self):
+    def is_exit(self) -> bool:
         return self.force_exit
 
     def _reconnecting_calls(self, func: Callable, func_info: str) -> [dict, object]:
@@ -239,7 +239,7 @@ class SortieHelper:
             return res, data
         return self._reconnecting_calls(_repair, 'repair')
 
-    def process_repair(self, ships: list, repair_levels: [int, list]):
+    def process_repair(self, ships: list, repair_levels: [int, list]) -> None:
         repairs = []
         ship_ids = []
         for ship in ships:
@@ -270,7 +270,7 @@ class SortieHelper:
         else:
             pass
 
-    def spy(self):
+    def spy(self) -> dict:
         def _spy() -> Tuple[bool, dict]:
             data = self.api.spy()
             print(data)
@@ -284,7 +284,7 @@ class SortieHelper:
             return res, data
         return self._reconnecting_calls(_spy, 'Detection')
 
-    def challenge(self, formation: str):
+    def challenge(self, formation: str) -> None:
         def _challenge() -> Tuple[bool, dict]:
             data = self.api.challenge(formation)
             print(data)
@@ -298,7 +298,7 @@ class SortieHelper:
             return res, data
         return self._reconnecting_calls(_challenge, 'Combat')
 
-    def get_war_result(self, is_night: str = '0'):
+    def get_war_result(self, is_night: str = '0') -> None:
         def _result() -> Tuple[bool, dict]:
             data = self.api.getWarResult(is_night)
             print(data)

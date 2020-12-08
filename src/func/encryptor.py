@@ -8,31 +8,31 @@ class Encryptor:
         pass
 
     @staticmethod
-    def gen_key():
+    def gen_key() -> bytes:
         return Fernet.generate_key()
 
     @staticmethod
-    def save_key(key, path):
+    def save_key(key: bytes, path: str) -> None:
         with open(path, 'wb') as f:
             f.write(key)
 
     @staticmethod
-    def load_key(path):
+    def load_key(path: str) -> bytes:
         with open(path, 'rb') as f:
             key = f.read()
         return key
 
     @staticmethod
-    def encrypt_str(key, string):
+    def encrypt_str(key: bytes, string: str):
         return Fernet(key).encrypt(bytes(string, encoding='utf8'))
 
     @staticmethod
-    def decrypt_data(key, data):
+    def decrypt_data(key: bytes, data: bytes) -> [bytes, None]:
         try:
             return Fernet(key).decrypt(data)
         except TypeError:
             logging.error('Key file or config file corrupted.')
-            return False
+            return None
 
 
 # End of File

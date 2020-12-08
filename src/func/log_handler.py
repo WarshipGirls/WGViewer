@@ -12,7 +12,7 @@ class LogHandler(logging.Handler, QObject):
         logging.Handler.__init__(self)
         QObject.__init__(self)
 
-    def emit(self, log_record):
+    def emit(self, log_record: logging.LogRecord) -> None:
         msg = f"{get_curr_time()} - " + str(log_record.getMessage())
         self.sig_log.emit(msg)
 

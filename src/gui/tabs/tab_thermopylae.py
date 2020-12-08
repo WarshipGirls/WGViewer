@@ -61,8 +61,9 @@ class TabThermopylae(QWidget):
         self.bee.finished.connect(self.process_finished)
         self.bee.terminate()
 
-        self.logger = self.create_logger()
+        self.logger = self.get_logger()
 
+        self.w = None
         self.init_ui()
         self.sortie = Sortie(self, self.api_six, [], [], self.is_realrun)
 
@@ -74,7 +75,7 @@ class TabThermopylae(QWidget):
         self.bee_sortie.finished.connect(self.sortie_finished)
         self.bee_sortie.terminate()
 
-    def create_logger(self):
+    def get_logger(self) -> logging.Logger:
         logger = logging.getLogger('TabThermopylae')
         log_handler = LogHandler()
         log_handler.sig_log.connect(self.text_box.append)
@@ -82,7 +83,7 @@ class TabThermopylae(QWidget):
         log_handler.setLevel(level=logging.INFO)
         return logger
 
-    def set_info_bar(self):
+    def set_info_bar(self) -> None:
         w = QWidget()
         layout = QHBoxLayout(w)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -99,10 +100,10 @@ class TabThermopylae(QWidget):
             layout.setStretch(i, 0)
         self.left_layout.addWidget(w)
 
-    def update_ticket(self, data: int):
+    def update_ticket(self, data: int) -> None:
         self.ticket_label.setText(str(data))
 
-    def update_purchasable(self, data: int):
+    def update_purchasable(self, data: int) -> None:
         self.purchasable_label.setText(str(data))
 
     def init_ui(self) -> None:
@@ -148,7 +149,7 @@ class TabThermopylae(QWidget):
         self.text_box.setReadOnly(True)
         self.right_layout.addWidget(self.text_box)
 
-    def add_ship(self):
+    def add_ship(self) -> None:
         # TODO long term; not used right now; let user select boats here; now just use last fleets
         self.button_group = QButtonGroup()
         # for ship_id in self.fleets:
@@ -163,10 +164,10 @@ class TabThermopylae(QWidget):
             self.button_group.addButton(l)
             self.left_layout.addWidget(l)
 
-    def disable_sortie(self):
-        pass
+    def disable_sortie(self) -> None:
+        raise NotImplementedError
 
-    def handle_selection(self, ship_info: list, button_id: int):
+    def handle_selection(self, ship_info: list, button_id: int) -> None:
         b = self.button_group.buttons()[button_id]
         ship_id = ship_info[1]
         if int(ship_id) in self.fleets:
@@ -176,16 +177,16 @@ class TabThermopylae(QWidget):
             s = ", ".join(ship_info)
             b.setText(s)
 
-    def popup_select_window(self, btn_id):
+    def popup_select_window(self, btn_id: int) -> None:
         # TODO: delete obj after close
         self.w = ShipSelectWindow(self, btn_id)
         self.w.show()
 
-    def button1_on_click(self):
+    def button1_on_click(self) -> None:
         self.button1.setEnabled(False)
         self.bee.start()
 
-    def test_process(self):
+    def test_process(self) -> None:
         # button 1 linked
         self.logger.info('starting')
         for i in range(10):
@@ -193,26 +194,26 @@ class TabThermopylae(QWidget):
             # self.sig_fuel.emit(1000)
             sleep(0.5)
 
-    def on_pre_battle(self):
+    def on_pre_battle(self) -> None:
         self.button_pre_battle.setEnabled(True)
         self.bee_pre_battle.start()
 
-    def on_sortie(self):
+    def on_sortie(self) -> None:
         self.button_sortie.setEnabled(False)
         self.bee_sortie.start()
 
-    def process_finished(self):
+    def process_finished(self) -> None:
         self.logger.info('task is done')
         self.button1.setEnabled(True)
 
-    def sortie_finished(self):
+    def sortie_finished(self) -> None:
         self.logger.info('==== Sortie (dev) is done! ====')
         self.button_sortie.setEnabled(True)
 
-    def pre_battle_finished(self):
+    def pre_battle_finished(self) -> None:
         self.logger.info('==== Pre battle checking is done! ====')
 
-    def update_resources(self, f, a, s, b):
+    def update_resources(self, f: int, a: int, s: int, b: int) -> None:
         # signals has to be emitted from a QObject
         self.sig_fuel.emit(f)
         self.sig_ammo.emit(a)

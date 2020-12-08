@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from src import data as wgv_data
 from src import utils as wgv_utils
-from src.func import constants
 from src.gui.custom_widgets import ScrollBoxWindow
 
 
@@ -125,13 +124,13 @@ class MainInterfaceMenuBar(QMenuBar):
     def show_download_links() -> None:
         def get_hyperlink(link, text) -> str:
             return f"<a href=\"{link}\">{text}</a>"
-
+        version = wgv_utils.get_game_version()
         base_url = "http://bspackage.moefantasy.com/jn/"
-        cn_android_full_link = base_url + f"warshipgirlsr_cn_censor_v{constants.version}.apk"
-        cn_ios_user_android_full_link = base_url + f"warshipgirlsr_ios_cn_censor_v{constants.version}.apk"
+        cn_android_full_link = base_url + f"warshipgirlsr_cn_censor_v{version}.apk"
+        cn_ios_user_android_full_link = base_url + f"warshipgirlsr_ios_cn_censor_v{version}.apk"
 
-        cn_android_base_link = base_url + f"warshipgirlsr_cn_censor_base_v{constants.version}.apk?"
-        cn_ios_user_android_base_link = base_url + f"warshipgirlsr_ios_cn_censor_base_v{constants.version}.apk?"
+        cn_android_base_link = base_url + f"warshipgirlsr_cn_censor_base_v{version}.apk?"
+        cn_ios_user_android_base_link = base_url + f"warshipgirlsr_ios_cn_censor_base_v{version}.apk?"
 
         msg_str = "<h1> Warship Girls Official Download Links</h1>"
         msg_str += "<br>"

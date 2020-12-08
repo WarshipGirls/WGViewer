@@ -23,10 +23,10 @@ class TabAdvanceFunctions(QWidget):
         self.layout.addWidget(test_btn2)
         self.setLayout(self.layout)
 
-    def update_fuel(self):
+    def update_fuel(self) -> None:
         self.sig_fuel.emit(10)
 
-    def update_fuel2(self):
+    def update_fuel2(self) -> None:
         self.sig_fuel.emit(9999999)
 
 
