@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QVariant, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
 from src import data as wgv_data
-from src.func import constants as CONST
+from src import utils as wgv_utils
 from src.func.helper import Helper
 from src.utils.general import clear_desc, ts_to_date
 from src.wgr.boat import API_BOAT
@@ -80,7 +80,7 @@ class ShipModel(QStandardItemModel):
         for s in self.ships_raw_data:
             self.ships_data[s["type"]].append(s)
         for ship_type, ship_lists in enumerate(self.ships_data):
-            if (ship_type not in CONST.ship_type) and (len(ship_lists) != 0):
+            if (ship_type not in wgv_utils.get_all_ship_types()) and (len(ship_lists) != 0):
                 continue
             else:
                 for ship in ship_lists:
@@ -160,7 +160,7 @@ class ShipModel(QStandardItemModel):
         self.setItem(args[0], 2, wig)
 
     def set_class(self, *args):
-        wig = QStandardItem(CONST.ship_type[args[1]])
+        wig = QStandardItem(wgv_utils.get_ship_type(args[1]))
         self.setItem(args[0], 3, wig)
 
     def set_level(self, *args):
@@ -197,7 +197,7 @@ class ShipModel(QStandardItemModel):
                 ammo = str(_ship['battleProps']['ammo']) + "/" + str(_ship['battlePropsMax']['ammo'])
                 bauxite = str(_ship['battleProps']['aluminium']) + "/" + str(_ship['battlePropsMax']['aluminium'])
                 self.item(row, 4).setData(_ship['battleProps']['speed'], Qt.DisplayRole)
-                self.item(row, 5).setData(CONST.range_type[_ship['battleProps']['range']], Qt.DisplayRole)
+                self.item(row, 5).setData(wgv_utils.get_ship_los(['battleProps']['range']), Qt.DisplayRole)
                 self.item(row, 7).setData(hp, Qt.DisplayRole)
                 self.item(row, 8).setData(_ship['battleProps']['atk'], Qt.DisplayRole)
                 self.item(row, 9).setData(_ship['battleProps']['def'], Qt.DisplayRole)
@@ -226,7 +226,7 @@ class ShipModel(QStandardItemModel):
                 self.item(row, 19).setData(_ship['battlePropsMax']['aluminium'], Qt.DisplayRole)
             elif self.value_opt == SCONST.value_select[2]:  # raw
                 self.item(row, 4).setData(_ship['battlePropsBasic']['speed'], Qt.DisplayRole)
-                self.item(row, 5).setData(CONST.range_type[_ship['battlePropsBasic']['range']], Qt.DisplayRole)
+                self.item(row, 5).setData(wgv_utils.get_ship_los(['battlePropsBasic']['range']), Qt.DisplayRole)
                 self.item(row, 7).setData(_ship['battlePropsBasic']['hp'], Qt.DisplayRole)
                 self.item(row, 8).setData(_ship['battlePropsBasic']['atk'], Qt.DisplayRole)
                 self.item(row, 9).setData(_ship['battlePropsBasic']['def'], Qt.DisplayRole)
@@ -254,7 +254,7 @@ class ShipModel(QStandardItemModel):
         self.setItem(args[0], 7, wig_h)
 
         self.setItem(args[0], 4, QStandardItem(str(args[1]['speed'])))
-        self.setItem(args[0], 5, QStandardItem(CONST.range_type[args[1]['range']]))
+        self.setItem(args[0], 5, QStandardItem(wgv_utils.get_ship_los(args[1]['range'])))
         self.setItem(args[0], 8, QStandardItem(str(args[1]['atk'])))
         self.setItem(args[0], 9, QStandardItem(str(args[1]['def'])))
         self.setItem(args[0], 10, QStandardItem(str(args[1]['torpedo'])))

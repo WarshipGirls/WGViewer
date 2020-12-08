@@ -15,7 +15,7 @@ from .game_combat import (
     process_spy_json
 )
 from .game_info import (
-    get_combat_formation, get_ship_los, get_ship_type
+    get_all_ship_types, get_build_type, get_combat_formation, get_ship_los, get_ship_type, get_war_evaluation
 )
 from .general import (
     clear_desc, 

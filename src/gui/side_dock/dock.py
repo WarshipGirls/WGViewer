@@ -19,10 +19,11 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgv_data
 from src import utils as wgv_utils
-from src.func import constants as CONST
 from src.func.helper import Helper
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
+
+TASK_TYPE = {'1': "SINGLE", '2': "DAILY", '3': "WEEKLY", '4': "LIMITED TIME"}
 
 
 def get_data_path(relative_path):
@@ -288,7 +289,7 @@ class SideDock(QDockWidget):
 
     @staticmethod
     def get_ship_type(_id: int) -> str:
-        return CONST.build_type[_id]
+        return wgv_utils.get_build_type(_id)
 
     @staticmethod
     def _remove_widget(parent, widget: [QLayout, QWidget]) -> None:
@@ -457,7 +458,7 @@ class SideDock(QDockWidget):
                     lim_flag = True
                 else:
                     lim_flag = False
-                prefix = CONST.task_type[i['type']]
+                prefix = TASK_TYPE[i['type']]
                 title = f"{prefix}\t{i['title']}"
                 self.tasklist_view.add_item(title, stat, desc, lim_flag)
 
@@ -515,6 +516,5 @@ class SideDock(QDockWidget):
         y = y + h + gap
         h = 0.19 * self.user_screen_h
         self.task_panel_widget.setGeometry(0, y, self.geometry().width(), h)
-
 
 # End of File

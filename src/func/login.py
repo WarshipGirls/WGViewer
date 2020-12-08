@@ -15,9 +15,48 @@ from PyQt5.QtWidgets import QPushButton
 
 from src.data.wgv_path import get_data_dir
 from src.exceptions.wgr_error import get_error
-from . import constants as constants
 from .helper import Helper
 from .session import GameSession
+
+HEADER = {
+    'Accept-Encoding': 'identity',
+    'Connection': 'Keep-Alive',
+    'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 9.1.1; SAMSUNG-SM-G900A Build/LMY47X)'
+}
+
+ANDROID_DATA_DICT = {
+    'client_version': version,
+    'phone_type': 'samsung note 9',
+    'phone_version': '9.1.1',
+    'ratio': '2960*1440',
+    'service': 'CHINA MOBILE',
+    'udid': '',
+    'source': 'android',
+    'affiliate': 'WIFI',
+    't': '-1',
+    'e': '-1',
+    'gz': '1',
+    'market': '2',
+    'channel': '100015',
+    'version': version
+}
+
+IOS_DATA_DICT = {
+    'client_version': version,
+    'phone_type': '',
+    'phone_version': '13.7',
+    'ratio': '2160*1620',
+    'service': '',
+    'udid': '',
+    'source': 'ios',
+    'affiliate': 'WIFI',
+    't': '-1',
+    'e': '-1',
+    'gz': '1',
+    'market': '2',
+    'channel': '100020',
+    'version': version
+}
 
 
 class GameLogin:
@@ -36,7 +75,7 @@ class GameLogin:
         self.uid = None
         self.cookies = None
         self.login_server = ""
-        self.key = constants.login_key
+        self.key = "kHPmWZ4zQBYP24ubmJ5wA4oz0d8EgIFe"
         self.portHead = "881d3SlFucX5R5hE"
         self.hm_login_server = ""
         self.passport_headers = {
@@ -51,7 +90,7 @@ class GameLogin:
         logging.info("LOGIN - first server fetching...")
         url_version = f"http://version.jr.moefantasy.com/index/checkVer/{self.version}/{self.channel}/2&version={self.version}&channel={self.channel}&market=2"
         # Pull version Info
-        response_version = self.session.get(url=url_version, headers=constants.header, timeout=10)
+        response_version = self.session.get(url=url_version, headers=HEADER, timeout=10)
         response_version = json.loads(response_version.text)
 
         if 'eid' in response_version:
@@ -79,7 +118,7 @@ class GameLogin:
 
         time.sleep(0.5)
         url_cheat = host + link + self.hlp.get_url_end(self.channel)
-        self.session.get(url=url_cheat, headers=constants.header, cookies=self.cookies, timeout=10)
+        self.session.get(url=url_cheat, headers=HEADER, cookies=self.cookies, timeout=10)
 
     def second_login(self, host: str) -> bool:
         logging.info("LOGIN - second data fetching...")
@@ -91,9 +130,9 @@ class GameLogin:
             return False
 
         if self.channel == "100020":
-            data_dict = constants.ios_data_dict
+            data_dict = IOS_DATA_DICT
         elif self.channel == "100015":
-            data_dict = constants.android_data_dict
+            data_dict = ANDROID_DATA_DICT
         else:
             data_dict = {}
         data_dict["udid"] = str(random.randint(100000000000000, 999999999999999))
@@ -104,7 +143,7 @@ class GameLogin:
         try:
             # Pull decisive data
             login_url_tmp = host + 'index/login/' + self.uid + '?&' + urllib.parse.urlencode(data_dict)
-            self.session.get(url=login_url_tmp, headers=constants.header, cookies=self.cookies, timeout=10)
+            self.session.get(url=login_url_tmp, headers=HEADER, cookies=self.cookies, timeout=10)
 
             # TODO: all of these are redundant
             self.cheat_sess(host, 'pevent/getPveData/')
@@ -163,7 +202,7 @@ class GameLogin:
                 break
 
         login_url = self.login_server + "index/hmLogin/" + tokens + self.hlp.get_url_end(self.channel)
-        login_response = self.session.get(url=login_url, headers=constants.header, timeout=10)
+        login_response = self.session.get(url=login_url, headers=HEADER, timeout=10)
         try:
             login_text = json.loads(zlib.decompress(login_response.content))
         except zlib.error as e:
