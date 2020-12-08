@@ -51,6 +51,11 @@ def _testrun() -> None:
     mi.show()
 
 
+# ================================
+# Entry Point
+# ================================
+
+
 if __name__ == '__main__':
 
     WGV_APP = QApplication([])

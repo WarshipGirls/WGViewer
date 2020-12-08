@@ -369,10 +369,6 @@ class SideDock(QDockWidget):
             self.table_model._data[2][2] = next((i for i in x if i["itemCid"] == 10241), {"num": 0})["num"]
             self.table_model._data[2][3] = next((i for i in x if i["itemCid"] == 10141), {"num": 0})["num"]
             self.table_model._data[2][4] = next((i for i in x if i["itemCid"] == 10541), {"num": 0})["num"]
-            # formatting numbers
-            for r in range(3):
-                for c in range(5):
-                    self.table_model._data[r][c] = f'{self.table_model._data[r][c]:,}'
 
     @pyqtSlot(dict)
     def on_received_name(self, data):
@@ -457,6 +453,10 @@ class SideDock(QDockWidget):
             for i in m:
                 self.add_task_countdown(i["title"], i["left_time"], len(self.task_counters))
 
+    @pyqtSlot(int)
+    def update_fuel(self, x: int):
+        self.table_model.update_fuel(x)
+
     # ================================
     # Events
     # ================================
@@ -508,7 +508,5 @@ class SideDock(QDockWidget):
         h = 0.19 * self.user_screen_h
         self.task_panel_widget.setGeometry(0, y, self.geometry().width(), h)
 
-    def update_fuel(self):
-        print(self.table_model._data[0][0])
 
 # End of File

@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QModelIndex
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QAbstractTableModel
 
@@ -20,12 +20,17 @@ class ResourceTableModel(QAbstractTableModel):
         super(ResourceTableModel, self).__init__()
         self._data = data
 
+    # ================================
+    # Virtual methods
+    # ================================
+
     def data(self, index, role):
         row = index.row()
         col = index.column()
         if role == Qt.DisplayRole:
+            return f'{self._data[row][col]:,}'
+        if role == Qt.UserRole:
             return self._data[row][col]
-
         if role == Qt.DecorationRole:
             if row == 0 and col == 0:
                 return QIcon(get_data_path('assets/items/fuel.png'))
@@ -60,8 +65,32 @@ class ResourceTableModel(QAbstractTableModel):
             else:
                 logging.error('incorrect indexes')
 
+    def setData(self, index, value, role):
+        if not index.isValid():
+            return False
+
+        # somehow it can auto format with comma, without explicitly calling Qt.DisplayRole here
+        if role == Qt.UserRole:
+            self._data[index.row()][index.column()] = value
+            self.dataChanged.emit(index, index, (Qt.UserRole,))
+        else:
+            return False
+        return True
+
+    def rowCount(self, index):
+        return len(self._data)
+
+    def columnCount(self, index):
+        return len(self._data[0])
+
+    # ================================
+    # Self Implemented methods
+    # ================================
+
     def update_fuel(self, new_val: int):
-        old_val = self._data[0][0]
+        idx = self.index(0, 0)
+        old_val = int(self.data(idx, Qt.UserRole))
+        print(old_val, new_val)
         if old_val > new_val:
             # red fade
             pass
@@ -69,13 +98,8 @@ class ResourceTableModel(QAbstractTableModel):
             # green fade
             pass
         else:
-            self._[0][0] = new_val
-
-    def rowCount(self, index):
-        return len(self._data)
-
-    def columnCount(self, index):
-        return len(self._data[0])
+            pass
+        self.setData(idx, new_val, Qt.UserRole)
 
 
 # End of File
