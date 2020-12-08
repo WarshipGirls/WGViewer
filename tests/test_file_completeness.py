@@ -111,7 +111,7 @@ class TestFileIntegrity(unittest.TestCase):
         self.assertNotEqual(get_file_size(_file), 0)
 
     def test_pull_request_template_valid(self):
-        _file = ROOT_DIR.joinpath('.github', 'PULL_REQUEST_TEMPLATE')
+        _file = ROOT_DIR.joinpath('.github', 'PULL_REQUEST_TEMPLATE.md')
         self.assertEqual(_file.exists(), True)
         self.assertNotEqual(get_file_size(_file), 0)
 
