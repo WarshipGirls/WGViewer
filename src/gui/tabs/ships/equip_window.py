@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgv_data
 from src.utils.wgv_pyqt import get_user_resolution
-from .delegate import ShipTableDelegate
 from . import constant as SCONST
 
 
@@ -23,7 +22,7 @@ def get_data_path(relative_path: str) -> str:
 
 
 class EquipPopup(QMainWindow):
-    def __init__(self, parent: ShipTableDelegate, row: int, col: int, cid: int, button_enable: bool):
+    def __init__(self, parent, row: int, col: int, cid: int, button_enable: bool):
         super().__init__()
         self.parent = parent
         self._row = row

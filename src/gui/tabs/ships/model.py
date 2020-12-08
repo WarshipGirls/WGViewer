@@ -196,7 +196,7 @@ class ShipModel(QStandardItemModel):
                 ammo = str(_ship['battleProps']['ammo']) + "/" + str(_ship['battlePropsMax']['ammo'])
                 bauxite = str(_ship['battleProps']['aluminium']) + "/" + str(_ship['battlePropsMax']['aluminium'])
                 self.item(row, 4).setData(_ship['battleProps']['speed'], Qt.DisplayRole)
-                self.item(row, 5).setData(wgv_utils.get_ship_los(['battleProps']['range']), Qt.DisplayRole)
+                self.item(row, 5).setData(wgv_utils.get_ship_los(_ship['battleProps']['range']), Qt.DisplayRole)
                 self.item(row, 7).setData(hp, Qt.DisplayRole)
                 self.item(row, 8).setData(_ship['battleProps']['atk'], Qt.DisplayRole)
                 self.item(row, 9).setData(_ship['battleProps']['def'], Qt.DisplayRole)
@@ -225,7 +225,7 @@ class ShipModel(QStandardItemModel):
                 self.item(row, 19).setData(_ship['battlePropsMax']['aluminium'], Qt.DisplayRole)
             elif self.value_opt == SCONST.value_select[2]:  # raw
                 self.item(row, 4).setData(_ship['battlePropsBasic']['speed'], Qt.DisplayRole)
-                self.item(row, 5).setData(wgv_utils.get_ship_los(['battlePropsBasic']['range']), Qt.DisplayRole)
+                self.item(row, 5).setData(wgv_utils.get_ship_los(_ship['battlePropsBasic']['range']), Qt.DisplayRole)
                 self.item(row, 7).setData(_ship['battlePropsBasic']['hp'], Qt.DisplayRole)
                 self.item(row, 8).setData(_ship['battlePropsBasic']['atk'], Qt.DisplayRole)
                 self.item(row, 9).setData(_ship['battlePropsBasic']['def'], Qt.DisplayRole)
@@ -325,7 +325,8 @@ class ShipModel(QStandardItemModel):
         unequip_id = self.index(row, col).data(Qt.UserRole)
         equip_slot = col - 21
 
-        if str(equip_id) == "-1":
+        equip_id = str(equip_id)
+        if equip_id == "-1":
             # unequip; setItem deletes previous item
             item = QStandardItem()
             item.setData(-1, Qt.UserRole)
@@ -336,10 +337,10 @@ class ShipModel(QStandardItemModel):
         else:
             pass
 
-        res = self.api_boat.changeEquipment(str(ship_id), str(equip_id), str(equip_slot))
+        res = self.api_boat.changeEquipment(str(ship_id), equip_id, str(equip_slot))
         if 'eid' not in res:
             # success
-            wgv_data.update_equipment_amount(equip_id, unequip_id)
+            wgv_data.update_equipment_amount(int(equip_id), unequip_id)
         else:
             logging.error('Equipment change is failed.')
             return
