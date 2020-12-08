@@ -5,8 +5,11 @@ from math import ceil
 from logging import getLogger
 
 from src import data as wgr_data
-from src.wgr.api import WGR_API  # only for typehints
+from src.utils import get_repair_type
 from .helper import SortieHelper
+
+# Following are only for typehints
+from src.wgr.six import API_SIX
 
 
 def save_json(name, data):
@@ -18,10 +21,11 @@ class Sortie:
     # This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
     # TODO long term
     # RIGHT NOW everything pre-battle is fixed
-    def __init__(self, parent, api: WGR_API, fleets: list, final_fleets: list, is_realrun: bool):
+
+    def __init__(self, parent, api: API_SIX, fleets: list, final_fleets: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
-        self.api = api
+        self.api: API_SIX = api
         self.fleets = fleets  # main fleets
         self.final_fleets = final_fleets  # fill up required number of boats
         self.logger = getLogger('TabThermopylae')
@@ -222,12 +226,21 @@ class Sortie:
             return
 
         # Node E6-1 A1, lv.1 -> lv.2
-        self.bump_level(adj_data)
+        if self.bump_level(adj_data) is False:
+            self.logger.info('Bumping failed. Should restart current sub-map.')
+        else:
+            pass
 
-        supply_data = self.helper.supply_boats(self.escort_DD)
+        self.helper.set_sortie_fleets(self.escort_DD)
+
+        supply_res = self.helper.supply_boats(self.escort_DD)
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
             return
+        # update side dock
+        self.parent.update_resources(supply_res['userVo']['oil'], supply_res['userVo']['ammo'], supply_res['userVo']['steel'], supply_res['userVo']['aluminium'])
+
+        # TODO TODO check repair -> fight -> next node...
 
     def bump_level(self, adj_data) -> bool:
         adj_lvl = int(adj_data["adjutantData"]["level"])

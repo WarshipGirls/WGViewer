@@ -1,6 +1,7 @@
 import os
 import re
 from datetime import datetime, timedelta
+from math import ceil
 from typing import Tuple
 
 from PyQt5.QtCore import QUrl, QCoreApplication
@@ -20,6 +21,28 @@ def get_app_version() -> str:
 
 def get_curr_time() -> str:
     return datetime.now().strftime("%H:%M:%S")
+
+
+# TODO refactor into a module; separate methods such as GUI, GAME-calculation
+def get_repair_type(ship_info: dict) -> int:
+    curr_hp = ship_info['battleProps']['hp']
+    max_hp = ship_info['battlePropsMax']['hp']
+    res = -1
+    if curr_hp < max_hp:
+        # slightly damaged
+        res = 0
+    elif curr_hp < ceil(max_hp * 0.5):
+        # moderately damaged
+        res = 1
+    elif curr_hp < ceil(max_hp * 0.25):
+        # heavily damaged
+        res = 2
+    elif curr_hp < 0:
+        # sunken
+        res = 3
+    else:
+        pass
+    return res
 
 
 def get_user_resolution() -> Tuple[int, int]:

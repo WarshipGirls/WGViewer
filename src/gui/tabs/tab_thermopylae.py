@@ -1,25 +1,37 @@
 import logging
 from time import sleep
 
-from PyQt5.QtCore import QObject, pyqtSignal, QThread
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QTableWidget, QMainWindow, QTableWidgetItem, QButtonGroup
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QButtonGroup
 
 import src.data as wgr_data
 from src.func.worker import Worker
 
 from src.wgr.six import API_SIX
 from src.func.log_handler import LogHandler
+from src.gui.side_dock.resource_model import ResourceTableModel
 from .thermopylae.ship_window import ShipSelectWindow
 from .thermopylae.sortie import Sortie
 
 
 class TabThermopylae(QWidget):
-    def __init__(self, tab_name: str, is_realrun: bool):
+    sig_fuel = pyqtSignal(int)
+    sig_ammo = pyqtSignal(int)
+    sig_steel = pyqtSignal(int)
+    sig_baux = pyqtSignal(int)
+
+    def __init__(self, tab_name: str, resource_info: ResourceTableModel, is_realrun: bool):
         # TODO reorganize
         super().__init__()
         self.setObjectName(tab_name)
+        self.resource_info = resource_info
         self.is_realrun = is_realrun
+
+        self.sig_fuel.connect(self.resource_info.update_fuel)
+        self.sig_ammo.connect(self.resource_info.update_ammo)
+        self.sig_steel.connect(self.resource_info.update_steel)
+        self.sig_baux.connect(self.resource_info.update_bauxite)
 
         self.api_six = API_SIX(wgr_data.load_cookies())
         self.fleets = [None] * 6
@@ -126,7 +138,7 @@ class TabThermopylae(QWidget):
         self.right_layout.addWidget(self.text_box)
 
     def add_ship(self):
-        # TODO long term let user select boats here; now just use last fleets
+        # TODO long term; not used right now; let user select boats here; now just use last fleets
         self.button_group = QButtonGroup()
         # for ship_id in self.fleets:
         for i in range(len(self.fleets)):
@@ -167,7 +179,8 @@ class TabThermopylae(QWidget):
         self.logger.info('starting')
         for i in range(10):
             self.logger.info(i)
-            sleep(1)
+            # self.sig_fuel.emit(1000)
+            sleep(0.5)
 
     def on_sortie(self):
         logging.info('User clicked sortieing button...')
@@ -184,4 +197,10 @@ class TabThermopylae(QWidget):
         self.logger.info('==== Sortie (dev) is done! ====')
         self.button_sortie.setEnabled(True)
 
+    def update_resources(self, f, a, s, b):
+        # signals has to be emitted from a QObject
+        self.sig_fuel.emit(f)
+        self.sig_ammo.emit(a)
+        self.sig_steel.emit(s)
+        self.sig_baux.emit(b)
 # End of File
