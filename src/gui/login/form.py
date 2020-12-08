@@ -56,7 +56,7 @@ class LoginForm(QWidget):
         self.check_disclaimer.setMaximumWidth(int(0.083 * user_w))
         self.check_save = QCheckBox('Store login info locally with encryption')
         self.check_auto = QCheckBox('Auto login on the application start')
-        self.login_button = QPushButton('')
+        self.login_button = QPushButton('Login')
 
         self.container = QWidget()
         main_layout = QVBoxLayout()

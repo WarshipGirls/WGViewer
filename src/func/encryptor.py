@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 from cryptography.fernet import Fernet
 
@@ -27,7 +28,7 @@ class Encryptor:
         return Fernet(key).encrypt(bytes(string, encoding='utf8'))
 
     @staticmethod
-    def decrypt_data(key: bytes, data: bytes) -> [bytes, None]:
+    def decrypt_data(key: bytes, data: bytes) -> Union[bytes, None]:
         try:
             return Fernet(key).decrypt(data)
         except TypeError:
