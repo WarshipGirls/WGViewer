@@ -7,9 +7,9 @@ from PyQt5.QtCore import QSettings, pyqtSlot
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from src import data as wgr_data
+from src import utils as wgv_utils
 from src.func import constants
 from src.gui.custom_widgets import ScrollBoxWindow
-from src.utils.general import popup_msg, open_url, _quit_application
 
 
 def get_data_path(relative_path: str) -> str:
@@ -51,7 +51,7 @@ class MainInterfaceMenuBar(QMenuBar):
         menu.addAction(self.create_action("Clear User Cache", self.clear_user_cache))
         menu.addAction(self.create_action("Clear All Cache", self.clear_all_cache))
         menu.addSeparator()
-        menu.addAction(self.create_action("Quit", _quit_application))
+        menu.addAction(self.create_action("Quit", wgv_utils.quit_application))
 
     def init_tabs_menu(self) -> None:
         menu = self.addMenu(self.tr("&Tabs"))
@@ -91,7 +91,7 @@ class MainInterfaceMenuBar(QMenuBar):
 
     @staticmethod
     def quit_application() -> None:
-        _quit_application()
+        wgv_utils.quit_application()
 
     @staticmethod
     def open_cache_folder() -> None:
@@ -101,9 +101,9 @@ class MainInterfaceMenuBar(QMenuBar):
     def clear_user_cache() -> None:
         res = wgr_data.clear_cache_folder(False)
         if res is True:
-            popup_msg('Clear success')
+            wgv_utils.popup_msg('Clear success')
         else:
-            popup_msg('Clear failed')
+            wgv_utils.popup_msg('Clear failed')
 
     def clear_all_cache(self) -> None:
         reply = QMessageBox.question(self, 'Warning', "Do you want to clear all caches?\n(Re-caching takes time)",
@@ -111,9 +111,9 @@ class MainInterfaceMenuBar(QMenuBar):
         if reply == QMessageBox.Yes:
             res = wgr_data.clear_cache_folder(True)
             if res is True:
-                popup_msg('Clear success')
+                wgv_utils.popup_msg('Clear success')
             else:
-                popup_msg('Clear failed')
+                wgv_utils.popup_msg('Clear failed')
         else:
             pass
 
@@ -171,7 +171,7 @@ class MainInterfaceMenuBar(QMenuBar):
         reply = QMessageBox.question(self, 'Report', "Do you want to submit a bug or make an suggestion?",
                                      QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            open_url('https://github.com/WarshipGirls/WGViewer/issues/new')
+            wgv_utils.open_url('https://github.com/WarshipGirls/WGViewer/issues/new')
         else:
             pass
 

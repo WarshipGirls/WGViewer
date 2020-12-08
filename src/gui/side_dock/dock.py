@@ -18,9 +18,9 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgr_data
+from src import utils as wgv_utils
 from src.func import constants as CONST
 from src.func.helper import Helper
-from src.utils.general import clear_desc, get_user_resolution
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 
@@ -38,7 +38,7 @@ class SideDock(QDockWidget):
 
     def __init__(self, parent):
         super(SideDock, self).__init__(parent)
-        _, self.user_screen_h = get_user_resolution()
+        _, self.user_screen_h = wgv_utils.get_user_resolution()
         self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
         self.hlp = Helper()
 
@@ -446,7 +446,7 @@ class SideDock(QDockWidget):
             t = data["taskVo"]
             for i in t:
                 stat = str(i["condition"][0]["finishedAmount"]) + " / " + str(i["condition"][0]["totalAmount"])
-                desc = clear_desc(i["desc"])
+                desc = wgv_utils.clear_desc(i["desc"])
                 if '#' in desc:
                     # TODO: (lowest priority) how to find `#s10030711#n` ? looks like not the same ID in docks
                     desc = re.sub(r'\[[^]]*\]', i["title"], desc)

@@ -19,11 +19,13 @@ from .game_info import (
 )
 from .general import (
     clear_desc, 
-    get_app_version, get_curr_time, 
+    force_quit, 
+    get_app_version, get_curr_time, get_game_version, 
     ts_to_countdown, ts_to_date
 )
-from .pyqt_related import (
+from .wgv_pyqt import (
     get_user_resolution, 
     open_disclaimer, open_url, 
-    popup_msg
+    popup_msg, 
+    quit_application
 )

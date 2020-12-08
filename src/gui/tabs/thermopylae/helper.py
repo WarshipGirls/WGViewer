@@ -2,9 +2,9 @@ from time import sleep
 from typing import Callable, Tuple
 from logging import getLogger
 
+from src import utils as wgv_utils
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.wgr.six import API_SIX  # only for typehints
-from src.utils.general import get_repair_type
 
 
 class SortieHelper:
@@ -92,6 +92,7 @@ class SortieHelper:
                 res = True
             else:
                 self.logger.debug(data)
+                next_node_id = -1
                 res = False
             return res, next_node_id
 
@@ -242,7 +243,7 @@ class SortieHelper:
         repairs = []
         ship_ids = []
         for ship in ships:
-            repairs.append(get_repair_type(ship))
+            repairs.append(wgv_utils.get_repair_type(ship))
             ship_ids.append(ship['id'])
 
         if isinstance(repair_levels, int):

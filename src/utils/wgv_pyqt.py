@@ -51,7 +51,7 @@ def open_url(url: str) -> None:
     QDesktopServices.openUrl(QUrl(url))
 
 
-def _quit_application() -> None:
+def quit_application() -> None:
     # TODO: in the future, save unfinished tasks
     QCoreApplication.exit()
 

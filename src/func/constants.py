@@ -1,4 +1,3 @@
-# TODO TODO refactor this into src/general.py
 version = "5.1.0"
 
 header = {

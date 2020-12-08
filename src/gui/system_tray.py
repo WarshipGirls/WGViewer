@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction
 
-from src.utils.general import _quit_application
+from src.utils.wgv_pyqt import quit_application
 
 
 class TrayIcon(QSystemTrayIcon):
@@ -23,7 +23,7 @@ class TrayIcon(QSystemTrayIcon):
         self.option_display.triggered.connect(self.toggle_display)
 
         self.option_quit = QAction('Quit')
-        self.option_quit.triggered.connect(_quit_application)
+        self.option_quit.triggered.connect(quit_application)
 
         self.menu = QMenu()
         self.menu.addAction(self.option_display)

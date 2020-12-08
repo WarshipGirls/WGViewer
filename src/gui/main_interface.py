@@ -6,11 +6,11 @@ from PyQt5.QtGui import QCloseEvent, QHideEvent
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
 
 from src import data as wgr_data
+from src import utils as wgv_utils
 from src.gui.side_dock.dock import SideDock
 from src.gui.interface.tabs import MainInterfaceTabs
 from src.gui.interface.menubar import MainInterfaceMenuBar
 from src.gui.system_tray import TrayIcon
-from src.utils.general import get_app_version, get_user_resolution, _quit_application
 from src.wgr.api import WGR_API
 
 
@@ -69,14 +69,14 @@ class MainInterface(QMainWindow):
 
     def init_ui(self) -> None:
         self.set_color_scheme()
-        user_w, user_h = get_user_resolution()
+        user_w, user_h = wgv_utils.get_user_resolution()
         self.resize(int(0.67 * user_w), int(0.67 * user_h))
 
         self.setMenuBar(self.menu_bar)
         self.setCentralWidget(self.main_tabs)
 
         self.setLayout(QHBoxLayout())
-        self.setWindowTitle(f"Warship Girls Viewer v{get_app_version()}")
+        self.setWindowTitle(f"Warship Girls Viewer v{wgv_utils.get_app_version()}")
 
     '''
     # Original design is to let user freely open/close side-dock.
@@ -135,7 +135,7 @@ class MainInterface(QMainWindow):
             pass
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        _quit_application()
+        wgv_utils.quit_application()
 
     def hideEvent(self, event: QHideEvent) -> None:
         self.hide()

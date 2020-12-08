@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgr_data
+from src import utils as wgv_utils
 from src.exceptions.custom import InterruptExecution
 from src.exceptions.wgr_error import WarshipGirlsExceptions
 from src.func.encryptor import Encryptor
@@ -18,7 +19,6 @@ from src.func.session import GameSession
 from src.func import constants as constants
 from src.func.version_check import VersionCheck
 from src.func.worker import CallbackWorker
-from src.utils.general import get_user_resolution, open_disclaimer, popup_msg, get_app_version
 from .main_interface import MainInterface
 
 
@@ -53,7 +53,7 @@ class LoginForm(QWidget):
         # TODO? trailing space
         # To limit the trailing space of the checkbox text with max width; still, there is ~2 whitespaces width space presents
         # set text all in label would cause user unable to click text to toggle checkbox; differs from other checkbox, (bad design IMO)
-        user_w, _ = get_user_resolution()
+        user_w, _ = wgv_utils.get_user_resolution()
         self.check_disclaimer.setMaximumWidth(int(0.083 * user_w))
         self.check_save = QCheckBox('Store login info locally with encryption')
         self.check_auto = QCheckBox('Auto login on the application start')
@@ -122,11 +122,11 @@ class LoginForm(QWidget):
         self.layout.setColumnStretch(0, 0)
         self.layout.setColumnStretch(1, 1)
         self.layout.setColumnStretch(2, 1)
-        user_w, user_h = get_user_resolution()
+        user_w, user_h = wgv_utils.get_user_resolution()
         self.init_login_button(user_h)
         self.resize(int(0.26 * user_w), int(0.12 * user_h))
         self.setStyleSheet(wgr_data.get_color_scheme())
-        self.setWindowTitle(f'Warship Girls Viewer v{get_app_version()} Login')
+        self.setWindowTitle(f'Warship Girls Viewer v{wgv_utils.get_app_version()} Login')
 
     def init_name_field(self, text: str = ''):
         label_name = create_label('Username')
@@ -189,7 +189,7 @@ class LoginForm(QWidget):
         label = QLabel()
         disclaimer = '<a href=\"{}\"> Terms and Conditions </a>'.format('TODO')
         label.setText(f'{disclaimer}')
-        label.linkActivated.connect(open_disclaimer)
+        label.linkActivated.connect(wgv_utils.open_disclaimer)
         self.layout.addWidget(label, 4, 2)
 
     def init_check_save(self, checked: bool = False):
@@ -244,7 +244,7 @@ class LoginForm(QWidget):
                 res = self.encryptor.decrypt_data(key, self.qsettings.value('Login/password')).decode("utf-8")
             except AttributeError:
                 res = ''
-                popup_msg('Error: Key file or config file may be corrupted.')
+                wgv_utils.popup_msg('Error: Key file or config file may be corrupted.')
                 # TODO: reset them
         else:
             res = ''
@@ -330,7 +330,7 @@ class LoginForm(QWidget):
             self.on_save_clicked()
             self._check_password()
         else:
-            popup_msg('Read disclaimer and check to proceed')
+            wgv_utils.popup_msg('Read disclaimer and check to proceed')
 
     def handle_result1(self, result: bool):
         logging.debug(f'LOGIN - First fetch result {result}')
@@ -351,12 +351,12 @@ class LoginForm(QWidget):
             # if self.check_auto.isChecked() is True:
             #     pass
             # else:
-            #     popup_msg('Login Success')
+            #     wgv_utils.popup_msg('Login Success')
             self.mi = MainInterface(self.account.get_cookies())
             self.login_success()
         else:
             self.login_failed()
-            popup_msg("Login Failed (3): Probably due to bad server connection")
+            wgv_utils.popup_msg("Login Failed (3): Probably due to bad server connection")
 
     def first_fetch(self, login_account: GameLogin, username: str, password: str) -> bool:
         try:
@@ -365,12 +365,12 @@ class LoginForm(QWidget):
             # TODO: May crash; cannot test w/o own simulation; need to wait next maintenance
             logging.error(f"LOGIN - {e}")
             self.login_failed()
-            popup_msg(f"{e}")
+            wgv_utils.popup_msg(f"{e}")
             return False
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
             self.login_failed()
-            popup_msg("Login Failed (1): Wrong authentication information")
+            wgv_utils.popup_msg("Login Failed (1): Wrong authentication information")
             return False
         return res1
 
@@ -380,7 +380,7 @@ class LoginForm(QWidget):
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
             self.login_failed()
-            popup_msg("Login Failed (2): Probably due to bad server connection")
+            wgv_utils.popup_msg("Login Failed (2): Probably due to bad server connection")
             return False
         return res2
 
