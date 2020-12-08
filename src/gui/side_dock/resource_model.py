@@ -60,6 +60,17 @@ class ResourceTableModel(QAbstractTableModel):
             else:
                 logging.error('incorrect indexes')
 
+    def update_fuel(self, new_val: int):
+        old_val = self._data[0][0]
+        if old_val > new_val:
+            # red fade
+            pass
+        elif new_val > old_val:
+            # green fade
+            pass
+        else:
+            self._[0][0] = new_val
+
     def rowCount(self, index):
         return len(self._data)
 

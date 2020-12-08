@@ -50,14 +50,15 @@ class MainInterface(QMainWindow):
 
         # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob.
         #  Qt.Focus issue)
-        # Tabs must be created before menu bar, as menu bar reference main_tabs
-        self.main_tabs = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
-        self.menu_bar = MainInterfaceMenuBar(self)
         self.side_dock_on = False
         self.side_dock = None
         self.tray = None
-        self.init_ui()
+
         self.init_side_dock()
+        # Tabs must be created before menu bar, as menu bar reference main_tabs
+        self.main_tabs = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
+        self.menu_bar = MainInterfaceMenuBar(self)
+        self.init_ui()
 
     # ================================
     # Initialization
@@ -77,6 +78,10 @@ class MainInterface(QMainWindow):
         self.setLayout(QHBoxLayout())
         self.setWindowTitle(f"Warship Girls Viewer v{get_app_version()}")
 
+    '''
+    # Original design is to let user freely open/close side-dock.
+    # Due to the need of hidden pyqt signals connect to the side-dock,
+    # we changed the visibility instead of delete it.
     def create_side_dock(self):
         if (self.side_dock_on is False) and (self.side_dock is None):
             self.side_dock = SideDock(self)
@@ -95,6 +100,23 @@ class MainInterface(QMainWindow):
         else:
             self.qsettings.setValue("UI/no_side_dock", False)
             self.create_side_dock()
+    '''
+    def create_side_dock(self) -> None:
+        if self.side_dock is None:
+            self.side_dock = SideDock(self)
+        else:
+            self.side_dock.show()
+        self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
+
+    def init_side_dock(self) -> None:
+        self.create_side_dock()
+        if self.qsettings.contains("UI/no_side_dock") is True:
+            if self.qsettings.value("UI/no_side_dock") == "true":
+                self.side_dock.hide()
+            else:
+                pass
+        else:
+            self.qsettings.setValue("UI/no_side_dock", False)
 
     def init_tray_icon(self) -> None:
         self.tray = TrayIcon(self, get_data_path('assets/favicon.ico'))
@@ -105,8 +127,12 @@ class MainInterface(QMainWindow):
 
     @pyqtSlot()
     def on_dock_closed(self) -> None:
-        self.side_dock_on = False
-        self.side_dock = None
+        # self.side_dock_on = False
+        # self.side_dock = None
+        if self.side_dock.isVisible() is True:
+            self.side_dock.hide()
+        else:
+            pass
 
     def closeEvent(self, event: QCloseEvent) -> None:
         _quit_application()

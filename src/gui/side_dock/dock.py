@@ -508,4 +508,7 @@ class SideDock(QDockWidget):
         h = 0.19 * self.user_screen_h
         self.task_panel_widget.setGeometry(0, y, self.geometry().width(), h)
 
+    def update_fuel(self):
+        print(self.table_model._data[0][0])
+
 # End of File
