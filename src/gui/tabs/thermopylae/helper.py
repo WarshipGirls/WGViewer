@@ -1,5 +1,5 @@
 from time import sleep
-from typing import Callable
+from typing import Callable, Tuple
 from logging import getLogger
 
 from src.wgr.api import WGR_API  # only for typehints
@@ -18,20 +18,26 @@ class SortieHelper:
         self.points = -1
         self.init_sub_map = "9316"  # TODO
         self.force_exit = False
+        self.adjutant_name = {
+            '10082': "紫貂",
+            '10182': "Kearsarge",
+            '10282': "Habakkuk"
+        }
         self.logger.debug('SortieHelper is initiated')
 
     def is_exit(self):
         return self.force_exit
 
-    def _reconnecting_calls(self, func: Callable, func_info: str):
+    def _reconnecting_calls(self, func: Callable, func_info: str) -> [dict, object]:
         # This redundancy while-loop (compared to api.py's while-loop) deals with WarshipGirlsExceptions;
         #   while the other one deals with URLError etc
-        res = [False, None]  # status, data
+        res = False  # status
+        data = None
         tries = 0
-        while not res[0]:
+        while not res:
             try:
                 self.logger.info(f"{func_info}...")
-                res = func()
+                res, data = func()
             except WarshipGirlsExceptions as e:
                 self.logger.warning(f'Failed to {func_info} due to {e}')
                 self.logger.warning('Trying reconnecting...')
@@ -44,14 +50,14 @@ class SortieHelper:
                 break
             else:
                 pass
-        return res[1]
+        return data
 
     # ================================
     # WGR API methods
     # ================================
 
-    def api_withdraw(self):
-        def _withdraw() -> list:
+    def api_withdraw(self) -> dict:
+        def _withdraw() -> Tuple[bool, dict]:
             data = self.api.withdraw()
             if 'eid' in data:
                 get_error(data['eid'])
@@ -63,12 +69,12 @@ class SortieHelper:
                 self.logger.error('Unexpected behavior')
                 self.logger.debug(data)
                 res = False
-            return [res, data]
+            return res, data
 
         return self._reconnecting_calls(_withdraw, 'restart')
 
-    def api_readyFire(self):
-        def _readyFire() -> list:
+    def api_readyFire(self) -> dict:
+        def _readyFire() -> Tuple[bool, int]:
             data = self.api.readyFire(self.init_sub_map)
             if 'eid' in data:
                 get_error(data['eid'])
@@ -80,12 +86,12 @@ class SortieHelper:
                 # Always choose the upper path
                 next_node_id = next_node['next_node'][0]
                 res = True
-            return [res, next_node_id]
+            return res, next_node_id
 
         return self._reconnecting_calls(_readyFire, 'enter the map')
 
-    def api_newNext(self, next_node: str):
-        def _newNext() -> list:
+    def api_newNext(self, next_node: str) -> dict:
+        def _newNext() -> Tuple[bool, dict]:
             # get 11009211 and 11008211
             data = self.api.newNext(next_node)
             if 'eid' in data:
@@ -95,12 +101,12 @@ class SortieHelper:
                 _flag = self.get_map_node(next_node)['flag']
                 self.logger.info(f"Proceed to {_flag} succeed!")
                 res = True
-            return [res, data]
+            return res, data
 
         return self._reconnecting_calls(_newNext, 'enter next node')
 
-    def get_ship_store(self, is_refresh: str = '0'):
-        def _canSelectList() -> list:
+    def get_ship_store(self, is_refresh: str = '0') -> dict:
+        def _canSelectList() -> Tuple[bool, dict]:
             data = self.api.canSelectList(is_refresh)
             if '$ssss' in data:
                 self.logger.info('Visiting shop succeed!')
@@ -114,9 +120,10 @@ class SortieHelper:
             else:
                 self.logger.error('Unexpected behavior')
                 res = False
-            return [res, data]
+            return res, data
 
         store_data = self._reconnecting_calls(_canSelectList, 'visit shop')
+        # TODO: delete
         print(store_data)
         self.logger.info('Shop has following: ')
         for ship in store_data['$ssss']:
@@ -126,15 +133,16 @@ class SortieHelper:
         return store_data
 
     def buy_ships(self, purchase_list: list, shop_data: dict):
-        def _selectBoat() -> list:
-            # TODO TODO can't tell if this is success or not due to urlopen response encoding
+        def _selectBoat() -> [bool, object]:
             data = self.api.selectBoat(purchase_list)
-            if len(data) < 25:  # workaround
+            if 'eid' in data:
+                self.logger.info("Buying ships failed...")
                 res = False
             else:
+                self.logger.info("Buying ships successfully!")
                 res = True
-            return [res, data]
-        self._reconnecting_calls(_selectBoat, 'buy ships')
+            return res, data
+        buy_data = self._reconnecting_calls(_selectBoat, 'buy ships')
 
         # calculate remaining points
         self.points = shop_data['strategic_point']
@@ -143,13 +151,59 @@ class SortieHelper:
                 self.logger.info(f'bought {self.user_ships[str(ship[1])]["Name"]}')
                 self.points -= int(ship[2])
         self.get_curr_points()
+        return buy_data
+
+    def buy_exp(self) -> dict:
+        def _buy_exp() -> Tuple[bool, dict]:
+            data = self.api.adjutantExp()
+            if 'eid' in data:
+                res = False
+            else:
+                res = True
+            return res, data
+        return self._reconnecting_calls(_buy_exp, 'buy exp')
+
+    def cast_skill(self) -> dict:
+        def _cast_skill() -> Tuple[bool, dict]:
+            data = self.api.useAdjutant()
+            if 'eid' in data:
+                self.logger.info("Failed to cast adjutant skill...")
+                res = False
+            else:
+                self.logger.info("Adjutant skill casted successfully!")
+                res = True
+            return res, data
+        res_data = self._reconnecting_calls(_cast_skill, 'cast adjutant skill')
+
+        self.points = res_data['strategic_point']
+        adj = res_data['adjutantData']
+        output_str = f'{self.adjutant_name[adj["id"]]} - Lv.{adj["level"]} {adj["exp"]}/{adj["exp_top"]}'
+        self.logger.info(output_str)
+        self.get_curr_points()
+        return res_data
+
+    def supply_boats(self, fleets: list) -> object:
+        def _supply_boats() -> Tuple[bool, dict]:
+            data = self.api.supplyBoats(fleets)
+            if 'eid' in data:
+                self.logger.info("Supply boat failed...")
+                res = False
+            else:
+                self.logger.info("Supply boat successfully!")
+                res = True
+            return res, data
+        return self._reconnecting_calls(_supply_boats, 'supply')
 
     # ================================
     # Non-WGR methods
     # ================================
 
-    def get_curr_points(self) -> int:
-        self.logger.info(f'Now have {self.points} strategic points left.')
+    def get_curr_points(self, is_print: bool = True) -> int:
+        # TODO break apart
+        if is_print is True:
+            self.logger.info(f'Now have {self.points} strategic points left.')
+        else:
+            pass
         return self.points
 
     def get_map_node(self, node_id: str) -> dict:

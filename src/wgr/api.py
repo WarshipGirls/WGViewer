@@ -1,7 +1,8 @@
 import json
 import logging
+import zlib
 
-
+from ast import literal_eval
 from requests import exceptions
 from requests.utils import cookiejar_from_dict
 from time import sleep
@@ -50,6 +51,7 @@ class WGR_API:
         return data
 
     def _api_urlopen(self, link: str) -> object:
+        # TODO: use this minimally! Currently the returned data is unreadable
         # This uses urllib.request.urlopen
         data = None
         url = self.server + link + self.hlp.get_url_end(self.channel)
@@ -65,7 +67,12 @@ class WGR_API:
         _req.add_header(key='User-Agent', val='Dalvik/2.1.0 (Linux; U; Android 9.1.1; SAMSUNG-SM-G900A Build/LMY47X)')
         while not res:
             try:
-                data = opener.open(_req, timeout=10).read().decode('latin-1')
+                raw_data = opener.open(_req, timeout=10).read()
+                try:
+                    byte_data = zlib.decompress(raw_data)
+                    data = literal_eval(byte_data.decode('ascii'))  # encoding type determined by chardet
+                except zlib.error:
+                    data = {}
                 res = True
             except (TimeoutError, URLError) as e:
                 logging.error(e)

@@ -1,6 +1,7 @@
 import json
 
 from time import sleep
+from math import ceil
 from logging import getLogger
 
 from src import data as wgr_data
@@ -36,7 +37,7 @@ class Sortie:
         self.helper = None
         self.boat_pool = []  # host existing boats
         self.escort_DD = []  # For 2DD to pass first few levels only, 萤火虫，布雷恩
-        self.escort_CV = -1  # For 1CV to pass first few levels only, 不挠
+        self.escort_CV = []  # For 1CV to pass first few levels only, 不挠
         self.user_ships = wgr_data.get_processed_userShipVo()
 
         self.logger.info("Init E6...")
@@ -138,8 +139,8 @@ class Sortie:
             elif ship['cid'] in [11008211, 11009211]:  # TODO: fix this for now
                 self.escort_DD.append(ship_id)
                 output_str += "\tESCORT DD"
-            elif ship['cid'] == 10031913:
-                self.escort_CV = ship_id
+            elif ship['cid'] in [10031913]:
+                self.escort_CV.append(ship_id)
                 output_str += "\tESCORT CV"
             # Lesson: do not output various stuff at once, concat them together; otherwise TypeError
             self.logger.info(output_str)
@@ -186,10 +187,12 @@ class Sortie:
     def start_sortie(self) -> None:
         self.logger.info('Retreating...')
 
+        # TODO: how to simplify the if-checking after every call?
         self.helper.api_withdraw()
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
             return
+
         next_node = self.helper.api_readyFire()
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
@@ -205,10 +208,57 @@ class Sortie:
             self.parent.button_sortie.setEnabled(True)
             return
 
-        self.helper.buy_ships(self.escort_DD, shop_data)
-
+        # Node A-1
+        buy_data = self.helper.buy_ships(self.escort_DD, shop_data)
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
             return
+        self.boat_pool = buy_data['boatPool']
+        # TODO dynamically update boat pool info on left panel
+
+        adj_data = self.helper.cast_skill()
+        if self.helper.is_exit is True:
+            self.parent.button_sortie.setEnabled(True)
+            return
+
+        # Node E6-1 A1, lv.1 -> lv.2
+        self.bump_level(adj_data)
+
+        supply_data = self.helper.supply_boats(self.escort_DD)
+        if self.helper.is_exit is True:
+            self.parent.button_sortie.setEnabled(True)
+            return
+
+    def bump_level(self, adj_data) -> bool:
+        adj_lvl = int(adj_data["adjutantData"]["level"])
+        next_adj_lvl = adj_lvl + 1
+        curr_exp = int(adj_data["adjutantData"]["exp"])
+        next_exp = int(adj_data["adjutantData"]["exp_top"])
+        required_exp = next_exp - curr_exp
+        if self.helper.get_curr_points(False) >= required_exp:
+            self.logger.info(f"Bumping adjutant level to Lv.{next_adj_lvl}")
+            buy_times = ceil(required_exp / 5)
+            res = None
+            while buy_times > 0:
+                res = self.helper.buy_exp()
+                if self.helper.is_exit is True:
+                    self.parent.button_sortie.setEnabled(True)
+                    break
+                buy_times -= 1
+                if buy_times < 0:
+                    break
+                output_str = f"EXP {res['adjutantData']['exp']}/{res['adjutantData']['exp_top']}; remaining points = {res['strategic_point']}"
+                self.logger.info(output_str)
+            if res is None:
+                return False
+            elif int(res['adjutantData']['level']) == next_adj_lvl:
+                self.logger.info("Bumping level successfully")
+                return True
+            else:
+                self.logger.debug("Unexpected behavior on bumping level")
+                self.logger.debug(res)
+                return False
+        else:
+            return False
 
 # End of File
