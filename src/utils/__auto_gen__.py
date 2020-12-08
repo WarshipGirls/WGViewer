@@ -17,7 +17,7 @@ def top_level_functions(body: list) -> list:
 
 
 def parse_ast(filename: str) -> ast.Module:
-    with open(filename, "rt") as file:
+    with open(filename, "rt", encoding='utf-8') as file:
         return ast.parse(file.read(), filename=filename)
 
 
