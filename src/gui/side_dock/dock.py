@@ -354,21 +354,31 @@ class SideDock(QDockWidget):
         if data is not None:
             u = data["userVo"]
             x = data["packageVo"]
-            self.table_model._data[0][0] = u["oil"]
-            self.table_model._data[0][1] = u["ammo"]
-            self.table_model._data[0][2] = u["steel"]
-            self.table_model._data[0][3] = u["aluminium"]
-            self.table_model._data[0][4] = u["gold"]
-            self.table_model._data[1][0] = next((i for i in x if i["itemCid"] == 541), {"num": 0})["num"]
-            self.table_model._data[1][1] = next((i for i in x if i["itemCid"] == 141), {"num": 0})["num"]
-            self.table_model._data[1][2] = next((i for i in x if i["itemCid"] == 241), {"num": 0})["num"]
-            self.table_model._data[1][3] = next((i for i in x if i["itemCid"] == 741), {"num": 0})["num"]
-            self.table_model._data[1][4] = next((i for i in x if i["itemCid"] == 66641), {"num": 0})["num"]
-            self.table_model._data[2][0] = next((i for i in x if i["itemCid"] == 10441), {"num": 0})["num"]
-            self.table_model._data[2][1] = next((i for i in x if i["itemCid"] == 10341), {"num": 0})["num"]
-            self.table_model._data[2][2] = next((i for i in x if i["itemCid"] == 10241), {"num": 0})["num"]
-            self.table_model._data[2][3] = next((i for i in x if i["itemCid"] == 10141), {"num": 0})["num"]
-            self.table_model._data[2][4] = next((i for i in x if i["itemCid"] == 10541), {"num": 0})["num"]
+            self.table_model.update_fuel(u["oil"])
+            self.table_model.update_ammo(u["ammo"])
+            self.table_model.update_steel(u["steel"])
+            self.table_model.update_bauxite(u["aluminium"])
+            self.table_model.update_gold(u["gold"])
+            t = next((i for i in x if i["itemCid"] == 541), {"num": 0})["num"]
+            self.table_model.update_repair(t)
+            t = next((i for i in x if i["itemCid"] == 141), {"num": 0})["num"]
+            self.table_model.update_build(t)
+            t = next((i for i in x if i["itemCid"] == 241), {"num": 0})["num"]
+            self.table_model.update_bp_construct(t)
+            t = next((i for i in x if i["itemCid"] == 741), {"num": 0})["num"]
+            self.table_model.update_bp_dev(t)
+            t = next((i for i in x if i["itemCid"] == 66641), {"num": 0})["num"]
+            self.table_model.update_revive(t)
+            t = next((i for i in x if i["itemCid"] == 10441), {"num": 0})["num"]
+            self.table_model.update_DD(t)
+            t = next((i for i in x if i["itemCid"] == 10341), {"num": 0})["num"]
+            self.table_model.update_CA(t)
+            t = next((i for i in x if i["itemCid"] == 10241), {"num": 0})["num"]
+            self.table_model.update_BB(t)
+            t = next((i for i in x if i["itemCid"] == 10141), {"num": 0})["num"]
+            self.table_model.update_CV(t)
+            t = next((i for i in x if i["itemCid"] == 10541), {"num": 0})["num"]
+            self.table_model.update_SS(t)
 
     @pyqtSlot(dict)
     def on_received_name(self, data):
@@ -452,10 +462,6 @@ class SideDock(QDockWidget):
             m = data["marketingData"]["activeList"]
             for i in m:
                 self.add_task_countdown(i["title"], i["left_time"], len(self.task_counters))
-
-    @pyqtSlot(int)
-    def update_fuel(self, x: int):
-        self.table_model.update_fuel(x)
 
     # ================================
     # Events

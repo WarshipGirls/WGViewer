@@ -17,7 +17,7 @@ class TabAdvanceFunctions(QWidget):
         test_btn2 = QPushButton('change to 9999999')
         test_btn2.clicked.connect(self.update_fuel2)
 
-        self.sig_fuel.connect(side_dock.update_fuel)
+        self.sig_fuel.connect(side_dock.table_model.update_fuel)
         self.layout = QHBoxLayout(self)
         self.layout.addWidget(test_btn)
         self.layout.addWidget(test_btn2)
