@@ -1,8 +1,8 @@
 # Description
 
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
-
-Fixes # (issue)
+- Provide a summary
+	- include motivation / context / related issues (link with `#`)
+- List new required dependencies for this change
 
 ## Type of change
 
@@ -15,19 +15,22 @@ Please delete options that are not relevant.
 
 # How Has This Been Tested?
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration
+- Describe your test procedure
+- List relevant test configuration
 
 **Test Configuration**:
 
-Tested OS version:
+- Tested OS version:
+- Tested Environment:
 
 # Checklist:
 
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added pytest (under 'WGViewer/tests/') that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
+- [ ] Followed the style guidelines of this project
+	- Added type hints for the arguments of functions/methods
+- [ ] Performed a self-review
+- [ ] Commented code (particularly in convoluted areas)
+- [ ] Updated corresponding documentation(s)
+- [ ] No new warnings
+	- Use IDE Code Inspection (e.g. PyCharm)
+- [ ] Added related pytest (under `WGViewer/tests/`)
 - [ ] Any dependent changes have been merged and published in downstream modules
