@@ -22,7 +22,7 @@ def get_repair_type(ship_info: dict) -> int:
     return res
 
 
-def process_spy_json(spy_json: dict) -> str:
+def process_spy_json(spy_json: dict, all_equipment: [dict, None] = None) -> str:
     enemy_info = spy_json['enemyVO']
     detect_result = "success" if enemy_info['isFound'] == 1 else "fail"
     detect_rate = enemy_info['successRate']
@@ -42,12 +42,15 @@ def process_spy_json(spy_json: dict) -> str:
         e_str += "AA {:4s} AS  {:4s} SPD {:4s} LOS {:4s} RNG {:4s}".format(str(e['airDef']), str(e['antisub']), str(e['speed']), str(e['radar']),
                                                                            get_ship_los(e['range']))
         e_str += "\n"
-        for q in e['equipment']:
-            if isinstance(q, int) is False or q == 0:
-                continue
-            _e = next((i for i in SHIP_EQUIPMENT if i['cid'] == q))
-            e_str += "{} ".format(_e['title'])
-        e_str += "\n"
+        if all_equipment is None:
+            pass
+        else:
+            for q in e['equipment']:
+                if isinstance(q, int) is False or q == 0:
+                    continue
+                _e = next((i for i in all_equipment if i['cid'] == q))
+                e_str += "{} ".format(_e['title'])
+            e_str += "\n"
         spy_out += e_str
     return spy_out
 
