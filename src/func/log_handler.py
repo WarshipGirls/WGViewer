@@ -2,7 +2,7 @@ import logging
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
-from src.general import get_curr_time
+from src.utils.general import get_curr_time
 
 
 class LogHandler(logging.Handler, QObject):

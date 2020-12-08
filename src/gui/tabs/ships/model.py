@@ -8,7 +8,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 from src import data as wgr_data
 from src.func import constants as CONST
 from src.func.helper import Helper
-from src.general import clear_desc, ts_to_date
+from src.utils.general import clear_desc, ts_to_date
 from src.wgr.boat import API_BOAT
 from . import constant as SCONST
 

@@ -18,7 +18,7 @@ from src.func.session import GameSession
 from src.func import constants as constants
 from src.func.version_check import VersionCheck
 from src.func.worker import CallbackWorker
-from src.general import get_user_resolution, open_disclaimer, popup_msg, get_app_version
+from src.utils.general import get_user_resolution, open_disclaimer, popup_msg, get_app_version
 from .main_interface import MainInterface
 
 

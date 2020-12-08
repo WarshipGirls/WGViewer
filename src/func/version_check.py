@@ -5,7 +5,7 @@ import urllib.request
 from PyQt5.QtWidgets import QMessageBox
 from packaging import version
 
-from src.general import get_app_version, open_url, _force_quit, popup_msg
+from src.utils.general import get_app_version, open_url, _force_quit, popup_msg
 
 
 class VersionCheck:

@@ -4,7 +4,7 @@ from logging import getLogger
 
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.wgr.six import API_SIX  # only for typehints
-from src.general import get_repair_type
+from src.utils.general import get_repair_type
 
 
 class SortieHelper:

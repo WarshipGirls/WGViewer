@@ -4,13 +4,13 @@ import os
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, QModelIndex
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QMainWindow,
+    QWidget, QMainWindow,
     QTableWidget, QTableWidgetItem,
     QVBoxLayout, QHeaderView
 )
 
 from src import data as wgr_data
-from src.general import get_user_resolution
+from src.utils.general import get_user_resolution
 
 
 def get_data_path(relative_path):
