@@ -1,7 +1,4 @@
 from math import ceil
-from src.data.wgv_json import get_shipEquipmnt
-
-SHIP_EQUIPMENT = get_shipEquipmnt()
 
 
 def get_repair_type(ship_info: dict) -> int:
