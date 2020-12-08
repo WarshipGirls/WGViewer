@@ -188,6 +188,9 @@ class Sortie:
         return res
 
     def start_sortie(self) -> None:
+        self.E61A1_sortie()
+
+    def E61A1_sortie(self) -> None:
         self.logger.info('Retreating...')
 
         # TODO: how to simplify the if-checking after every call?
@@ -196,12 +199,12 @@ class Sortie:
             self.parent.button_sortie.setEnabled(True)
             return
 
-        next_node = self.helper.api_readyFire()
+        next_node_id = self.helper.api_readyFire()
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
             return
 
-        self.helper.api_newNext(str(next_node))
+        self.helper.api_newNext(str(next_node_id))
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
             return
@@ -245,9 +248,26 @@ class Sortie:
         sleep(2)
         self.helper.spy()
         sleep(2)
-        self.helper.challenge('1')
+        challenge_res = self.helper.challenge('1')
+        if self.helper.is_exit is True:
+            self.parent.button_sortie.setEnabled(True)
+            return
+        do_night_battle = self.helper.is_night_battle(challenge_res)
+
         sleep(10)
-        self.helper.get_war_result('1')
+        if do_night_battle is True:
+            battle_res = self.helper.get_war_result('1')
+        else:
+            battle_res = self.helper.get_war_result('0')
+        self.helper.process_battle_result(battle_res)
+        sleep(3)
+        self.helper.process_repair(battle_res['shipVO'], [1])
+        if battle_res['getScore$return']['flagKill'] == 0 or battle_res['resultLevel'] in [1, 2]:
+            # proceed
+            next_node_id = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
+        else:
+            self.logger.info('Failed to clean current node. Should restart. Exiting.')
+            return
 
     def bump_level(self, adj_data) -> bool:
         adj_lvl = int(adj_data["adjutantData"]["level"])

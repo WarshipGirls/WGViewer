@@ -11,6 +11,7 @@ from src.func.worker import Worker
 from src.wgr.six import API_SIX
 from src.func.log_handler import LogHandler
 from src.gui.side_dock.resource_model import ResourceTableModel
+from src.gui.side_dock.dock import SideDock
 from .thermopylae.ship_window import ShipSelectWindow
 from .thermopylae.sortie import Sortie
 
@@ -20,18 +21,21 @@ class TabThermopylae(QWidget):
     sig_ammo = pyqtSignal(int)
     sig_steel = pyqtSignal(int)
     sig_baux = pyqtSignal(int)
+    sig_exp = pyqtSignal(dict)
 
-    def __init__(self, tab_name: str, resource_info: ResourceTableModel, is_realrun: bool):
+    def __init__(self, tab_name: str, side_dock: SideDock, is_realrun: bool):
         # TODO reorganize
         super().__init__()
         self.setObjectName(tab_name)
-        self.resource_info = resource_info
+        self.side_dock = side_dock
+        self.resource_info: ResourceTableModel = self.side_dock.table_model
         self.is_realrun = is_realrun
 
         self.sig_fuel.connect(self.resource_info.update_fuel)
         self.sig_ammo.connect(self.resource_info.update_ammo)
         self.sig_steel.connect(self.resource_info.update_steel)
         self.sig_baux.connect(self.resource_info.update_bauxite)
+        self.sig_exp.connect(self.side_dock.update_lvl_label)
 
         self.api_six = API_SIX(wgv_data.load_cookies())
         self.fleets = [None] * 6
@@ -219,4 +223,7 @@ class TabThermopylae(QWidget):
         self.sig_ammo.emit(a)
         self.sig_steel.emit(s)
         self.sig_baux.emit(b)
+
+    def update_user_exp_label(self, x: dict) -> None:
+        self.sig_exp.emit(x)
 # End of File

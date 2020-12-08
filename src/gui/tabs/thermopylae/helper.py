@@ -86,9 +86,7 @@ class SortieHelper:
                 res = False
             elif '$currentVo' in data:
                 self.logger.info('Entering map succeed!')
-                next_node = self.get_map_node(data['$currentVo']['nodeId'])
-                # Always choose the upper path
-                next_node_id = next_node['next_node'][0]
+                next_node_id = self.get_next_node_by_id(data['$currentVo']['nodeId'])
                 res = True
             else:
                 self.logger.debug(data)
@@ -105,7 +103,7 @@ class SortieHelper:
                 get_error(data['eid'])
                 res = False
             elif 'nodeId' in data:
-                _flag = self.get_map_node(next_node)['flag']
+                _flag = self.get_map_node_by_id(next_node)['flag']
                 self.logger.info(f"Proceed to {_flag} succeed!")
                 res = True
             else:
@@ -284,10 +282,9 @@ class SortieHelper:
             return res, data
         return self._reconnecting_calls(_spy, 'Detection')
 
-    def challenge(self, formation: str) -> None:
+    def challenge(self, formation: str) -> dict:
         def _challenge() -> Tuple[bool, dict]:
             data = self.api.challenge(formation)
-            print(data)
             if 'eid' in data:
                 res = False
             elif 'warReport' in data:
@@ -298,7 +295,23 @@ class SortieHelper:
             return res, data
         return self._reconnecting_calls(_challenge, 'Combat')
 
-    def get_war_result(self, is_night: str = '0') -> None:
+    def is_night_battle(self, challenge_res: dict) -> bool:
+        if challenge_res['warReport']['canDoNightWar'] == 0:
+            self.logger.info('Battle finished by day')
+            do_night_battle = False
+        elif challenge_res['warReport']['canDoNightWar'] == 1:
+            e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
+            self.logger.info(e_list)
+            if e_list[0] != 0: # if enemy's flagship is sunken
+                do_night_battle = True
+            else:
+                do_night_battle = False
+        else:
+            self.logger.info("Cannot process battle info. Exiting")
+            do_night_battle = False
+        return do_night_battle
+
+    def get_war_result(self, is_night: str = '0') -> dict:
         def _result() -> Tuple[bool, dict]:
             data = self.api.getWarResult(is_night)
             print(data)
@@ -312,6 +325,23 @@ class SortieHelper:
             return res, data
         return self._reconnecting_calls(_result, 'receive result')
 
+    def process_battle_result(self, battle_res: dict):
+        res_str = f"==== {wgv_utils.get_war_evaluation(battle_res['resultLevel'])} ===="
+        self.logger.info(res_str)
+        adj = battle_res['adjutantData']
+        adj_str = f"Adjutant Lv.{adj['level']} {adj['exp']}/{adj['exp_top']}"
+        self.logger.info(adj_str)
+
+        ships = battle_res['warResult']['selfShipResults']
+        for i in range(len(ships)):
+            shipname = battle_res['shipVO'][i]['title']
+            ship = ships[i]
+            ship_str = f"{shipname} Lv.{ship['level']} +{ship['expAdd']}Exp"
+            ship_str += " MVP" if ship['isMvp'] == 1 else ""
+            self.logger.info(ship_str)
+
+        self.points = battle_res['strategic_point']
+
     # ================================
     # Non-WGR methods
     # ================================
@@ -324,12 +354,21 @@ class SortieHelper:
             pass
         return self.points
 
-    def get_map_node(self, node_id: str) -> dict:
+    def get_map_node_by_id(self, node_id: str) -> dict:
         try:
             node = next(i for i in self.map_data['combatLevelNode'] if i['id'] == node_id)
         except StopIteration:
             self.logger.error('Access wrong nodes.')
             node = {}
+        return node
+
+    def get_next_node_by_id(self, node_id: str) -> str:
+        try:
+            next_node = self.get_map_node_by_id(node_id)
+            next_node_id = next_node['next_node'][0]
+        except KeyError:
+            self.logger.error('Access wrong nodes.')
+            node = ""
         return node
 
 # End of File
