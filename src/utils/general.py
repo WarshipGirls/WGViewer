@@ -1,14 +1,6 @@
 import os
 import re
 from datetime import datetime, timedelta
-from math import ceil
-from typing import Tuple
-
-from PyQt5.QtCore import QUrl, QCoreApplication
-from PyQt5.QtGui import QDesktopServices
-from PyQt5.QtWidgets import QMessageBox, QDesktopWidget
-from src import data as wgr_data
-from src.func import constants as CONST
 
 
 def clear_desc(text: str) -> str:
@@ -22,90 +14,6 @@ def get_app_version() -> str:
 
 def get_curr_time() -> str:
     return datetime.now().strftime("%H:%M:%S")
-
-
-# TODO refactor into a module; separate methods such as GUI, GAME-calculation
-def get_repair_type(ship_info: dict) -> int:
-    curr_hp = ship_info['battleProps']['hp']
-    max_hp = ship_info['battlePropsMax']['hp']
-    res = -1
-    if curr_hp < max_hp:
-        # slightly damaged
-        res = 0
-    elif curr_hp < ceil(max_hp * 0.5):
-        # moderately damaged
-        res = 1
-    elif curr_hp < ceil(max_hp * 0.25):
-        # heavily damaged
-        res = 2
-    elif curr_hp < 0:
-        # sunken
-        res = 3
-    else:
-        pass
-    return res
-
-
-def get_formation(formation: int) -> str:
-    return CONST.formation[formation]
-
-
-def get_type(ship_type_id: int) -> str:
-    return CONST.ship_type[ship_type_id]
-
-
-def get_range(range_id: int) -> str:
-    return CONST.range_type[range_id]
-
-
-def get_user_resolution() -> Tuple[int, int]:
-    # use this info to re-scale, so to avoid hardcoding
-    user_w = QDesktopWidget().screenGeometry(-1).width()
-    user_h = QDesktopWidget().screenGeometry(-1).height()
-    return user_w, user_h
-
-
-def open_disclaimer() -> None:
-    # Hardcoding for now
-    t = "<h2>DISCLAIMER</h2>\n"
-    t += """
-    Warship Girls Viewer (as "WGViewer") is not a representative and is not
-    associated with Warship Girls (as "the game"), Warship Girls R (as "the game"),
-    or Moefantasy 幻萌网络.
-    <br><br>
-    The copyright of the shipgirl art resources used in the
-    WGViewer belong to Moefantasy.
-    <br><br>
-    WGViewer is intended for educational purposes only. Botting is in violation of
-    the User Agreement of the game; prolonged usage of WGViewer's automation
-    functions may result in your game account being banned. The developer of
-    WGViewer takes no responsibility for repercussions related to the usage of
-    WGViewer.
-    <br><br>
-    Although unlikely, users may sink ships and lose equipment when using WGViewer
-    to conduct combat sorties. While WGViewer has been painstakingly designed to
-    reduce chances of such occurrence, the developer of WGViewer does not take
-    responsibility for any loss of ships and/or resources.
-    """
-    popup_msg(t, 'Terms and Conditions')
-
-
-def popup_msg(text: str, title: str = None) -> None:
-    msg = QMessageBox()
-    msg.setStyleSheet(wgr_data.get_color_scheme())
-    t = title if title is not None else "Info"
-    msg.setWindowTitle(t)
-    msg.setText(text)
-    msg.exec_()
-
-
-def open_url(url: str) -> None:
-    QDesktopServices.openUrl(QUrl(url))
-
-
-def _quit_application() -> None:
-    # TODO: in the future, save unfinished tasks
-    QCoreApplication.exit()
 
 
 def _force_quit(code: int) -> None:
