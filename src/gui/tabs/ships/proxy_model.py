@@ -5,7 +5,7 @@ import re
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtGui import QIcon
 
-from src import data as wgr_data
+from src import data as wgv_data
 from . import constant as SCONST
 
 
@@ -33,7 +33,7 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
         self.slot_sort_col = [20]
 
         # TODO? multi-processing following command
-        self._info = wgr_data.init_ships_temp()
+        self._info = wgv_data.init_ships_temp()
         logging.debug('SHIP - Proxy Model init done.')
 
     def ship_id_to_rarity(self, cid: int) -> int:

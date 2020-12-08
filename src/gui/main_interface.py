@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt, pyqtSlot, QThreadPool, QSettings
 from PyQt5.QtGui import QCloseEvent, QHideEvent
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
 
-from src import data as wgr_data
+from src import data as wgv_data
 from src import utils as wgv_utils
 from src.gui.side_dock.dock import SideDock
 from src.gui.interface.tabs import MainInterfaceTabs
@@ -15,10 +15,10 @@ from src.wgr.api import WGR_API
 
 
 def init_zip_files() -> None:
-    dir_size = sum(entry.stat().st_size for entry in os.scandir(wgr_data.get_zip_dir()))
+    dir_size = sum(entry.stat().st_size for entry in os.scandir(wgv_data.get_zip_dir()))
     # E.zip + S.zip + init.zip ~= 34M+
     if dir_size < 30000000:
-        wgr_data.init_resources()
+        wgv_data.init_resources()
     else:
         pass
 
@@ -38,7 +38,7 @@ class MainInterface(QMainWindow):
         self.cookies = cookies
         self.is_realrun = realrun
 
-        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
+        self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         self.threadpool = QThreadPool()
         self.api = WGR_API(self.cookies)
 
@@ -65,7 +65,7 @@ class MainInterface(QMainWindow):
     # ================================
 
     def set_color_scheme(self) -> None:
-        self.setStyleSheet(wgr_data.get_color_scheme())
+        self.setStyleSheet(wgv_data.get_color_scheme())
 
     def init_ui(self) -> None:
         self.set_color_scheme()
@@ -151,14 +151,14 @@ class MainInterface(QMainWindow):
     def api_initGame(self) -> None:
         if self.is_realrun:
             data = self.api.initGame()
-            wgr_data.save_api_initGame(data)
+            wgv_data.save_api_initGame(data)
         else:
-            data = wgr_data.get_api_initGame()
+            data = wgv_data.get_api_initGame()
 
-        wgr_data.save_equipmentVo(data['equipmentVo'])
-        wgr_data.save_user_tactics(data['tactics'])
-        wgr_data.save_userVo(data['userVo'])
-        wgr_data.save_user_fleets(data['fleetVo'])
-        wgr_data.save_pveExploreVo(data['pveExploreVo'])
+        wgv_data.save_equipmentVo(data['equipmentVo'])
+        wgv_data.save_user_tactics(data['tactics'])
+        wgv_data.save_userVo(data['userVo'])
+        wgv_data.save_user_fleets(data['fleetVo'])
+        wgv_data.save_pveExploreVo(data['pveExploreVo'])
 
 # End of File

@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QHeaderView
 )
 
-from src import data as wgr_data
+from src import data as wgv_data
 from src.utils.wgv_pyqt import get_user_resolution
 from . import constant as SCONST
 
@@ -45,14 +45,14 @@ class EquipPopup(QMainWindow):
             self.button.setEnabled(False)
 
     def init_ui(self):
-        self.setStyleSheet(wgr_data.get_color_scheme())
+        self.setStyleSheet(wgv_data.get_color_scheme())
         self.setWindowTitle('WGViewer - Equipment Selection')
         self.resize(self.width, self.height)
 
         self.button.clicked.connect(self.unequip)
 
         self.tab.setColumnCount(4)
-        equips = wgr_data.get_ship_equips(self.cid)
+        equips = wgv_data.get_ship_equips(self.cid)
 
         for e in equips:
             self.addTableRow(self.tab, e)

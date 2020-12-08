@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QGridLayout, QVBoxLayout
 )
 
-from src import data as wgr_data
+from src import data as wgv_data
 from src import utils as wgv_utils
 from src.exceptions.custom import InterruptExecution
 from src.exceptions.wgr_error import WarshipGirlsExceptions
@@ -36,7 +36,7 @@ class LoginForm(QWidget):
         VersionCheck(self)
 
         self.sig_login.connect(self.start_login)
-        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
+        self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         self.encryptor = Encryptor()
         self.key_filename = '.wgr.key'
         self.channel = ""
@@ -125,7 +125,7 @@ class LoginForm(QWidget):
         user_w, user_h = wgv_utils.get_user_resolution()
         self.init_login_button(user_h)
         self.resize(int(0.26 * user_w), int(0.12 * user_h))
-        self.setStyleSheet(wgr_data.get_color_scheme())
+        self.setStyleSheet(wgv_data.get_color_scheme())
         self.setWindowTitle(f'Warship Girls Viewer v{wgv_utils.get_app_version()} Login')
 
     def init_name_field(self, text: str = ''):
@@ -238,9 +238,9 @@ class LoginForm(QWidget):
         self.sig_login.emit()
 
     def _get_password(self) -> str:
-        if wgr_data.is_key_exists(self.key_filename) and self.qsettings.contains('Login/password'):
+        if wgv_data.is_key_exists(self.key_filename) and self.qsettings.contains('Login/password'):
             try:
-                key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
+                key = self.encryptor.load_key(wgv_data.get_key_path(self.key_filename))
                 res = self.encryptor.decrypt_data(key, self.qsettings.value('Login/password')).decode("utf-8")
             except AttributeError:
                 res = ''
@@ -269,7 +269,7 @@ class LoginForm(QWidget):
             self.qsettings.endGroup()
         else:
             self.qsettings.remove("Login")
-            wgr_data.del_key_file(self.key_filename)
+            wgv_data.del_key_file(self.key_filename)
             self.lineEdit_username.clear()
             self.lineEdit_password.clear()
             self.combo_platform.setCurrentText(self.combo_platform.itemText(0))
@@ -390,11 +390,11 @@ class LoginForm(QWidget):
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()
 
-        if not wgr_data.is_key_exists(self.key_filename):
+        if not wgv_data.is_key_exists(self.key_filename):
             key = self.encryptor.gen_key()
-            self.encryptor.save_key(key, wgr_data.get_key_path(self.key_filename))
+            self.encryptor.save_key(key, wgv_data.get_key_path(self.key_filename))
         else:
-            key = self.encryptor.load_key(wgr_data.get_key_path(self.key_filename))
+            key = self.encryptor.load_key(wgv_data.get_key_path(self.key_filename))
         self.qsettings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
 
         self.bee1 = CallbackWorker(self.first_fetch, (self.account, _username, _password), self.handle_result1)

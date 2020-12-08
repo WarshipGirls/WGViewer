@@ -5,7 +5,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QButtonGroup
 
-import src.data as wgr_data
+import src.data as wgv_data
 from src.func.worker import Worker
 
 from src.wgr.six import API_SIX
@@ -33,7 +33,7 @@ class TabThermopylae(QWidget):
         self.sig_steel.connect(self.resource_info.update_steel)
         self.sig_baux.connect(self.resource_info.update_bauxite)
 
-        self.api_six = API_SIX(wgr_data.load_cookies())
+        self.api_six = API_SIX(wgv_data.load_cookies())
         self.fleets = [None] * 6
         self.final_fleet = [None] * 14
         # for testing

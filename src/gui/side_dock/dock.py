@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
     QDockWidget, QWidget, QLabel, QLineEdit, QMessageBox, QCheckBox, QLayout
 )
 
-from src import data as wgr_data
+from src import data as wgv_data
 from src import utils as wgv_utils
 from src.func import constants as CONST
 from src.func.helper import Helper
@@ -39,7 +39,7 @@ class SideDock(QDockWidget):
     def __init__(self, parent):
         super(SideDock, self).__init__(parent)
         _, self.user_screen_h = wgv_utils.get_user_resolution()
-        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
+        self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         self.hlp = Helper()
 
         # index 0 for daily, 1 for weekly, 2+ for tasks/events
@@ -92,7 +92,7 @@ class SideDock(QDockWidget):
         self.set_data()
 
     def set_data(self) -> None:
-        d = wgr_data.get_api_initGame()
+        d = wgv_data.get_api_initGame()
         self.on_received_lists(d)
         self.on_received_resource(d)
         self.on_received_name(d)
@@ -479,7 +479,7 @@ class SideDock(QDockWidget):
         box = QMessageBox(QMessageBox.Question, "INFO", "Do you want to close side dock?\n(Can re-open in View menu)",
                           QMessageBox.Yes | QMessageBox.No, self)
 
-        box.setStyleSheet(wgr_data.get_color_scheme())
+        box.setStyleSheet(wgv_data.get_color_scheme())
         box.setDefaultButton(QMessageBox.No)
         box.setCheckBox(cb)
 

@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QHeaderView, QTableView
 )
 
-from src import data as wgr_data
+from src import data as wgv_data
 from src.wgr.api import WGR_API
 from .ships.delegate import ShipTableDelegate
 from .ships.model import ShipModel
@@ -28,7 +28,7 @@ class TabShips(QWidget):
     def __init__(self, tab_name: str, is_realrun: bool):
         super().__init__()
         logging.info("SHIPS - Creating Ships Tab...")
-        self.api = WGR_API(wgr_data.load_cookies())
+        self.api = WGR_API(wgv_data.load_cookies())
 
         self.setObjectName(tab_name)
         self.content_widget = None
@@ -49,12 +49,12 @@ class TabShips(QWidget):
 
     def _realrun(self):
         data = self.api.getShipList()
-        wgr_data.save_api_getShipList(data)
+        wgv_data.save_api_getShipList(data)
         self.on_received_shiplist(data)
 
     def _testrun(self):
         logging.debug("SHIPS - Starting tests...")
-        data = wgr_data.get_api_getShipList()
+        data = wgv_data.get_api_getShipList()
         # logging.error(len(data['userShipVO']))
         data['userShipVO'] = data['userShipVO'][:5]
         self.on_received_shiplist(data)

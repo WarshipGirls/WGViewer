@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QHeaderView
 )
 
-from src import data as wgr_data
+from src import data as wgv_data
 from src.utils.wgv_pyqt import get_user_resolution
 
 
@@ -37,13 +37,13 @@ class ShipSelectWindow(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-        self.setStyleSheet(wgr_data.get_color_scheme())
+        self.setStyleSheet(wgv_data.get_color_scheme())
         self.setWindowTitle('WGViewer - Ship Selection')
         self.resize(self.width, self.height)
 
         self.tab.setColumnCount(4)
         # TODO remove Lv. 1 ships; add a label to inform user this
-        self.ships_info = wgr_data.get_processed_userShipVo()
+        self.ships_info = wgv_data.get_processed_userShipVo()
         for ship_id, ship in self.ships_info.items():
             self.add_table_row(self.tab, ship_id, ship)
 

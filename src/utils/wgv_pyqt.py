@@ -3,7 +3,7 @@ from typing import Tuple
 from PyQt5.QtCore import QUrl, QCoreApplication
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QMessageBox, QDesktopWidget
-from src import data as wgr_data
+from src import data as wgv_data
 
 
 def get_user_resolution() -> Tuple[int, int]:
@@ -40,7 +40,7 @@ def open_disclaimer() -> None:
 
 def popup_msg(text: str, title: str = None) -> None:
     msg = QMessageBox()
-    msg.setStyleSheet(wgr_data.get_color_scheme())
+    msg.setStyleSheet(wgv_data.get_color_scheme())
     t = title if title is not None else "Info"
     msg.setWindowTitle(t)
     msg.setText(text)

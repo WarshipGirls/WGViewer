@@ -5,7 +5,7 @@ import sys
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 
-from src import data as wgr_data
+from src import data as wgv_data
 from src.func import constants as CONST
 from src.func.helper import Helper
 from src.utils.general import clear_desc, ts_to_date
@@ -24,7 +24,7 @@ class ShipModel(QStandardItemModel):
     def __init__(self, view):
         super().__init__(view)
         self.view = view
-        self.api_boat = API_BOAT(wgr_data.load_cookies())
+        self.api_boat = API_BOAT(wgv_data.load_cookies())
         self.hlp = Helper()
 
         self.value_opt = SCONST.value_select[0]
@@ -61,7 +61,7 @@ class ShipModel(QStandardItemModel):
                 tactics.append(self.index(row, col).data(Qt.UserRole))
             s['tactics'] = tactics
             # TODO skill cid after implementing skill
-        wgr_data.save_processed_userShipVo(all_ships)
+        wgv_data.save_processed_userShipVo(all_ships)
 
     def init_icons(self):
         # To avoid repeatedly loading same icon, preload them
@@ -69,8 +69,8 @@ class ShipModel(QStandardItemModel):
         self.lock_icon = QIcon(get_data_path("assets/icons/lock_64.png"))
 
     def init_json(self):
-        self.tactics_json = wgr_data.get_tactics_json()
-        self.user_tactics = wgr_data.get_user_tactics()
+        self.tactics_json = wgv_data.get_tactics_json()
+        self.user_tactics = wgv_data.get_user_tactics()
 
     def set_data(self, _data):
         self.ships_raw_data = _data
@@ -122,7 +122,7 @@ class ShipModel(QStandardItemModel):
         # QTableWidgetItem requires unique assignment; thus, same pic cannot assign twice. Differ from QIcon
         img_path = "S/" + prefix + mid + ".png"
         img = QPixmap()
-        is_loaded = img.load(os.path.join(wgr_data.get_zip_dir(), get_data_path(img_path)))
+        is_loaded = img.load(os.path.join(wgv_data.get_zip_dir(), get_data_path(img_path)))
         if is_loaded:
             thumbnail = QStandardItem()
             thumbnail.setData(QVariant(img.scaled(78, 44)), Qt.DecorationRole)
@@ -131,7 +131,7 @@ class ShipModel(QStandardItemModel):
             self.setItem(row, 0, thumbnail)
         else:
             tmp = QPixmap()
-            tmp.load(os.path.join(wgr_data.get_zip_dir(), get_data_path("S/0v0.png")))
+            tmp.load(os.path.join(wgv_data.get_zip_dir(), get_data_path("S/0v0.png")))
             tmp2 = QStandardItem()
             tmp2.setData(QVariant(tmp.scaled(78, 44)), Qt.DecorationRole)
             tmp2.setData(cid, Qt.UserRole)
@@ -301,7 +301,7 @@ class ShipModel(QStandardItemModel):
             else:
                 pass
             raw_path = "E/equip_L_" + str(int(e[3:6])) + ".png"
-            img_path = os.path.join(wgr_data.get_zip_dir(), get_data_path(raw_path))
+            img_path = os.path.join(wgv_data.get_zip_dir(), get_data_path(raw_path))
 
             img = QPixmap()
             is_loaded = img.load(img_path)
@@ -331,7 +331,7 @@ class ShipModel(QStandardItemModel):
             item = QStandardItem()
             item.setData(-1, Qt.UserRole)
             self.setItem(row, col, item)
-            wgr_data.update_equipment_amount(-1, unequip_id)
+            wgv_data.update_equipment_amount(-1, unequip_id)
             self.api_boat.removeEquipment(str(ship_id), str(equip_slot))
             return
         else:
@@ -340,13 +340,13 @@ class ShipModel(QStandardItemModel):
         res = self.api_boat.changeEquipment(str(ship_id), str(equip_id), str(equip_slot))
         if 'eid' not in res:
             # success
-            wgr_data.update_equipment_amount(equip_id, unequip_id)
+            wgv_data.update_equipment_amount(equip_id, unequip_id)
         else:
             logging.error('Equipment change is failed.')
             return
 
         raw_path = "E/equip_L_" + str(int(equip_id[3:6])) + ".png"
-        img_path = os.path.join(wgr_data.get_zip_dir(), get_data_path(raw_path))
+        img_path = os.path.join(wgv_data.get_zip_dir(), get_data_path(raw_path))
         img = QPixmap()
         is_loaded = img.load(img_path)
         if is_loaded:
@@ -362,7 +362,7 @@ class ShipModel(QStandardItemModel):
         # TODO: switch tactics like equip
         col = 25
         ship_id = self.index(args[0], 2).data()
-        indices = wgr_data.find_all_indices(self.user_tactics, 'boat_id', ship_id)
+        indices = wgv_data.find_all_indices(self.user_tactics, 'boat_id', ship_id)
         if len(indices) == 0:
             return
         else:
@@ -375,7 +375,7 @@ class ShipModel(QStandardItemModel):
             else:
                 for idx in indices:
                     if str(t_id) == str(self.user_tactics[idx]['cid'])[:-1]:
-                        i = wgr_data.find_index(self.tactics_json, 'cid', self.user_tactics[idx]['cid'])
+                        i = wgv_data.find_index(self.tactics_json, 'cid', self.user_tactics[idx]['cid'])
                         t = self.tactics_json[i]
                         title = t['title'] + " " + str(t['level'])
                         d1 = clear_desc(t["desc"])
