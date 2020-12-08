@@ -101,6 +101,7 @@ delete the __init__.py and re-run __auto_gen__.py
         logging.error(f'DATA - auto_gen failed for {e}')
     return res
 
+
 if __name__ == "__main__":
     print('Starting __auto_gen__...')
     print(start_generator())

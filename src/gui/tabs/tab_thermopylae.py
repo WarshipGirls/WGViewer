@@ -52,6 +52,7 @@ class TabThermopylae(QWidget):
         self.button_group = None
         self.button1 = None
         self.button_sortie = None
+        self.button_pre_battle = None
         self.init_left_layout()
 
         self.text_box = QTextEdit()
@@ -64,6 +65,10 @@ class TabThermopylae(QWidget):
 
         self.init_ui()
         self.sortie = Sortie(self, self.api_six, [], [], self.is_realrun)
+
+        self.bee_pre_battle = Worker(self.sortie.pre_battle, ())
+        self.bee_pre_battle.finished.connect(self.pre_battle_finished)
+        self.bee_pre_battle.terminate()
 
         self.bee_sortie = Worker(self.sortie.start_sortie, ())
         self.bee_sortie.finished.connect(self.sortie_finished)
@@ -122,13 +127,19 @@ class TabThermopylae(QWidget):
         t.setFontPointSize(10)
         t.setText(msg)
         self.button1 = QPushButton('start random process')
-        self.button_sortie = QPushButton('Start Thermopylae E6 sortieing...')
         self.button1.clicked.connect(self.button1_on_click)
+
+        self.button_sortie = QPushButton('Start Thermopylae E6 sortieing...')
         self.button_sortie.clicked.connect(self.on_sortie)
         self.button_sortie.setEnabled(False)
 
+        self.button_pre_battle = QPushButton('Perform pre-battle checking')
+        self.button_pre_battle.clicked.connect(self.on_pre_battle)
+        self.button_pre_battle.setEnabled(True)
+
         self.left_layout.addWidget(t)
         self.left_layout.addWidget(self.button1)
+        self.left_layout.addWidget(self.button_pre_battle)
         self.left_layout.addWidget(self.button_sortie)
 
     def init_right_layout(self) -> None:
@@ -182,12 +193,13 @@ class TabThermopylae(QWidget):
             # self.sig_fuel.emit(1000)
             sleep(0.5)
 
+    def on_pre_battle(self):
+        self.button_pre_battle.setEnabled(True)
+        self.bee_pre_battle.start()
+
     def on_sortie(self):
-        logging.info('User clicked sortieing button...')
-        # TODO TODO this is not multi-threading
         self.button_sortie.setEnabled(False)
         self.bee_sortie.start()
-        # self.sortie.start_sortie()
 
     def process_finished(self):
         self.logger.info('task is done')
@@ -196,6 +208,9 @@ class TabThermopylae(QWidget):
     def sortie_finished(self):
         self.logger.info('==== Sortie (dev) is done! ====')
         self.button_sortie.setEnabled(True)
+
+    def pre_battle_finished(self):
+        self.logger.info('==== Pre battle checking is done! ====')
 
     def update_resources(self, f, a, s, b):
         # signals has to be emitted from a QObject

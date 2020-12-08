@@ -5,7 +5,6 @@ from math import ceil
 from logging import getLogger
 
 from src import data as wgr_data
-from src.utils import get_repair_type
 from .helper import SortieHelper
 
 # Following are only for typehints
@@ -39,6 +38,7 @@ class Sortie:
         self.user_data = None
         self.can_start = False
         self.helper = None
+        self.repair_level = 1
         self.boat_pool = []  # host existing boats
         self.escort_DD = []  # For 2DD to pass first few levels only, 萤火虫，布雷恩
         self.escort_CV = []  # For 1CV to pass first few levels only, 不挠
@@ -231,16 +231,24 @@ class Sortie:
         else:
             pass
 
-        self.helper.set_sortie_fleets(self.escort_DD)
+        self.helper.set_war_fleets(self.escort_DD)
 
         supply_res = self.helper.supply_boats(self.escort_DD)
         if self.helper.is_exit is True:
             self.parent.button_sortie.setEnabled(True)
             return
         # update side dock
-        self.parent.update_resources(supply_res['userVo']['oil'], supply_res['userVo']['ammo'], supply_res['userVo']['steel'], supply_res['userVo']['aluminium'])
+        self.parent.update_resources(supply_res['userVo']['oil'], supply_res['userVo']['ammo'], supply_res['userVo']['steel'],
+                                     supply_res['userVo']['aluminium'])
 
-        # TODO TODO check repair -> fight -> next node...
+        # TODO TODO fight -> next node...
+        self.helper.process_repair(supply_res['shipVO'], [1])
+        sleep(2)
+        self.helper.spy()
+        sleep(2)
+        self.helper.challenge('1')
+        sleep(10)
+        self.helper.get_war_result('1')
 
     def bump_level(self, adj_data) -> bool:
         adj_lvl = int(adj_data["adjutantData"]["level"])
@@ -273,5 +281,6 @@ class Sortie:
                 return False
         else:
             return False
+
 
 # End of File

@@ -8,6 +8,7 @@ from PyQt5.QtCore import QUrl, QCoreApplication
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QMessageBox, QDesktopWidget
 from src import data as wgr_data
+from src.func import constants as CONST
 
 
 def clear_desc(text: str) -> str:
@@ -43,6 +44,18 @@ def get_repair_type(ship_info: dict) -> int:
     else:
         pass
     return res
+
+
+def get_formation(formation: int) -> str:
+    return CONST.formation[formation]
+
+
+def get_type(ship_type_id: int) -> str:
+    return CONST.ship_type[ship_type_id]
+
+
+def get_range(range_id: int) -> str:
+    return CONST.range_type[range_id]
 
 
 def get_user_resolution() -> Tuple[int, int]:

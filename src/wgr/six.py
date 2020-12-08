@@ -15,6 +15,9 @@ class API_SIX(WGR_API):
     def supplyBoats(self, fleets: list):
         return self.boats_api.supplyBoats(fleets)
 
+    def instantRepairShips(self, fleets: list):
+        return self.boats_api.instantRepairShips(fleets)
+
     # ================================
     # SIX
     # ================================

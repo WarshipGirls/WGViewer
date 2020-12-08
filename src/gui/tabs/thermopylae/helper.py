@@ -2,12 +2,13 @@ from time import sleep
 from typing import Callable, Tuple
 from logging import getLogger
 
-from src.wgr.api import WGR_API  # only for typehints
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
+from src.wgr.six import API_SIX  # only for typehints
+from src.utils import get_repair_type
 
 
 class SortieHelper:
-    def __init__(self, api: WGR_API, user_ships: dict, map_data: dict):
+    def __init__(self, api: API_SIX, user_ships: dict, map_data: dict):
         self.api = api
         self.logger = getLogger('TabThermopylae')
         self.user_ships = user_ships
@@ -195,7 +196,7 @@ class SortieHelper:
         self.get_curr_points()
         return res_data
 
-    def set_sortie_fleets(self, fleets: list) -> dict:
+    def set_war_fleets(self, fleets: list) -> dict:
         def _set_fleets() -> Tuple[bool, dict]:
             data = self.api.setWarFleet(fleets)
             if 'eid' in data:
@@ -209,7 +210,7 @@ class SortieHelper:
         res_data = self._reconnecting_calls(_set_fleets, 'settings fleet')
         return res_data
 
-    def supply_boats(self, fleets: list) -> object:
+    def supply_boats(self, fleets: list) -> dict:
         def _supply_boats() -> Tuple[bool, dict]:
             data = self.api.supplyBoats(fleets)
             if 'eid' in data:
@@ -223,6 +224,92 @@ class SortieHelper:
                 res = False
             return res, data
         return self._reconnecting_calls(_supply_boats, 'supply')
+
+    def repair(self, fleets: list) -> dict:
+        def _repair() -> Tuple[bool, dict]:
+            data = self.api.instantRepairShips(fleets)
+            print(data)
+            if 'eid' in data:
+                self.logger.info(f"Failed to repair {fleets}")
+                res = False
+                # TODO elif
+            else:
+                res = True
+            return res, data
+        return self._reconnecting_calls(_repair, 'repair')
+
+    def process_repair(self, ships: list, repair_levels: [int, list]):
+        repairs = []
+        ship_ids = []
+        for ship in ships:
+            repairs.append(get_repair_type(ship))
+            ship_ids.append(ship['id'])
+
+        if isinstance(repair_levels, int):
+            # all ships share the same repair scheme
+            repair_levels = [repair_levels] * len(ships)
+        elif isinstance(repair_levels, list) and len(repair_levels) > 0:
+            try:
+                assert len(ships) == len(repair_levels)
+                repair_levels = repair_levels
+            except AssertionError:
+                repair_levels = [repair_levels[0]] * len(ships)
+        else:
+            # default repair all moderately damaged ships
+            repair_levels = [1] * len(ships)
+
+        to_repair = []
+        for i in range(len(ships)):
+            if repairs[i] >= repair_levels[i]:
+                to_repair.append(ship_ids[i])
+            else:
+                pass
+        if len(to_repair) > 0:
+            self.repair(to_repair)
+        else:
+            pass
+
+    def spy(self):
+        def _spy() -> Tuple[bool, dict]:
+            data = self.api.spy()
+            print(data)
+            if 'eid' in data:
+                res = False
+            elif 'enemyVO' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+                res = False
+            return res, data
+        return self._reconnecting_calls(_spy, 'Detection')
+
+    def challenge(self, formation: str):
+        def _challenge() -> Tuple[bool, dict]:
+            data = self.api.challenge(formation)
+            print(data)
+            if 'eid' in data:
+                res = False
+            elif 'warReport' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+                res = False
+            return res, data
+        return self._reconnecting_calls(_challenge, 'Combat')
+
+    def get_war_result(self, is_night: str = '0'):
+        def _result() -> Tuple[bool, dict]:
+            data = self.api.getWarResult(is_night)
+            print(data)
+            if 'eid' in data:
+                res = False
+            elif 'warResult' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+                res = False
+            return res, data
+        return self._reconnecting_calls(_result, 'receive result')
 
     # ================================
     # Non-WGR methods
