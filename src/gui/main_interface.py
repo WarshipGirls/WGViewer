@@ -10,7 +10,7 @@ from src.gui.side_dock.dock import SideDock
 from src.gui.interface.tabs import MainInterfaceTabs
 from src.gui.interface.menubar import MainInterfaceMenuBar
 from src.gui.system_tray import TrayIcon
-from src.utils import get_app_version, get_user_resolution, _quit_application
+from src.general import get_app_version, get_user_resolution, _quit_application
 from src.wgr.api import WGR_API
 
 

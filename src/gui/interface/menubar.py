@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 from src import data as wgr_data
 from src.func import constants
 from src.gui.custom_widgets import ScrollBoxWindow
-from src.utils import popup_msg, open_url, _quit_application
+from src.general import popup_msg, open_url, _quit_application
 
 
 def get_data_path(relative_path: str) -> str:

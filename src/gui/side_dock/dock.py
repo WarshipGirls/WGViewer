@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import (
 from src import data as wgr_data
 from src.func import constants as CONST
 from src.func.helper import Helper
-from src.utils import clear_desc, get_user_resolution
+from src.general import clear_desc, get_user_resolution
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 

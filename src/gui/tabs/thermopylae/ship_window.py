@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgr_data
-from src.utils import get_user_resolution
+from src.general import get_user_resolution
 
 
 def get_data_path(relative_path):

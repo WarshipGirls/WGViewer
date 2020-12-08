@@ -45,7 +45,6 @@ class Sortie:
         self.user_ships = wgr_data.get_processed_userShipVo()
 
         self.logger.info("Init E6...")
-        self.pre_battle()
 
     '''
     Order:

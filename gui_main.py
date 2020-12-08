@@ -6,7 +6,7 @@ import sys
 from PyQt5.QtGui import QIcon, QFontDatabase
 from PyQt5.QtWidgets import QApplication
 
-from src.utils import get_app_version
+from src.general import get_app_version
 from src.gui.login import LoginForm
 
 

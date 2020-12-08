@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction
 
-from src.utils import _quit_application
+from src.general import _quit_application
 
 
 class TrayIcon(QSystemTrayIcon):

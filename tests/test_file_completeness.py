@@ -3,7 +3,7 @@ import unittest
 
 from packaging import version
 
-from src.utils import get_app_version
+from src.general import get_app_version
 from tests.utils import get_project_root, get_file_size
 
 ROOT_DIR = get_project_root()
