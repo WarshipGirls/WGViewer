@@ -264,7 +264,6 @@ eng_name = {
     "威廉·D·波特": "William D. Porter",
     "波特": "Porter",
     "拉菲": "Laffey",
-    "拉菲": "Laffey",
     "卡米契亚·内拉": "Camicia Nera",
     "阿维埃尔": "Aviere",
     "安东尼奥·达诺利": "Antonio Da Noli",
@@ -374,7 +373,6 @@ eng_name = {
     "希尔曼": "Heermann",
     "基辅": "Kiev",
     "塔斯卡卢萨": "Tuscaloosa",
-    "列克星敦": "Lexington",
     "诺福克": "Norfolk",
     "斯特雷特": "Sterett",
     "妙高": "Myōkō",
@@ -472,11 +470,7 @@ eng_name = {
     "燕八哥": "Starling",
     "蒂默曼": "Timmerman",
     "史密斯": "Smith",
-    "提尔比茨": "Tirpitz",
     "萝德尼": "Lodney",
-    "内华达": "Nevada",
-    "欧根亲王": "Prinz Eugen",
-    "华盛顿": "Washington",
     "戈本": "Goeben",
     "塞班": "Saipan",
     "哥伦比亚": "Columbia",
@@ -485,7 +479,7 @@ eng_name = {
 }
 
 
-def get_name(name):
+def get_name(name: str) -> str:
     try:
         if name in jap_name:
             res = jap_name[name]

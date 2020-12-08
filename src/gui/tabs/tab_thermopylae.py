@@ -1,27 +1,39 @@
 import logging
 from time import sleep
 
-from PyQt5.QtCore import QObject, pyqtSignal, QThread
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QTableWidget, QMainWindow, QTableWidgetItem, QButtonGroup
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QButtonGroup
 
-import src.data as wgr_data
+import src.data as wgv_data
 from src.func.worker import Worker
 
 from src.wgr.six import API_SIX
 from src.func.log_handler import LogHandler
+from src.gui.side_dock.resource_model import ResourceTableModel
 from .thermopylae.ship_window import ShipSelectWindow
 from .thermopylae.sortie import Sortie
 
 
 class TabThermopylae(QWidget):
-    def __init__(self, tab_name: str, is_realrun: bool):
+    sig_fuel = pyqtSignal(int)
+    sig_ammo = pyqtSignal(int)
+    sig_steel = pyqtSignal(int)
+    sig_baux = pyqtSignal(int)
+
+    def __init__(self, tab_name: str, resource_info: ResourceTableModel, is_realrun: bool):
         # TODO reorganize
         super().__init__()
         self.setObjectName(tab_name)
+        self.resource_info = resource_info
         self.is_realrun = is_realrun
 
-        self.api_six = API_SIX(wgr_data.load_cookies())
+        self.sig_fuel.connect(self.resource_info.update_fuel)
+        self.sig_ammo.connect(self.resource_info.update_ammo)
+        self.sig_steel.connect(self.resource_info.update_steel)
+        self.sig_baux.connect(self.resource_info.update_bauxite)
+
+        self.api_six = API_SIX(wgv_data.load_cookies())
         self.fleets = [None] * 6
         self.final_fleet = [None] * 14
         # for testing
@@ -40,6 +52,7 @@ class TabThermopylae(QWidget):
         self.button_group = None
         self.button1 = None
         self.button_sortie = None
+        self.button_pre_battle = None
         self.init_left_layout()
 
         self.text_box = QTextEdit()
@@ -48,16 +61,21 @@ class TabThermopylae(QWidget):
         self.bee.finished.connect(self.process_finished)
         self.bee.terminate()
 
-        self.logger = self.create_logger()
+        self.logger = self.get_logger()
 
+        self.w = None
         self.init_ui()
         self.sortie = Sortie(self, self.api_six, [], [], self.is_realrun)
+
+        self.bee_pre_battle = Worker(self.sortie.pre_battle, ())
+        self.bee_pre_battle.finished.connect(self.pre_battle_finished)
+        self.bee_pre_battle.terminate()
 
         self.bee_sortie = Worker(self.sortie.start_sortie, ())
         self.bee_sortie.finished.connect(self.sortie_finished)
         self.bee_sortie.terminate()
 
-    def create_logger(self):
+    def get_logger(self) -> logging.Logger:
         logger = logging.getLogger('TabThermopylae')
         log_handler = LogHandler()
         log_handler.sig_log.connect(self.text_box.append)
@@ -65,7 +83,7 @@ class TabThermopylae(QWidget):
         log_handler.setLevel(level=logging.INFO)
         return logger
 
-    def set_info_bar(self):
+    def set_info_bar(self) -> None:
         w = QWidget()
         layout = QHBoxLayout(w)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -82,10 +100,10 @@ class TabThermopylae(QWidget):
             layout.setStretch(i, 0)
         self.left_layout.addWidget(w)
 
-    def update_ticket(self, data: int):
+    def update_ticket(self, data: int) -> None:
         self.ticket_label.setText(str(data))
 
-    def update_purchasable(self, data: int):
+    def update_purchasable(self, data: int) -> None:
         self.purchasable_label.setText(str(data))
 
     def init_ui(self) -> None:
@@ -110,13 +128,19 @@ class TabThermopylae(QWidget):
         t.setFontPointSize(10)
         t.setText(msg)
         self.button1 = QPushButton('start random process')
-        self.button_sortie = QPushButton('Start Thermopylae E6 sortieing...')
         self.button1.clicked.connect(self.button1_on_click)
+
+        self.button_sortie = QPushButton('Start Thermopylae E6 sortieing...')
         self.button_sortie.clicked.connect(self.on_sortie)
         self.button_sortie.setEnabled(False)
 
+        self.button_pre_battle = QPushButton('Perform pre-battle checking')
+        self.button_pre_battle.clicked.connect(self.on_pre_battle)
+        self.button_pre_battle.setEnabled(True)
+
         self.left_layout.addWidget(t)
         self.left_layout.addWidget(self.button1)
+        self.left_layout.addWidget(self.button_pre_battle)
         self.left_layout.addWidget(self.button_sortie)
 
     def init_right_layout(self) -> None:
@@ -125,8 +149,8 @@ class TabThermopylae(QWidget):
         self.text_box.setReadOnly(True)
         self.right_layout.addWidget(self.text_box)
 
-    def add_ship(self):
-        # TODO long term let user select boats here; now just use last fleets
+    def add_ship(self) -> None:
+        # TODO long term; not used right now; let user select boats here; now just use last fleets
         self.button_group = QButtonGroup()
         # for ship_id in self.fleets:
         for i in range(len(self.fleets)):
@@ -140,10 +164,10 @@ class TabThermopylae(QWidget):
             self.button_group.addButton(l)
             self.left_layout.addWidget(l)
 
-    def disable_sortie(self):
-        pass
+    def disable_sortie(self) -> None:
+        raise NotImplementedError
 
-    def handle_selection(self, ship_info: list, button_id: int):
+    def handle_selection(self, ship_info: list, button_id: int) -> None:
         b = self.button_group.buttons()[button_id]
         ship_id = ship_info[1]
         if int(ship_id) in self.fleets:
@@ -153,35 +177,46 @@ class TabThermopylae(QWidget):
             s = ", ".join(ship_info)
             b.setText(s)
 
-    def popup_select_window(self, btn_id):
+    def popup_select_window(self, btn_id: int) -> None:
         # TODO: delete obj after close
         self.w = ShipSelectWindow(self, btn_id)
         self.w.show()
 
-    def button1_on_click(self):
+    def button1_on_click(self) -> None:
         self.button1.setEnabled(False)
         self.bee.start()
 
-    def test_process(self):
+    def test_process(self) -> None:
         # button 1 linked
         self.logger.info('starting')
         for i in range(10):
             self.logger.info(i)
-            sleep(1)
+            # self.sig_fuel.emit(1000)
+            sleep(0.5)
 
-    def on_sortie(self):
-        logging.info('User clicked sortieing button...')
-        # TODO TODO this is not multi-threading
+    def on_pre_battle(self) -> None:
+        self.button_pre_battle.setEnabled(True)
+        self.bee_pre_battle.start()
+
+    def on_sortie(self) -> None:
         self.button_sortie.setEnabled(False)
         self.bee_sortie.start()
-        # self.sortie.start_sortie()
 
-    def process_finished(self):
+    def process_finished(self) -> None:
         self.logger.info('task is done')
         self.button1.setEnabled(True)
 
-    def sortie_finished(self):
+    def sortie_finished(self) -> None:
         self.logger.info('==== Sortie (dev) is done! ====')
         self.button_sortie.setEnabled(True)
 
+    def pre_battle_finished(self) -> None:
+        self.logger.info('==== Pre battle checking is done! ====')
+
+    def update_resources(self, f: int, a: int, s: int, b: int) -> None:
+        # signals has to be emitted from a QObject
+        self.sig_fuel.emit(f)
+        self.sig_ammo.emit(a)
+        self.sig_steel.emit(s)
+        self.sig_baux.emit(b)
 # End of File

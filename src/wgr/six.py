@@ -1,10 +1,26 @@
 from .api import WGR_API
+from .boat import API_BOAT
 
 
 class API_SIX(WGR_API):
     # TODO find purchase ticket
     def __init__(self, cookies):
         super().__init__(cookies)
+        self.boats_api = API_BOAT(cookies)
+
+    # ================================
+    # SIX
+    # ================================
+
+    def supplyBoats(self, fleets: list):
+        return self.boats_api.supplyBoats(fleets)
+
+    def instantRepairShips(self, fleets: list):
+        return self.boats_api.instantRepairShips(fleets)
+
+    # ================================
+    # SIX
+    # ================================
 
     def adjutantExp(self):
         # if success, exp + 5
@@ -58,18 +74,17 @@ class API_SIX(WGR_API):
         return self._api_call(link)
 
     def selectBoat(self, selected_boats: list, skill_card: str = '0'):
-        # TODO change all lists inputs to urlopen call
         link = 'six/selectBoat/' + self._int_list_to_str(selected_boats) + '/' + skill_card
         return self._api_urlopen(link)
 
     def setChapterBoat(self, sortie_map: str, fleets: list):
         # sortie_map from 9301 to 9318 in the order of E1 (9301,9302,9303) to E6 (9316,9317,9318)
         link = 'six/setChapterBoat/' + sortie_map + '/' + self._int_list_to_str(fleets)
-        return self._api_call(link)
+        return self._api_urlopen(link)
 
     def setWarFleet(self, fleets: list):
         link = 'six/setWarFleet/' + self._int_list_to_str(fleets)
-        return self._api_call(link)
+        return self._api_urlopen(link)
 
     def spy(self):
         link = 'six/spy'

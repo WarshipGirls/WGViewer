@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QScrollArea, QMainWindow, QApplication
 
-from src.utils import get_user_resolution
+from src.utils.wgv_pyqt import get_user_resolution
 
 
 class ScrollLabel(QScrollArea):
@@ -17,14 +17,14 @@ class ScrollLabel(QScrollArea):
         self.label.setWordWrap(True)
         lay.addWidget(self.label)
 
-    def setText(self, text):
+    def setText(self, text) -> None:
         self.label.setText(text)
 
 
 class ScrollBoxWindow(QMainWindow):
     sig_close = pyqtSignal()
 
-    def __init__(self, parent, title, text):
+    def __init__(self, parent, title: str, text: str):
         super().__init__()
         self.setWindowTitle(title)
         user_w, user_h = get_user_resolution()
@@ -38,7 +38,7 @@ class ScrollBoxWindow(QMainWindow):
         self.center()
         self.sig_close.connect(parent.delete_version_log)
 
-    def center(self):
+    def center(self) -> None:
         frame_gm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
         center_point = QApplication.desktop().screenGeometry(screen).center()

@@ -17,7 +17,7 @@ def get_data_path(relative_path):
 
 
 class TabExpedition(QWidget):
-    def __init__(self, tab_name:str):
+    def __init__(self, tab_name: str):
         super().__init__()
         self.setObjectName(tab_name)
         csv_path = get_data_path('assets/data/exp_data.csv')
@@ -27,7 +27,7 @@ class TabExpedition(QWidget):
         logging.info("Creating Expedition Tab...")
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
 

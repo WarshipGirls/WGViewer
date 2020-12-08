@@ -61,8 +61,8 @@ WGViewer welcomes contributors!
 If you know "hello world" in any programming language, please see the [contribution guide](CONTRIBUTING.md) for more information.
 
 If you don't know coding but still want to help WGViewer becomes better, you may
-- upload missing ship images ([here](https://github.com/WarshipGirls/WGViewer/issues/43))
-- add missing translations ([here](https://github.com/WarshipGirls/WGViewer/blob/master/src/func/shipname.py)).
+- upload missing ship images ([here](https://github.com/WarshipGirls/WGViewer/issues/43));
+- add missing translations;
 - report bugs or make suggestions! ([here](https://github.com/WarshipGirls/WGViewer/issues))
 
 ## Disclaimer

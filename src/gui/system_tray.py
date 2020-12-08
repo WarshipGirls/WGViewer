@@ -1,11 +1,11 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction
 
-from src.utils import _quit_application
+from src.utils.wgv_pyqt import quit_application
 
 
 class TrayIcon(QSystemTrayIcon):
-    def __init__(self, parent, icon_path):
+    def __init__(self, parent, icon_path: str):
         super().__init__(parent)
         # All members need to be self referenced (including QAction;
         # otherwise will be collected
@@ -23,7 +23,7 @@ class TrayIcon(QSystemTrayIcon):
         self.option_display.triggered.connect(self.toggle_display)
 
         self.option_quit = QAction('Quit')
-        self.option_quit.triggered.connect(_quit_application)
+        self.option_quit.triggered.connect(quit_application)
 
         self.menu = QMenu()
         self.menu.addAction(self.option_display)
@@ -32,7 +32,7 @@ class TrayIcon(QSystemTrayIcon):
 
         self.activated.connect(self.activate_handler)
 
-    def activate_handler(self, reason):
+    def activate_handler(self, reason: QSystemTrayIcon.ActivationReason) -> None:
         # Most Windows apps use 1-click
         if reason == QSystemTrayIcon.Trigger:
             self.toggle_display()

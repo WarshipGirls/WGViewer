@@ -3,8 +3,10 @@
 # ================================
 # Not Exports
 # ================================
+from typing import Tuple, Any
 
-def _process_one_equip(equip):
+
+def _process_one_equip(equip: dict) -> dict:
     res = {'title': equip['title'], 'desc': equip['desc']}
     for key in equip.keys():
         if isinstance(equip[key], int):
@@ -21,7 +23,7 @@ def _process_one_equip(equip):
     return res
 
 
-def _process_shipItem():
+def _process_shipItem() -> dict:
     t = get_shipItem()
     res = {}
     for i in t:
@@ -33,15 +35,15 @@ def _process_shipItem():
 # Exports
 # ================================
 
-def get_big_success_rate():
+def get_big_success_rate() -> Tuple[float, int, int]:
     t = get_userVo()
-    n = t['detailInfo']['exploreBigSuccessNum']
-    d = t['detailInfo']['exploreNum']
-    res = round(int(n) / int(d), 4)
-    return [res, n, d]
+    n = int(t['detailInfo']['exploreBigSuccessNum'])
+    d = int(t['detailInfo']['exploreNum'])
+    res = round(n/d, 4)
+    return res, n, d
 
 
-def get_exp_fleets():
+def get_exp_fleets() -> dict:
     # return a list of int
     fleets = get_user_fleets()
     exp_ids = ["5", "6", "7", "8"]
@@ -54,7 +56,7 @@ def get_exp_fleets():
     return res
 
 
-def get_ship_equips(cid):
+def get_ship_equips(cid: int) -> list:
     """
     Given a ship's cid, find all user owned equipment.
     """
@@ -93,17 +95,17 @@ def get_ship_equips(cid):
     return res
 
 
-def get_exp_map(fleet_id):
+def get_exp_map(fleet_id: str) -> str:
     _json = get_pveExploreVo()['levels']
     try:
-        fleet = next(i for i in _json if i['fleetId'] == str(fleet_id))
+        fleet = next(i for i in _json if i['fleetId'] == fleet_id)
         map_name = fleet['exploreId'].replace('000', '-')
     except StopIteration:
         map_name = ""
     return map_name
 
 
-def get_exp_list():
+def get_exp_list() -> list:
     exp_list = get_pveExploreVo()['chapters']
     res = []
     for i in exp_list:
@@ -136,11 +138,10 @@ def get_love_list():
     #             pass
     #     if counter >= 5:
     #         break
-    pass
+    raise NotImplementedError
 
 
-def update_equipment_amount(equipped, unequipped):
-    # both input are cid (int)
+def update_equipment_amount(equipped: int, unequipped: int) -> None:
     equipped = int(equipped)
     unequipped = int(unequipped)
     user_equips = get_equipmentVo()
@@ -155,20 +156,20 @@ def update_equipment_amount(equipped, unequipped):
     save_equipmentVo(user_equips)
 
 
-def find_index(lst, key, value):
+def find_index(_list: list, key: Any, value: Any) -> int:
     """
     Given a list of dict, find index by key-value pair.
     """
-    for i, dic in enumerate(lst):
-        if dic[key] == value:
+    for i, _dict in enumerate(_list):
+        if _dict[key] == value:
             return i
     return -1
 
 
-def find_all_indices(lst, key, value):
+def find_all_indices(_list, key: Any, value: Any) -> list:
     res = []
-    for i, dic in enumerate(lst):
-        if dic[key] == value:
+    for i, _dict in enumerate(_list):
+        if _dict[key] == value:
             res.append(i)
     return res
 

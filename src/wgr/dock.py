@@ -15,7 +15,7 @@ class API_DOCK(WGR_API):
 
     def dismantleBoat(self, ships: list, save_equips: str):
         link = 'dock/dismantleBoat/[' + self._int_list_to_str(ships) + ']/' + save_equips + '/'
-        return self._api_call(link)
+        return self._api_urlopen(link)
 
     def getBoat(self, dock_id: str):
         link = 'dock/getBoat/' + dock_id + '/'

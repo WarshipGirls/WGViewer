@@ -15,10 +15,11 @@ class API_BOAT(WGR_API):
 
     def instantFleet(self, fleet_id: str, ships: list):
         link = 'boat/instantFleet/' + fleet_id + '/' + self._int_list_to_str(ships) + '/'
+        return self._api_urlopen(link)
 
     def instantRepairShips(self, ships: list):
         link = 'boat/instantRepairShips/' + self._int_list_to_str(ships) + '/'
-        return self._api_call(link)
+        return self._api_urlopen(link)
 
     def lock(self, ship_id: str):
         # Assume this is a procedure before expedition
@@ -55,7 +56,7 @@ class API_BOAT(WGR_API):
 
     def strengthen(self, food: list, target_ship: str):
         link = 'boat/strengthen/' + self._int_list_to_str(food) + '/[' + target_ship + ']/'
-        return self._api_call(link)
+        return self._api_urlopen(link)
 
     def skillLevelUp(self, ship_id: str):
         link = 'boat/skillLevelUp/' + ship_id + '/'
@@ -63,6 +64,6 @@ class API_BOAT(WGR_API):
 
     def supplyBoats(self, fleets: list):
         link = 'boat/supplyBoats/' + self._int_list_to_str(fleets) + '/0/0/'
-        return self._api_call(link)
+        return self._api_urlopen(link)
 
 # End of File

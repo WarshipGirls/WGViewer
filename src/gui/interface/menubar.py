@@ -6,10 +6,9 @@ from urllib.request import urlopen
 from PyQt5.QtCore import QSettings, pyqtSlot
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
-from src import data as wgr_data
-from src.func import constants
+from src import data as wgv_data
+from src import utils as wgv_utils
 from src.gui.custom_widgets import ScrollBoxWindow
-from src.utils import popup_msg, open_url, _quit_application
 
 
 def get_data_path(relative_path: str) -> str:
@@ -24,7 +23,7 @@ class MainInterfaceMenuBar(QMenuBar):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
+        self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         self.version_log = None
 
         self.init_file_menu()
@@ -51,7 +50,7 @@ class MainInterfaceMenuBar(QMenuBar):
         menu.addAction(self.create_action("Clear User Cache", self.clear_user_cache))
         menu.addAction(self.create_action("Clear All Cache", self.clear_all_cache))
         menu.addSeparator()
-        menu.addAction(self.create_action("Quit", _quit_application))
+        menu.addAction(self.create_action("Quit", wgv_utils.quit_application))
 
     def init_tabs_menu(self) -> None:
         menu = self.addMenu(self.tr("&Tabs"))
@@ -91,29 +90,29 @@ class MainInterfaceMenuBar(QMenuBar):
 
     @staticmethod
     def quit_application() -> None:
-        _quit_application()
+        wgv_utils.quit_application()
 
     @staticmethod
     def open_cache_folder() -> None:
-        os.startfile(wgr_data.get_data_dir())
+        os.startfile(wgv_data.get_data_dir())
 
     @staticmethod
     def clear_user_cache() -> None:
-        res = wgr_data.clear_cache_folder(False)
+        res = wgv_data.clear_cache_folder(False)
         if res is True:
-            popup_msg('Clear success')
+            wgv_utils.popup_msg('Clear success')
         else:
-            popup_msg('Clear failed')
+            wgv_utils.popup_msg('Clear failed')
 
     def clear_all_cache(self) -> None:
         reply = QMessageBox.question(self, 'Warning', "Do you want to clear all caches?\n(Re-caching takes time)",
                                      QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            res = wgr_data.clear_cache_folder(True)
+            res = wgv_data.clear_cache_folder(True)
             if res is True:
-                popup_msg('Clear success')
+                wgv_utils.popup_msg('Clear success')
             else:
-                popup_msg('Clear failed')
+                wgv_utils.popup_msg('Clear failed')
         else:
             pass
 
@@ -125,13 +124,13 @@ class MainInterfaceMenuBar(QMenuBar):
     def show_download_links() -> None:
         def get_hyperlink(link, text) -> str:
             return f"<a href=\"{link}\">{text}</a>"
-
+        version = wgv_utils.get_game_version()
         base_url = "http://bspackage.moefantasy.com/jn/"
-        cn_android_full_link = base_url + f"warshipgirlsr_cn_censor_v{constants.version}.apk"
-        cn_ios_user_android_full_link = base_url + f"warshipgirlsr_ios_cn_censor_v{constants.version}.apk"
+        cn_android_full_link = base_url + f"warshipgirlsr_cn_censor_v{version}.apk"
+        cn_ios_user_android_full_link = base_url + f"warshipgirlsr_ios_cn_censor_v{version}.apk"
 
-        cn_android_base_link = base_url + f"warshipgirlsr_cn_censor_base_v{constants.version}.apk?"
-        cn_ios_user_android_base_link = base_url + f"warshipgirlsr_ios_cn_censor_base_v{constants.version}.apk?"
+        cn_android_base_link = base_url + f"warshipgirlsr_cn_censor_base_v{version}.apk?"
+        cn_ios_user_android_base_link = base_url + f"warshipgirlsr_ios_cn_censor_base_v{version}.apk?"
 
         msg_str = "<h1> Warship Girls Official Download Links</h1>"
         msg_str += "<br>"
@@ -146,7 +145,7 @@ class MainInterfaceMenuBar(QMenuBar):
         msg_str += get_hyperlink(cn_ios_user_android_base_link, 'CN Android (iOS server) base package')
 
         msg = QMessageBox()
-        msg.setStyleSheet(wgr_data.get_color_scheme())
+        msg.setStyleSheet(wgv_data.get_color_scheme())
         msg.setWindowTitle('Official Game App Download Links')
         msg.setText(msg_str)
         msg.exec_()
@@ -171,14 +170,14 @@ class MainInterfaceMenuBar(QMenuBar):
         reply = QMessageBox.question(self, 'Report', "Do you want to submit a bug or make an suggestion?",
                                      QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            open_url('https://github.com/WarshipGirls/WGViewer/issues/new')
+            wgv_utils.open_url('https://github.com/WarshipGirls/WGViewer/issues/new')
         else:
             pass
 
     def open_version_log(self) -> None:
         text = urlopen('https://raw.githubusercontent.com/WarshipGirls/WGViewer/master/docs/version_log.md').read().decode('ascii')
         self.version_log = ScrollBoxWindow(self, 'WGViewer Version Logs', text)
-        self.version_log.setStyleSheet(wgr_data.get_color_scheme())
+        self.version_log.setStyleSheet(wgv_data.get_color_scheme())
         self.version_log.show()
 
     @pyqtSlot()
@@ -199,7 +198,7 @@ class MainInterfaceMenuBar(QMenuBar):
         msg_str += '<br><br>'
         msg_str += "<p style=\"text-align: center;\">&copy; GNU General Public License v3.0</p>"
         msg = QMessageBox()
-        msg.setStyleSheet(wgr_data.get_color_scheme())
+        msg.setStyleSheet(wgv_data.get_color_scheme())
         msg.setWindowTitle('About Warship Girls Viewer (WGViewer)')
         msg.setText(msg_str)
         msg.exec_()

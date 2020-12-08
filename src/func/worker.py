@@ -9,7 +9,7 @@ class Worker(QThread):
         # TODO assign task based on user thread power
         print("ideal amounts of thread to run on current machine: " + str(QThread.idealThreadCount()))
 
-    def run(self):
+    def run(self) -> None:
         self.func(*self.args)
 
 
@@ -22,7 +22,7 @@ class CallbackWorker(QThread):
         self.args = args
         self.finished.connect(callback)
 
-    def run(self):
+    def run(self) -> None:
         res = self._func(*self.args)
         res = True if res is True else False
         self.finished.emit(res)

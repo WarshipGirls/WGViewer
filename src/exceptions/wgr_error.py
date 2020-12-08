@@ -30,6 +30,6 @@ def get_error(error_id: [str, int]) -> NoReturn:
     if str(error_id) in error_json:
         raise WarshipGirlsExceptions(error_id, error_json[str(error_id)])
     else:
-        raise WarshipGirlsExceptions("UNKNOWN ERROR")
+        raise WarshipGirlsExceptions(0, "UNKNOWN ERROR")
 
 # End of File

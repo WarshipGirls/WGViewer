@@ -27,7 +27,7 @@ def _download(url: str) -> str:
     return filename
 
 
-def _download_all(urls) -> list:
+def _download_all(urls: list) -> list:
     res = []
     for url in urls:
         logging.info(f'Downloading {url}')
@@ -35,7 +35,7 @@ def _download_all(urls) -> list:
     return res
 
 
-def _unzip_file(filename: str):
+def _unzip_file(filename: str) -> None:
     # filename with extension
     path = os.path.join(get_zip_dir(), filename)
     if os.path.exists(path):
@@ -45,12 +45,12 @@ def _unzip_file(filename: str):
         logging.error(f'Filepath not exists: {path}')
 
 
-def _unzip_all(filenames: list):
+def _unzip_all(filenames: list) -> None:
     for filename in filenames:
         _unzip_file(filename)
 
 
-def init_resources():
+def init_resources() -> None:
     res = _download_all(my_urls)
     _unzip_all(res)
 
