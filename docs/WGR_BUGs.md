@@ -33,3 +33,31 @@ One of the equipment, see below, has seemingly invalid `effect` field. All other
 ```
 
 suggestion to MF: use `"effect": {'boom':0.05, 'hit':5}`
+
+4.
+
+Game version: 5.1.0
+
+In the shop data (shown below), there are, from time to time, untoleratable mismatchings! AND, waste bandwidth on repeated data, again! 
+
+```
+{
+	...
+   "$pools":[
+   		# shows 5 ship_ids here
+   ],
+   "$ssss":[
+   		# only shows 4 lists here; SHOULD BE 5 (sometimes there are 5)
+   		# the lists are in the form of [ship_star, ship_id, cost]
+   ],
+   ...
+   "boats":[
+   		# only shows 4 ship_ids here; SHOULD BE 5 (sometimes there are 5)
+   ],
+   ...
+   "buyPointArr":[
+   		# shows the cost of 5 ships here
+   ]
+   # sometimes the buff-card-id is 0
+}
+```
