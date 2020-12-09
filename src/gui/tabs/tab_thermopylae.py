@@ -50,11 +50,11 @@ class TabThermopylae(QWidget):
 
         self.ticket_label = None
         self.purchasable_label = None
-        self.set_ticket_info()
+        self.set_ticket_display()
         self.adjutant_label = None
         self.adjutant_exp_label = None
         self.points_label = None
-        self.set_adjutant_info()
+        self.set_adjutant_display()
 
         self.button_group = None
         self.boat_pool_label = QLabel()
@@ -88,7 +88,7 @@ class TabThermopylae(QWidget):
         log_handler.setLevel(level=logging.INFO)
         return logger
 
-    def set_ticket_info(self) -> None:
+    def set_ticket_display(self) -> None:
         w = QWidget()
         layout = QHBoxLayout(w)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -105,7 +105,7 @@ class TabThermopylae(QWidget):
             layout.setStretch(i, 0)
         self.left_layout.addWidget(w)
 
-    def set_adjutant_info(self) -> None:
+    def set_adjutant_display(self) -> None:
         w = QWidget()
         layout = QHBoxLayout(w)
         layout.setContentsMargins(0, 0, 0, 0)

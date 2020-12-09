@@ -17,10 +17,6 @@ ADJUTANT_ID_TO_NAME = {
     '10282': "Habakkuk"
 }
 
-REWARD_NODE_1 = ['931604', '931610', '931617']
-REWARD_NODE_2 = ['931702', '931706', '931717', '931722']
-REWARD_NODE_3 = ['931802', '931809', '931821']
-
 
 def save_json(name, data):
     with open(name, 'w', encoding='utf-8') as f:
@@ -61,25 +57,6 @@ class Sortie:
         self.logger.info("Init E6...")
 
     '''
-    Order:
-    on sub maps
-        - six_readyFire
-        - six_useAdjutant
-        - six_withdraw
-        - six_passLevel
-    on each node
-        - six_newNext
-        - six_canSelectList
-        - six_selectBoat
-        - boat_supplyBoats
-        - boat_instantRepairShips
-        - six_spy
-        - six_cha11enge
-        - six_getWarResult
-    others
-        - six_adjutantExp
-        - six_setWarFleet
-    
     > self.user_data
         -> nodeId: current node
         -> levelId: current level
@@ -185,6 +162,8 @@ class Sortie:
             return
 
         self.helper = SortieHelper(self.parent, self.api, self.user_ships, self.map_data)
+        self.helper.set_adjutant_info(self.user_data['adjutantData'])
+        self.helper.set_curr_points(self.user_data['strategic_point'])
 
         self.logger.info("Setting final fleets:")
         for ship_id in self.final_fleet:
@@ -225,9 +204,12 @@ class Sortie:
     def start_fresh_sortie(self) -> None:
         self.logger.info('Retreating...')
         try:
-            next_id = self.E6_1_A1_sortie()
-            self.curr_node = next_id
-            self.E6_1_B1_sortie(self.curr_node)
+            next_id = self.E6A1()
+            # next_id = self.E6_1_A1_sortie()
+            # self.curr_node = next_id
+            # self.E6_1_B1_sortie(self.curr_node)
+            while next_id != "931617":
+                next_id = self.single_node_sortie(next_id)
         except ThermopylaeSoriteExit:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
@@ -254,17 +236,25 @@ class Sortie:
             label_text += f"{self.user_ships[s]['Name']} "
         self.parent.update_boat_pool_label(label_text)
 
-    def set_fleets(self, fleets: list) -> None:
+    def set_fleets(self, fleet: list) -> None:
         # The list may contain string or integer elements
         try:
-            assert (len(fleets) <= 6)
+            assert (len(fleet) <= 6)
             label_text = "On battle: "
             i = 1
-            for s in fleets:
+            ss_count = 0
+            ss = []
+            for s in fleet:
                 label_text += f"{i} {self.user_ships[s]['Name']} "
+                if self.user_ships[s]['Class'] == "SS":
+                    ss_count += 1
+                    ss.append(s)
                 i += 1
             self.parent.update_fleet_label(label_text)
-            self.battle_fleet = [int(i) for i in fleets]
+            if ss_count >= 4:
+                self.battle_fleet = [int(j) for j in ss]
+            else:
+                self.battle_fleet = [int(j) for j in fleet]
         except AssertionError:
             raise ThermopylaeSoriteExit
 
@@ -276,6 +266,7 @@ class Sortie:
     # TODO: hardcoding A1, B1...
     # ================================
 
+    '''
     def E6_1_A1_sortie(self) -> str:
         self.helper.api_withdraw()
         next_node_id = self.helper.api_readyFire()
@@ -297,7 +288,8 @@ class Sortie:
         sp_res = self.helper.supply_boats(self.battle_fleet)
         self.set_side_dock_resources(sp_res['userVo'])
 
-        self.helper.process_repair(sp_res['shipVO'], [self.repair_level])  # pre-battle repair
+        repair_res = self.helper.process_repair(sp_res['shipVO'], [self.repair_level])  # pre-battle repair
+        self.set_side_dock_resources(repair_res['userVo'])
         set_sleep()
         self.helper.spy()
         set_sleep()
@@ -310,7 +302,8 @@ class Sortie:
             battle_res = self.helper.get_war_result('0')
         self.helper.process_battle_result(battle_res, self.battle_fleet)
         set_sleep()
-        self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
+        repair_res = self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
+        self.set_side_dock_resources(repair_res['userVo'])
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] in [1, 2]:  # TODO: changes to < 5
             next_id = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
         else:
@@ -318,8 +311,8 @@ class Sortie:
             next_id = -1
         return next_id
 
-    def E6_1_B1_sortie(self, next_id: str) -> str:
-        self.helper.api_newNext(str(next_id))
+    def E6_1_B1_sortie(self, curr_id: str) -> str:
+        self.helper.api_newNext(str(curr_id))
         shop_data = self.helper.get_ship_store()
         buy_data = self.helper.buy_ships(self.escort_CV, shop_data)
         self.set_boat_pool(buy_data['boatPool'])
@@ -329,7 +322,8 @@ class Sortie:
         sp_res = self.helper.supply_boats(self.battle_fleet)
         self.set_side_dock_resources(sp_res['userVo'])
 
-        self.helper.process_repair(sp_res['shipVO'], [self.repair_level])  # pre-battle repair
+        repair_res = self.helper.process_repair(sp_res['shipVO'], [self.repair_level])  # pre-battle repair
+        self.set_side_dock_resources(repair_res['userVo'])
         set_sleep()
         self.helper.spy()
         set_sleep()
@@ -344,7 +338,118 @@ class Sortie:
             battle_res = self.helper.get_war_result('0')
         self.helper.process_battle_result(battle_res, self.battle_fleet)
         set_sleep()
-        self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
+        repair_res = self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
+        self.set_side_dock_resources(repair_res['userVo'])
+        if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
+            next_id = str(self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id']))
+        else:
+            self.logger.info('Failed to clean E6-1 B1. Should restart. Exiting.')
+            next_id = "0"
+        return next_id
+    '''
+
+    def E6A1(self) -> str:
+        self.helper.api_withdraw()
+        next_node_id = self.helper.api_readyFire()
+        self.single_node_sortie(next_node_id)
+
+    def find_SS(self, shop_data: list) -> list:
+        # Get from a list of int (max length of 5), return a list of ship_id (str)
+        res = []
+        for ship_id in shop_data:
+            if ship_id in self.main_fleet:
+                res.append(str(ship_id))
+        return res
+
+    def single_node_sortie(self, curr_node_id: str) -> str:
+        self.helper.api_newNext(str(curr_node_id))
+
+        buy_res = None
+        if curr_node_id == '931602':
+            shop_res = self.helper.get_ship_store()
+            buy_res = self.helper.buy_ships(self.escort_DD, shop_res)
+        elif curr_node_id == '931604':
+            shop_res = self.helper.get_ship_store()
+            buy_res = self.helper.buy_ships(self.escort_CV, shop_res)
+        # elif curr_node_id == '931607':
+        #     # TODO: find COST 4 SS
+        #     shop_res = self.helper.get_ship_store()
+        #     shop_res['boats']
+        #     buy_res = self.helper.buy_ships(['132974'], shop_res)
+        else:
+            # TODO: buy SS
+            shop_res = self.helper.get_ship_store()
+            ss_lists = self.find_SS(shop_res['boats'])
+            if len(ss_lists) == 0:
+                shop_res = self.helper.get_ship_store('1')
+                ss_lists = self.find_SS(shop_res['boats'])
+                if len(ss_lists) == 0:
+                    pass
+                else:
+                    buy_res = self.helper.buy_ships(ss_lists, shop_res)
+            else:
+                buy_res = self.helper.buy_ships(ss_lists, shop_res)
+
+        if buy_res is None:
+            pass
+        else:
+            self.set_boat_pool(buy_res['boatPool'])
+            # TODO: when SS count >= 4, set all to SS, done?
+            self.set_fleets(buy_res['boatPool'])
+            # TODO: when final fleet elem == battle_fleet elem; skip set-war-fleet
+            if set(self.battle_fleet) == set(self.final_fleet):
+                # skip
+                pass
+            else:
+                self.helper.set_war_fleets(self.battle_fleet)
+
+        # cast skill
+        if curr_node_id in ['931602', '931702']:
+            adj_res = self.helper.cast_skill()
+            self.helper.set_adjutant_info(adj_res)
+        elif curr_node_id == '931802':
+            # TODO habakkuk; maybe not here
+            pass
+        else:
+            pass
+
+        if self.helper.can_bump() is True:
+            if (adj_res is not None) and (self.helper.bump_level(adj_res) is False):
+                self.logger.info('Bumping failed. Should restart current sub-map.')
+            else:
+                pass
+        else:
+            pass
+
+        set_sleep()
+        supply_res = self.helper.supply_boats(self.battle_fleet)
+        self.set_side_dock_resources(supply_res['userVo'])
+
+        repair_res = self.helper.process_repair(supply_res['shipVO'], [self.repair_level])  # pre-battle repair
+        self.set_side_dock_resources(repair_res['userVo'])
+
+        set_sleep()
+        self.helper.spy()
+
+        set_sleep()
+        challenge_res = self.helper.challenge(formation='1')
+
+
+        do_night_battle = self.helper.is_night_battle(curr_node_id, challenge_res)
+
+        set_sleep(level=2)
+        if do_night_battle is True:
+            self.logger.info("Entering night war...")
+            battle_res = self.helper.get_war_result('1')
+        else:
+            self.logger.info("")
+            battle_res = self.helper.get_war_result('0')
+        self.helper.process_battle_result(battle_res, self.battle_fleet)
+
+        set_sleep()
+        repair_res = self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
+        self.set_side_dock_resources(repair_res['userVo'])
+
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
             next_id = str(self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id']))
         else:

@@ -13,6 +13,8 @@ ADJUTANT_ID_TO_NAME = {
     '10282': "Habakkuk"
 }
 
+REWARD_NODE = ['931604', '931610', '931617', '931702', '931706', '931717', '931722', '931802', '931809', '931821']
+
 
 class SortieHelper:
     def __init__(self, tab_thermopylae, api: API_SIX, user_ships: dict, map_data: dict):
@@ -23,7 +25,8 @@ class SortieHelper:
         self.map_data = map_data
 
         self.max_retry = 3
-        self.points = -1
+        self.points = 10
+        self.adjutant_info = {}  # level, curr_exp, exp_cap
         self.init_sub_map = "9316"  # TODO
 
         self.logger.debug('SortieHelper is initiated')
@@ -295,11 +298,14 @@ class SortieHelper:
         return self._reconnecting_calls(_result, 'receive result')
 
     # ================================
-    # Non-WGR methods
+    # Getter / Setter
     # ================================
 
     def get_curr_points(self) -> int:
         return self.points
+
+    def get_adjutant_info(self) -> dict:
+        return self.adjutant_info
 
     def get_map_node_by_id(self, node_id: str) -> dict:
         try:
@@ -318,39 +324,77 @@ class SortieHelper:
             next_node_id = ""
         return next_node_id
 
-    def bump_level(self, adj_data) -> bool:
-        adj_lvl = int(adj_data["adjutantData"]["level"])
-        next_adj_lvl = adj_lvl + 1
-        curr_exp = int(adj_data["adjutantData"]["exp"])
-        next_exp = int(adj_data["adjutantData"]["exp_top"])
-        required_exp = next_exp - curr_exp
-        if self.get_curr_points() >= required_exp:
-            self.logger.info(f"Bumping adjutant level to Lv.{next_adj_lvl}")
-            buy_times = ceil(required_exp / 5)
-            res = None
-            while buy_times > 0:
-                res = self.buy_exp()
-                buy_times -= 1
-                if buy_times < 0:
-                    break
-                self.update_adjutant_info(res['adjutantData'], res['strategic_point'])
-                wgv_utils.set_sleep()
-            if res is None:
-                return False
-            elif int(res['adjutantData']['level']) == next_adj_lvl:
-                self.logger.info("Bumping level successfully")
-                return True
-            else:
-                self.logger.debug(res)
-                return False
+    def set_adjutant_info(self, adj_data: dict) -> None:
+        print(adj_data)
+        self.adjutant_info = adj_data
+
+    def set_curr_points(self, points) -> None:
+        self.points = points
+
+    # ================================
+    # Assistant methods
+    # ================================
+
+    def can_bump(self) -> bool:
+        if self.adjutant_info is None:
+            res = False
         else:
+            curr_exp = int(self.adjutant_info["exp"])
+            next_exp = int(self.adjutant_info["exp_top"])
+            required_exp = next_exp - curr_exp
+
+            if self.get_curr_points() >= required_exp:
+                if int(self.adjutant_info['level']) >= 8 and required_exp > 5:
+                    res = False
+                else:
+                    res = True
+            else:
+                res = False
+
+        self.logger.debug(f'bumping check result = {res}')
+        return res
+
+    # def bump_level(self, adj_data) -> bool:
+    def bump_level(self) -> bool:
+        # adj_lvl = int(adj_data["adjutantData"]["level"])
+        # next_adj_lvl = adj_lvl + 1
+        curr_exp = int(self.adjutant_info["exp"])
+        next_exp = int(self.adjutant_info["exp_top"])
+        required_exp = next_exp - curr_exp
+        # if self.get_curr_points() >= required_exp:
+
+        next_adj_lvl = int(self.adjutant_info["level"]) + 1
+        self.logger.info(f"Bumping adjutant level to Lv.{next_adj_lvl}")
+        buy_times = ceil(required_exp / 5)
+        res = None
+        while buy_times > 0:
+            res = self.buy_exp()
+            buy_times -= 1
+            if buy_times < 0:
+                break
+            self.update_adjutant_info(res['adjutantData'], res['strategic_point'])
+            wgv_utils.set_sleep()
+
+        if 'adjutantData' not in res:
             return False
+        elif int(res['adjutantData']['level']) == next_adj_lvl:
+            self.logger.info("Bumping level successfully")
+            self.adjutant_info = res['adjutantData']
+            return True
+        else:
+            self.logger.debug(res)
+            return False
+
+        # else:
+        # return False
 
     def update_adjutant_info(self, adj_data, strategic_point):
         # TODO: use signal? and manage signals globally?
         _name = ADJUTANT_ID_TO_NAME[adj_data['id']]
         _exp = f"Lv. {adj_data['level']} {adj_data['exp']}/{adj_data['exp_top']}"
         _point = str(strategic_point)
+
+        self.adjutant_info = adj_data
         self.points = strategic_point
         self.tab_thermopylae.update_adjutant_name(_name)
         self.tab_thermopylae.update_adjutant_exp(_exp)
@@ -389,10 +433,12 @@ class SortieHelper:
         else:
             pass
 
-    def is_night_battle(self, challenge_res: dict) -> bool:
+    def is_night_battle(self, curr_id: str, challenge_res: dict) -> bool:
         if challenge_res['warReport']['canDoNightWar'] == 0:
             self.logger.info('Battle finished by day')
             do_night_battle = False
+        elif curr_id in REWARD_NODE:
+            do_night_battle = True
         elif challenge_res['warReport']['canDoNightWar'] == 1:
             e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
             self.logger.info(e_list)
