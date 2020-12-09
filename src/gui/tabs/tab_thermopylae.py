@@ -54,6 +54,8 @@ class TabThermopylae(QWidget):
         self.set_info_bar()
 
         self.button_group = None
+        self.boat_pool_label = QLabel()
+        self.boat_pool_label.setWordWrap(True)
         self.button_pre_battle = None
         self.button_fresh_sortie = None
         self.button_resume_sortie = None
@@ -99,12 +101,6 @@ class TabThermopylae(QWidget):
             layout.setStretch(i, 0)
         self.left_layout.addWidget(w)
 
-    def update_ticket(self, data: int) -> None:
-        self.ticket_label.setText(str(data))
-
-    def update_purchasable(self, data: int) -> None:
-        self.purchasable_label.setText(str(data))
-
     def init_ui(self) -> None:
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.addLayout(self.left_layout)
@@ -140,6 +136,7 @@ class TabThermopylae(QWidget):
         self.button_resume_sortie.setEnabled(False)
 
         self.left_layout.addWidget(t)
+        self.left_layout.addWidget(self.boat_pool_label)
         self.left_layout.addWidget(self.button_pre_battle)
         self.left_layout.addWidget(self.button_fresh_sortie)
         self.left_layout.addWidget(self.button_resume_sortie)
@@ -232,5 +229,18 @@ class TabThermopylae(QWidget):
 
     def update_user_exp_label(self, x: dict) -> None:
         self.sig_exp.emit(x)
+
+    # ================================
+    # Update left-layout display
+    # ================================
+
+    def update_ticket(self, data: int) -> None:
+        self.ticket_label.setText(str(data))
+
+    def update_purchasable(self, data: int) -> None:
+        self.purchasable_label.setText(str(data))
+
+    def update_boat_pool_label(self, data: list) -> None:
+        self.boat_pool_label.setText(str(data))
 
 # End of File

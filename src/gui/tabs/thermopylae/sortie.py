@@ -83,6 +83,9 @@ class Sortie:
     "status": "3",  # sub map
     
     '''
+    # ================================
+    # Pre battle checke
+    # ================================
 
     def _get_fleet_info(self) -> None:
         if self.is_realrun is True:
@@ -110,6 +113,45 @@ class Sortie:
         else:
             with open('six_getUserData.json', 'r', encoding='utf-8') as f:
                 self.user_data = json.load(f)
+
+    def pre_battle_set_info(self) -> bool:
+        # TODO free up dock space if needed
+        user_e6 = next(i for i in self.user_data['chapterList'] if i['id'] == "10006")
+        if self.user_data['chapterId'] != '10006':
+            self.logger.warning("You are in the middle of a battle other than E6. Exiting")
+            return False
+        elif len(user_e6['boats']) != 22:
+            # Try to detect if user passed E6;
+            self.logger.warning("You have not passed E6 manually. Exiting")
+            return False
+        else:
+            pass
+        self.parent.update_ticket(self.user_data['ticket'])
+        self.parent.update_purchasable(self.user_data['canChargeNum'])
+
+        # check if the sortie "final fleet" is set or not
+        b = self.fleet_info['chapterInfo']['boats']
+        if len(b) == 0:
+            self.logger.info('User has not entered E6. Select from old settings')
+            last_fleets = user_e6['boats']
+        elif len(b) == 22 and self.fleet_info['chapterInfo']['level_id'] == "9316":
+            self.logger.info('User has entered E6-1.')
+            last_fleets = b
+        else:
+            self.logger.info('Invalid settings for using this function')
+            self.logger.info('1. Ensure you have passed E6-3; 2. You are not in a battle OR in E6')
+            return False
+
+        self.set_boat_pool(self.fleet_info['fleet'])
+        self.curr_node = self.user_data['nodeId']
+
+        if len(last_fleets) != 22:
+            self.logger.warning("Invalid last boats settings.")
+            res = False
+        else:
+            self.final_fleets = last_fleets
+            res = True
+        return res
 
     def pre_battle_calls(self) -> bool:
         self._get_fleet_info()
@@ -154,44 +196,9 @@ class Sortie:
         else:
             self.logger.info('Can choose a fresh start')
 
-    def pre_battle_set_info(self) -> bool:
-        # TODO free up dock space if needed
-        user_e6 = next(i for i in self.user_data['chapterList'] if i['id'] == "10006")
-        if self.user_data['chapterId'] != '10006':
-            self.logger.warning("You are in the middle of a battle other than E6. Exiting")
-            return False
-        elif len(user_e6['boats']) != 22:
-            # Try to detect if user passed E6;
-            self.logger.warning("You have not passed E6 manually. Exiting")
-            return False
-        else:
-            pass
-        self.parent.update_ticket(self.user_data['ticket'])
-        self.parent.update_purchasable(self.user_data['canChargeNum'])
-
-        # check if the sortie "final fleet" is set or not
-        b = self.fleet_info['chapterInfo']['boats']
-        if len(b) == 0:
-            self.logger.info('User has not entered E6. Select from old settings')
-            last_fleets = user_e6['boats']
-        elif len(b) == 22 and self.fleet_info['chapterInfo']['level_id'] == "9316":
-            self.logger.info('User has entered E6-1.')
-            last_fleets = b
-        else:
-            self.logger.info('Invalid settings for using this function')
-            self.logger.info('1. Ensure you have passed E6-3; 2. You are not in a battle OR in E6')
-            return False
-
-        self.boat_pool = self.fleet_info['fleet']
-        self.curr_node = self.user_data['nodeId']
-
-        if len(last_fleets) != 22:
-            self.logger.warning("Invalid last boats settings.")
-            res = False
-        else:
-            self.final_fleets = last_fleets
-            res = True
-        return res
+    # ================================
+    # Entry points
+    # ================================
 
     def resume_sortie(self) -> None:
         print(f"Resume sortie from node {self.curr_node}")
@@ -207,6 +214,21 @@ class Sortie:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
 
+    # ================================
+    # Setter / Getter
+    # ================================
+
+    def set_boat_pool(self, boat_pool: list):
+        self.boat_pool = boat_pool
+        label_text = "Selected ships: "
+        for s in self.boat_pool:
+            label_text += f"{self.user_ships[s]['Name']} "
+        self.parent.update_boat_pool_label(label_text)
+
+    # ================================
+    # Combat
+    # ================================
+
     def E6_1_A1_sortie(self) -> Tuple[str, str]:
         self.helper.api_withdraw()
         next_node_id = self.helper.api_readyFire()
@@ -215,7 +237,7 @@ class Sortie:
         shop_data = self.helper.get_ship_store()
         buy_data = self.helper.buy_ships(self.escort_DD, shop_data)
         # TODO dynamically update boat pool info on left panel
-        self.boat_pool = buy_data['boatPool']
+        self.set_boat_pool(buy_data['boatPool'])
         self.helper.set_war_fleets(self.escort_DD)
 
         # Node E6-1 A1, lv.1 -> lv.2
@@ -228,7 +250,7 @@ class Sortie:
         sp_res = self.helper.supply_boats(self.escort_DD)
         self.parent.update_resources(sp_res['userVo']['oil'], sp_res['userVo']['ammo'], sp_res['userVo']['steel'], sp_res['userVo']['aluminium'])
 
-        self.helper.process_repair(sp_res['shipVO'], [1])   # pre-battle repair
+        self.helper.process_repair(sp_res['shipVO'], [1])  # pre-battle repair
         sleep(2)
         self.helper.spy()
         sleep(2)
@@ -241,7 +263,7 @@ class Sortie:
             battle_res = self.helper.get_war_result('0')
         self.helper.process_battle_result(battle_res)
         sleep(3)
-        self.helper.process_repair(battle_res['shipVO'], [1])   # post-battle repair
+        self.helper.process_repair(battle_res['shipVO'], [1])  # post-battle repair
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] in [1, 2]:
             next_id, next_name = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
         else:
@@ -249,6 +271,5 @@ class Sortie:
             next_id = -1
             next_name = "??"
         return next_id, next_name
-
 
 # End of File
