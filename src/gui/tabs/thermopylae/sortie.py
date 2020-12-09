@@ -40,6 +40,7 @@ class Sortie:
         self.can_start = False
         self.helper = None
         self.repair_level = 1
+        self.curr_node = -1
         self.boat_pool = []  # host existing boats
         self.escort_DD = []  # For 2DD to pass first few levels only, 萤火虫，布雷恩
         self.escort_CV = []  # For 1CV to pass first few levels only, 不挠
@@ -68,8 +69,10 @@ class Sortie:
         - six_setWarFleet
     
     > self.user_data
-        -> status: ( I believe this is the user current map )
-            1 (sub map 1), ..., 3 (sub map 3)
+        -> nodeId: current node
+        -> levelId: current level
+        -> chapterId: current chapter
+        -> npcId: current enemy
         -> boats:
             last set boat
             len E1/2 = 14, E3/4 = 18, E5/6 = 22
@@ -84,7 +87,7 @@ class Sortie:
     def _get_fleet_info(self) -> None:
         if self.is_realrun is True:
             self.fleet_info = self.api.getFleetInfo()
-            # save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
+            save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
             sleep(self.sleep_time)
         else:
             with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
@@ -93,7 +96,7 @@ class Sortie:
     def _get_pve_data(self) -> None:
         if self.is_realrun is True:
             self.map_data = self.api.getPveData()
-            # save_json('six_getPveData.json', self.map_data)  # TODO only for testing
+            save_json('six_getPveData.json', self.map_data)  # TODO only for testing
             sleep(self.sleep_time)
         else:
             with open('six_getPveData.json', 'r', encoding='utf-8') as f:
@@ -102,7 +105,7 @@ class Sortie:
     def _get_user_data(self) -> None:
         if self.is_realrun is True:
             self.user_data = self.api.getUserData()
-            # save_json('six_getUserData.json', self.user_data)  # TODO only for testing
+            save_json('six_getUserData.json', self.user_data)  # TODO only for testing
             sleep(self.sleep_time)
         else:
             with open('six_getUserData.json', 'r', encoding='utf-8') as f:
@@ -144,16 +147,21 @@ class Sortie:
             # Lesson: do not output various stuff at once, concat them together; otherwise TypeError
             self.logger.info(output_str)
 
-        self.parent.button_sortie.setEnabled(True)
+        self.parent.button_fresh_sortie.setEnabled(True)
+        if len(self.boat_pool) > 0:
+            self.parent.button_resume_sortie.setEnabled(True)
+            self.logger.info('Can choose a fresh start or resume existing battle')
+        else:
+            self.logger.info('Can choose a fresh start')
 
     def pre_battle_set_info(self) -> bool:
         # TODO free up dock space if needed
         user_e6 = next(i for i in self.user_data['chapterList'] if i['id'] == "10006")
-        if self.user_data['levelId'] != "9316":
-            self.logger.warning("You are in the middle of a battle. Exiting")
+        if self.user_data['chapterId'] != '10006':
+            self.logger.warning("You are in the middle of a battle other than E6. Exiting")
             return False
-        elif self.user_data['npcId'] != "931821001":
-            # Try to detect if user passed E6; TODO not sure if this is legit
+        elif len(user_e6['boats']) != 22:
+            # Try to detect if user passed E6;
             self.logger.warning("You have not passed E6 manually. Exiting")
             return False
         else:
@@ -167,13 +175,15 @@ class Sortie:
             self.logger.info('User has not entered E6. Select from old settings')
             last_fleets = user_e6['boats']
         elif len(b) == 22 and self.fleet_info['chapterInfo']['level_id'] == "9316":
-            # TODO long term; pick up where user left?
-            self.logger.info('User has entered E6-1. Will retreat for a fresh start')
+            self.logger.info('User has entered E6-1.')
             last_fleets = b
         else:
             self.logger.info('Invalid settings for using this function')
-            self.logger.info('Ensure you have passed E6-3, AND you are not in a battle OR in E6-1')
+            self.logger.info('1. Ensure you have passed E6-3; 2. You are not in a battle OR in E6')
             return False
+
+        self.boat_pool = self.fleet_info['fleet']
+        self.curr_node = self.user_data['nodeId']
 
         if len(last_fleets) != 22:
             self.logger.warning("Invalid last boats settings.")
@@ -183,13 +193,18 @@ class Sortie:
             res = True
         return res
 
-    def start_sortie(self) -> None:
+    def resume_sortie(self) -> None:
+        print(f"Resume sortie from node {self.curr_node}")
+        print(self.boat_pool)
+        self.parent.button_resume_sortie.setEnabled(True)
+
+    def start_fresh_sortie(self) -> None:
         self.logger.info('Retreating...')
         try:
             next_id, next_name = self.E6_1_A1_sortie()
             print(next_id, next_name)
         except ThermopylaeSoriteExit:
-            self.parent.button_sortie.setEnabled(True)
+            self.parent.button_fresh_sortie.setEnabled(True)
             return
 
     def E6_1_A1_sortie(self) -> Tuple[str, str]:
