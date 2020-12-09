@@ -7,10 +7,17 @@ from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.exceptions.custom import ThermopylaeSoriteExit
 from src.wgr.six import API_SIX  # only for typehints
 
+ADJUTANT_ID_TO_NAME = {
+    '10082': "紫貂",
+    '10182': "Kearsarge",
+    '10282': "Habakkuk"
+}
+
 
 class SortieHelper:
-    def __init__(self, api: API_SIX, user_ships: dict, map_data: dict):
+    def __init__(self, tab_thermopylae, api: API_SIX, user_ships: dict, map_data: dict):
         self.api = api
+        self.tab_thermopylae = tab_thermopylae
         self.logger = getLogger('TabThermopylae')
         self.user_ships = user_ships
         self.map_data = map_data
@@ -18,11 +25,7 @@ class SortieHelper:
         self.max_retry = 3
         self.points = -1
         self.init_sub_map = "9316"  # TODO
-        self.adjutant_name = {
-            '10082': "紫貂",
-            '10182': "Kearsarge",
-            '10282': "Habakkuk"
-        }
+
         self.logger.debug('SortieHelper is initiated')
 
     def _reconnecting_calls(self, func: Callable, func_info: str) -> [dict, object]:
@@ -154,7 +157,6 @@ class SortieHelper:
             if ship[1] in purchase_list:
                 self.logger.info(f'bought {self.user_ships[str(ship[1])]["Name"]}')
                 self.points -= int(ship[2])
-        self.get_curr_points()
         return buy_data
 
     def buy_exp(self) -> dict:
@@ -189,11 +191,7 @@ class SortieHelper:
 
         res_data = self._reconnecting_calls(_cast_skill, 'cast adjutant skill')
 
-        self.points = res_data['strategic_point']
-        adj = res_data['adjutantData']
-        output_str = f'{self.adjutant_name[adj["id"]]} - Lv.{adj["level"]} {adj["exp"]}/{adj["exp_top"]}'
-        self.logger.info(output_str)
-        self.get_curr_points()
+        self.update_adjutant_info(res_data['adjutantData'], res_data['strategic_point'])
         return res_data
 
     def set_war_fleets(self, fleets: list) -> dict:
@@ -293,12 +291,7 @@ class SortieHelper:
     # Non-WGR methods
     # ================================
 
-    def get_curr_points(self, is_print: bool = True) -> int:
-        # TODO break apart
-        if is_print is True:
-            self.logger.info(f'Now have {self.points} strategic points left.')
-        else:
-            pass
+    def get_curr_points(self) -> int:
         return self.points
 
     def get_map_node_by_id(self, node_id: str) -> dict:
@@ -327,7 +320,7 @@ class SortieHelper:
         curr_exp = int(adj_data["adjutantData"]["exp"])
         next_exp = int(adj_data["adjutantData"]["exp_top"])
         required_exp = next_exp - curr_exp
-        if self.get_curr_points(False) >= required_exp:
+        if self.get_curr_points() >= required_exp:
             self.logger.info(f"Bumping adjutant level to Lv.{next_adj_lvl}")
             buy_times = ceil(required_exp / 5)
             res = None
@@ -336,9 +329,7 @@ class SortieHelper:
                 buy_times -= 1
                 if buy_times < 0:
                     break
-                adj = res['adjutantData']
-                output_str = f"Lv. {adj['level']} EXP {adj['exp']}/{adj['exp_top']}; remaining points = {res['strategic_point']}"
-                self.logger.info(output_str)
+                self.update_adjutant_info(res['adjutantData'], res['strategic_point'])
                 wgv_utils.set_sleep()
             if res is None:
                 return False
@@ -350,6 +341,16 @@ class SortieHelper:
                 return False
         else:
             return False
+
+    def update_adjutant_info(self, adj_data, strategic_point):
+        # TODO: use signal? and manage signals globally?
+        _name = ADJUTANT_ID_TO_NAME[adj_data['id']]
+        _exp = f"Lv. {adj_data['level']} {adj_data['exp']}/{adj_data['exp_top']}"
+        _point = str(strategic_point)
+        self.points = strategic_point
+        self.tab_thermopylae.update_adjutant_name(_name)
+        self.tab_thermopylae.update_adjutant_exp(_exp)
+        self.tab_thermopylae.update_points(_point)
 
     def process_repair(self, ships: list, repair_levels: [int, list]) -> None:
         repairs = []
@@ -401,9 +402,7 @@ class SortieHelper:
     def process_battle_result(self, battle_res: dict):
         res_str = f"==== {wgv_utils.get_war_evaluation(battle_res['resultLevel'])} ===="
         self.logger.info(res_str)
-        adj = battle_res['adjutantData']
-        adj_str = f"Adjutant Lv.{adj['level']} {adj['exp']}/{adj['exp_top']}"
-        self.logger.info(adj_str)
+        self.update_adjutant_info(battle_res['adjutantData'], battle_res['strategic_point'])
 
         ships = battle_res['warResult']['selfShipResults']
         for i in range(len(ships)):
@@ -412,7 +411,5 @@ class SortieHelper:
             ship_str = f"{shipname} Lv.{ship['level']} +{ship['expAdd']}Exp"
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
             self.logger.info(ship_str)
-
-        self.points = battle_res['strategic_point']
 
 # End of File

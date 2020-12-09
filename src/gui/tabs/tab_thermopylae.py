@@ -1,5 +1,4 @@
 import logging
-from time import sleep
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
@@ -51,7 +50,11 @@ class TabThermopylae(QWidget):
 
         self.ticket_label = None
         self.purchasable_label = None
-        self.set_info_bar()
+        self.set_ticket_info()
+        self.adjutant_label = None
+        self.adjutant_exp_label = None
+        self.points_label = None
+        self.set_adjutant_info()
 
         self.button_group = None
         self.boat_pool_label = QLabel()
@@ -85,7 +88,7 @@ class TabThermopylae(QWidget):
         log_handler.setLevel(level=logging.INFO)
         return logger
 
-    def set_info_bar(self) -> None:
+    def set_ticket_info(self) -> None:
         w = QWidget()
         layout = QHBoxLayout(w)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -100,6 +103,23 @@ class TabThermopylae(QWidget):
         w.setLayout(layout)
         for i in range(4):
             layout.setStretch(i, 0)
+        self.left_layout.addWidget(w)
+
+    def set_adjutant_info(self) -> None:
+        w = QWidget()
+        layout = QHBoxLayout(w)
+        layout.setContentsMargins(0, 0, 0, 0)
+        name_tag = QLabel("Adjutant")
+        self.adjutant_label = QLabel("?")
+        self.adjutant_exp_label = QLabel("?/?")
+        point_tag = QLabel("Point")
+        self.points_label = QLabel("?")
+        layout.addWidget(name_tag)
+        layout.addWidget(self.adjutant_label)
+        layout.addWidget(self.adjutant_exp_label)
+        layout.addWidget(point_tag)
+        layout.addWidget(self.points_label)
+        w.setLayout(layout)
         self.left_layout.addWidget(w)
 
     def init_ui(self) -> None:
@@ -242,6 +262,15 @@ class TabThermopylae(QWidget):
 
     def update_purchasable(self, data: int) -> None:
         self.purchasable_label.setText(str(data))
+
+    def update_adjutant_name(self, data: str) -> None:
+        self.adjutant_label.setText(data)
+
+    def update_adjutant_exp(self, data: str) -> None:
+        self.adjutant_exp_label.setText(data)
+
+    def update_points(self, data: str) -> None:
+        self.points_label.setText(data)
 
     def update_boat_pool_label(self, data: str) -> None:
         self.boat_pool_label.setText(data)

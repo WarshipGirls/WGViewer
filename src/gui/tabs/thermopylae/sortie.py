@@ -1,7 +1,7 @@
 import json
 
 from logging import getLogger
-from typing import Tuple, NoReturn, Union, Any
+from typing import Tuple
 
 from src import data as wgv_data
 from src.utils.general import set_sleep
@@ -10,6 +10,12 @@ from .helper import SortieHelper
 
 # Following are only for typehints
 from src.wgr.six import API_SIX
+
+ADJUTANT_ID_TO_NAME = {
+    '10082': "紫貂",
+    '10182': "Kearsarge",
+    '10282': "Habakkuk"
+}
 
 
 def save_json(name, data):
@@ -127,8 +133,8 @@ class Sortie:
             return False
         else:
             pass
-        self.parent.update_ticket(self.user_data['ticket'])
-        self.parent.update_purchasable(self.user_data['canChargeNum'])
+        self.set_sortie_tickets()
+        self.set_adjutant_info()
 
         # check if the sortie "final fleet" is set or not
         b = self.fleet_info['chapterInfo']['boats']
@@ -172,7 +178,7 @@ class Sortie:
         if self.pre_battle_calls() is False:
             return
 
-        self.helper = SortieHelper(self.api, self.user_ships, self.map_data)
+        self.helper = SortieHelper(self.parent, self.api, self.user_ships, self.map_data)
 
         self.logger.info("Setting final fleets:")
         for ship_id in self.final_fleet:
@@ -224,6 +230,17 @@ class Sortie:
     # ================================
     # Setter / Getter
     # ================================
+
+    def set_sortie_tickets(self) -> None:
+        self.parent.update_ticket(self.user_data['ticket'])
+        self.parent.update_purchasable(self.user_data['canChargeNum'])
+
+    def set_adjutant_info(self) -> None:
+        # TODO: very similar functions in helper.py; may remove one of them
+        adj = self.user_data['adjutantData']
+        self.parent.update_adjutant_name(ADJUTANT_ID_TO_NAME[adj['id']])
+        self.parent.update_adjutant_exp(f"Lv. {adj['level']} {adj['exp']}/{adj['exp_top']}")
+        self.parent.update_points(str(self.user_data['strategic_point']))
 
     def set_boat_pool(self, boat_pool: list) -> None:
         self.boat_pool = boat_pool
