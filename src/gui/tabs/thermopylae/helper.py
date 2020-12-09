@@ -1,6 +1,7 @@
+from logging import getLogger
+from math import ceil
 from time import sleep
 from typing import Callable, Tuple
-from logging import getLogger
 
 from src import utils as wgv_utils
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
@@ -82,7 +83,7 @@ class SortieHelper:
                 res = False
             elif '$currentVo' in data:
                 self.logger.info('Entering map succeed!')
-                next_node_id = self.get_next_node_by_id(data['$currentVo']['nodeId'])
+                next_node_id, _ = self.get_next_node_by_id(data['$currentVo']['nodeId'])
                 res = True
             else:
                 self.logger.debug(data)
@@ -99,7 +100,7 @@ class SortieHelper:
                 get_error(data['eid'])
                 res = False
             elif 'nodeId' in data:
-                _flag = self.get_map_node_by_id(next_node)['flag']
+                _, _flag = self.get_map_node_by_id(next_node)['flag']
                 self.logger.info(f"Proceed to {_flag} succeed!")
                 res = True
             else:
@@ -145,6 +146,7 @@ class SortieHelper:
                 self.logger.debug(data)
                 res = False
             return res, data
+
         buy_data = self._reconnecting_calls(_selectBoat, 'buy ships')
 
         # calculate remaining points
@@ -167,6 +169,7 @@ class SortieHelper:
                 self.logger.debug(data)
                 res = False
             return res, data
+
         return self._reconnecting_calls(_buy_exp, 'buy exp')
 
     def cast_skill(self) -> dict:
@@ -182,6 +185,7 @@ class SortieHelper:
                 self.logger.debug(data)
                 res = False
             return res, data
+
         res_data = self._reconnecting_calls(_cast_skill, 'cast adjutant skill')
 
         self.points = res_data['strategic_point']
@@ -202,6 +206,7 @@ class SortieHelper:
                 self.logger.debug(data)
                 res = False
             return res, data
+
         res_data = self._reconnecting_calls(_set_fleets, 'settings fleet')
         return res_data
 
@@ -218,6 +223,7 @@ class SortieHelper:
                 self.logger.debug(data)
                 res = False
             return res, data
+
         return self._reconnecting_calls(_supply_boats, 'supply')
 
     def repair(self, fleets: list) -> dict:
@@ -231,6 +237,7 @@ class SortieHelper:
             else:
                 res = True
             return res, data
+
         return self._reconnecting_calls(_repair, 'repair')
 
     def process_repair(self, ships: list, repair_levels: [int, list]) -> None:
@@ -276,6 +283,7 @@ class SortieHelper:
                 self.logger.debug(data)
                 res = False
             return res, data
+
         return self._reconnecting_calls(_spy, 'Detection')
 
     def challenge(self, formation: str) -> dict:
@@ -289,6 +297,7 @@ class SortieHelper:
                 self.logger.debug(data)
                 res = False
             return res, data
+
         return self._reconnecting_calls(_challenge, 'Combat')
 
     def is_night_battle(self, challenge_res: dict) -> bool:
@@ -298,7 +307,7 @@ class SortieHelper:
         elif challenge_res['warReport']['canDoNightWar'] == 1:
             e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
             self.logger.info(e_list)
-            if e_list[0] != 0: # if enemy's flagship is sunken
+            if e_list[0] != 0:  # if enemy's flagship is sunken
                 do_night_battle = True
             else:
                 do_night_battle = False
@@ -319,6 +328,7 @@ class SortieHelper:
                 self.logger.debug(data)
                 res = False
             return res, data
+
         return self._reconnecting_calls(_result, 'receive result')
 
     def process_battle_result(self, battle_res: dict):
@@ -358,13 +368,44 @@ class SortieHelper:
             node = {}
         return node
 
-    def get_next_node_by_id(self, node_id: str) -> str:
+    def get_next_node_by_id(self, node_id: str) -> Tuple[str, str]:
         try:
             next_node = self.get_map_node_by_id(node_id)
-            next_node_id = next_node['next_node'][0]
+            next_node_id = str(next_node['next_node'][0])
+            next_node_name = next_node['flag']
         except KeyError:
             self.logger.error('Access wrong nodes.')
-            node = ""
-        return node
+            next_node_id = ""
+            next_node_name = "??"
+        return next_node_id, next_node_name
+
+    def bump_level(self, adj_data) -> bool:
+        adj_lvl = int(adj_data["adjutantData"]["level"])
+        next_adj_lvl = adj_lvl + 1
+        curr_exp = int(adj_data["adjutantData"]["exp"])
+        next_exp = int(adj_data["adjutantData"]["exp_top"])
+        required_exp = next_exp - curr_exp
+        if self.get_curr_points(False) >= required_exp:
+            self.logger.info(f"Bumping adjutant level to Lv.{next_adj_lvl}")
+            buy_times = ceil(required_exp / 5)
+            res = None
+            while buy_times > 0:
+                res = self.buy_exp()
+                buy_times -= 1
+                if buy_times < 0:
+                    break
+                output_str = f"EXP {res['adjutantData']['exp']}/{res['adjutantData']['exp_top']}; remaining points = {res['strategic_point']}"
+                self.logger.info(output_str)
+                sleep(0.5)
+            if res is None:
+                return False
+            elif int(res['adjutantData']['level']) == next_adj_lvl:
+                self.logger.info("Bumping level successfully")
+                return True
+            else:
+                self.logger.debug(res)
+                return False
+        else:
+            return False
 
 # End of File

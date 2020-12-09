@@ -1,8 +1,8 @@
 import json
 
 from time import sleep
-from math import ceil
 from logging import getLogger
+from typing import Tuple
 
 from src import data as wgv_data
 from src.exceptions.custom import ThermopylaeSoriteExit
@@ -68,11 +68,6 @@ class Sortie:
         - six_setWarFleet
     
     > self.user_data
-    nodeId: highest reached node: 913821 E6-boss
-    levelId: highest reached map: 9318 (E6 map3)
-    adjutantList: 10082, 10182, 10282
-    chapterList
-        -> id : 10001 (E1) ... 10006 (E6)
         -> status: ( I believe this is the user current map )
             1 (sub map 1), ..., 3 (sub map 3)
         -> boats:
@@ -189,21 +184,20 @@ class Sortie:
         return res
 
     def start_sortie(self) -> None:
+        self.logger.info('Retreating...')
         try:
-            self.E61A1_sortie()
+            next_id, next_name = self.E6_1_A1_sortie()
+            print(next_id, next_name)
         except ThermopylaeSoriteExit:
             self.parent.button_sortie.setEnabled(True)
             return
 
-    def E61A1_sortie(self) -> None:
-        self.logger.info('Retreating...')
+    def E6_1_A1_sortie(self) -> Tuple[str, str]:
         self.helper.api_withdraw()
-
         next_node_id = self.helper.api_readyFire()
         self.helper.api_newNext(str(next_node_id))
 
         shop_data = self.helper.get_ship_store()
-        # Node A-1
         buy_data = self.helper.buy_ships(self.escort_DD, shop_data)
         # TODO dynamically update boat pool info on left panel
         self.boat_pool = buy_data['boatPool']
@@ -211,22 +205,20 @@ class Sortie:
 
         # Node E6-1 A1, lv.1 -> lv.2
         adj_data = self.helper.cast_skill()
-        if self.bump_level(adj_data) is False:
+        if self.helper.bump_level(adj_data) is False:
             self.logger.info('Bumping failed. Should restart current sub-map.')
         else:
             pass
 
         sp_res = self.helper.supply_boats(self.escort_DD)
-        # update side dock
         self.parent.update_resources(sp_res['userVo']['oil'], sp_res['userVo']['ammo'], sp_res['userVo']['steel'], sp_res['userVo']['aluminium'])
 
-        self.helper.process_repair(sp_res['shipVO'], [1])
+        self.helper.process_repair(sp_res['shipVO'], [1])   # pre-battle repair
         sleep(2)
         self.helper.spy()
         sleep(2)
         challenge_res = self.helper.challenge('1')
         do_night_battle = self.helper.is_night_battle(challenge_res)
-
         sleep(10)
         if do_night_battle is True:
             battle_res = self.helper.get_war_result('1')
@@ -234,44 +226,14 @@ class Sortie:
             battle_res = self.helper.get_war_result('0')
         self.helper.process_battle_result(battle_res)
         sleep(3)
-        self.helper.process_repair(battle_res['shipVO'], [1])
-        if battle_res['getScore$return']['flagKill'] == 0 or battle_res['resultLevel'] in [1, 2]:
-            next_node_id = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
+        self.helper.process_repair(battle_res['shipVO'], [1])   # post-battle repair
+        if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] in [1, 2]:
+            next_id, next_name = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
         else:
-            self.logger.info('Failed to clean current node. Should restart. Exiting.')
-            next_node_id = -1
-        return next_node_id
+            self.logger.info('Failed to clean E6-1 A1. Should restart. Exiting.')
+            next_id = -1
+            next_name = "??"
+        return next_id, next_name
 
-    def bump_level(self, adj_data) -> bool:
-        adj_lvl = int(adj_data["adjutantData"]["level"])
-        next_adj_lvl = adj_lvl + 1
-        curr_exp = int(adj_data["adjutantData"]["exp"])
-        next_exp = int(adj_data["adjutantData"]["exp_top"])
-        required_exp = next_exp - curr_exp
-        if self.helper.get_curr_points(False) >= required_exp:
-            self.logger.info(f"Bumping adjutant level to Lv.{next_adj_lvl}")
-            buy_times = ceil(required_exp / 5)
-            res = None
-            while buy_times > 0:
-                res = self.helper.buy_exp()
-                if self.helper.is_exit is True:
-                    self.parent.button_sortie.setEnabled(True)
-                    break
-                buy_times -= 1
-                if buy_times < 0:
-                    break
-                output_str = f"EXP {res['adjutantData']['exp']}/{res['adjutantData']['exp_top']}; remaining points = {res['strategic_point']}"
-                self.logger.info(output_str)
-            if res is None:
-                return False
-            elif int(res['adjutantData']['level']) == next_adj_lvl:
-                self.logger.info("Bumping level successfully")
-                return True
-            else:
-                self.logger.debug("Unexpected behavior on bumping level")
-                self.logger.debug(res)
-                return False
-        else:
-            return False
 
 # End of File
