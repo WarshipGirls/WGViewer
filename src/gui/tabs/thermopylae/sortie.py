@@ -1,7 +1,6 @@
 import json
 
 from logging import getLogger
-from typing import Tuple
 
 from src import data as wgv_data
 from src.utils.general import set_sleep
@@ -195,8 +194,9 @@ class Sortie:
     def resume_sortie(self) -> None:
         self.logger.info(f"Resume sortie from node {self.curr_node}")
         try:
-            if self.curr_node == '931602':
-                next_id = self.E6_1_B1_sortie(self.curr_node)
+            # if self.curr_node == '931602':
+            #     next_id = self.E6_1_B1_sortie(self.curr_node)
+            pass
         except ThermopylaeSoriteExit:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
@@ -236,29 +236,42 @@ class Sortie:
             label_text += f"{self.user_ships[s]['Name']} "
         self.parent.update_boat_pool_label(label_text)
 
-    def set_fleets(self, fleet: list) -> None:
+    def set_fleet(self, fleet: list) -> None:
         # The list may contain string or integer elements
         try:
             assert (len(fleet) <= 6)
-            label_text = "On battle: "
-            i = 1
             ss_count = 0
             ss = []
             for s in fleet:
-                label_text += f"{i} {self.user_ships[s]['Name']} "
                 if self.user_ships[s]['Class'] == "SS":
                     ss_count += 1
                     ss.append(s)
-                i += 1
-            self.parent.update_fleet_label(label_text)
             if ss_count >= 4:
                 self.battle_fleet = [int(j) for j in ss]
             else:
                 self.battle_fleet = [int(j) for j in fleet]
+
+            if self.curr_node == '931607':
+                if ss_count == 0:
+                    raise ThermopylaeSoriteExit
+                else:
+                    self.battle_fleet = [int(j) for j in ss]
+            else:
+                pass
+
+            self.update_battle_fleet_label(self.battle_fleet)
         except AssertionError:
             raise ThermopylaeSoriteExit
 
-    def set_side_dock_resources(self, x):
+    def update_battle_fleet_label(self, fleet: list) -> None:
+        label_text = "On battle: "
+        i = 1
+        for s in fleet:
+            label_text += f"{i} {self.user_ships[str(s)]['Name']} "
+            i += 1
+        self.parent.update_fleet_label(label_text)
+
+    def set_side_dock_resources(self, x) -> None:
         self.parent.update_resources(x['oil'], x['ammo'], x['steel'], x['aluminium'])
 
     # ================================
@@ -275,7 +288,7 @@ class Sortie:
         shop_data = self.helper.get_ship_store()
         buy_data = self.helper.buy_ships(self.escort_DD, shop_data)
         self.set_boat_pool(buy_data['boatPool'])
-        self.set_fleets(buy_data['boatPool'])
+        self.set_fleet(buy_data['boatPool'])
         self.helper.set_war_fleets(self.battle_fleet)
 
         # Node E6-1 A1, lv.1 -> lv.2
@@ -316,7 +329,7 @@ class Sortie:
         shop_data = self.helper.get_ship_store()
         buy_data = self.helper.buy_ships(self.escort_CV, shop_data)
         self.set_boat_pool(buy_data['boatPool'])
-        self.set_fleets(buy_data['boatPool'])
+        self.set_fleet(buy_data['boatPool'])
         self.helper.set_war_fleets(self.battle_fleet)
 
         sp_res = self.helper.supply_boats(self.battle_fleet)
@@ -351,17 +364,26 @@ class Sortie:
     def E6A1(self) -> str:
         self.helper.api_withdraw()
         next_node_id = self.helper.api_readyFire()
-        self.single_node_sortie(next_node_id)
+        return self.single_node_sortie(next_node_id)
 
     def find_SS(self, shop_data: list) -> list:
         # Get from a list of int (max length of 5), return a list of ship_id (str)
         res = []
+        print('find sssssssssssssssssssssssss')
         for ship_id in shop_data:
+            print(type(ship_id))
+            print(shop_data)
+            print(type(shop_data[0]))
             if ship_id in self.main_fleet:
                 res.append(str(ship_id))
         return res
 
     def single_node_sortie(self, curr_node_id: str) -> str:
+        self.curr_node = curr_node_id
+        self.logger.info('********************************')
+        self.logger.info("Start combat on new node")
+        self.logger.info('********************************')
+        print(self.helper.get_adjutant_info())
         self.helper.api_newNext(str(curr_node_id))
 
         buy_res = None
@@ -377,26 +399,34 @@ class Sortie:
         #     shop_res['boats']
         #     buy_res = self.helper.buy_ships(['132974'], shop_res)
         else:
+            print("SSSSSSSSSSSSSSSSSSSSSSHOULD BUY SSSSSSSSSSSSSSSSSSSSSSSS")
             # TODO: buy SS
             shop_res = self.helper.get_ship_store()
             ss_lists = self.find_SS(shop_res['boats'])
+            # first shop fetch
             if len(ss_lists) == 0:
                 shop_res = self.helper.get_ship_store('1')
                 ss_lists = self.find_SS(shop_res['boats'])
+                # second shop fetch
                 if len(ss_lists) == 0:
-                    pass
+                    if self.curr_node == '931607':
+                        raise ThermopylaeSoriteExit
                 else:
                     buy_res = self.helper.buy_ships(ss_lists, shop_res)
             else:
                 buy_res = self.helper.buy_ships(ss_lists, shop_res)
 
+            # if curr_node_id == '931607' and len(ss_lists) == 0:
+            #     raise ThermopylaeSoriteExit('No Required SS')
+            print('buy_res:')
+            print(buy_res)
+            print('\n\n')
+
         if buy_res is None:
             pass
         else:
             self.set_boat_pool(buy_res['boatPool'])
-            # TODO: when SS count >= 4, set all to SS, done?
-            self.set_fleets(buy_res['boatPool'])
-            # TODO: when final fleet elem == battle_fleet elem; skip set-war-fleet
+            self.set_fleet(buy_res['boatPool'])
             if set(self.battle_fleet) == set(self.final_fleet):
                 # skip
                 pass
@@ -405,8 +435,8 @@ class Sortie:
 
         # cast skill
         if curr_node_id in ['931602', '931702']:
-            adj_res = self.helper.cast_skill()
-            self.helper.set_adjutant_info(adj_res)
+            # adj_res = self.helper.cast_skill()
+            self.helper.cast_skill()
         elif curr_node_id == '931802':
             # TODO habakkuk; maybe not here
             pass
@@ -414,7 +444,8 @@ class Sortie:
             pass
 
         if self.helper.can_bump() is True:
-            if (adj_res is not None) and (self.helper.bump_level(adj_res) is False):
+            # if (adj_res is not None) and (self.helper.bump_level(adj_res) is False):
+            if self.helper.bump_level() is False:
                 self.logger.info('Bumping failed. Should restart current sub-map.')
             else:
                 pass
@@ -426,14 +457,25 @@ class Sortie:
         self.set_side_dock_resources(supply_res['userVo'])
 
         repair_res = self.helper.process_repair(supply_res['shipVO'], [self.repair_level])  # pre-battle repair
-        self.set_side_dock_resources(repair_res['userVo'])
+        print('repair result:')
+        print(repair_res)
+        if 'userVo' in repair_res:
+            self.set_side_dock_resources(repair_res['userVo'])
 
         set_sleep()
         self.helper.spy()
 
         set_sleep()
-        challenge_res = self.helper.challenge(formation='1')
-
+        # TODO use spy result to find formation
+        if self.curr_node in ['931608', '931610']:
+            formation = '5'
+        elif self.curr_node in self.helper.get_reward_nodes():
+            formation = '4'
+        elif len(self.battle_fleet) >= 4:
+            formation = '2'
+        else:
+            formation = '1'
+        challenge_res = self.helper.challenge(formation)
 
         do_night_battle = self.helper.is_night_battle(curr_node_id, challenge_res)
 
@@ -442,19 +484,23 @@ class Sortie:
             self.logger.info("Entering night war...")
             battle_res = self.helper.get_war_result('1')
         else:
-            self.logger.info("")
+            # self.logger.info("")
             battle_res = self.helper.get_war_result('0')
         self.helper.process_battle_result(battle_res, self.battle_fleet)
 
         set_sleep()
         repair_res = self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
-        self.set_side_dock_resources(repair_res['userVo'])
+        if 'userVo' in repair_res:
+            self.set_side_dock_resources(repair_res['userVo'])
 
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
             next_id = str(self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id']))
+            self.logger.info('********************************')
+            self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
+            self.logger.info('********************************')
         else:
             self.logger.info('Failed to clean E6-1 B1. Should restart. Exiting.')
-            next_id = "0"
+            raise ThermopylaeSoriteExit
         return next_id
 
 # End of File

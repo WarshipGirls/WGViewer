@@ -143,7 +143,7 @@ class TabThermopylae(QWidget):
         msg += "4. Buff cards are not selected;\n"
         msg += "5. The function is NOT completed yet.\n"
         msg += "\n"
-        msg += "> Points earned after battle = 2 &times; adjutant-level + 1\n"
+        msg += "> Points earned after battle = 2 x adjutant-level + 1\n"
         t.setFontPointSize(10)
         t.setText(msg)
         t.setReadOnly(True)

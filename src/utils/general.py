@@ -38,6 +38,6 @@ def ts_to_date(ts: int) -> str:
 def set_sleep(level: int = 1):
     # There must be some interval between Game API calls
     # TODO: make this global settings
-    sleep(randint(4, 6) * level)
+    sleep(randint(5, 10) * level)
 
 # End of File

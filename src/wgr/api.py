@@ -3,6 +3,8 @@ import logging
 import zlib
 
 from ast import literal_eval
+
+from socket import timeout
 from requests import exceptions
 from requests.utils import cookiejar_from_dict
 from time import sleep
@@ -74,7 +76,7 @@ class WGR_API:
                 except zlib.error:
                     data = {}
                 res = True
-            except (TimeoutError, URLError) as e:
+            except (TimeoutError, URLError, timeout) as e:
                 logging.error(e)
                 logging.warning('urlopen trying reconnecting...')
                 sleep(self.sleep_time)

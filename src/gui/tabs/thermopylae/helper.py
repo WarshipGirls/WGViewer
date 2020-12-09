@@ -135,7 +135,7 @@ class SortieHelper:
         for ship in store_data['$ssss']:
             star = int(ship[0])
             cost = star * int(ship[2])
-            output_str = f'{self.user_ships[str(ship[1])]["Name"]} - STAR {star} - COST {cost}'
+            output_str = f'{self.user_ships[str(ship[1])]["Name"]}\tSTAR {star}\tCOST {cost}'
             self.logger.info(output_str)
         if store_data['buff'] != 0:
             # TODO? get buff; but who needs buff anyway?
@@ -143,8 +143,10 @@ class SortieHelper:
         return store_data
 
     def buy_ships(self, purchase_list: list, shop_data: dict):
+        _to_buy = [int(i) for i in purchase_list]
+
         def _selectBoat() -> [bool, object]:
-            data = self.api.selectBoat(purchase_list)
+            data = self.api.selectBoat(_to_buy)
             if 'eid' in data:
                 get_error(data['eid'])
                 self.logger.warning("Buying ships failed...")
@@ -157,7 +159,10 @@ class SortieHelper:
                 res = False
             return res, data
 
+        print('prepare to buy')
+        print(purchase_list)
         buy_data = self._reconnecting_calls(_selectBoat, 'buy ships')
+        print(buy_data)
 
         # calculate remaining points
         self.points = shop_data['strategic_point']
@@ -165,6 +170,9 @@ class SortieHelper:
             if ship[1] in purchase_list:
                 self.logger.info(f'bought {self.user_ships[str(ship[1])]["Name"]}')
                 self.points -= int(ship[2])
+        print(self.get_adjutant_info())
+        print('how many points after buying:')
+        print(self.points)
         return buy_data
 
     def buy_exp(self) -> dict:
@@ -307,6 +315,10 @@ class SortieHelper:
     def get_adjutant_info(self) -> dict:
         return self.adjutant_info
 
+    @staticmethod
+    def get_reward_nodes() -> list:
+        return REWARD_NODE
+
     def get_map_node_by_id(self, node_id: str) -> dict:
         try:
             node = next(i for i in self.map_data['combatLevelNode'] if i['id'] == node_id)
@@ -399,8 +411,9 @@ class SortieHelper:
         self.tab_thermopylae.update_adjutant_name(_name)
         self.tab_thermopylae.update_adjutant_exp(_exp)
         self.tab_thermopylae.update_points(_point)
+        print(self.get_adjutant_info())
 
-    def process_repair(self, ships: list, repair_levels: [int, list]) -> None:
+    def process_repair(self, ships: list, repair_levels: [int, list]) -> dict:
         repairs = []
         ship_ids = []
         for ship in ships:
@@ -427,11 +440,12 @@ class SortieHelper:
             else:
                 pass
         if len(to_repair) > 0:
-            names = [self.user_ships[i]['Name'] for i in to_repair]
+            names = [self.user_ships[str(i)]['Name'] for i in to_repair]
             self.logger.info(f'Start to prepare {names}')
-            self.repair(to_repair)
+            res = self.repair(to_repair)
         else:
-            pass
+            res = {}
+        return res
 
     def is_night_battle(self, curr_id: str, challenge_res: dict) -> bool:
         if challenge_res['warReport']['canDoNightWar'] == 0:
