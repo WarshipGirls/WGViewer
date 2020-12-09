@@ -4,6 +4,7 @@ from logging import getLogger
 
 from src import utils as wgv_utils
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
+from src.exceptions.custom import ThermopylaeSoriteExit
 from src.wgr.six import API_SIX  # only for typehints
 
 
@@ -18,16 +19,12 @@ class SortieHelper:
         self.max_retry = 5
         self.points = -1
         self.init_sub_map = "9316"  # TODO
-        self.force_exit = False
         self.adjutant_name = {
             '10082': "紫貂",
             '10182': "Kearsarge",
             '10282': "Habakkuk"
         }
         self.logger.debug('SortieHelper is initiated')
-
-    def is_exit(self) -> bool:
-        return self.force_exit
 
     def _reconnecting_calls(self, func: Callable, func_info: str) -> [dict, object]:
         # This redundancy while-loop (compared to api.py's while-loop) deals with WarshipGirlsExceptions;
@@ -47,8 +44,7 @@ class SortieHelper:
             tries += 1
             if tries >= self.max_retry:
                 self.logger.error(f"Failed to {func_info} after {self.max_retry} reconnections. Please try again later.")
-                self.force_exit = True
-                break
+                raise ThermopylaeSoriteExit()
             else:
                 pass
         return data
