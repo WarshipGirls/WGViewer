@@ -129,6 +129,7 @@ class SortieHelper:
             return res, data
 
         store_data = self._reconnecting_calls(_canSelectList, 'visit shop')
+        self.set_curr_points(store_data['strategic_point'])
         # notes that the server only return affordable ships and buff
         # since CN ver 5.1.0, there are only 4 ships + 1 buff
         self.logger.info('Affordable ships: ')
@@ -160,19 +161,20 @@ class SortieHelper:
             return res, data
 
         print('prepare to buy')
-        print(purchase_list)
+        print(_to_buy)
         buy_data = self._reconnecting_calls(_selectBoat, 'buy ships')
-        print(buy_data)
 
-        # calculate remaining points
-        self.points = shop_data['strategic_point']
-        for ship in shop_data['$ssss']:
-            if ship[1] in purchase_list:
-                self.logger.info(f'bought {self.user_ships[str(ship[1])]["Name"]}')
-                self.points -= int(ship[2])
-        print(self.get_adjutant_info())
-        print('how many points after buying:')
-        print(self.points)
+        if 'strategic_point' in buy_data:
+            self.set_curr_points(buy_data['strategic_point'])
+            for s in _to_buy:
+                self.logger.info(f'bought {self.user_ships[str(s)]["Name"]}')
+        else:
+            print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
+
+        print('buy_data')
+        print(buy_data)
+        print('shop_data')
+        print(shop_data)
         return buy_data
 
     def buy_exp(self) -> dict:
@@ -223,8 +225,7 @@ class SortieHelper:
                 res = False
             return res, data
 
-        res_data = self._reconnecting_calls(_set_fleets, 'set battle fleet')
-        return res_data
+        return self._reconnecting_calls(_set_fleets, 'set battle fleet')
 
     def supply_boats(self, fleets: list) -> dict:
         def _supply_boats() -> Tuple[bool, dict]:
@@ -273,7 +274,9 @@ class SortieHelper:
                 res = False
             return res, data
 
-        return self._reconnecting_calls(_spy, 'Detection')
+        spy_data = self._reconnecting_calls(_spy, 'Detection')
+        self.logger.info(wgv_utils.process_spy_json(spy_data))
+        return spy_data
 
     def challenge(self, formation: str) -> dict:
         def _challenge() -> Tuple[bool, dict]:
@@ -341,6 +344,7 @@ class SortieHelper:
         self.adjutant_info = adj_data
 
     def set_curr_points(self, points) -> None:
+        print(f"{self.points} -> {points}")
         self.points = points
 
     # ================================
@@ -407,7 +411,7 @@ class SortieHelper:
         _point = str(strategic_point)
 
         self.adjutant_info = adj_data
-        self.points = strategic_point
+        self.set_curr_points(strategic_point)
         self.tab_thermopylae.update_adjutant_name(_name)
         self.tab_thermopylae.update_adjutant_exp(_exp)
         self.tab_thermopylae.update_points(_point)

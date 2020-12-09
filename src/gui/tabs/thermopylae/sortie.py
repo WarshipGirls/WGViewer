@@ -4,7 +4,7 @@ from logging import getLogger
 
 from src import data as wgv_data
 from src.utils.general import set_sleep
-from src.exceptions.custom import ThermopylaeSoriteExit
+from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart
 from .helper import SortieHelper
 
 # Following are only for typehints
@@ -34,7 +34,7 @@ class Sortie:
         self.parent = parent
         self.api: API_SIX = api
         self.main_fleet = fleet  # main fleets (6SS)
-        self.battle_fleet = []  # ships that on battle
+        self.battle_fleet = set()  # ships that on battle
         self.final_fleet = final_fleet  # fill up required number of boats
         self.logger = getLogger('TabThermopylae')
         self.is_realrun = is_realrun
@@ -48,7 +48,7 @@ class Sortie:
         self.helper = None
         self.repair_level = 1
         self.curr_node = "0"
-        self.boat_pool = []  # host existing boats
+        self.boat_pool = set()  # host existing boats
         self.escort_DD = []  # For 2DD to pass first few levels only, 萤火虫，布雷恩
         self.escort_CV = []  # For 1CV to pass first few levels only, 不挠
         self.user_ships = wgv_data.get_processed_userShipVo()
@@ -160,6 +160,7 @@ class Sortie:
         if self.pre_battle_calls() is False:
             return
 
+        # init data
         self.helper = SortieHelper(self.parent, self.api, self.user_ships, self.map_data)
         self.helper.set_adjutant_info(self.user_data['adjutantData'])
         self.helper.set_curr_points(self.user_data['strategic_point'])
@@ -213,6 +214,9 @@ class Sortie:
         except ThermopylaeSoriteExit:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
+        except ThermopylaeSortieRestart:
+            self.logger.warning("RESTARTING!")
+            self.start_fresh_sortie()
 
     # ================================
     # Setter / Getter
@@ -230,7 +234,7 @@ class Sortie:
         self.parent.update_points(str(self.user_data['strategic_point']))
 
     def set_boat_pool(self, boat_pool: list) -> None:
-        self.boat_pool = boat_pool
+        self.boat_pool = set(boat_pool)
         label_text = "Selected ships: "
         for s in self.boat_pool:
             label_text += f"{self.user_ships[s]['Name']} "
@@ -247,15 +251,15 @@ class Sortie:
                     ss_count += 1
                     ss.append(s)
             if ss_count >= 4:
-                self.battle_fleet = [int(j) for j in ss]
+                self.battle_fleet = set([int(j) for j in ss])
             else:
-                self.battle_fleet = [int(j) for j in fleet]
+                self.battle_fleet = set([int(j) for j in fleet])
 
             if self.curr_node == '931607':
                 if ss_count == 0:
                     raise ThermopylaeSoriteExit
                 else:
-                    self.battle_fleet = [int(j) for j in ss]
+                    self.battle_fleet = set([int(j) for j in ss])
             else:
                 pass
 
@@ -279,7 +283,6 @@ class Sortie:
     # TODO: hardcoding A1, B1...
     # ================================
 
-
     def E6A1(self) -> str:
         self.helper.api_withdraw()
         next_node_id = self.helper.api_readyFire()
@@ -293,6 +296,9 @@ class Sortie:
             print(type(ship_id))
             print(shop_data)
             print(type(shop_data[0]))
+            if self.curr_node[:4] == '9316' and ship_id in self.battle_fleet:
+                # in E6-1, don't buy repeated ships
+                continue
             if ship_id in self.main_fleet:
                 res.append(str(ship_id))
         return res
@@ -301,8 +307,9 @@ class Sortie:
         self.curr_node = curr_node_id
         self.logger.info('********************************')
         self.logger.info("Start combat on new node")
+        self.logger.info(self.helper.points)
+        self.logger.info(self.helper.adjutant_info)
         self.logger.info('********************************')
-        print(self.helper.get_adjutant_info())
         self.helper.api_newNext(str(curr_node_id))
 
         buy_res = None
@@ -312,14 +319,8 @@ class Sortie:
         elif curr_node_id == '931604':
             shop_res = self.helper.get_ship_store()
             buy_res = self.helper.buy_ships(self.escort_CV, shop_res)
-        # elif curr_node_id == '931607':
-        #     # TODO: find COST 4 SS
-        #     shop_res = self.helper.get_ship_store()
-        #     shop_res['boats']
-        #     buy_res = self.helper.buy_ships(['132974'], shop_res)
         else:
             print("SSSSSSSSSSSSSSSSSSSSSSHOULD BUY SSSSSSSSSSSSSSSSSSSSSSSS")
-            # TODO: buy SS
             shop_res = self.helper.get_ship_store()
             ss_lists = self.find_SS(shop_res['boats'])
             # first shop fetch
@@ -329,7 +330,7 @@ class Sortie:
                 # second shop fetch
                 if len(ss_lists) == 0:
                     if self.curr_node == '931607':
-                        raise ThermopylaeSoriteExit
+                        raise ThermopylaeSortieRestart
                 else:
                     buy_res = self.helper.buy_ships(ss_lists, shop_res)
             else:
@@ -346,11 +347,11 @@ class Sortie:
         else:
             self.set_boat_pool(buy_res['boatPool'])
             self.set_fleet(buy_res['boatPool'])
-            if set(self.battle_fleet) == set(self.final_fleet):
-                # skip
-                pass
-            else:
-                self.helper.set_war_fleets(self.battle_fleet)
+
+        if self.battle_fleet == set(self.final_fleet):
+            self.logger.debug('final fleet is done. skip setting!')
+        else:
+            self.helper.set_war_fleets(list(self.battle_fleet))
 
         # cast skill
         if curr_node_id in ['931602', '931702']:
@@ -372,7 +373,7 @@ class Sortie:
             pass
 
         set_sleep()
-        supply_res = self.helper.supply_boats(self.battle_fleet)
+        supply_res = self.helper.supply_boats(list(self.battle_fleet))
         self.set_side_dock_resources(supply_res['userVo'])
 
         repair_res = self.helper.process_repair(supply_res['shipVO'], [self.repair_level])  # pre-battle repair
@@ -405,7 +406,7 @@ class Sortie:
         else:
             # self.logger.info("")
             battle_res = self.helper.get_war_result('0')
-        self.helper.process_battle_result(battle_res, self.battle_fleet)
+        self.helper.process_battle_result(battle_res, list(self.battle_fleet))
 
         set_sleep()
         repair_res = self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
@@ -418,7 +419,7 @@ class Sortie:
             self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
             self.logger.info('********************************')
         else:
-            self.logger.info('Failed to clean E6-1 B1. Should restart. Exiting.')
+            self.logger.info(f"Failed to clean E6 {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
             raise ThermopylaeSoriteExit
         return next_id
 

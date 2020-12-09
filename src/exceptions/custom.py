@@ -5,4 +5,8 @@ class InterruptExecution(Exception):
 class ThermopylaeSoriteExit(Exception):
     pass
 
+
+class ThermopylaeSortieRestart(Exception):
+    pass
+
 # End of File
