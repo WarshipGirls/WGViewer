@@ -134,13 +134,16 @@ class TabThermopylae(QWidget):
 
     def init_left_layout(self) -> None:
         t = QTextEdit()
-        msg = "Notes\n"
+        msg = "Notes (dev)\n"
         msg += "1. As of now, this auto sortie function is ONLY for players who passed E6 manually;\n"
-        msg += "2. As of now, there are limitations on what ship should be set:\n"
+        msg += "2. There are limitations on what ship cards should be set:\n"
         msg += "    - DD 'Glowworm' and 'Amethyst', and CV 'Indomitable' are required\n"
         msg += "    - 6 high level SS are required\n"
         msg += "3. Adjutant 紫貂 (default) and Habakkuk (purchased in shop) are required;\n"
-        msg += "4. The function is NOT completed yet.\n"
+        msg += "4. Buff cards are not selected;\n"
+        msg += "5. The function is NOT completed yet.\n"
+        msg += "\n"
+        msg += "> Points earned after battle = 2 &times; adjutant-level + 1\n"
         t.setFontPointSize(10)
         t.setText(msg)
         t.setReadOnly(True)

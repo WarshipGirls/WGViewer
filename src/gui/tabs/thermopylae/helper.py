@@ -84,7 +84,7 @@ class SortieHelper:
                 res = False
             elif '$currentVo' in data:
                 self.logger.info('Entering map succeed!')
-                next_node_id, _ = self.get_next_node_by_id(data['$currentVo']['nodeId'])
+                next_node_id = self.get_next_node_by_id(data['$currentVo']['nodeId'])
                 res = True
             else:
                 self.logger.debug(data)
@@ -101,7 +101,7 @@ class SortieHelper:
                 get_error(data['eid'])
                 res = False
             elif 'nodeId' in data:
-                _, node_name = self.get_next_node_by_id(next_node)
+                node_name = self.get_map_node_by_id(next_node)['flag']
                 self.logger.info(f"Proceed to {node_name} succeed!")
                 res = True
             else:
@@ -126,12 +126,17 @@ class SortieHelper:
             return res, data
 
         store_data = self._reconnecting_calls(_canSelectList, 'visit shop')
-        # TODO: delete
-        self.logger.info('Shop has following: ')
+        # notes that the server only return affordable ships and buff
+        # since CN ver 5.1.0, there are only 4 ships + 1 buff
+        self.logger.info('Affordable ships: ')
         for ship in store_data['$ssss']:
-            output_str = f'{self.user_ships[str(ship[1])]["Name"]} - LV {ship[0]} - COST {ship[2]}'
+            star = int(ship[0])
+            cost = star * int(ship[2])
+            output_str = f'{self.user_ships[str(ship[1])]["Name"]} - STAR {star} - COST {cost}'
             self.logger.info(output_str)
-            # TODO: where is buff card? (low priority)
+        if store_data['buff'] != 0:
+            # TODO? get buff; but who needs buff anyway?
+            pass
         return store_data
 
     def buy_ships(self, purchase_list: list, shop_data: dict):
@@ -139,7 +144,7 @@ class SortieHelper:
             data = self.api.selectBoat(purchase_list)
             if 'eid' in data:
                 get_error(data['eid'])
-                self.logger.info("Buying ships failed...")
+                self.logger.warning("Buying ships failed...")
                 res = False
             elif 'boatPool' in data:
                 self.logger.info("Buying ships successfully!")
@@ -179,7 +184,7 @@ class SortieHelper:
             data = self.api.useAdjutant()
             if 'eid' in data:
                 get_error(data['eid'])
-                self.logger.info("Failed to cast adjutant skill...")
+                self.logger.warning("Failed to cast adjutant skill...")
                 res = False
             elif 'adjutantData' in data:
                 self.logger.info("Adjutant skill casted successfully!")
@@ -215,7 +220,7 @@ class SortieHelper:
             data = self.api.supplyBoats(fleets)
             if 'eid' in data:
                 get_error(data['eid'])
-                self.logger.info("Supply ships failed...")
+                self.logger.warning("Supply ships failed...")
                 res = False
             elif 'userVo' in data:
                 self.logger.info("Supply boats successfully!")
@@ -227,17 +232,19 @@ class SortieHelper:
 
         return self._reconnecting_calls(_supply_boats, 'supply')
 
-    def repair(self, fleets: list) -> dict:
+    def repair(self, fleet: list) -> dict:
         def _repair() -> Tuple[bool, dict]:
-            data = self.api.instantRepairShips(fleets)
-            print(data)
+            data = self.api.instantRepairShips(fleet)
             if 'eid' in data:
                 get_error(data['eid'])
-                self.logger.info(f"Failed to repair {fleets}")
+                self.logger.warning(f"Failed to repair {fleet}")
                 res = False
-                # TODO elif
-            else:
+            elif 'shipVOs' in data:
+                self.logger.info("Repaired successfully")
                 res = True
+            else:
+                self.logger.debug(data)
+                res = False
             return res, data
 
         return self._reconnecting_calls(_repair, 'repair')
@@ -302,17 +309,14 @@ class SortieHelper:
             node = {}
         return node
 
-    def get_next_node_by_id(self, node_id: str) -> Tuple[str, str]:
+    def get_next_node_by_id(self, node_id: str) -> str:
         try:
             next_node = self.get_map_node_by_id(node_id)
             next_node_id = str(next_node['next_node'][0])
-            next_node_name = self.get_map_node_by_id(next_node_id)['flag']
         except KeyError:
             self.logger.error('Access wrong nodes.')
             next_node_id = ""
-            next_node_name = "??"
-        print(next_node_id, next_node_name)
-        return next_node_id, next_node_name
+        return next_node_id
 
     def bump_level(self, adj_data) -> bool:
         adj_lvl = int(adj_data["adjutantData"]["level"])
@@ -370,7 +374,7 @@ class SortieHelper:
                 repair_levels = [repair_levels[0]] * len(ships)
         else:
             # default repair all moderately damaged ships
-            repair_levels = [1] * len(ships)
+            repair_levels = [2] * len(ships)
 
         to_repair = []
         for i in range(len(ships)):
@@ -379,6 +383,8 @@ class SortieHelper:
             else:
                 pass
         if len(to_repair) > 0:
+            names = [self.user_ships[i]['Name'] for i in to_repair]
+            self.logger.info(f'Start to prepare {names}')
             self.repair(to_repair)
         else:
             pass
@@ -399,16 +405,17 @@ class SortieHelper:
             do_night_battle = False
         return do_night_battle
 
-    def process_battle_result(self, battle_res: dict):
+    def process_battle_result(self, battle_res: dict, fleet: list):
         res_str = f"==== {wgv_utils.get_war_evaluation(battle_res['resultLevel'])} ===="
         self.logger.info(res_str)
         self.update_adjutant_info(battle_res['adjutantData'], battle_res['strategic_point'])
 
         ships = battle_res['warResult']['selfShipResults']
         for i in range(len(ships)):
-            shipname = battle_res['shipVO'][i]['title']
+            ship_id = fleet[i]
+            shipname = next((j for j in battle_res['shipVO'] if j['id'] == ship_id))['title']
             ship = ships[i]
-            ship_str = f"{shipname} Lv.{ship['level']} +{ship['expAdd']}Exp"
+            ship_str = f"{shipname}\tLv.{ship['level']} +{ship['expAdd']}Exp"
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
             self.logger.info(ship_str)
 

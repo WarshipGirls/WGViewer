@@ -17,6 +17,10 @@ ADJUTANT_ID_TO_NAME = {
     '10282': "Habakkuk"
 }
 
+REWARD_NODE_1 = ['931604', '931610', '931617']
+REWARD_NODE_2 = ['931702', '931706', '931717', '931722']
+REWARD_NODE_3 = ['931802', '931809', '931821']
+
 
 def save_json(name, data):
     with open(name, 'w', encoding='utf-8') as f:
@@ -27,6 +31,8 @@ class Sortie:
     # This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
     # TODO long term
     # RIGHT NOW everything pre-battle is fixed
+
+    # SINCE game version 5.1.0, only 5 slots is shown; E6-1 A1 can choose 5 ships; after that, it's 4 ships + buff card
 
     def __init__(self, parent, api: API_SIX, fleet: list, final_fleet: list, is_realrun: bool):
         super().__init__()
@@ -46,7 +52,7 @@ class Sortie:
         self.can_start = False
         self.helper = None
         self.repair_level = 1
-        self.curr_node = -1
+        self.curr_node = "0"
         self.boat_pool = []  # host existing boats
         self.escort_DD = []  # For 2DD to pass first few levels only, 萤火虫，布雷恩
         self.escort_CV = []  # For 1CV to pass first few levels only, 不挠
@@ -150,7 +156,7 @@ class Sortie:
             return False
 
         self.set_boat_pool(self.fleet_info['fleet'])
-        self.curr_node = self.user_data['nodeId']
+        self.curr_node = str(self.user_data['nodeId'])
 
         if len(last_fleets) != 22:
             self.logger.warning("Invalid last boats settings.")
@@ -211,8 +217,7 @@ class Sortie:
         self.logger.info(f"Resume sortie from node {self.curr_node}")
         try:
             if self.curr_node == '931602':
-                next_id, next_name = self.E6_1_B1_sortie()
-                print(next_id, next_name)
+                next_id = self.E6_1_B1_sortie(self.curr_node)
         except ThermopylaeSoriteExit:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
@@ -220,9 +225,9 @@ class Sortie:
     def start_fresh_sortie(self) -> None:
         self.logger.info('Retreating...')
         try:
-            next_id, next_name = self.E6_1_A1_sortie()
-            print(next_id, next_name)
-            self.E6_1_B1_sortie()
+            next_id = self.E6_1_A1_sortie()
+            self.curr_node = next_id
+            self.E6_1_B1_sortie(self.curr_node)
         except ThermopylaeSoriteExit:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
@@ -271,7 +276,7 @@ class Sortie:
     # TODO: hardcoding A1, B1...
     # ================================
 
-    def E6_1_A1_sortie(self) -> Tuple[str, str]:
+    def E6_1_A1_sortie(self) -> str:
         self.helper.api_withdraw()
         next_node_id = self.helper.api_readyFire()
         self.helper.api_newNext(str(next_node_id))
@@ -303,20 +308,18 @@ class Sortie:
             battle_res = self.helper.get_war_result('1')
         else:
             battle_res = self.helper.get_war_result('0')
-        self.helper.process_battle_result(battle_res)
+        self.helper.process_battle_result(battle_res, self.battle_fleet)
         set_sleep()
         self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
-        if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] in [1, 2]:
-            next_id, next_name = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
+        if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] in [1, 2]:  # TODO: changes to < 5
+            next_id = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
         else:
             self.logger.info('Failed to clean E6-1 A1. Should restart. Exiting.')
             next_id = -1
-            next_name = "??"
-        return next_id, next_name
+        return next_id
 
-    def E6_1_B1_sortie(self) -> Tuple[str, str]:
-        next_id, _ = self.helper.get_next_node_by_id(self.curr_node)
-        self.helper.api_newNext(next_id)
+    def E6_1_B1_sortie(self, next_id: str) -> str:
+        self.helper.api_newNext(str(next_id))
         shop_data = self.helper.get_ship_store()
         buy_data = self.helper.buy_ships(self.escort_CV, shop_data)
         self.set_boat_pool(buy_data['boatPool'])
@@ -339,15 +342,14 @@ class Sortie:
         else:
             self.logger.info("")
             battle_res = self.helper.get_war_result('0')
-        self.helper.process_battle_result(battle_res)
+        self.helper.process_battle_result(battle_res, self.battle_fleet)
         set_sleep()
         self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
-        if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] in [1, 2]:
-            next_id, next_name = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
+        if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
+            next_id = str(self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id']))
         else:
-            self.logger.info('Failed to clean E6-1 A1. Should restart. Exiting.')
-            next_id = -1
-            next_name = "??"
-        return next_id, next_name
+            self.logger.info('Failed to clean E6-1 B1. Should restart. Exiting.')
+            next_id = "0"
+        return next_id
 
 # End of File
