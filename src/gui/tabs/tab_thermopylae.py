@@ -55,6 +55,7 @@ class TabThermopylae(QWidget):
 
         self.button_group = None
         self.boat_pool_label = QLabel()
+        self.fleet_label = QLabel()
         self.boat_pool_label.setWordWrap(True)
         self.button_pre_battle = None
         self.button_fresh_sortie = None
@@ -122,6 +123,7 @@ class TabThermopylae(QWidget):
         msg += "4. The function is NOT completed yet.\n"
         t.setFontPointSize(10)
         t.setText(msg)
+        t.setReadOnly(True)
 
         self.button_pre_battle = QPushButton('Perform pre-battle checking')
         self.button_pre_battle.clicked.connect(self.on_pre_battle)
@@ -136,6 +138,7 @@ class TabThermopylae(QWidget):
         self.button_resume_sortie.setEnabled(False)
 
         self.left_layout.addWidget(t)
+        self.left_layout.addWidget(self.fleet_label)
         self.left_layout.addWidget(self.boat_pool_label)
         self.left_layout.addWidget(self.button_pre_battle)
         self.left_layout.addWidget(self.button_fresh_sortie)
@@ -240,7 +243,10 @@ class TabThermopylae(QWidget):
     def update_purchasable(self, data: int) -> None:
         self.purchasable_label.setText(str(data))
 
-    def update_boat_pool_label(self, data: list) -> None:
-        self.boat_pool_label.setText(str(data))
+    def update_boat_pool_label(self, data: str) -> None:
+        self.boat_pool_label.setText(data)
+
+    def update_fleet_label(self, data: str) -> None:
+        self.fleet_label.setText(data)
 
 # End of File

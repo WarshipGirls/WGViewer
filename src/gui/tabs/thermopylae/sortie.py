@@ -1,10 +1,10 @@
 import json
 
-from time import sleep
 from logging import getLogger
-from typing import Tuple
+from typing import Tuple, NoReturn, Union, Any
 
 from src import data as wgv_data
+from src.utils.general import set_sleep
 from src.exceptions.custom import ThermopylaeSoriteExit
 from .helper import SortieHelper
 
@@ -22,16 +22,16 @@ class Sortie:
     # TODO long term
     # RIGHT NOW everything pre-battle is fixed
 
-    def __init__(self, parent, api: API_SIX, fleets: list, final_fleets: list, is_realrun: bool):
+    def __init__(self, parent, api: API_SIX, fleet: list, final_fleet: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
         self.api: API_SIX = api
-        self.fleets = fleets  # main fleets
-        self.final_fleets = final_fleets  # fill up required number of boats
+        self.main_fleet = fleet  # main fleets (6SS)
+        self.battle_fleet = []  # ships that on battle
+        self.final_fleet = final_fleet  # fill up required number of boats
         self.logger = getLogger('TabThermopylae')
         self.is_realrun = is_realrun
 
-        self.sleep_time = 3  # TODO random this every time
         self.max_retry = 5
 
         self.fleet_info = None
@@ -83,6 +83,7 @@ class Sortie:
     "status": "3",  # sub map
     
     '''
+
     # ================================
     # Pre battle checke
     # ================================
@@ -91,7 +92,7 @@ class Sortie:
         if self.is_realrun is True:
             self.fleet_info = self.api.getFleetInfo()
             save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
-            sleep(self.sleep_time)
+            set_sleep()
         else:
             with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
                 self.fleet_info = json.load(f)
@@ -100,7 +101,7 @@ class Sortie:
         if self.is_realrun is True:
             self.map_data = self.api.getPveData()
             save_json('six_getPveData.json', self.map_data)  # TODO only for testing
-            sleep(self.sleep_time)
+            set_sleep()
         else:
             with open('six_getPveData.json', 'r', encoding='utf-8') as f:
                 self.map_data = json.load(f)
@@ -109,7 +110,7 @@ class Sortie:
         if self.is_realrun is True:
             self.user_data = self.api.getUserData()
             save_json('six_getUserData.json', self.user_data)  # TODO only for testing
-            sleep(self.sleep_time)
+            set_sleep()
         else:
             with open('six_getUserData.json', 'r', encoding='utf-8') as f:
                 self.user_data = json.load(f)
@@ -139,7 +140,7 @@ class Sortie:
             last_fleets = b
         else:
             self.logger.info('Invalid settings for using this function')
-            self.logger.info('1. Ensure you have passed E6-3; 2. You are not in a battle OR in E6')
+            self.logger.info('1. Ensure you have cleared E6-3; 2. You are not in a battle OR in E6')
             return False
 
         self.set_boat_pool(self.fleet_info['fleet'])
@@ -149,7 +150,7 @@ class Sortie:
             self.logger.warning("Invalid last boats settings.")
             res = False
         else:
-            self.final_fleets = last_fleets
+            self.final_fleet = last_fleets
             res = True
         return res
 
@@ -174,11 +175,11 @@ class Sortie:
         self.helper = SortieHelper(self.api, self.user_ships, self.map_data)
 
         self.logger.info("Setting final fleets:")
-        for ship_id in self.final_fleets:
+        for ship_id in self.final_fleet:
             ship = self.user_ships[str(ship_id)]
             output_str = "{:8s}{:17s}".format(str(ship_id), ship['Name'])
             if ship['Class'] == "SS":
-                self.fleets.append(ship_id)
+                self.main_fleet.append(ship_id)
                 output_str += "\tMAIN FORCE"
             elif ship['cid'] in [11008211, 11009211]:  # TODO: fix this for now
                 self.escort_DD.append(ship_id)
@@ -201,15 +202,21 @@ class Sortie:
     # ================================
 
     def resume_sortie(self) -> None:
-        print(f"Resume sortie from node {self.curr_node}")
-        print(self.boat_pool)
-        self.parent.button_resume_sortie.setEnabled(True)
+        self.logger.info(f"Resume sortie from node {self.curr_node}")
+        try:
+            if self.curr_node == '931602':
+                next_id, next_name = self.E6_1_B1_sortie()
+                print(next_id, next_name)
+        except ThermopylaeSoriteExit:
+            self.parent.button_fresh_sortie.setEnabled(True)
+            return
 
     def start_fresh_sortie(self) -> None:
         self.logger.info('Retreating...')
         try:
             next_id, next_name = self.E6_1_A1_sortie()
             print(next_id, next_name)
+            self.E6_1_B1_sortie()
         except ThermopylaeSoriteExit:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
@@ -218,15 +225,33 @@ class Sortie:
     # Setter / Getter
     # ================================
 
-    def set_boat_pool(self, boat_pool: list):
+    def set_boat_pool(self, boat_pool: list) -> None:
         self.boat_pool = boat_pool
         label_text = "Selected ships: "
         for s in self.boat_pool:
             label_text += f"{self.user_ships[s]['Name']} "
         self.parent.update_boat_pool_label(label_text)
 
+    def set_fleets(self, fleets: list) -> None:
+        # The list may contain string or integer elements
+        try:
+            assert (len(fleets) <= 6)
+            label_text = "On battle: "
+            i = 1
+            for s in fleets:
+                label_text += f"{i} {self.user_ships[s]['Name']} "
+                i += 1
+            self.parent.update_fleet_label(label_text)
+            self.battle_fleet = [int(i) for i in fleets]
+        except AssertionError:
+            raise ThermopylaeSoriteExit
+
+    def set_side_dock_resources(self, x):
+        self.parent.update_resources(x['oil'], x['ammo'], x['steel'], x['aluminium'])
+
     # ================================
     # Combat
+    # TODO: hardcoding A1, B1...
     # ================================
 
     def E6_1_A1_sortie(self) -> Tuple[str, str]:
@@ -236,9 +261,9 @@ class Sortie:
 
         shop_data = self.helper.get_ship_store()
         buy_data = self.helper.buy_ships(self.escort_DD, shop_data)
-        # TODO dynamically update boat pool info on left panel
         self.set_boat_pool(buy_data['boatPool'])
-        self.helper.set_war_fleets(self.escort_DD)
+        self.set_fleets(buy_data['boatPool'])
+        self.helper.set_war_fleets(self.battle_fleet)
 
         # Node E6-1 A1, lv.1 -> lv.2
         adj_data = self.helper.cast_skill()
@@ -247,23 +272,59 @@ class Sortie:
         else:
             pass
 
-        sp_res = self.helper.supply_boats(self.escort_DD)
-        self.parent.update_resources(sp_res['userVo']['oil'], sp_res['userVo']['ammo'], sp_res['userVo']['steel'], sp_res['userVo']['aluminium'])
+        sp_res = self.helper.supply_boats(self.battle_fleet)
+        self.set_side_dock_resources(sp_res['userVo'])
 
-        self.helper.process_repair(sp_res['shipVO'], [1])  # pre-battle repair
-        sleep(2)
+        self.helper.process_repair(sp_res['shipVO'], [self.repair_level])  # pre-battle repair
+        set_sleep()
         self.helper.spy()
-        sleep(2)
-        challenge_res = self.helper.challenge('1')
+        set_sleep()
+        challenge_res = self.helper.challenge(formation='1')
         do_night_battle = self.helper.is_night_battle(challenge_res)
-        sleep(10)
+        set_sleep(level=2)
         if do_night_battle is True:
             battle_res = self.helper.get_war_result('1')
         else:
             battle_res = self.helper.get_war_result('0')
         self.helper.process_battle_result(battle_res)
-        sleep(3)
-        self.helper.process_repair(battle_res['shipVO'], [1])  # post-battle repair
+        set_sleep()
+        self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
+        if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] in [1, 2]:
+            next_id, next_name = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
+        else:
+            self.logger.info('Failed to clean E6-1 A1. Should restart. Exiting.')
+            next_id = -1
+            next_name = "??"
+        return next_id, next_name
+
+    def E6_1_B1_sortie(self) -> Tuple[str, str]:
+        next_id, _ = self.helper.get_next_node_by_id(self.curr_node)
+        self.helper.api_newNext(next_id)
+        shop_data = self.helper.get_ship_store()
+        buy_data = self.helper.buy_ships(self.escort_CV, shop_data)
+        self.set_boat_pool(buy_data['boatPool'])
+        self.set_fleets(buy_data['boatPool'])
+        self.helper.set_war_fleets(self.battle_fleet)
+
+        sp_res = self.helper.supply_boats(self.battle_fleet)
+        self.set_side_dock_resources(sp_res['userVo'])
+
+        self.helper.process_repair(sp_res['shipVO'], [self.repair_level])  # pre-battle repair
+        set_sleep()
+        self.helper.spy()
+        set_sleep()
+        challenge_res = self.helper.challenge(formation='1')
+        do_night_battle = self.helper.is_night_battle(challenge_res)
+        set_sleep(level=2)
+        if do_night_battle is True:
+            self.logger.info("Entering night war...")
+            battle_res = self.helper.get_war_result('1')
+        else:
+            self.logger.info("")
+            battle_res = self.helper.get_war_result('0')
+        self.helper.process_battle_result(battle_res)
+        set_sleep()
+        self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] in [1, 2]:
             next_id, next_name = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
         else:

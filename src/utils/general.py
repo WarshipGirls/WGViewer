@@ -1,6 +1,9 @@
 import os
 import re
+
 from datetime import datetime, timedelta
+from random import randint
+from time import sleep
 
 
 def clear_desc(text: str) -> str:
@@ -30,5 +33,11 @@ def ts_to_countdown(seconds: int) -> str:
 
 def ts_to_date(ts: int) -> str:
     return datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
+
+def set_sleep(level: int = 1):
+    # There must be some interval between Game API calls
+    # TODO: make this global settings
+    sleep(randint(4, 6) * level)
 
 # End of File

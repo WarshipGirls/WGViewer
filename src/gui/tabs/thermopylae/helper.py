@@ -1,6 +1,5 @@
 from logging import getLogger
 from math import ceil
-from time import sleep
 from typing import Callable, Tuple
 
 from src import utils as wgv_utils
@@ -16,8 +15,7 @@ class SortieHelper:
         self.user_ships = user_ships
         self.map_data = map_data
 
-        self.sleep_time = 7
-        self.max_retry = 5
+        self.max_retry = 3
         self.points = -1
         self.init_sub_map = "9316"  # TODO
         self.adjutant_name = {
@@ -40,7 +38,7 @@ class SortieHelper:
             except WarshipGirlsExceptions as e:
                 self.logger.warning(f'Failed to {func_info} due to {e}')
                 self.logger.warning('Trying reconnecting...')
-                sleep(self.sleep_time)
+                wgv_utils.set_sleep()
 
             tries += 1
             if tries >= self.max_retry:
@@ -100,8 +98,8 @@ class SortieHelper:
                 get_error(data['eid'])
                 res = False
             elif 'nodeId' in data:
-                _, _flag = self.get_map_node_by_id(next_node)['flag']
-                self.logger.info(f"Proceed to {_flag} succeed!")
+                _, node_name = self.get_next_node_by_id(next_node)
+                self.logger.info(f"Proceed to {node_name} succeed!")
                 res = True
             else:
                 self.logger.debug(data)
@@ -137,6 +135,7 @@ class SortieHelper:
         def _selectBoat() -> [bool, object]:
             data = self.api.selectBoat(purchase_list)
             if 'eid' in data:
+                get_error(data['eid'])
                 self.logger.info("Buying ships failed...")
                 res = False
             elif 'boatPool' in data:
@@ -162,6 +161,7 @@ class SortieHelper:
         def _buy_exp() -> Tuple[bool, dict]:
             data = self.api.adjutantExp()
             if 'eid' in data:
+                get_error(data['eid'])
                 res = False
             elif 'adjutantData' in data:
                 res = True
@@ -176,6 +176,7 @@ class SortieHelper:
         def _cast_skill() -> Tuple[bool, dict]:
             data = self.api.useAdjutant()
             if 'eid' in data:
+                get_error(data['eid'])
                 self.logger.info("Failed to cast adjutant skill...")
                 res = False
             elif 'adjutantData' in data:
@@ -199,25 +200,27 @@ class SortieHelper:
         def _set_fleets() -> Tuple[bool, dict]:
             data = self.api.setWarFleet(fleets)
             if 'eid' in data:
+                get_error(data['eid'])
                 res = False
-            elif 'fleet' in data:
+            elif 'fleet' in data and len(data['fleet']) > 0:
                 res = True
             else:
                 self.logger.debug(data)
                 res = False
             return res, data
 
-        res_data = self._reconnecting_calls(_set_fleets, 'settings fleet')
+        res_data = self._reconnecting_calls(_set_fleets, 'set battle fleet')
         return res_data
 
     def supply_boats(self, fleets: list) -> dict:
         def _supply_boats() -> Tuple[bool, dict]:
             data = self.api.supplyBoats(fleets)
             if 'eid' in data:
-                self.logger.info("Supply boat failed...")
+                get_error(data['eid'])
+                self.logger.info("Supply ships failed...")
                 res = False
             elif 'userVo' in data:
-                self.logger.info("Supply boat successfully!")
+                self.logger.info("Supply boats successfully!")
                 res = True
             else:
                 self.logger.debug(data)
@@ -231,6 +234,7 @@ class SortieHelper:
             data = self.api.instantRepairShips(fleets)
             print(data)
             if 'eid' in data:
+                get_error(data['eid'])
                 self.logger.info(f"Failed to repair {fleets}")
                 res = False
                 # TODO elif
@@ -239,6 +243,113 @@ class SortieHelper:
             return res, data
 
         return self._reconnecting_calls(_repair, 'repair')
+
+    def spy(self) -> dict:
+        def _spy() -> Tuple[bool, dict]:
+            data = self.api.spy()
+            if 'eid' in data:
+                get_error(data['eid'])
+                res = False
+            elif 'enemyVO' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+                res = False
+            return res, data
+
+        return self._reconnecting_calls(_spy, 'Detection')
+
+    def challenge(self, formation: str) -> dict:
+        def _challenge() -> Tuple[bool, dict]:
+            data = self.api.challenge(formation)
+            if 'eid' in data:
+                get_error(data['eid'])
+                res = False
+            elif 'warReport' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+                res = False
+            return res, data
+
+        return self._reconnecting_calls(_challenge, 'Combat')
+
+    def get_war_result(self, is_night: str = '0') -> dict:
+        def _result() -> Tuple[bool, dict]:
+            data = self.api.getWarResult(is_night)
+            if 'eid' in data:
+                get_error(data['eid'])
+                res = False
+            elif 'warResult' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+                res = False
+            return res, data
+
+        return self._reconnecting_calls(_result, 'receive result')
+
+    # ================================
+    # Non-WGR methods
+    # ================================
+
+    def get_curr_points(self, is_print: bool = True) -> int:
+        # TODO break apart
+        if is_print is True:
+            self.logger.info(f'Now have {self.points} strategic points left.')
+        else:
+            pass
+        return self.points
+
+    def get_map_node_by_id(self, node_id: str) -> dict:
+        try:
+            node = next(i for i in self.map_data['combatLevelNode'] if i['id'] == node_id)
+        except StopIteration:
+            self.logger.error('Access wrong nodes.')
+            node = {}
+        return node
+
+    def get_next_node_by_id(self, node_id: str) -> Tuple[str, str]:
+        try:
+            next_node = self.get_map_node_by_id(node_id)
+            next_node_id = str(next_node['next_node'][0])
+            next_node_name = self.get_map_node_by_id(next_node_id)['flag']
+        except KeyError:
+            self.logger.error('Access wrong nodes.')
+            next_node_id = ""
+            next_node_name = "??"
+        print(next_node_id, next_node_name)
+        return next_node_id, next_node_name
+
+    def bump_level(self, adj_data) -> bool:
+        adj_lvl = int(adj_data["adjutantData"]["level"])
+        next_adj_lvl = adj_lvl + 1
+        curr_exp = int(adj_data["adjutantData"]["exp"])
+        next_exp = int(adj_data["adjutantData"]["exp_top"])
+        required_exp = next_exp - curr_exp
+        if self.get_curr_points(False) >= required_exp:
+            self.logger.info(f"Bumping adjutant level to Lv.{next_adj_lvl}")
+            buy_times = ceil(required_exp / 5)
+            res = None
+            while buy_times > 0:
+                res = self.buy_exp()
+                buy_times -= 1
+                if buy_times < 0:
+                    break
+                adj = res['adjutantData']
+                output_str = f"Lv. {adj['level']} EXP {adj['exp']}/{adj['exp_top']}; remaining points = {res['strategic_point']}"
+                self.logger.info(output_str)
+                wgv_utils.set_sleep()
+            if res is None:
+                return False
+            elif int(res['adjutantData']['level']) == next_adj_lvl:
+                self.logger.info("Bumping level successfully")
+                return True
+            else:
+                self.logger.debug(res)
+                return False
+        else:
+            return False
 
     def process_repair(self, ships: list, repair_levels: [int, list]) -> None:
         repairs = []
@@ -271,35 +382,6 @@ class SortieHelper:
         else:
             pass
 
-    def spy(self) -> dict:
-        def _spy() -> Tuple[bool, dict]:
-            data = self.api.spy()
-            print(data)
-            if 'eid' in data:
-                res = False
-            elif 'enemyVO' in data:
-                res = True
-            else:
-                self.logger.debug(data)
-                res = False
-            return res, data
-
-        return self._reconnecting_calls(_spy, 'Detection')
-
-    def challenge(self, formation: str) -> dict:
-        def _challenge() -> Tuple[bool, dict]:
-            data = self.api.challenge(formation)
-            if 'eid' in data:
-                res = False
-            elif 'warReport' in data:
-                res = True
-            else:
-                self.logger.debug(data)
-                res = False
-            return res, data
-
-        return self._reconnecting_calls(_challenge, 'Combat')
-
     def is_night_battle(self, challenge_res: dict) -> bool:
         if challenge_res['warReport']['canDoNightWar'] == 0:
             self.logger.info('Battle finished by day')
@@ -315,21 +397,6 @@ class SortieHelper:
             self.logger.info("Cannot process battle info. Exiting")
             do_night_battle = False
         return do_night_battle
-
-    def get_war_result(self, is_night: str = '0') -> dict:
-        def _result() -> Tuple[bool, dict]:
-            data = self.api.getWarResult(is_night)
-            print(data)
-            if 'eid' in data:
-                res = False
-            elif 'warResult' in data:
-                res = True
-            else:
-                self.logger.debug(data)
-                res = False
-            return res, data
-
-        return self._reconnecting_calls(_result, 'receive result')
 
     def process_battle_result(self, battle_res: dict):
         res_str = f"==== {wgv_utils.get_war_evaluation(battle_res['resultLevel'])} ===="
@@ -347,65 +414,5 @@ class SortieHelper:
             self.logger.info(ship_str)
 
         self.points = battle_res['strategic_point']
-
-    # ================================
-    # Non-WGR methods
-    # ================================
-
-    def get_curr_points(self, is_print: bool = True) -> int:
-        # TODO break apart
-        if is_print is True:
-            self.logger.info(f'Now have {self.points} strategic points left.')
-        else:
-            pass
-        return self.points
-
-    def get_map_node_by_id(self, node_id: str) -> dict:
-        try:
-            node = next(i for i in self.map_data['combatLevelNode'] if i['id'] == node_id)
-        except StopIteration:
-            self.logger.error('Access wrong nodes.')
-            node = {}
-        return node
-
-    def get_next_node_by_id(self, node_id: str) -> Tuple[str, str]:
-        try:
-            next_node = self.get_map_node_by_id(node_id)
-            next_node_id = str(next_node['next_node'][0])
-            next_node_name = next_node['flag']
-        except KeyError:
-            self.logger.error('Access wrong nodes.')
-            next_node_id = ""
-            next_node_name = "??"
-        return next_node_id, next_node_name
-
-    def bump_level(self, adj_data) -> bool:
-        adj_lvl = int(adj_data["adjutantData"]["level"])
-        next_adj_lvl = adj_lvl + 1
-        curr_exp = int(adj_data["adjutantData"]["exp"])
-        next_exp = int(adj_data["adjutantData"]["exp_top"])
-        required_exp = next_exp - curr_exp
-        if self.get_curr_points(False) >= required_exp:
-            self.logger.info(f"Bumping adjutant level to Lv.{next_adj_lvl}")
-            buy_times = ceil(required_exp / 5)
-            res = None
-            while buy_times > 0:
-                res = self.buy_exp()
-                buy_times -= 1
-                if buy_times < 0:
-                    break
-                output_str = f"EXP {res['adjutantData']['exp']}/{res['adjutantData']['exp_top']}; remaining points = {res['strategic_point']}"
-                self.logger.info(output_str)
-                sleep(0.5)
-            if res is None:
-                return False
-            elif int(res['adjutantData']['level']) == next_adj_lvl:
-                self.logger.info("Bumping level successfully")
-                return True
-            else:
-                self.logger.debug(res)
-                return False
-        else:
-            return False
 
 # End of File
