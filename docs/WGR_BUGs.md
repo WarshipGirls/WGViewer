@@ -33,3 +33,31 @@ One of the equipment, see below, has seemingly invalid `effect` field. All other
 ```
 
 suggestion to MF: use `"effect": {'boom':0.05, 'hit':5}`
+
+4.
+
+Game version: 5.1.0
+
+In the response body of `six/passLevel` call, the json is invalid with boolean `False` in one of the fields:
+
+```
+	...
+   "$taward":[
+      False,
+      False,
+      False,
+      False,
+      {
+         "20241":24
+      },
+      False,
+      {
+         "23":30
+      },
+      False,
+      {
+         "20482":5
+      }
+   ],
+   ...
+```
