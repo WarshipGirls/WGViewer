@@ -9,4 +9,6 @@ In our context, we should use `ship` as "A ship can carry a boat, but a boat can
 
 ### In Game Translation
 
-Most translations used in `WGViewer` are aligned with [Kancolle English Wiki](https://kancolle.fandom.com/wiki/Combat).
+Most translations used in `WGViewer` are aligned with
+- [Warship Girls English Wiki](https://warship-girls.fandom.com/wiki/Combat)
+- [Kancolle English Wiki](https://kancolle.fandom.com/wiki/Combat).
