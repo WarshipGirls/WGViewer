@@ -20,6 +20,7 @@ class TabThermopylae(QWidget):
     sig_ammo = pyqtSignal(int)
     sig_steel = pyqtSignal(int)
     sig_baux = pyqtSignal(int)
+    sig_repair = pyqtSignal(int)
     sig_exp = pyqtSignal(dict)
 
     def __init__(self, tab_name: str, side_dock: SideDock, is_realrun: bool):
@@ -34,6 +35,7 @@ class TabThermopylae(QWidget):
         self.sig_ammo.connect(self.resource_info.update_ammo)
         self.sig_steel.connect(self.resource_info.update_steel)
         self.sig_baux.connect(self.resource_info.update_bauxite)
+        self.sig_repair.connect(self.resource_info.update_repair)
         self.sig_exp.connect(self.side_dock.update_lvl_label)
 
         self.api_six = API_SIX(wgv_data.load_cookies())
@@ -253,6 +255,9 @@ class TabThermopylae(QWidget):
         self.sig_steel.emit(s)
         self.sig_baux.emit(b)
 
+    def update_repair_bucket(self, b):
+        self.sig_repair.emit(b)
+
     def update_user_exp_label(self, x: dict) -> None:
         self.sig_exp.emit(x)
 
@@ -273,7 +278,7 @@ class TabThermopylae(QWidget):
         self.adjutant_exp_label.setText(data)
 
     def update_points(self, data: str) -> None:
-        self.points_label.setText(data)
+        self.points_label.setText(str(data))
 
     def update_boat_pool_label(self, data: str) -> None:
         self.boat_pool_label.setText(data)

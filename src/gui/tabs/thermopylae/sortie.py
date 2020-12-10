@@ -55,6 +55,12 @@ class Sortie:
 
         self.logger.info("Init E6...")
 
+    def _clean_memory(self):
+        self.logger.info("Reset ship card pool, battle fleet and curr node")
+        self.curr_node = "0"
+        self.set_boat_pool([])
+        self.set_fleet([])
+
     '''
     > self.user_data
         -> nodeId: current node
@@ -77,28 +83,31 @@ class Sortie:
     # ================================
 
     def _get_fleet_info(self) -> None:
-        if self.is_realrun is True:
+        # if self.is_realrun is True: # TODO
+        if self.is_realrun is False: # TODO
             self.fleet_info = self.api.getFleetInfo()
             save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
-            set_sleep()
+            # set_sleep()
         else:
             with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
                 self.fleet_info = json.load(f)
 
     def _get_pve_data(self) -> None:
-        if self.is_realrun is True:
+        # if self.is_realrun is True:
+        if self.is_realrun is False:
             self.map_data = self.api.getPveData()
             save_json('six_getPveData.json', self.map_data)  # TODO only for testing
-            set_sleep()
+            # set_sleep()
         else:
             with open('six_getPveData.json', 'r', encoding='utf-8') as f:
                 self.map_data = json.load(f)
 
     def _get_user_data(self) -> None:
-        if self.is_realrun is True:
+        # if self.is_realrun is True:
+        if self.is_realrun is False:
             self.user_data = self.api.getUserData()
             save_json('six_getUserData.json', self.user_data)  # TODO only for testing
-            set_sleep()
+            # set_sleep()
         else:
             with open('six_getUserData.json', 'r', encoding='utf-8') as f:
                 self.user_data = json.load(f)
@@ -204,6 +213,7 @@ class Sortie:
 
     def start_fresh_sortie(self) -> None:
         self.logger.info('Retreating...')
+        self._clean_memory()
         try:
             next_id = self.E6A1()
             # next_id = self.E6_1_A1_sortie()
@@ -263,7 +273,7 @@ class Sortie:
             else:
                 pass
 
-            self.update_battle_fleet_label(self.battle_fleet)
+            self.update_battle_fleet_label(list(self.battle_fleet))
         except AssertionError:
             raise ThermopylaeSoriteExit
 
@@ -275,8 +285,13 @@ class Sortie:
             i += 1
         self.parent.update_fleet_label(label_text)
 
-    def set_side_dock_resources(self, x) -> None:
+    def update_side_dock_resources(self, x) -> None:
         self.parent.update_resources(x['oil'], x['ammo'], x['steel'], x['aluminium'])
+
+    def update_side_dock_repair(self, x) -> None:
+        # assume only bucket is updated in packageVo; for more secure, use next()
+        # self.parent.update_repair_bucket(x['packageVo'][0]['num'])
+        self.parent.update_repair_bucket(x[0]['num'])
 
     # ================================
     # Combat
@@ -321,22 +336,28 @@ class Sortie:
             buy_res = self.helper.buy_ships(self.escort_CV, shop_res)
         else:
             print("SSSSSSSSSSSSSSSSSSSSSSHOULD BUY SSSSSSSSSSSSSSSSSSSSSSSS")
-            shop_res = self.helper.get_ship_store()
-            ss_lists = self.find_SS(shop_res['boats'])
             # first shop fetch
-            if len(ss_lists) == 0:
-                shop_res = self.helper.get_ship_store('1')
-                ss_lists = self.find_SS(shop_res['boats'])
+            shop_res = self.helper.get_ship_store()
+            ss_list = self.find_SS(shop_res['boats'])
+            if len(ss_list) == 0:
                 # second shop fetch
-                if len(ss_lists) == 0:
+                shop_res = self.helper.get_ship_store('1')
+                ss_list = self.find_SS(shop_res['boats'])
+                if len(ss_list) == 0:
                     if self.curr_node == '931607':
                         raise ThermopylaeSortieRestart
                 else:
-                    buy_res = self.helper.buy_ships(ss_lists, shop_res)
+                    # buy_res = self.helper.buy_ships(ss_list, shop_res)
+                    pass
             else:
-                buy_res = self.helper.buy_ships(ss_lists, shop_res)
+                # buy_res = self.helper.buy_ships(ss_list, shop_res)
+                pass
 
-            # if curr_node_id == '931607' and len(ss_lists) == 0:
+            purchase_list = self.helper.find_affordable_ships(ss_list, shop_res)
+            if len(purchase_list) > 0:
+                buy_res = self.helper.buy_ships(purchase_list, shop_res)
+
+            # if curr_node_id == '931607' and len(ss_list) == 0:
             #     raise ThermopylaeSoriteExit('No Required SS')
             print('buy_res:')
             print(buy_res)
@@ -351,6 +372,7 @@ class Sortie:
         if self.battle_fleet == set(self.final_fleet):
             self.logger.debug('final fleet is done. skip setting!')
         else:
+            self.set_fleet(list(self.boat_pool))
             self.helper.set_war_fleets(list(self.battle_fleet))
 
         # cast skill
@@ -374,13 +396,14 @@ class Sortie:
 
         set_sleep()
         supply_res = self.helper.supply_boats(list(self.battle_fleet))
-        self.set_side_dock_resources(supply_res['userVo'])
+        self.update_side_dock_resources(supply_res['userVo'])
 
         repair_res = self.helper.process_repair(supply_res['shipVO'], [self.repair_level])  # pre-battle repair
         print('repair result:')
         print(repair_res)
         if 'userVo' in repair_res:
-            self.set_side_dock_resources(repair_res['userVo'])
+            self.update_side_dock_resources(repair_res['userVo'])
+            self.update_side_dock_repair(repair_res['packageVo'])
 
         set_sleep()
         self.helper.spy()
@@ -411,7 +434,8 @@ class Sortie:
         set_sleep()
         repair_res = self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
         if 'userVo' in repair_res:
-            self.set_side_dock_resources(repair_res['userVo'])
+            self.update_side_dock_resources(repair_res['userVo'])
+            self.update_side_dock_repair(repair_res['packageVo'])
 
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
             next_id = str(self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id']))

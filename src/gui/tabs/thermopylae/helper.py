@@ -144,10 +144,8 @@ class SortieHelper:
         return store_data
 
     def buy_ships(self, purchase_list: list, shop_data: dict):
-        _to_buy = [int(i) for i in purchase_list]
-
         def _selectBoat() -> [bool, object]:
-            data = self.api.selectBoat(_to_buy)
+            data = self.api.selectBoat(purchase_list)
             if 'eid' in data:
                 get_error(data['eid'])
                 self.logger.warning("Buying ships failed...")
@@ -161,12 +159,12 @@ class SortieHelper:
             return res, data
 
         print('prepare to buy')
-        print(_to_buy)
+        print(purchase_list)
         buy_data = self._reconnecting_calls(_selectBoat, 'buy ships')
 
         if 'strategic_point' in buy_data:
             self.set_curr_points(buy_data['strategic_point'])
-            for s in _to_buy:
+            for s in purchase_list:
                 self.logger.info(f'bought {self.user_ships[str(s)]["Name"]}')
         else:
             print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
@@ -346,10 +344,33 @@ class SortieHelper:
     def set_curr_points(self, points) -> None:
         print(f"{self.points} -> {points}")
         self.points = points
+        self.tab_thermopylae.update_points(self.points)
 
     # ================================
     # Assistant methods
     # ================================
+
+    def find_affordable_ships(self, purchase_list: list, shop_data: dict) -> list:
+        if len(purchase_list) == 0:
+            return []
+
+        # if point is insufficient, buy from the least expensive to the most
+        purchase_list = [int(i) for i in purchase_list]
+        ship_id_to_price = {}
+        for ship in purchase_list:
+            price = shop_data['buyPointArr'][shop_data['boats'].index(ship)]
+            ship_id_to_price[ship] = price
+        # sort by price
+        sorted_list = dict(sorted(ship_id_to_price.items(), key=lambda i: i[1]))
+        total = 0
+        res = []
+        for ship_id in sorted_list:
+            total += sorted_list[ship_id]
+            if total > self.get_curr_points():
+                break
+            else:
+                res.append(ship_id)
+        return res
 
     def can_bump(self) -> bool:
         if self.adjutant_info is None:
@@ -359,7 +380,7 @@ class SortieHelper:
             next_exp = int(self.adjutant_info["exp_top"])
             required_exp = next_exp - curr_exp
 
-            if self.get_curr_points() >= required_exp:
+            if self.get_curr_points() >= required_exp and self.get_curr_points() >= 5:
                 if int(self.adjutant_info['level']) >= 8 and required_exp > 5:
                     res = False
                 else:
@@ -386,8 +407,8 @@ class SortieHelper:
         while buy_times > 0:
             res = self.buy_exp()
             buy_times -= 1
-            if buy_times < 0:
-                break
+            # if buy_times < 0:   # redundant TODO: remove
+            #     break
             self.update_adjutant_info(res['adjutantData'], res['strategic_point'])
             wgv_utils.set_sleep()
 
@@ -395,7 +416,7 @@ class SortieHelper:
             return False
         elif int(res['adjutantData']['level']) == next_adj_lvl:
             self.logger.info("Bumping level successfully")
-            self.adjutant_info = res['adjutantData']
+            # self.adjutant_info = res['adjutantData']
             return True
         else:
             self.logger.debug(res)
@@ -405,6 +426,7 @@ class SortieHelper:
         # return False
 
     def update_adjutant_info(self, adj_data, strategic_point):
+        print('updatingggggggggggggggggggggggg adjutant info')
         # TODO: use signal? and manage signals globally?
         _name = ADJUTANT_ID_TO_NAME[adj_data['id']]
         _exp = f"Lv. {adj_data['level']} {adj_data['exp']}/{adj_data['exp_top']}"
@@ -414,10 +436,11 @@ class SortieHelper:
         self.set_curr_points(strategic_point)
         self.tab_thermopylae.update_adjutant_name(_name)
         self.tab_thermopylae.update_adjutant_exp(_exp)
-        self.tab_thermopylae.update_points(_point)
+        # self.tab_thermopylae.update_points(_point)
         print(self.get_adjutant_info())
 
     def process_repair(self, ships: list, repair_levels: [int, list]) -> dict:
+        # TODO update bucket on side dock
         repairs = []
         ship_ids = []
         for ship in ships:
@@ -445,7 +468,7 @@ class SortieHelper:
                 pass
         if len(to_repair) > 0:
             names = [self.user_ships[str(i)]['Name'] for i in to_repair]
-            self.logger.info(f'Start to prepare {names}')
+            self.logger.info(f'Start to repair {names}')
             res = self.repair(to_repair)
         else:
             res = {}
