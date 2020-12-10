@@ -10,7 +10,7 @@ from .helper import SortieHelper
 # Following are only for typehints
 from src.wgr.six import API_SIX
 
-from .constants import ADJUTANT_ID_TO_NAME
+from . import constants as T_CONST
 
 
 def save_json(name, data):
@@ -78,33 +78,36 @@ class Sortie:
 
     def _get_fleet_info(self) -> None:
         # if self.is_realrun is True: # TODO
-        if self.is_realrun is False: # TODO
-            self.fleet_info = self.api.getFleetInfo()
-            save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
-            # set_sleep()
-        else:
-            with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
-                self.fleet_info = json.load(f)
+        self.fleet_info = self.api.getFleetInfo()
+        # if self.is_realrun is False: # TODO
+        #     self.fleet_info = self.api.getFleetInfo()
+        save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
+        set_sleep()
+        # else:
+        # with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
+        #     self.fleet_info = json.load(f)
 
     def _get_pve_data(self) -> None:
         # if self.is_realrun is True:
-        if self.is_realrun is False:
-            self.map_data = self.api.getPveData()
-            save_json('six_getPveData.json', self.map_data)  # TODO only for testing
-            # set_sleep()
-        else:
-            with open('six_getPveData.json', 'r', encoding='utf-8') as f:
-                self.map_data = json.load(f)
+        self.map_data = self.api.getPveData()
+        # if self.is_realrun is False:
+        #     self.map_data = self.api.getPveData()
+        save_json('six_getPveData.json', self.map_data)  # TODO only for testing
+        set_sleep()
+        # else:
+        # with open('six_getPveData.json', 'r', encoding='utf-8') as f:
+        #     self.map_data = json.load(f)
 
     def _get_user_data(self) -> None:
+        self.user_data = self.api.getUserData()
         # if self.is_realrun is True:
-        if self.is_realrun is False:
-            self.user_data = self.api.getUserData()
-            save_json('six_getUserData.json', self.user_data)  # TODO only for testing
-            # set_sleep()
-        else:
-            with open('six_getUserData.json', 'r', encoding='utf-8') as f:
-                self.user_data = json.load(f)
+        # if self.is_realrun is False:
+        #     self.user_data = self.api.getUserData()
+        save_json('six_getUserData.json', self.user_data)  # TODO only for testing
+        set_sleep()
+        # else:
+        # with open('six_getUserData.json', 'r', encoding='utf-8') as f:
+        #     self.user_data = json.load(f)
 
     def pre_battle_set_info(self) -> bool:
         # TODO free up dock space if needed
@@ -134,7 +137,7 @@ class Sortie:
             self.logger.info('1. Ensure you have cleared E6-3; 2. You are not in a battle OR in E6')
             return False
 
-        self.set_boat_pool(self.fleet_info['fleet'])
+        self.set_boat_pool(self.user_data['boatPool'])
         self.curr_node = str(self.user_data['nodeId'])
 
         if len(last_fleets) != 22:
@@ -196,22 +199,115 @@ class Sortie:
     # ================================
 
     def resume_sortie(self) -> None:
+        # TODO: still some corner cases to catch
         self.logger.info(f"Resume sortie from node {self.curr_node}")
         try:
-            self.set_fleet(self.user_data['fleet'])
-            shop_res = self.helper.get_ship_store('1')
-            print(shop_res)
+            node_status = self.get_node_status(self.curr_node)
+            if self.curr_node in T_CONST.BOSS_NODES and node_status == 3:
+                boss_res = self.helper.api_passLevel()
+                self.helper.process_boss_reward_result(boss_res)
+                return
+            # Shopping Cases when user resume:
+            #   - user has not visit shop
+            #   - user has visit shop once
+            #       - user made purchase    (can't purchase again)
+            #       - user didn't purchase  (how to detect? w/o calling server?)
+            #   - user has visit shop twice
+            #       - user purchased        (can't purchase again)
+            #       - user didn't purchase  (how to detect w/o calling server?)
+            #
+            shop_res = self.api.canSelectList('0')
+            # TODO simplify this giant if-else
+            if 'eid' in shop_res:
+                self.logger.debug('you already bought')
+                buy_res = None
+            elif '$ssss' in shop_res:
+                self.logger.debug('trying visiting store')
+                if shop_res['hadResetSelectFlag'] == 0:
+                    ss_list = self.find_SS(shop_res['boats'])
+                    if len(ss_list) == 0:
+                        # do a second fetch
+                        shop_res = self.api.canSelectList('1')
+                        ss_list = self.find_SS(shop_res['boats'])
+                        if len(ss_list) == 0:
+                            buy_res = None
+                        else:
+                            purchase_list = self.helper.find_affordable_ships(ss_list, shop_res)
+                            if len(purchase_list) > 0:
+                                buy_res = self.helper.buy_ships(purchase_list, shop_res)
+                            else:
+                                buy_res = None
+                    else:
+                        purchase_list = self.helper.find_affordable_ships(ss_list, shop_res)
+                        if len(purchase_list) > 0:
+                            buy_res = self.helper.buy_ships(purchase_list, shop_res)
+                        else:
+                            buy_res = None
+                else:
+                    ss_list = self.find_SS(shop_res['boats'])
+                    if len(ss_list) == 0:
+                        buy_res = None
+                    else:
+                        purchase_list = self.helper.find_affordable_ships(ss_list, shop_res)
+                        if len(purchase_list) > 0:
+                            buy_res = self.helper.buy_ships(purchase_list, shop_res)
+                        else:
+                            buy_res = None
+            else:
+                self.logger.debug(shop_res)
+                buy_res = None
+
+            if buy_res is None:
+                self.logger.debug("using previous boat pool")
+                self.set_fleet(self.user_data['boatPool'])
+            else:
+                self.logger.debug("using new boat pool")
+                self.set_boat_pool(buy_res['boatPool'])
+                self.set_fleet(buy_res['boatPool'])
+
+            print(node_status)
+            if node_status == -1:
+                self.logger.error('Unexpected node. Should do a fresh start.')
+            elif node_status == 3:
+                next_node = self.helper.get_next_node_by_id(self.curr_node)
+                while next_node != '931617':
+                    next_node = self.single_node_sortie(next_node)
+                self.single_node_sortie(next_node)
+            elif node_status in [1, 2]:
+                next_node = self.curr_node
+                if node_status == 2:
+                    next_node = self.resume_node_sortie(self.curr_node)
+                while next_node != '931617':
+                    next_node = self.single_node_sortie(self.curr_node)
+                self.single_node_sortie(next_node)
+            else:
+                self.logger.debug(self.curr_node)
         except ThermopylaeSoriteExit:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
 
-    def start_fresh_sortie(self) -> None:
-        self.logger.info('Retreating...')
-        self._clean_memory()
+    def get_node_status(self, node_id: str) -> int:
         try:
-            next_id = self.E6A1()
-            while next_id != "931617":
+            node = next((i for i in self.user_data['nodeList'] if i['node_id'] == node_id))
+            return node['status']
+        except StopIteration:
+            return -1
+
+    def start_fresh_sortie(self) -> None:
+        try:
+            if self.curr_node == "0" or self.curr_node[:4] == "9316":
+                self._clean_memory()
+                next_id = self.E6A1()
+            else:
+                self.logger.debug("new sub map!!!!!!!!!")
+                next_id = self.curr_node[:4] + "01"
+                self.helper.api_withdraw()
+
+            while next_id not in T_CONST.BOSS_NODES:
                 next_id = self.single_node_sortie(next_id)
+            self.logger.info("!! REACHING BOSS NODE !!")
+            self.single_node_sortie(next_id)
+            # TODO: this one up to E6-1H1(boss)
         except ThermopylaeSoriteExit:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
@@ -230,49 +326,43 @@ class Sortie:
     def set_adjutant_info(self) -> None:
         # TODO: very similar functions in helper.py; may remove one of them
         adj = self.user_data['adjutantData']
-        self.parent.update_adjutant_name(ADJUTANT_ID_TO_NAME[adj['id']])
+        self.parent.update_adjutant_name(T_CONST.ADJUTANT_ID_TO_NAME[adj['id']])
         self.parent.update_adjutant_exp(f"Lv. {adj['level']} {adj['exp']}/{adj['exp_top']}")
         self.parent.update_points(str(self.user_data['strategic_point']))
 
     def set_boat_pool(self, boat_pool: list) -> None:
         self.boat_pool = set(boat_pool)
-        label_text = "Selected ships: "
+        label_text = "BOAT POOL | "
         for s in self.boat_pool:
             label_text += f"{self.user_ships[s]['Name']} "
         self.parent.update_boat_pool_label(label_text)
 
     def set_fleet(self, fleet: list) -> None:
         # The list may contain string or integer elements
-        try:
-            ss_count = 0
-            ss = []
-            for s in fleet:
-                if self.user_ships[s]['Class'] == "SS":
-                    ss_count += 1
-                    ss.append(s)
-            if ss_count >= 4:
+        ss = []
+        for s in fleet:
+            if self.user_ships[s]['Class'] == "SS":
+                ss.append(s)
+        if len(ss) >= 4:
+            temp = set([int(j) for j in ss])
+            self.battle_fleet = self.helper.reorder_battle_list(list(temp))
+        else:
+            self.battle_fleet = set([int(j) for j in fleet])
+
+        if self.curr_node == '931607':
+            if len(ss) == 0:
+                raise ThermopylaeSoriteExit
+            else:
                 self.battle_fleet = set([int(j) for j in ss])
-            else:
-                self.battle_fleet = set([int(j) for j in fleet])
+        else:
+            pass
 
-            if self.curr_node == '931607':
-                if ss_count == 0:
-                    raise ThermopylaeSoriteExit
-                else:
-                    self.battle_fleet = set([int(j) for j in ss])
-            else:
-                pass
-
-            self.update_battle_fleet_label(list(self.battle_fleet))
-        except AssertionError:
-            raise ThermopylaeSoriteExit
+        self.update_battle_fleet_label(list(self.battle_fleet))
 
     def update_battle_fleet_label(self, fleet: list) -> None:
-        label_text = "On battle: "
-        i = 1
+        label_text = "ON BATTLE | "
         for s in fleet:
-            label_text += f"{i} {self.user_ships[str(s)]['Name']} "
-            i += 1
+            label_text += f"{self.user_ships[str(s)]['Name']} "
         self.parent.update_fleet_label(label_text)
 
     def update_side_dock_resources(self, x) -> None:
@@ -290,7 +380,8 @@ class Sortie:
 
     def E6A1(self) -> str:
         self.helper.api_withdraw()
-        next_node_id = self.helper.api_readyFire()
+        # you can still readyFire after you enter a map
+        next_node_id = self.helper.api_readyFire('9316')
         return self.single_node_sortie(next_node_id)
 
     def find_SS(self, shop_data: list) -> list:
@@ -384,8 +475,7 @@ class Sortie:
         self.helper.spy()
 
         set_sleep()
-        # TODO use spy result to find formation
-        if self.curr_node in ['931608', '931610']:
+        if self.curr_node in ['931608', '931610']:  # only these two nodes need anti-sub
             formation = '5'
         elif self.curr_node in self.helper.get_reward_nodes():
             formation = '4'
@@ -416,6 +506,68 @@ class Sortie:
             self.logger.info('********************************')
             self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
             self.logger.info('********************************')
+        else:
+            self.logger.info(f"Failed to clean E6 {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
+            raise ThermopylaeSoriteExit
+        return next_id
+
+    def resume_node_sortie(self, curr_node_id: str) -> str:
+        self.logger.info('********************************')
+        self.logger.info("Start combat on new node")
+        self.logger.info(self.helper.points)
+        self.logger.info(self.helper.adjutant_info)
+        self.logger.info('********************************')
+        self.helper.api_readyFire(self.curr_node[:4])
+        supply_res = self.helper.supply_boats(list(self.battle_fleet))
+        self.update_side_dock_resources(supply_res['userVo'])
+
+        repair_res = self.helper.process_repair(supply_res['shipVO'], [self.repair_level])  # pre-battle repair
+        print('repair result:')
+        print(repair_res)
+        if 'userVo' in repair_res:
+            self.update_side_dock_resources(repair_res['userVo'])
+            self.update_side_dock_repair(repair_res['packageVo'])
+
+        set_sleep()
+        self.helper.spy()
+
+        set_sleep()
+        if self.curr_node in ['931608', '931610']:  # only these two nodes need anti-sub
+            formation = '5'
+        elif self.curr_node in self.helper.get_reward_nodes():
+            formation = '4'
+        elif len(self.battle_fleet) >= 4:
+            formation = '2'
+        else:
+            formation = '1'
+        challenge_res = self.helper.challenge(formation)
+
+        do_night_battle = self.helper.is_night_battle(curr_node_id, challenge_res)
+
+        set_sleep(level=2)
+        if do_night_battle is True:
+            self.logger.info("Entering night war...")
+            battle_res = self.helper.get_war_result('1')
+        else:
+            battle_res = self.helper.get_war_result('0')
+        self.helper.process_battle_result(battle_res, list(self.battle_fleet))
+
+        set_sleep()
+        repair_res = self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
+        if 'userVo' in repair_res:
+            self.update_side_dock_resources(repair_res['userVo'])
+            self.update_side_dock_repair(repair_res['packageVo'])
+
+        if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
+            next_id = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
+            if next_id != "" and next_id != "-1":
+                self.logger.info('********************************')
+                self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
+                self.logger.info('********************************')
+            elif next_id == "":
+                self.logger.info('---- BOSS NODE ----')
+            else:
+                pass
         else:
             self.logger.info(f"Failed to clean E6 {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
             raise ThermopylaeSoriteExit

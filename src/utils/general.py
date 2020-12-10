@@ -35,7 +35,7 @@ def ts_to_date(ts: int) -> str:
     return datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 
-def set_sleep(level: int = 1):
+def set_sleep(level: float = 1.0):
     # There must be some interval between Game API calls
     # TODO: make this global settings
     sleep(randint(5, 10) * level)

@@ -3,7 +3,6 @@ import logging
 import zlib
 
 from ast import literal_eval
-
 from socket import timeout
 from requests import exceptions
 from requests.utils import cookiejar_from_dict

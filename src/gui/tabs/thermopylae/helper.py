@@ -1,3 +1,5 @@
+import json
+
 from logging import getLogger
 from math import ceil
 from typing import Callable, Tuple
@@ -20,7 +22,7 @@ class SortieHelper:
         self.max_retry = 3
         self.points = 10
         self.adjutant_info = {}  # level, curr_exp, exp_cap
-        self.init_sub_map = "9316"  # TODO
+        # self.init_sub_map = "9316"  # TODO
 
         self.logger.debug('SortieHelper is initiated')
 
@@ -55,6 +57,20 @@ class SortieHelper:
     #   - unknown; unexpected
     # ================================================================
 
+    def api_passLevel(self) -> dict:
+        def _pass() -> Tuple[bool, dict]:
+            data = self.api.passLevel()
+            if 'eid' in data:
+                get_error(data['eid'])
+                res = False
+            elif 'attach' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+                res = False
+            return res, data
+        return self._reconnecting_calls(_pass, 'collect boss reward')
+
     def api_withdraw(self) -> dict:
         def _withdraw() -> Tuple[bool, dict]:
             data = self.api.withdraw()
@@ -71,9 +87,9 @@ class SortieHelper:
 
         return self._reconnecting_calls(_withdraw, 'restart')
 
-    def api_readyFire(self) -> dict:
+    def api_readyFire(self, sub_map_id: str) -> dict:
         def _readyFire() -> Tuple[bool, int]:
-            data = self.api.readyFire(self.init_sub_map)
+            data = self.api.readyFire(sub_map_id)
             if 'eid' in data:
                 get_error(data['eid'])
                 next_node_id = -1
@@ -125,6 +141,8 @@ class SortieHelper:
             return res, data
 
         store_data = self._reconnecting_calls(_canSelectList, 'visit shop')
+        # print(store_data)
+        # return store_data
         # if store_data['hadResetSelectFlag'] == 1:
         if '$ssss' not in store_data:
             return store_data
@@ -135,17 +153,17 @@ class SortieHelper:
         for ship in store_data['$ssss']:
             star = int(ship[0])
             cost = star * int(ship[2])
-            output_str = "{:15s} STAR{:3s} COST{:4s}".format(self.user_ships[str(ship[1])]["Name"], str(star), str(cost))
-            # output_str = f'{self.user_ships[str(ship[1])]["Name"]}\tSTAR {star}\tCOST {cost}'
+            output_str = "{:15s}\tSTAR{:3s} COST{:4s}".format(self.user_ships[str(ship[1])]["Name"], str(star), str(cost))
             self.logger.info(output_str)
         # if store_data['buff'] != 0:
         #     TODO? get buff; but who needs buff anyway?
         # pass
         return store_data
 
-    def buy_ships(self, purchase_list: list, shop_data: dict):
+    # TODO: reorder arguments?
+    def buy_ships(self, purchase_list: list, shop_data: dict = None, buff_card: str = '0') -> dict:
         def _selectBoat() -> [bool, object]:
-            data = self.api.selectBoat(purchase_list)
+            data = self.api.selectBoat(purchase_list, buff_card)
             if 'eid' in data:
                 get_error(data['eid'])
                 self.logger.warning("Buying ships failed...")
@@ -162,17 +180,18 @@ class SortieHelper:
         print(purchase_list)
         buy_data = self._reconnecting_calls(_selectBoat, 'buy ships')
 
-        if 'strategic_point' in buy_data:
+        if 'strategic_point' in buy_data and shop_data is not None:
             self.set_curr_points(buy_data['strategic_point'])
             for s in purchase_list:
                 self.logger.info(f'bought {self.user_ships[str(s)]["Name"]}')
         else:
-            print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
+            # print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
+            pass
 
-        print('buy_data')
-        print(buy_data)
-        print('shop_data')
-        print(shop_data)
+        # print('buy_data')
+        # print(buy_data)
+        # print('shop_data')
+        # print(shop_data)
         return buy_data
 
     def buy_exp(self) -> dict:
@@ -227,10 +246,8 @@ class SortieHelper:
         return res
 
     def set_war_fleets(self, fleet: list) -> dict:
-        ordered_fleet = self.reorder_battle_list(fleet)
-
         def _set_fleets() -> Tuple[bool, dict]:
-            data = self.api.setWarFleet(ordered_fleet)
+            data = self.api.setWarFleet(fleet)
             if 'eid' in data:
                 get_error(data['eid'])
                 res = False
@@ -336,7 +353,7 @@ class SortieHelper:
 
     @staticmethod
     def get_reward_nodes() -> list:
-        return T_CONST.REWARD_NODE
+        return T_CONST.REWARD_NODES
 
     def get_map_node_by_id(self, node_id: str) -> dict:
         try:
@@ -347,12 +364,16 @@ class SortieHelper:
         return node
 
     def get_next_node_by_id(self, node_id: str) -> str:
+        self.logger.debug(f'Get next for {node_id}')
         try:
             next_node = self.get_map_node_by_id(node_id)
-            next_node_id = str(next_node['next_node'][0])
+            if len(next_node['next_node']) == 0:
+                next_node_id = ""
+            else:
+                next_node_id = str(next_node['next_node'][0])
         except KeyError:
             self.logger.error('Access wrong nodes.')
-            next_node_id = ""
+            next_node_id = "-1"
         return next_node_id
 
     def set_adjutant_info(self, adj_data: dict) -> None:
@@ -484,7 +505,28 @@ class SortieHelper:
         if challenge_res['warReport']['canDoNightWar'] == 0:
             self.logger.info('Battle finished by day')
             do_night_battle = False
-        elif curr_id in T_CONST.REWARD_NODE:
+        elif curr_id in T_CONST.BOSS_NODES:
+            e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
+            self.logger.info('---- BOSS BATTLE ----')
+            self.logger.info(e_list)
+            if curr_id == T_CONST.BOSS_NODES[0]:
+                if e_list[0] == 0 and e_list[3] == 0:
+                    do_night_battle = True
+                elif e_list.count(0) >= 2:
+                    do_night_battle = True
+                else:
+                    raise ThermopylaeSoriteExit("E6-1 BOSS NEEDS RE-BATTLE")
+            elif curr_id == T_CONST.BOSS_NODES[1]:
+                if e_list.count(0) >= 2:
+                    do_night_battle = True
+                else:
+                    raise ThermopylaeSoriteExit("E6-2 BOSS NEEDS RE-BATTLE")
+            else:
+                if e_list.count(0) >= 3:
+                    do_night_battle = True
+                else:
+                    raise ThermopylaeSoriteExit("E6-3 BOSS NEEDS RE-BATTLE")
+        elif curr_id in T_CONST.REWARD_NODES:
             do_night_battle = True
         elif challenge_res['warReport']['canDoNightWar'] == 1:
             e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
@@ -508,9 +550,25 @@ class SortieHelper:
             ship_id = fleet[i]
             shipname = next((j for j in battle_res['shipVO'] if j['id'] == ship_id))['title']
             ship = ships[i]
-            ship_str = "{:12s} Lv.{:4s} +{:4s} Exp".format(shipname, ship['level'], ship['expAdd'])
+            # TODO fix the output format
+            ship_str = "{:12s}\tLv.{:4s}\t+{:4s} Exp".format(shipname, str(ship['level']), str(ship['expAdd']))
             # ship_str = f"{shipname}\tLv.{ship['level']} +{ship['expAdd']}Exp"
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
             self.logger.info(ship_str)
+
+    def process_boss_reward_result(self, reward_res: dict):
+        self.logger.info("######## BOSS REWARDS ########")
+        # TODO: probably fail due to stupid WGR developer's coding practice
+        replaced = str(reward_res).replace('False', '{}')
+        json_obj = json.loads(replaced)
+        rewards = json_obj['attach']
+        for r in rewards:
+            output_str = '{} {}'.format(T_CONST.ITEMS[int(r)], rewards[r])
+            self.logger.info(output_str)
+        reward_ships = json_obj['shipVO']
+        for s in reward_ships:
+            output_str = '{}'.format(s['title'])
+            self.logger.info(output_str)
+
 
 # End of File
