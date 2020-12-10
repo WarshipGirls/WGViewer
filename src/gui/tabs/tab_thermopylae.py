@@ -60,7 +60,9 @@ class TabThermopylae(QWidget):
 
         self.button_group = None
         self.boat_pool_label = QLabel()
+        self.boat_pool_label.setFont(QFont('Consolas'))
         self.fleet_label = QLabel()
+        self.fleet_label.setFont(QFont('Consolas'))
         self.boat_pool_label.setWordWrap(True)
         self.button_pre_battle = None
         self.button_fresh_sortie = None
