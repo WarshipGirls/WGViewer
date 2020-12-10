@@ -9,7 +9,11 @@ AIR_CONTROL = {1: "Air Supremacy", 2: "Air Superiority", 3: "Air Parity", 4: "Ai
 FORMATION = {1: "单纵 LineAhead", 2: "复纵 DoubleLine", 3: "轮形 Diamond", 4: "T形 Echelon", 5: "单横 LineAbreast"}
 WAR_EVALUATION = ['-', 'SS', 'S', 'A', 'B', 'C', 'D']
 BUILD_TYPE = {1: "Type S.", 2: "Type M.", 3: "Type L.", 4: "?", 5: "?"}
+# This one is not 100% confirmed (I assumed from challenge['warType'])
+COURSEHEADING_TYPE = {1: 'Parallel', 2: 'Heading', 3: 'T+', 4: 'T-'}
 
+def get_heading_type(heading_id: int) -> str:
+    return COURSEHEADING_TYPE[heading_id]
 
 def get_build_type(build_id: int) -> str:
     return BUILD_TYPE[build_id]
