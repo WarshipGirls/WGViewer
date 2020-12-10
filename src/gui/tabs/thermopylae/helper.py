@@ -6,14 +6,7 @@ from src import utils as wgv_utils
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.exceptions.custom import ThermopylaeSoriteExit
 from src.wgr.six import API_SIX  # only for typehints
-
-ADJUTANT_ID_TO_NAME = {
-    '10082': "紫貂",
-    '10182': "Kearsarge",
-    '10282': "Habakkuk"
-}
-
-REWARD_NODE = ['931604', '931610', '931617', '931702', '931706', '931717', '931722', '931802', '931809', '931821']
+from . import constants as T_CONST
 
 
 class SortieHelper:
@@ -123,12 +116,18 @@ class SortieHelper:
             elif '$ssss' in data:
                 self.logger.info('Visiting shop succeed!')
                 res = True
+            elif 'hadResetSelectFlag' in data and data['hadResetSelectFlag'] == 1:
+                self.logger.warning('Shop has been reset')
+                res = True
             else:
                 self.logger.error(data)
                 res = False
             return res, data
 
         store_data = self._reconnecting_calls(_canSelectList, 'visit shop')
+        # if store_data['hadResetSelectFlag'] == 1:
+        if '$ssss' not in store_data:
+            return store_data
         self.set_curr_points(store_data['strategic_point'])
         # notes that the server only return affordable ships and buff
         # since CN ver 5.1.0, there are only 4 ships + 1 buff
@@ -136,11 +135,12 @@ class SortieHelper:
         for ship in store_data['$ssss']:
             star = int(ship[0])
             cost = star * int(ship[2])
-            output_str = f'{self.user_ships[str(ship[1])]["Name"]}\tSTAR {star}\tCOST {cost}'
+            output_str = "{:15s} STAR{:3s} COST{:4s}".format(self.user_ships[str(ship[1])]["Name"], str(star), str(cost))
+            # output_str = f'{self.user_ships[str(ship[1])]["Name"]}\tSTAR {star}\tCOST {cost}'
             self.logger.info(output_str)
-        if store_data['buff'] != 0:
-            # TODO? get buff; but who needs buff anyway?
-            pass
+        # if store_data['buff'] != 0:
+        #     TODO? get buff; but who needs buff anyway?
+        # pass
         return store_data
 
     def buy_ships(self, purchase_list: list, shop_data: dict):
@@ -210,9 +210,27 @@ class SortieHelper:
         self.update_adjutant_info(res_data['adjutantData'], res_data['strategic_point'])
         return res_data
 
-    def set_war_fleets(self, fleets: list) -> dict:
+    def reorder_battle_list(self, unorder: list) -> list:
+        # Based on criteria mentioned in src/gui/tabs/thermopylae/constants.py
+        res = []
+        for cid in T_CONST.SUBMARINE_ORDER:
+            i = 0
+            while i < len(unorder):
+
+                if self.user_ships[str(unorder[i])]['cid'] == cid:
+                    res.append(unorder[i])
+                    break
+                else:
+                    i += 1
+            if len(res) == len(unorder):
+                break
+        return res
+
+    def set_war_fleets(self, fleet: list) -> dict:
+        ordered_fleet = self.reorder_battle_list(fleet)
+
         def _set_fleets() -> Tuple[bool, dict]:
-            data = self.api.setWarFleet(fleets)
+            data = self.api.setWarFleet(ordered_fleet)
             if 'eid' in data:
                 get_error(data['eid'])
                 res = False
@@ -318,7 +336,7 @@ class SortieHelper:
 
     @staticmethod
     def get_reward_nodes() -> list:
-        return REWARD_NODE
+        return T_CONST.REWARD_NODE
 
     def get_map_node_by_id(self, node_id: str) -> dict:
         try:
@@ -417,7 +435,7 @@ class SortieHelper:
 
     def update_adjutant_info(self, adj_data, strategic_point):
         # TODO: use signal? and manage signals globally?
-        _name = ADJUTANT_ID_TO_NAME[adj_data['id']]
+        _name = T_CONST.ADJUTANT_ID_TO_NAME[adj_data['id']]
         _exp = f"Lv. {adj_data['level']} {adj_data['exp']}/{adj_data['exp_top']}"
         _point = str(strategic_point)
 
@@ -466,7 +484,7 @@ class SortieHelper:
         if challenge_res['warReport']['canDoNightWar'] == 0:
             self.logger.info('Battle finished by day')
             do_night_battle = False
-        elif curr_id in REWARD_NODE:
+        elif curr_id in T_CONST.REWARD_NODE:
             do_night_battle = True
         elif challenge_res['warReport']['canDoNightWar'] == 1:
             e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
@@ -490,7 +508,8 @@ class SortieHelper:
             ship_id = fleet[i]
             shipname = next((j for j in battle_res['shipVO'] if j['id'] == ship_id))['title']
             ship = ships[i]
-            ship_str = f"{shipname}\tLv.{ship['level']} +{ship['expAdd']}Exp"
+            ship_str = "{:12s} Lv.{:4s} +{:4s} Exp".format(shipname, ship['level'], ship['expAdd'])
+            # ship_str = f"{shipname}\tLv.{ship['level']} +{ship['expAdd']}Exp"
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
             self.logger.info(ship_str)
 

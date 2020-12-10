@@ -10,11 +10,7 @@ from .helper import SortieHelper
 # Following are only for typehints
 from src.wgr.six import API_SIX
 
-ADJUTANT_ID_TO_NAME = {
-    '10082': "紫貂",
-    '10182': "Kearsarge",
-    '10282': "Habakkuk"
-}
+from .constants import ADJUTANT_ID_TO_NAME
 
 
 def save_json(name, data):
@@ -202,9 +198,9 @@ class Sortie:
     def resume_sortie(self) -> None:
         self.logger.info(f"Resume sortie from node {self.curr_node}")
         try:
-            # if self.curr_node == '931602':
-            #     next_id = self.E6_1_B1_sortie(self.curr_node)
-            pass
+            self.set_fleet(self.user_data['fleet'])
+            shop_res = self.helper.get_ship_store('1')
+            print(shop_res)
         except ThermopylaeSoriteExit:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
@@ -248,7 +244,6 @@ class Sortie:
     def set_fleet(self, fleet: list) -> None:
         # The list may contain string or integer elements
         try:
-            assert (len(fleet) <= 6)
             ss_count = 0
             ss = []
             for s in fleet:
@@ -334,7 +329,7 @@ class Sortie:
                 shop_res = self.helper.get_ship_store('1')
                 ss_list = self.find_SS(shop_res['boats'])
                 if len(ss_list) == 0 and self.curr_node == '931607':
-                        raise ThermopylaeSortieRestart
+                    raise ThermopylaeSortieRestart
                 else:
                     pass
             else:
@@ -365,6 +360,7 @@ class Sortie:
         else:
             pass
 
+        # TODO some nodes need to save money
         if self.helper.can_bump() is True:
             if self.helper.bump_level() is False:
                 self.logger.info('Bumping failed. Should restart current sub-map.')
