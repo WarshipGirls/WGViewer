@@ -152,15 +152,15 @@ class TabThermopylae(QWidget):
         t.setText(msg)
         t.setReadOnly(True)
 
-        self.button_pre_battle = QPushButton('Perform pre-battle checking')
+        self.button_pre_battle = QPushButton('Pre-Battle Check')
         self.button_pre_battle.clicked.connect(self.on_pre_battle)
         self.button_pre_battle.setEnabled(True)
 
-        self.button_fresh_sortie = QPushButton('Start a new E6 combat')
+        self.button_fresh_sortie = QPushButton('Fresh Start')
         self.button_fresh_sortie.clicked.connect(self.on_fresh_sortie)
         self.button_fresh_sortie.setEnabled(False)
 
-        self.button_resume_sortie = QPushButton('Resume E6 combat')
+        self.button_resume_sortie = QPushButton('Resume Combat')
         self.button_resume_sortie.clicked.connect(self.on_resume_sortie)
         self.button_resume_sortie.setEnabled(False)
 

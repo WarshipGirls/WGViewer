@@ -22,7 +22,6 @@ class SortieHelper:
         self.max_retry = 3
         self.points = 10
         self.adjutant_info = {}  # level, curr_exp, exp_cap
-        # self.init_sub_map = "9316"  # TODO
 
         self.logger.debug('SortieHelper is initiated')
 
@@ -141,9 +140,6 @@ class SortieHelper:
             return res, data
 
         store_data = self._reconnecting_calls(_canSelectList, 'visit shop')
-        # print(store_data)
-        # return store_data
-        # if store_data['hadResetSelectFlag'] == 1:
         if '$ssss' not in store_data:
             return store_data
         self.set_curr_points(store_data['strategic_point'])
@@ -185,13 +181,8 @@ class SortieHelper:
             for s in purchase_list:
                 self.logger.info(f'bought {self.user_ships[str(s)]["Name"]}')
         else:
-            # print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
             pass
 
-        # print('buy_data')
-        # print(buy_data)
-        # print('shop_data')
-        # print(shop_data)
         return buy_data
 
     def buy_exp(self) -> dict:
@@ -552,7 +543,6 @@ class SortieHelper:
             ship = ships[i]
             # TODO fix the output format
             ship_str = "{:12s}\tLv.{:4s}\t+{:4s} Exp".format(shipname, str(ship['level']), str(ship['expAdd']))
-            # ship_str = f"{shipname}\tLv.{ship['level']} +{ship['expAdd']}Exp"
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
             self.logger.info(ship_str)
 
@@ -563,12 +553,15 @@ class SortieHelper:
         json_obj = json.loads(replaced)
         rewards = json_obj['attach']
         for r in rewards:
-            output_str = '{} {}'.format(T_CONST.ITEMS[int(r)], rewards[r])
+            output_str = f'{T_CONST.ITEMS[int(r)]} {rewards[r]}'
             self.logger.info(output_str)
         reward_ships = json_obj['shipVO']
         for s in reward_ships:
-            output_str = '{}'.format(s['title'])
+            output_str = f'{s["title"]}'
             self.logger.info(output_str)
+
+        self.set_adjutant_info(reward_res['adjutantData'])
+        self.set_curr_points(reward_res['strategic_point'])
 
 
 # End of File

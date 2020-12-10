@@ -66,10 +66,6 @@ class Sortie:
             len E1/2 = 14, E3/4 = 18, E5/6 = 22
         -> level_id  ( I believe this is the user reached level)
             9301 (E1 map1) 9303 (E1 map3) 9304 (E2 map1) 9316 (E6 map 1)
-    levellist
-    "levelId": "9314",
-    "status": "3",  # sub map
-    
     '''
 
     # ================================
@@ -77,37 +73,19 @@ class Sortie:
     # ================================
 
     def _get_fleet_info(self) -> None:
-        # if self.is_realrun is True: # TODO
         self.fleet_info = self.api.getFleetInfo()
-        # if self.is_realrun is False: # TODO
-        #     self.fleet_info = self.api.getFleetInfo()
         save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
         set_sleep()
-        # else:
-        # with open('six_getFleetInfo.json', 'r', encoding='utf-8') as f:
-        #     self.fleet_info = json.load(f)
 
     def _get_pve_data(self) -> None:
-        # if self.is_realrun is True:
         self.map_data = self.api.getPveData()
-        # if self.is_realrun is False:
-        #     self.map_data = self.api.getPveData()
         save_json('six_getPveData.json', self.map_data)  # TODO only for testing
         set_sleep()
-        # else:
-        # with open('six_getPveData.json', 'r', encoding='utf-8') as f:
-        #     self.map_data = json.load(f)
 
     def _get_user_data(self) -> None:
         self.user_data = self.api.getUserData()
-        # if self.is_realrun is True:
-        # if self.is_realrun is False:
-        #     self.user_data = self.api.getUserData()
         save_json('six_getUserData.json', self.user_data)  # TODO only for testing
         set_sleep()
-        # else:
-        # with open('six_getUserData.json', 'r', encoding='utf-8') as f:
-        #     self.user_data = json.load(f)
 
     def pre_battle_set_info(self) -> bool:
         # TODO free up dock space if needed
@@ -196,6 +174,7 @@ class Sortie:
 
     # ================================
     # Entry points
+    # TODO: get 9317 as new id
     # ================================
 
     def resume_sortie(self) -> None:
@@ -370,7 +349,6 @@ class Sortie:
 
     def update_side_dock_repair(self, x) -> None:
         # assume only bucket is updated in packageVo; for more secure, use next()
-        # self.parent.update_repair_bucket(x['packageVo'][0]['num'])
         self.parent.update_repair_bucket(x[0]['num'])
 
     # ================================
@@ -380,7 +358,6 @@ class Sortie:
 
     def E6A1(self) -> str:
         self.helper.api_withdraw()
-        # you can still readyFire after you enter a map
         next_node_id = self.helper.api_readyFire('9316')
         return self.single_node_sortie(next_node_id)
 
@@ -451,7 +428,6 @@ class Sortie:
         else:
             pass
 
-        # TODO some nodes need to save money
         if self.helper.can_bump() is True:
             if self.helper.bump_level() is False:
                 self.logger.info('Bumping failed. Should restart current sub-map.')
@@ -507,13 +483,13 @@ class Sortie:
             self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
             self.logger.info('********************************')
         else:
-            self.logger.info(f"Failed to clean E6 {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
+            self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
             raise ThermopylaeSoriteExit
         return next_id
 
     def resume_node_sortie(self, curr_node_id: str) -> str:
         self.logger.info('********************************')
-        self.logger.info("Start combat on new node")
+        self.logger.info("Resume combat on new node")
         self.logger.info(self.helper.points)
         self.logger.info(self.helper.adjutant_info)
         self.logger.info('********************************')
@@ -569,7 +545,7 @@ class Sortie:
             else:
                 pass
         else:
-            self.logger.info(f"Failed to clean E6 {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
+            self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
             raise ThermopylaeSoriteExit
         return next_id
 

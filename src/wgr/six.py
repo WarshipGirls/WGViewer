@@ -66,6 +66,7 @@ class API_SIX(WGR_API):
         return self._api_call(link)
 
     def readyFire(self, sub_map_id: str):
+        # you can still readyFire after you enter a map
         link = 'six/readyFire/' + sub_map_id
         return self._api_call(link)
 
