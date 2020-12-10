@@ -391,14 +391,10 @@ class SortieHelper:
         self.logger.debug(f'bumping check result = {res}')
         return res
 
-    # def bump_level(self, adj_data) -> bool:
     def bump_level(self) -> bool:
-        # adj_lvl = int(adj_data["adjutantData"]["level"])
-        # next_adj_lvl = adj_lvl + 1
         curr_exp = int(self.adjutant_info["exp"])
         next_exp = int(self.adjutant_info["exp_top"])
         required_exp = next_exp - curr_exp
-        # if self.get_curr_points() >= required_exp:
 
         next_adj_lvl = int(self.adjutant_info["level"]) + 1
         self.logger.info(f"Bumping adjutant level to Lv.{next_adj_lvl}")
@@ -407,8 +403,6 @@ class SortieHelper:
         while buy_times > 0:
             res = self.buy_exp()
             buy_times -= 1
-            # if buy_times < 0:   # redundant TODO: remove
-            #     break
             self.update_adjutant_info(res['adjutantData'], res['strategic_point'])
             wgv_utils.set_sleep()
 
@@ -416,17 +410,12 @@ class SortieHelper:
             return False
         elif int(res['adjutantData']['level']) == next_adj_lvl:
             self.logger.info("Bumping level successfully")
-            # self.adjutant_info = res['adjutantData']
             return True
         else:
             self.logger.debug(res)
             return False
 
-        # else:
-        # return False
-
     def update_adjutant_info(self, adj_data, strategic_point):
-        print('updatingggggggggggggggggggggggg adjutant info')
         # TODO: use signal? and manage signals globally?
         _name = ADJUTANT_ID_TO_NAME[adj_data['id']]
         _exp = f"Lv. {adj_data['level']} {adj_data['exp']}/{adj_data['exp_top']}"
@@ -436,7 +425,6 @@ class SortieHelper:
         self.set_curr_points(strategic_point)
         self.tab_thermopylae.update_adjutant_name(_name)
         self.tab_thermopylae.update_adjutant_exp(_exp)
-        # self.tab_thermopylae.update_points(_point)
         print(self.get_adjutant_info())
 
     def process_repair(self, ships: list, repair_levels: [int, list]) -> dict:

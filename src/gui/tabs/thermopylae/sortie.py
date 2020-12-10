@@ -27,8 +27,6 @@ class Sortie:
     # TODO long term
     # RIGHT NOW everything pre-battle is fixed
 
-    # SINCE game version 5.1.0, only 5 slots is shown; E6-1 A1 can choose 5 ships; after that, it's 4 ships + buff card
-
     def __init__(self, parent, api: API_SIX, fleet: list, final_fleet: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
@@ -216,9 +214,6 @@ class Sortie:
         self._clean_memory()
         try:
             next_id = self.E6A1()
-            # next_id = self.E6_1_A1_sortie()
-            # self.curr_node = next_id
-            # self.E6_1_B1_sortie(self.curr_node)
             while next_id != "931617":
                 next_id = self.single_node_sortie(next_id)
         except ThermopylaeSoriteExit:
@@ -306,11 +301,7 @@ class Sortie:
     def find_SS(self, shop_data: list) -> list:
         # Get from a list of int (max length of 5), return a list of ship_id (str)
         res = []
-        print('find sssssssssssssssssssssssss')
         for ship_id in shop_data:
-            print(type(ship_id))
-            print(shop_data)
-            print(type(shop_data[0]))
             if self.curr_node[:4] == '9316' and ship_id in self.battle_fleet:
                 # in E6-1, don't buy repeated ships
                 continue
@@ -335,7 +326,6 @@ class Sortie:
             shop_res = self.helper.get_ship_store()
             buy_res = self.helper.buy_ships(self.escort_CV, shop_res)
         else:
-            print("SSSSSSSSSSSSSSSSSSSSSSHOULD BUY SSSSSSSSSSSSSSSSSSSSSSSS")
             # first shop fetch
             shop_res = self.helper.get_ship_store()
             ss_list = self.find_SS(shop_res['boats'])
@@ -343,25 +333,16 @@ class Sortie:
                 # second shop fetch
                 shop_res = self.helper.get_ship_store('1')
                 ss_list = self.find_SS(shop_res['boats'])
-                if len(ss_list) == 0:
-                    if self.curr_node == '931607':
+                if len(ss_list) == 0 and self.curr_node == '931607':
                         raise ThermopylaeSortieRestart
                 else:
-                    # buy_res = self.helper.buy_ships(ss_list, shop_res)
                     pass
             else:
-                # buy_res = self.helper.buy_ships(ss_list, shop_res)
                 pass
 
             purchase_list = self.helper.find_affordable_ships(ss_list, shop_res)
             if len(purchase_list) > 0:
                 buy_res = self.helper.buy_ships(purchase_list, shop_res)
-
-            # if curr_node_id == '931607' and len(ss_list) == 0:
-            #     raise ThermopylaeSoriteExit('No Required SS')
-            print('buy_res:')
-            print(buy_res)
-            print('\n\n')
 
         if buy_res is None:
             pass
@@ -377,7 +358,6 @@ class Sortie:
 
         # cast skill
         if curr_node_id in ['931602', '931702']:
-            # adj_res = self.helper.cast_skill()
             self.helper.cast_skill()
         elif curr_node_id == '931802':
             # TODO habakkuk; maybe not here
@@ -386,7 +366,6 @@ class Sortie:
             pass
 
         if self.helper.can_bump() is True:
-            # if (adj_res is not None) and (self.helper.bump_level(adj_res) is False):
             if self.helper.bump_level() is False:
                 self.logger.info('Bumping failed. Should restart current sub-map.')
             else:
@@ -427,7 +406,6 @@ class Sortie:
             self.logger.info("Entering night war...")
             battle_res = self.helper.get_war_result('1')
         else:
-            # self.logger.info("")
             battle_res = self.helper.get_war_result('0')
         self.helper.process_battle_result(battle_res, list(self.battle_fleet))
 
