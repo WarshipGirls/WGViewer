@@ -41,7 +41,8 @@ class Sortie:
         self.can_start = False
         self.helper = None
         self.repair_level = 1
-        self.curr_node = "0"
+        self.curr_node = '0'
+        self.curr_sub_map = '0'
         self.boat_pool = set()  # host existing boats
         self.escort_DD = []  # For 2DD to pass first few levels only, 萤火虫，布雷恩
         self.escort_CV = []  # For 1CV to pass first few levels only, 不挠
@@ -89,12 +90,12 @@ class Sortie:
 
     def pre_battle_set_info(self) -> bool:
         # TODO free up dock space if needed
+        # Insepect the validity for user to use this function
         user_e6 = next(i for i in self.user_data['chapterList'] if i['id'] == "10006")
         if self.user_data['chapterId'] != '10006':
             self.logger.warning("You are in the middle of a battle other than E6. Exiting")
             return False
         elif len(user_e6['boats']) != 22:
-            # Try to detect if user passed E6;
             self.logger.warning("You have not passed E6 manually. Exiting")
             return False
         else:
@@ -107,8 +108,9 @@ class Sortie:
         if len(b) == 0:
             self.logger.info('User has not entered E6. Select from old settings')
             last_fleets = user_e6['boats']
-        elif len(b) == 22 and self.fleet_info['chapterInfo']['level_id'] == "9316":
+        elif len(b) == 22 and self.fleet_info['chapterInfo']['level_id'] in ['9316', '9317', '9318']:
             self.logger.info('User has entered E6-1.')
+            self.set_sub_map(self.fleet_info['chapterInfo']['level_id'])
             last_fleets = b
         else:
             self.logger.info('Invalid settings for using this function')
@@ -184,7 +186,8 @@ class Sortie:
             node_status = self.get_node_status(self.curr_node)
             if self.curr_node in T_CONST.BOSS_NODES and node_status == 3:
                 boss_res = self.helper.api_passLevel()
-                self.helper.process_boss_reward_result(boss_res)
+                new_sub_map = self.helper.process_boss_reward_result(boss_res)
+                self.set_sub_map(new_sub_map)
                 return
             # Shopping Cases when user resume:
             #   - user has not visit shop
@@ -297,6 +300,9 @@ class Sortie:
     # ================================
     # Setter / Getter
     # ================================
+
+    def set_sub_map(self, sub_map_id: str) -> None:
+        self.curr_sub_map = sub_map_id
 
     def set_sortie_tickets(self) -> None:
         self.parent.update_ticket(self.user_data['ticket'])

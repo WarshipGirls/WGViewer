@@ -546,7 +546,7 @@ class SortieHelper:
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
             self.logger.info(ship_str)
 
-    def process_boss_reward_result(self, reward_res: dict):
+    def process_boss_reward_result(self, reward_res: dict) -> str:
         self.logger.info("######## BOSS REWARDS ########")
         # TODO: probably fail due to stupid WGR developer's coding practice
         replaced = str(reward_res).replace('False', '{}')
@@ -562,6 +562,8 @@ class SortieHelper:
 
         self.set_adjutant_info(reward_res['adjutantData'])
         self.set_curr_points(reward_res['strategic_point'])
+        sub_map = next((j for j in reward_res['shipVO'] if j['id'] == '10006'))['level_id']
+        return sub_map
 
 
 # End of File
