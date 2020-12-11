@@ -1,4 +1,6 @@
 import logging
+from typing import Tuple
+
 import requests
 import threading
 import time
@@ -41,8 +43,8 @@ class LoginForm(QWidget):
         self.channel = ""
         self.server = ""
         self.mi = None
-        self.res1 = False
-        self.res2 = False
+        self.res1: bool = False
+        self.res2: bool = False
 
         self.lineEdit_username = QLineEdit()
         self.lineEdit_password = QLineEdit()
@@ -331,17 +333,25 @@ class LoginForm(QWidget):
         else:
             wgv_utils.popup_msg('Read disclaimer and check to proceed')
 
-    def handle_result1(self, result: bool) -> None:
+    def handle_result1(self, result: Tuple[bool, str]) -> None:
         logging.debug(f'LOGIN - First fetch result {result}')
-        self.res1 = result
+        self.res1 = result[0]
         if self.res1 is True:
             self.bee2.start()
         else:
             self.login_failed()
+            wgv_utils.popup_msg(result[1])
 
-    def handle_result2(self, result: bool) -> None:
+    def handle_result2(self, result: Tuple[bool, str]) -> None:
         logging.debug(f'LOGIN - Second fetch result {result}')
-        self.res2 = result
+        self.res2 = result[0]
+
+        if self.res2 is True:
+            pass
+        else:
+            self.login_failed()
+            wgv_utils.popup_msg(result[1])
+            return
 
         if self.res1 == True and self.res2 == True:
             self.login_button.setText('Loading and Initializing... (rendering time varies with dock size)')
@@ -357,31 +367,29 @@ class LoginForm(QWidget):
             self.login_failed()
             wgv_utils.popup_msg("Login Failed (3): Probably due to bad server connection")
 
-    def first_fetch(self, login_account: GameLogin, username: str, password: str) -> bool:
+    @staticmethod
+    def first_fetch(login_account: GameLogin, username: str, password: str) -> Tuple[bool, str]:
         try:
             res1 = login_account.first_login(username, password)
         except WarshipGirlsExceptions as e:
-            # TODO: May crash; cannot test w/o own simulation; need to wait next maintenance
+            # Lesson: Handle GUI actions (e.g. popup_msg) outside the thread; otherwise, the GUI is blocked
             logging.error(f"LOGIN - {e}")
-            self.login_failed()
-            wgv_utils.popup_msg(f"{e}")
-            return False
+            return False, str(e)
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
-            self.login_failed()
-            wgv_utils.popup_msg("Login Failed (1): Wrong authentication information")
-            return False
-        return res1
+            msg = "Login Failed (1): Wrong authentication information"
+            return False, msg
+        return res1, ""
 
-    def second_fetch(self, login_account: GameLogin, server: str) -> bool:
+    @staticmethod
+    def second_fetch(login_account: GameLogin, server: str) -> Tuple[bool, str]:
         try:
             res2 = login_account.second_login(server)
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
             logging.error(f"LOGIN - {e}")
-            self.login_failed()
-            wgv_utils.popup_msg("Login Failed (2): Probably due to bad server connection")
-            return False
-        return res2
+            msg = "Login Failed (2): Probably due to bad server connection"
+            return False, msg
+        return res2, ""
 
     def _check_password(self) -> None:
         sess = LoginSession()
