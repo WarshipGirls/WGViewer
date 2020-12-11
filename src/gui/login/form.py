@@ -220,7 +220,11 @@ class LoginForm(QWidget):
     # General
     # ================================
 
-    def login_success(self) -> None:
+    def login_success(self, is_bypass: bool = False) -> None:
+        if is_bypass is True:
+            self.mi = MainInterface(wgv_data.load_cookies())
+        else:
+            self.mi = MainInterface(self.account.get_cookies())
         self.mi.show()
         self.close()
 
@@ -353,7 +357,7 @@ class LoginForm(QWidget):
             res = False
 
         if res is True:
-            self.login_success()
+            self.login_success(True)
         else:
             self.button_bypass.setEnabled(False)
             wgv_utils.popup_msg("Your cookies is invalid. Please use Login")
@@ -386,7 +390,6 @@ class LoginForm(QWidget):
             #     pass
             # else:
             #     wgv_utils.popup_msg('Login Success')
-            self.mi = MainInterface(self.account.get_cookies())
             self.login_success()
         else:
             self.login_failed()
