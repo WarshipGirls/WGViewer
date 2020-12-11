@@ -39,7 +39,6 @@ class LoginForm(QWidget):
         self.sig_login.connect(self.start_login)
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         self.encryptor = Encryptor()
-        self.key_filename = '.wgr.key'
         self.channel = ""
         self.server = ""
         self.mi = None
@@ -56,9 +55,13 @@ class LoginForm(QWidget):
         # set text all in label would cause user unable to click text to toggle checkbox; differs from other checkbox, (bad design IMO)
         user_w, _ = wgv_utils.get_user_resolution()
         self.check_disclaimer.setMaximumWidth(int(0.083 * user_w))
-        self.check_save = QCheckBox('Store login info locally with encryption')
-        self.check_auto = QCheckBox('Auto login on the application start')
-        self.login_button = QPushButton('Login')
+        self.check_save = QCheckBox("Store login info locally with encryption")
+        self.check_auto = QCheckBox("Auto login on the application start")
+        self.button_login = QPushButton("Login")
+        self.button_bypass = QPushButton("Bypass Login with Existing Cookie")
+        self.button_bypass.setToolTip(
+            "If you previously logged in with WGViewer AND haven't logged in through other means,\n"
+            "you may use this option to bypass login.")
 
         self.container = QWidget()
         main_layout = QVBoxLayout()
@@ -74,7 +77,9 @@ class LoginForm(QWidget):
         if self.qsettings.value("Login/auto") == "true":
             # QThread cannot handle exceptions for this one
             try:
-                self.login_button.setEnabled(False)  # in case user manually log-in
+                # In case user manually log-in
+                self.button_login.setEnabled(False)
+                self.button_bypass.setEnabled(False)
                 self.check_auto.setText('!! Login auto starts in 5 seconds. Uncheck to pause !!')
                 threading.Thread(target=self.wait_five_seconds).start()
             except InterruptExecution:
@@ -124,7 +129,7 @@ class LoginForm(QWidget):
         self.layout.setColumnStretch(1, 1)
         self.layout.setColumnStretch(2, 1)
         user_w, user_h = wgv_utils.get_user_resolution()
-        self.init_login_button(user_h)
+        self.init_login_buttons(user_h)
         self.resize(int(0.26 * user_w), int(0.12 * user_h))
         self.setStyleSheet(wgv_data.get_color_scheme())
         self.setWindowTitle(f'Warship Girls Viewer v{wgv_utils.get_app_version()} Login')
@@ -203,10 +208,12 @@ class LoginForm(QWidget):
         self.check_auto.stateChanged.connect(self.on_auto_clicked)
         self.layout.addWidget(self.check_auto, 6, 1, 1, 2)
 
-    def init_login_button(self, user_h: int) -> None:
-        self.login_button.clicked.connect(self.start_login)
+    def init_login_buttons(self, user_h: int) -> None:
+        self.button_login.clicked.connect(self.start_login)
+        self.button_bypass.clicked.connect(self.start_bypass_login)
         # set an empty gap row
-        self.layout.addWidget(self.login_button, 8, 0, 1, 3)
+        self.layout.addWidget(self.button_bypass, 8, 0, 1, 3)
+        self.layout.addWidget(self.button_login, 9, 0, 1, 3)
         self.layout.setRowMinimumHeight(7, int(0.03 * user_h))
 
     # ================================
@@ -218,8 +225,8 @@ class LoginForm(QWidget):
         self.close()
 
     def login_failed(self) -> None:
-        self.login_button.setText('Login')
-        self.login_button.setEnabled(True)
+        self.button_login.setText('Login')
+        self.button_login.setEnabled(True)
         self.check_auto.setText('Auto login on the application start')
         self.container.setEnabled(True)
 
@@ -239,14 +246,13 @@ class LoginForm(QWidget):
         self.sig_login.emit()
 
     def _get_password(self) -> str:
-        if wgv_data.is_key_exists(self.key_filename) and self.qsettings.contains('Login/password'):
+        if wgv_data.is_key_exists() and self.qsettings.contains('Login/password'):
             try:
-                key = self.encryptor.load_key(wgv_data.get_key_path(self.key_filename))
+                key = self.encryptor.load_key(wgv_data.get_key_path())
                 res = self.encryptor.decrypt_data(key, self.qsettings.value('Login/password')).decode("utf-8")
             except AttributeError:
                 res = ''
                 wgv_utils.popup_msg('Error: Key file or config file may be corrupted.')
-                # TODO: reset them
         else:
             res = ''
         return res
@@ -270,7 +276,7 @@ class LoginForm(QWidget):
             self.qsettings.endGroup()
         else:
             self.qsettings.remove("Login")
-            wgv_data.del_key_file(self.key_filename)
+            wgv_data.del_key_file()
             self.lineEdit_username.clear()
             self.lineEdit_password.clear()
             self.combo_platform.setCurrentText(self.combo_platform.itemText(0))
@@ -284,7 +290,8 @@ class LoginForm(QWidget):
             self.check_auto.setText('Will auto login on next start up')
         else:
             self.check_auto.setText('Auto login on the application start')
-            self.login_button.setEnabled(True)
+            self.button_login.setEnabled(True)
+            self.button_bypass.setEnabled(True)
         self.qsettings.setValue("Login/auto", self.check_auto.isChecked())
 
     def update_server_box(self, text: str) -> None:
@@ -333,6 +340,24 @@ class LoginForm(QWidget):
         else:
             wgv_utils.popup_msg('Read disclaimer and check to proceed')
 
+    def start_bypass_login(self) -> None:
+        user_cookie = wgv_data.load_cookies()
+        if 'cookies' in user_cookie and 'hf_skey' in user_cookie['cookies']:
+            token = user_cookie['cookies']['hf_skey']
+            if token == "" or len(token) < 50:
+                # The random part is 32, the timestamp is 10, the UID part is at least 10
+                res = False
+            else:
+                res = True
+        else:
+            res = False
+
+        if res is True:
+            self.login_success()
+        else:
+            self.button_bypass.setEnabled(False)
+            wgv_utils.popup_msg("Your cookies is invalid. Please use Login")
+
     def handle_result1(self, result: Tuple[bool, str]) -> None:
         logging.debug(f'LOGIN - First fetch result {result}')
         self.res1 = result[0]
@@ -354,7 +379,7 @@ class LoginForm(QWidget):
             return
 
         if self.res1 == True and self.res2 == True:
-            self.login_button.setText('Loading and Initializing... (rendering time varies with dock size)')
+            self.button_login.setText('Loading and Initializing... (rendering time varies with dock size)')
             logging.info("LOGIN - SUCCESS!")
             # No popup msg on Login Success
             # if self.check_auto.isChecked() is True:
@@ -393,15 +418,15 @@ class LoginForm(QWidget):
 
     def _check_password(self) -> None:
         sess = LoginSession()
-        self.account = GameLogin(wgv_utils.get_game_version(), self.channel, sess, self.login_button)
+        self.account = GameLogin(wgv_utils.get_game_version(), self.channel, sess, self.button_login)
         _username = self.lineEdit_username.text()
         _password = self.lineEdit_password.text()
 
-        if not wgv_data.is_key_exists(self.key_filename):
+        if not wgv_data.is_key_exists():
             key = self.encryptor.gen_key()
-            self.encryptor.save_key(key, wgv_data.get_key_path(self.key_filename))
+            self.encryptor.save_key(key, wgv_data.get_key_path())
         else:
-            key = self.encryptor.load_key(wgv_data.get_key_path(self.key_filename))
+            key = self.encryptor.load_key(wgv_data.get_key_path())
         self.qsettings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
 
         self.bee1 = CallbackWorker(self.first_fetch, (self.account, _username, _password), self.handle_result1)

@@ -4,8 +4,6 @@ import hashlib
 import hmac
 import json
 import logging
-import os
-import pickle
 import random
 import time
 import urllib
@@ -13,7 +11,7 @@ import zlib
 
 from PyQt5.QtWidgets import QPushButton
 
-from src.data.wgv_path import get_data_dir
+from src.data.wgv_qsettings import save_cookies
 from src.utils.general import get_app_version
 from src.exceptions.wgr_error import get_error
 from .helper import LoginHelper
@@ -227,12 +225,7 @@ class GameLogin:
 
     def get_cookies(self) -> dict:
         output = {'server': self.server, 'channel': self.channel, 'cookies': self.cookies}
-        self.save_cookies(output)
+        save_cookies(output)
         return output
-
-    @staticmethod
-    def save_cookies(data: dict) -> None:
-        with open(os.path.join(get_data_dir(), 'user.cookies'), 'wb') as f:
-            pickle.dump(data, f)
 
 # End of File

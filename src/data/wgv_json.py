@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 import json
 import os
-import pickle
 
 
 # ================================
@@ -25,11 +24,6 @@ def _save_json(folder: str, filename: str, data: [list, dict]) -> None:
 # ================================
 # Exports
 # ================================
-
-def load_cookies() -> dict:
-    with open(os.path.join(get_data_dir(), 'user.cookies'), 'rb') as f:
-        data = pickle.load(f)
-    return data
 
 
 def get_api_initGame() -> dict:
