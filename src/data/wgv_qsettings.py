@@ -48,12 +48,11 @@ def save_cookies(cookie: dict) -> None:
 
 
 def load_cookies() -> dict:
-    cookie_path = os.path.join(get_data_dir(), 'user.cookies')
-    with open(cookie_path, 'rb') as f:
+    with open(os.path.join(get_data_dir(), 'user.cookies'), 'rb') as f:
         encrypted_cookie = pickle.load(f)
-    encryptor = Encryptor()
     if is_key_exists():
         try:
+            encryptor = Encryptor()
             key = encryptor.load_key(get_key_path())
             string = encryptor.decrypt_data(key, encrypted_cookie).decode('utf-8')
             res = literal_eval(string)
