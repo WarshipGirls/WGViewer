@@ -109,7 +109,7 @@ class Sortie:
             self.logger.info('User has not entered E6. Select from old settings')
             last_fleets = user_e6['boats']
         elif len(b) == 22 and self.fleet_info['chapterInfo']['level_id'] in ['9316', '9317', '9318']:
-            self.logger.info('User has entered E6-1.')
+            self.logger.info('User has entered E6.')
             self.set_sub_map(self.fleet_info['chapterInfo']['level_id'])
             last_fleets = b
         else:
@@ -168,7 +168,7 @@ class Sortie:
             self.logger.info(output_str)
 
         self.parent.button_fresh_sortie.setEnabled(True)
-        if len(self.boat_pool) > 0:
+        if len(self.boat_pool) > 0 and self.curr_node[-2:] != "01":
             self.parent.button_resume_sortie.setEnabled(True)
             self.logger.info('Can choose a fresh start or resume existing battle')
         else:
@@ -176,7 +176,6 @@ class Sortie:
 
     # ================================
     # Entry points
-    # TODO: get 9317 as new id
     # ================================
 
     def resume_sortie(self) -> None:
@@ -186,8 +185,9 @@ class Sortie:
             node_status = self.get_node_status(self.curr_node)
             if self.curr_node in T_CONST.BOSS_NODES and node_status == 3:
                 boss_res = self.helper.api_passLevel()
-                new_sub_map = self.helper.process_boss_reward_result(boss_res)
-                self.set_sub_map(new_sub_map)
+                # new_sub_map = self.helper.process_boss_reward_result(boss_res)
+                self._get_user_data()
+                self.set_sub_map(self.user_data['levelId'])
                 return
             # Shopping Cases when user resume:
             #   - user has not visit shop
@@ -252,14 +252,14 @@ class Sortie:
                 self.logger.error('Unexpected node. Should do a fresh start.')
             elif node_status == 3:
                 next_node = self.helper.get_next_node_by_id(self.curr_node)
-                while next_node != '931617':
+                while next_node not in T_CONST.BOSS_NODES:
                     next_node = self.single_node_sortie(next_node)
                 self.single_node_sortie(next_node)
             elif node_status in [1, 2]:
                 next_node = self.curr_node
                 if node_status == 2:
                     next_node = self.resume_node_sortie(self.curr_node)
-                while next_node != '931617':
+                while next_node not in T_CONST.BOSS_NODES:
                     next_node = self.single_node_sortie(self.curr_node)
                 self.single_node_sortie(next_node)
             else:
@@ -268,22 +268,16 @@ class Sortie:
             self.parent.button_fresh_sortie.setEnabled(True)
             return
 
-    def get_node_status(self, node_id: str) -> int:
-        try:
-            node = next((i for i in self.user_data['nodeList'] if i['node_id'] == node_id))
-            return node['status']
-        except StopIteration:
-            return -1
-
     def start_fresh_sortie(self) -> None:
         try:
-            if self.curr_node == "0" or self.curr_node[:4] == "9316":
+            if self.curr_node == "0":
                 self._clean_memory()
-                next_id = self.E6A1()
-            else:
-                self.logger.debug("new sub map!!!!!!!!!")
-                next_id = self.curr_node[:4] + "01"
-                self.helper.api_withdraw()
+                # next_id = self.starting_node()
+            next_id = self.starting_node()
+            # else:
+            #     self.logger.debug("new sub map!!!!!!!!!")
+            #     next_id = self.curr_node[:4] + "01"
+            #     self.helper.api_withdraw()
 
             while next_id not in T_CONST.BOSS_NODES:
                 next_id = self.single_node_sortie(next_id)
@@ -300,6 +294,13 @@ class Sortie:
     # ================================
     # Setter / Getter
     # ================================
+
+    def get_node_status(self, node_id: str) -> int:
+        try:
+            node = next((i for i in self.user_data['nodeList'] if i['node_id'] == node_id))
+            return node['status']
+        except StopIteration:
+            return -1
 
     def set_sub_map(self, sub_map_id: str) -> None:
         self.curr_sub_map = sub_map_id
@@ -359,12 +360,15 @@ class Sortie:
 
     # ================================
     # Combat
-    # TODO: hardcoding A1, B1...
     # ================================
 
-    def E6A1(self) -> str:
+    def starting_node(self) -> str:
+        # !! MUST DO readyFire First, THEN USE withdraw !!
+        # OTHERWISE, IT WILL RESET EVERYTHING. (I'm in E6-2 right now, but with Lv.1 adjutant and empty boat pool)
+        next_node_id = self.helper.api_readyFire(self.curr_sub_map)
         self.helper.api_withdraw()
-        next_node_id = self.helper.api_readyFire('9316')
+        # second readyFire
+        next_node_id = self.helper.api_readyFire(self.curr_sub_map)
         return self.single_node_sortie(next_node_id)
 
     def find_SS(self, shop_data: list) -> list:
@@ -381,7 +385,7 @@ class Sortie:
     def single_node_sortie(self, curr_node_id: str) -> str:
         self.curr_node = curr_node_id
         self.logger.info('********************************')
-        self.logger.info("Start combat on new node")
+        self.logger.info("Start combat on {}".format(self.curr_node))
         self.logger.info(self.helper.points)
         self.logger.info(self.helper.adjutant_info)
         self.logger.info('********************************')
@@ -402,7 +406,7 @@ class Sortie:
                 # second shop fetch
                 shop_res = self.helper.get_ship_store('1')
                 ss_list = self.find_SS(shop_res['boats'])
-                if len(ss_list) == 0 and self.curr_node == '931607':
+                if len(ss_list) == 0 and self.curr_node in ['931607', '931702', '931802']:
                     raise ThermopylaeSortieRestart
                 else:
                     pass
@@ -495,7 +499,7 @@ class Sortie:
 
     def resume_node_sortie(self, curr_node_id: str) -> str:
         self.logger.info('********************************')
-        self.logger.info("Resume combat on new node")
+        self.logger.info("Resume combat on {}".format(curr_node_id))
         self.logger.info(self.helper.points)
         self.logger.info(self.helper.adjutant_info)
         self.logger.info('********************************')

@@ -4,7 +4,7 @@ SHIP_TYPE = {
     11: "BM", 12: "DD", 13: "SSV", 14: "SS", 15: "SC",
     16: "AP", 23: "ASDG", 24: "AADG", 26: "CB", 27: "BBG",
     # Enemy types
-    17: "Fortess"
+    17: "Fortess", 99: "Flagship"
 }
 RANGE_TYPE = {0: "?", 1: "S", 2: "M", 3: "L", 4: "XL"}
 AIR_CONTROL = {1: "Air Supremacy", 2: "Air Superiority", 3: "Air Parity", 4: "Air Denial", 5: "Air Incapability"}
