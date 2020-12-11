@@ -64,7 +64,6 @@ class Sortie:
 
     def _clean_memory(self):
         self.logger.info("Reset ship card pool, battle fleet and curr node")
-        self.curr_node = "0"
         self.set_boat_pool([])
         self.set_fleet([])
 
@@ -305,8 +304,10 @@ class Sortie:
 
     def start_fresh_sortie(self) -> None:
         try:
-            if self.curr_node == "0":
+            if self.curr_node == "0" or self.curr_sub_map == "0":
                 self._clean_memory()
+                self.curr_node = '931601'
+                self.curr_sub_map = '9316'
             next_id = self.starting_node()
 
             while next_id not in T_CONST.BOSS_NODES:
