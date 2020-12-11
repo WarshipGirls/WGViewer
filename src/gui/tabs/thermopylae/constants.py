@@ -1,3 +1,4 @@
+# TODO: add these settings to GUI
 BOSS_RETRY_LIMIT = 3
 CONNECTION_RETRY_LIMIT = 3
 """

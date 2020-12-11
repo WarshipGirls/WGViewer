@@ -217,7 +217,7 @@ class Sortie:
             shop_res = self.api.canSelectList('0')
             # TODO simplify this giant if-else
             if 'eid' in shop_res:
-                self.logger.debug('you already bought')
+                get_error(shop_res['eid'])
                 buy_res = None
             elif '$ssss' in shop_res:
                 self.logger.debug('trying visiting store')
@@ -251,6 +251,9 @@ class Sortie:
                             buy_res = self.helper.buy_ships(purchase_list, shop_res)
                         else:
                             buy_res = None
+            elif '$reset-$data' in shop_res and shop_res['$reset-$data'] is not None:
+                self.logger.debug('user has already used up purchase opportunity')
+                buy_res = None
             else:
                 self.logger.debug(shop_res)
                 buy_res = None
@@ -264,6 +267,7 @@ class Sortie:
                 self.set_fleet(buy_res['boatPool'])
 
             node_status = self.get_node_status(self.curr_node)
+            # TODO: a fresh run with rebattle boss lead to -1 here
             print("node status = {}".format(node_status))
             if node_status == -1:
                 self.logger.error('Unexpected node. Should do a fresh start.')
@@ -306,6 +310,7 @@ class Sortie:
         try:
             if self.curr_node == "0" or self.curr_sub_map == "0":
                 self._clean_memory()
+                self.api.setChapterBoat('10006', self.final_fleet)
                 self.curr_node = '931601'
                 self.curr_sub_map = '9316'
             next_id = self.starting_node()

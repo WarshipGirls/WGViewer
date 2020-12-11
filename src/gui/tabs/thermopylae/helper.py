@@ -501,7 +501,7 @@ class SortieHelper:
             self.logger.info('---- BOSS BATTLE (TODO NIGHT BATTLE) ----')
             self.logger.info(e_list)
             if curr_id == T_CONST.BOSS_NODES[0]:
-                if e_list[0] == 0 and e_list[3] == 0:
+                if e_list[0] == 0 or e_list[3] == 0:
                     do_night_battle = True
                 elif e_list.count(0) >= 2:
                     do_night_battle = True

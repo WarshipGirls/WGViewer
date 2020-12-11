@@ -78,6 +78,7 @@ class TabThermopylae(QWidget):
         self.init_ui()
         self.sortie = Sortie(self, self.api_six, [], [], self.is_realrun)
 
+        # TODO: use a callback worker, I need result handling
         self.bee_pre_battle = Worker(self.sortie.pre_battle, ())
         self.bee_pre_battle.finished.connect(self.pre_battle_finished)
         self.bee_pre_battle.terminate()

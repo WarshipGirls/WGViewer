@@ -83,7 +83,7 @@ class API_SIX(WGR_API):
         return self._api_urlopen(link)
 
     def setChapterBoat(self, sortie_map: str, fleets: list):
-        # sortie_map from 9301 to 9318 in the order of E1 (9301,9302,9303) to E6 (9316,9317,9318)
+        # chapter id: 10001 (E1) to 10006 (E6)
         link = 'six/setChapterBoat/' + sortie_map + '/' + self._int_list_to_str(fleets)
         return self._api_urlopen(link)
 
