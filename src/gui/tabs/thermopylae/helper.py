@@ -6,7 +6,7 @@ from typing import Callable, Tuple
 
 from src import utils as wgv_utils
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
-from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart
+from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume
 from src.wgr.six import API_SIX  # only for typehints
 from . import constants as T_CONST
 
@@ -510,7 +510,7 @@ class SortieHelper:
                         do_night_battle = True
                     else:
                         self.boss_retry_count += 1
-                        raise ThermopylaeSortieRestart("E6-1 BOSS NEEDS RE-BATTLE")
+                        raise ThermopylaeSortieResume("E6-1 BOSS NEEDS RE-BATTLE")
             elif curr_id == T_CONST.BOSS_NODES[1]:
                 if e_list.count(0) >= 2:
                     do_night_battle = True
@@ -519,7 +519,7 @@ class SortieHelper:
                         do_night_battle = True
                     else:
                         self.boss_retry_count += 1
-                        raise ThermopylaeSortieRestart("E6-2 BOSS NEEDS RE-BATTLE")
+                        raise ThermopylaeSortieResume("E6-2 BOSS NEEDS RE-BATTLE")
             else:
                 if e_list.count(0) >= 3:
                     do_night_battle = True
@@ -528,7 +528,7 @@ class SortieHelper:
                         do_night_battle = True
                     else:
                         self.boss_retry_count += 1
-                        raise ThermopylaeSortieRestart("E6-3 BOSS NEEDS RE-BATTLE")
+                        raise ThermopylaeSortieResume("E6-3 BOSS NEEDS RE-BATTLE")
         elif curr_id in T_CONST.REWARD_NODES:
             do_night_battle = True
         elif challenge_res['warReport']['canDoNightWar'] == 1:

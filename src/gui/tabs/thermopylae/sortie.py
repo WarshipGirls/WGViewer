@@ -1,10 +1,15 @@
+"""
+The implementation of auto E6 sortie is quite unnecessarily complicated at this point,
+please help improve the logic if possible! Many Thanks! - @pwyq
+"""
+
 import json
 
 from logging import getLogger
 
 from src import data as wgv_data
 from src.utils.general import set_sleep
-from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart
+from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume
 from .helper import SortieHelper
 
 # Following are only for typehints
@@ -55,19 +60,6 @@ class Sortie:
         self.curr_node = "0"
         self.set_boat_pool([])
         self.set_fleet([])
-
-    '''
-    > self.user_data
-        -> nodeId: current node
-        -> levelId: current level
-        -> chapterId: current chapter
-        -> npcId: current enemy
-        -> boats:
-            last set boat
-            len E1/2 = 14, E3/4 = 18, E5/6 = 22
-        -> level_id  ( I believe this is the user reached level)
-            9301 (E1 map1) 9303 (E1 map3) 9304 (E2 map1) 9316 (E6 map 1)
-    '''
 
     # ================================
     # Pre battle checke
@@ -188,10 +180,10 @@ class Sortie:
             self.helper.api_passLevel()
             self._get_user_data()
             self.set_sub_map(self.user_data['levelId'])
-            raise ThermopylaeSoriteExit("BOSS FIGHT DONE!")
+            raise ThermopylaeSortieRestart("BOSS FIGHT DONE!")
 
     def resume_sortie(self) -> None:
-        # TODO: still some corner cases to catch
+        # TODO: still have some corner cases to catch
         self.logger.info(f"Resume sortie from node {self.curr_node}")
         try:
             if self.check_sub_map_done(self.curr_node) is True:
@@ -275,6 +267,9 @@ class Sortie:
             return
         except ThermopylaeSortieRestart as e:
             set_sleep()
+            self.start_fresh_sortie()
+        except ThermopylaeSortieResume as e:
+            set_sleep()
             self.logger.debug(e)
             self.resume_sortie()
 
@@ -296,8 +291,10 @@ class Sortie:
             return
         except ThermopylaeSortieRestart as e:
             set_sleep()
-            self.logger.debug(e)
             self.start_fresh_sortie()
+        except ThermopylaeSortieResume as e:
+            self.logger.debug(e)
+            self.resume_sortie()
 
     # ================================
     # Setter / Getter
@@ -345,6 +342,7 @@ class Sortie:
 
         if self.curr_node == '931607':
             if len(ss) == 0:
+                # TODO: this is not covered; a raise is before this one
                 raise ThermopylaeSoriteExit
             else:
                 self.battle_fleet = set([int(j) for j in ss])
@@ -458,8 +456,6 @@ class Sortie:
         self.update_side_dock_resources(supply_res['userVo'])
 
         repair_res = self.helper.process_repair(supply_res['shipVO'], [self.repair_level])  # pre-battle repair
-        print('repair result:')
-        print(repair_res)
         if 'userVo' in repair_res:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
@@ -500,8 +496,8 @@ class Sortie:
             self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
             self.logger.info('********************************')
         else:
-            self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
-            raise ThermopylaeSoriteExit
+            self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Restarting...")
+            raise ThermopylaeSortieRestart
 
         self.check_sub_map_done(next_id)
         return next_id
@@ -517,8 +513,6 @@ class Sortie:
         self.update_side_dock_resources(supply_res['userVo'])
 
         repair_res = self.helper.process_repair(supply_res['shipVO'], [self.repair_level])  # pre-battle repair
-        print('repair result:')
-        print(repair_res)
         if 'userVo' in repair_res:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
@@ -564,8 +558,8 @@ class Sortie:
             else:
                 pass
         else:
-            self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
-            raise ThermopylaeSoriteExit
+            self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Restarting...")
+            raise ThermopylaeSortieRestart
         self.check_sub_map_done(next_id)
         return next_id
 
