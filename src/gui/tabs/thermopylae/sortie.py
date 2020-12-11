@@ -33,7 +33,7 @@ class Sortie:
         self.logger = getLogger('TabThermopylae')
         self.is_realrun = is_realrun
 
-        self.max_retry = 5
+        # self.max_retry = 5
 
         self.fleet_info = None
         self.map_data = None
@@ -178,26 +178,24 @@ class Sortie:
     # Entry points
     # ================================
 
+    def check_sub_map_done(self, curr_node: str) -> None:
+        if curr_node == "":
+            self._get_user_data()
+            curr_node = self.user_data['nodeId']
+        node_status = self.get_node_status(curr_node)
+        if (curr_node in T_CONST.BOSS_NODES) and (node_status == 3):
+            # boss_res = self.helper.api_passLevel();   # boss_res cannot be parsed due to invliad json from the response
+            self.helper.api_passLevel()
+            self._get_user_data()
+            self.set_sub_map(self.user_data['levelId'])
+            raise ThermopylaeSoriteExit("BOSS FIGHT DONE!")
+
     def resume_sortie(self) -> None:
         # TODO: still some corner cases to catch
         self.logger.info(f"Resume sortie from node {self.curr_node}")
         try:
-            node_status = self.get_node_status(self.curr_node)
-            if self.curr_node in T_CONST.BOSS_NODES and node_status == 3:
-                boss_res = self.helper.api_passLevel()
-                # new_sub_map = self.helper.process_boss_reward_result(boss_res)
-                self._get_user_data()
-                self.set_sub_map(self.user_data['levelId'])
+            if self.check_sub_map_done(self.curr_node) is True:
                 return
-            # Shopping Cases when user resume:
-            #   - user has not visit shop
-            #   - user has visit shop once
-            #       - user made purchase    (can't purchase again)
-            #       - user didn't purchase  (how to detect? w/o calling server?)
-            #   - user has visit shop twice
-            #       - user purchased        (can't purchase again)
-            #       - user didn't purchase  (how to detect w/o calling server?)
-            #
             shop_res = self.api.canSelectList('0')
             # TODO simplify this giant if-else
             if 'eid' in shop_res:
@@ -247,48 +245,58 @@ class Sortie:
                 self.set_boat_pool(buy_res['boatPool'])
                 self.set_fleet(buy_res['boatPool'])
 
-            print(node_status)
+            node_status = self.get_node_status(self.curr_node)
+            print("node status = {}".format(node_status))
             if node_status == -1:
                 self.logger.error('Unexpected node. Should do a fresh start.')
             elif node_status == 3:
                 next_node = self.helper.get_next_node_by_id(self.curr_node)
                 while next_node not in T_CONST.BOSS_NODES:
                     next_node = self.single_node_sortie(next_node)
+                # boss fight
                 self.single_node_sortie(next_node)
+                # if self.check_sub_map_done(self.curr_node) is True:
+                #     return
             elif node_status in [1, 2]:
                 next_node = self.curr_node
                 if node_status == 2:
                     next_node = self.resume_node_sortie(self.curr_node)
                 while next_node not in T_CONST.BOSS_NODES:
                     next_node = self.single_node_sortie(self.curr_node)
+                # boss fight
                 self.single_node_sortie(next_node)
+                # if self.check_sub_map_done(self.curr_node) is True:
+                #     return
             else:
                 self.logger.debug(self.curr_node)
-        except ThermopylaeSoriteExit:
+        except ThermopylaeSoriteExit as e:
+            self.logger.debug(e)
             self.parent.button_fresh_sortie.setEnabled(True)
             return
+        except ThermopylaeSortieRestart as e:
+            set_sleep()
+            self.logger.debug(e)
+            self.resume_sortie()
 
     def start_fresh_sortie(self) -> None:
         try:
             if self.curr_node == "0":
                 self._clean_memory()
-                # next_id = self.starting_node()
             next_id = self.starting_node()
-            # else:
-            #     self.logger.debug("new sub map!!!!!!!!!")
-            #     next_id = self.curr_node[:4] + "01"
-            #     self.helper.api_withdraw()
 
             while next_id not in T_CONST.BOSS_NODES:
                 next_id = self.single_node_sortie(next_id)
             self.logger.info("!! REACHING BOSS NODE !!")
             self.single_node_sortie(next_id)
-            # TODO: this one up to E6-1H1(boss)
-        except ThermopylaeSoriteExit:
+            # if self.check_sub_map_done(self.curr_node) is True:
+            #     return
+        except ThermopylaeSoriteExit as e:
+            self.logger.debug(e)
             self.parent.button_fresh_sortie.setEnabled(True)
             return
-        except ThermopylaeSortieRestart:
-            self.logger.warning("RESTARTING!")
+        except ThermopylaeSortieRestart as e:
+            set_sleep()
+            self.logger.debug(e)
             self.start_fresh_sortie()
 
     # ================================
@@ -363,9 +371,8 @@ class Sortie:
     # ================================
 
     def starting_node(self) -> str:
-        # !! MUST DO readyFire First, THEN USE withdraw !!
-        # OTHERWISE, IT WILL RESET EVERYTHING. (I'm in E6-2 right now, but with Lv.1 adjutant and empty boat pool)
-        next_node_id = self.helper.api_readyFire(self.curr_sub_map)
+        # First let the server know which sub-map you are on; otherwise without this, withdraw resets to the first sub-map
+        self.helper.api_readyFire(self.curr_sub_map)
         self.helper.api_withdraw()
         # second readyFire
         next_node_id = self.helper.api_readyFire(self.curr_sub_map)
@@ -495,6 +502,8 @@ class Sortie:
         else:
             self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
             raise ThermopylaeSoriteExit
+
+        self.check_sub_map_done(next_id)
         return next_id
 
     def resume_node_sortie(self, curr_node_id: str) -> str:
@@ -551,12 +560,13 @@ class Sortie:
                 self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
                 self.logger.info('********************************')
             elif next_id == "":
-                self.logger.info('---- BOSS NODE ----')
+                self.logger.info('---- BOSS NODE FINISHED ----')
             else:
                 pass
         else:
             self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Should restart. Exiting.")
             raise ThermopylaeSoriteExit
+        self.check_sub_map_done(next_id)
         return next_id
 
 # End of File

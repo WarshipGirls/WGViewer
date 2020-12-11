@@ -1,3 +1,5 @@
+BOSS_RETRY_LIMIT = 3
+CONNECTION_RETRY_LIMIT = 3
 """
 The list is used to determine the order of submarines in E6 (thermopylae) battle fleet.
 It is manually sorted, as of Game ver5.1.0, based on following criteria:

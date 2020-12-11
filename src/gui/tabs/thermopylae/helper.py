@@ -6,7 +6,7 @@ from typing import Callable, Tuple
 
 from src import utils as wgv_utils
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
-from src.exceptions.custom import ThermopylaeSoriteExit
+from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart
 from src.wgr.six import API_SIX  # only for typehints
 from . import constants as T_CONST
 
@@ -19,11 +19,9 @@ class SortieHelper:
         self.user_ships = user_ships
         self.map_data = map_data
 
-        self.max_retry = 3
+        self.boss_retry_count = 0
         self.points = 10
         self.adjutant_info = {}  # level, curr_exp, exp_cap
-
-        self.logger.debug('SortieHelper is initiated')
 
     def _reconnecting_calls(self, func: Callable, func_info: str) -> [dict, object]:
         # This redundancy while-loop (compared to api.py's while-loop) deals with WarshipGirlsExceptions;
@@ -41,8 +39,8 @@ class SortieHelper:
                 wgv_utils.set_sleep()
 
             tries += 1
-            if tries >= self.max_retry:
-                self.logger.error(f"Failed to {func_info} after {self.max_retry} reconnections. Please try again later.")
+            if tries >= T_CONST.CONNECTION_RETRY_LIMIT:
+                self.logger.error(f"Failed to {func_info} after {T_CONST.CONNECTION_RETRY_LIMIT} reconnections. Please try again later.")
                 raise ThermopylaeSoriteExit()
             else:
                 pass
@@ -359,6 +357,7 @@ class SortieHelper:
         try:
             next_node = self.get_map_node_by_id(node_id)
             if len(next_node['next_node']) == 0:
+                # Boss node
                 next_node_id = ""
             else:
                 next_node_id = str(next_node['next_node'][0])
@@ -498,7 +497,8 @@ class SortieHelper:
             do_night_battle = False
         elif curr_id in T_CONST.BOSS_NODES:
             e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
-            self.logger.info('---- BOSS BATTLE ----')
+            # TODO TODO: simplify and refactor
+            self.logger.info('---- BOSS BATTLE (TODO NIGHT BATTLE) ----')
             self.logger.info(e_list)
             if curr_id == T_CONST.BOSS_NODES[0]:
                 if e_list[0] == 0 and e_list[3] == 0:
@@ -506,17 +506,29 @@ class SortieHelper:
                 elif e_list.count(0) >= 2:
                     do_night_battle = True
                 else:
-                    raise ThermopylaeSoriteExit("E6-1 BOSS NEEDS RE-BATTLE")
+                    if self.boss_retry_count == T_CONST.BOSS_RETRY_LIMIT:
+                        do_night_battle = True
+                    else:
+                        self.boss_retry_count += 1
+                        raise ThermopylaeSortieRestart("E6-1 BOSS NEEDS RE-BATTLE")
             elif curr_id == T_CONST.BOSS_NODES[1]:
                 if e_list.count(0) >= 2:
                     do_night_battle = True
                 else:
-                    raise ThermopylaeSoriteExit("E6-2 BOSS NEEDS RE-BATTLE")
+                    if self.boss_retry_count == T_CONST.BOSS_RETRY_LIMIT:
+                        do_night_battle = True
+                    else:
+                        self.boss_retry_count += 1
+                        raise ThermopylaeSortieRestart("E6-2 BOSS NEEDS RE-BATTLE")
             else:
                 if e_list.count(0) >= 3:
                     do_night_battle = True
                 else:
-                    raise ThermopylaeSoriteExit("E6-3 BOSS NEEDS RE-BATTLE")
+                    if self.boss_retry_count == T_CONST.BOSS_RETRY_LIMIT:
+                        do_night_battle = True
+                    else:
+                        self.boss_retry_count += 1
+                        raise ThermopylaeSortieRestart("E6-3 BOSS NEEDS RE-BATTLE")
         elif curr_id in T_CONST.REWARD_NODES:
             do_night_battle = True
         elif challenge_res['warReport']['canDoNightWar'] == 1:
