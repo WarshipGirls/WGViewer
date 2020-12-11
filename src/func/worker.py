@@ -24,7 +24,6 @@ class CallbackWorker(QThread):
 
     def run(self) -> None:
         res = self._func(*self.args)
-        res = True if res is True else False
         self.finished.emit(res)
 
 # End of File
