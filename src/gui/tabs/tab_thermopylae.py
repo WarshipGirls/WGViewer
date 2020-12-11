@@ -99,6 +99,7 @@ class TabThermopylae(QWidget):
         ticket_tag = QLabel("Remaining Sortie Tickets")
         self.ticket_label = QLabel("?")
         can_buy_tag = QLabel("Purchasable Tickets")
+        # TODO: link the label to chargeTicket
         self.purchasable_label = QLabel("?")
         layout.addWidget(ticket_tag)
         layout.addWidget(self.ticket_label)

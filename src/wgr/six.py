@@ -3,7 +3,6 @@ from .boat import API_BOAT
 
 
 class API_SIX(WGR_API):
-    # TODO find purchase ticket
     def __init__(self, cookies):
         super().__init__(cookies)
         self.boats_api = API_BOAT(cookies)
@@ -41,6 +40,10 @@ class API_SIX(WGR_API):
         link = 'six/cha11enge/' + formation
         return self._api_call(link)
 
+    def chargeTicket(self):
+        link = 'six/chargeTicket/3'
+        return self._api_call(link)
+
     def getUserData(self):
         link = 'six/getuserdata'        # no typo, all lowercase
         return self._api_call(link)
@@ -71,6 +74,7 @@ class API_SIX(WGR_API):
         return self._api_call(link)
 
     def resetChapter(self, sortie_map: str):
+        # used when after passing the final sub-map of a chapter
         link = 'resetChapter/' + sortie_map
         return self._api_call(link)
 
