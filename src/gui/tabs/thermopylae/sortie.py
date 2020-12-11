@@ -15,6 +15,7 @@ from logging import getLogger
 
 from src import data as wgv_data
 from src.utils.general import set_sleep
+from src.exceptions.wgr_error import get_error
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume, ThermopylaeSortieDone
 from .helper import SortieHelper
 
@@ -73,16 +74,25 @@ class Sortie:
 
     def _get_fleet_info(self) -> None:
         self.fleet_info = self.api.getFleetInfo()
+        if 'eid' in self.fleet_info:
+            get_error(self.fleet_info['eid'])
+            return
         save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
         set_sleep()
 
     def _get_pve_data(self) -> None:
         self.map_data = self.api.getPveData()
+        if 'eid' in self.map_data:
+            get_error(self.map_data['eid'])
+            return
         save_json('six_getPveData.json', self.map_data)  # TODO only for testing
         set_sleep()
 
     def _get_user_data(self) -> None:
         self.user_data = self.api.getUserData()
+        if 'eid' in self.user_data:
+            get_error(self.user_data['eid'])
+            return
         save_json('six_getUserData.json', self.user_data)  # TODO only for testing
         set_sleep()
 
