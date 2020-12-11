@@ -13,4 +13,8 @@ class ThermopylaeSortieRestart(Exception):
 class ThermopylaeSortieResume(Exception):
     pass
 
+
+class ThermopylaeSortieDone(Exception):
+    pass
+
 # End of File

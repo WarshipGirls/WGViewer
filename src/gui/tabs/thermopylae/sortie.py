@@ -1,6 +1,12 @@
 """
 The implementation of auto E6 sortie is quite unnecessarily complicated at this point,
 please help improve the logic if possible! Many Thanks! - @pwyq
+
+TODO: one-complete-run w/o interference
+TODO: multiple consecutive run w/o interference
+TODO: replace raise?
+TODO: remove all hard coding
+TODO: refactor
 """
 
 import json
@@ -9,7 +15,7 @@ from logging import getLogger
 
 from src import data as wgv_data
 from src.utils.general import set_sleep
-from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume
+from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume, ThermopylaeSortieDone
 from .helper import SortieHelper
 
 # Following are only for typehints
@@ -176,18 +182,29 @@ class Sortie:
             curr_node = self.user_data['nodeId']
         node_status = self.get_node_status(curr_node)
         if (curr_node in T_CONST.BOSS_NODES) and (node_status == 3):
-            # boss_res = self.helper.api_passLevel();   # boss_res cannot be parsed due to invliad json from the response
             self.helper.api_passLevel()
             self._get_user_data()
             self.set_sub_map(self.user_data['levelId'])
-            raise ThermopylaeSortieRestart("BOSS FIGHT DONE!")
+            if self.curr_sub_map == '9318':
+                raise ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
+            else:
+                raise ThermopylaeSortieRestart("BOSS FIGHT DONE!")
+
+    def _reset_chapter(self) -> None:
+        # chapter can only be reset after E6-3
+        reset_res = self.api.resetChapter('10006')
+        self.set_boat_pool([])
+        self.set_fleet([])
+        self.set_sub_map('9316')
+        # self.set_adjutant_info(reset_res['adjutantData'])
+        self.helper.set_adjutant_info(reset_res['adjutantData'])
 
     def resume_sortie(self) -> None:
         # TODO: still have some corner cases to catch
         self.logger.info(f"Resume sortie from node {self.curr_node}")
         try:
-            if self.check_sub_map_done(self.curr_node) is True:
-                return
+            self.check_sub_map_done(self.curr_node)
+
             shop_res = self.api.canSelectList('0')
             # TODO simplify this giant if-else
             if 'eid' in shop_res:
@@ -272,6 +289,9 @@ class Sortie:
             set_sleep()
             self.logger.debug(e)
             self.resume_sortie()
+        except ThermopylaeSortieDone as e:
+            self.logger.info(e)
+            self._reset_chapter()
 
     def start_fresh_sortie(self) -> None:
         try:
@@ -295,6 +315,9 @@ class Sortie:
         except ThermopylaeSortieResume as e:
             self.logger.debug(e)
             self.resume_sortie()
+        except ThermopylaeSortieDone as e:
+            self.logger.info(e)
+            self._reset_chapter()
 
     # ================================
     # Setter / Getter
