@@ -516,8 +516,7 @@ class Sortie:
 
         set_sleep(level=2)
         is_night_battle = self.helper.check_night_battle(curr_node_id, challenge_res)
-        night_battle_option = '1' if is_night_battle is True else '0'
-        battle_res = self.helper.get_war_result(night_battle_option)
+        battle_res = self.helper.get_war_result(is_night_battle)
         self.helper.process_battle_result(battle_res, list(self.battle_fleet))
 
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:

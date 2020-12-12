@@ -550,60 +550,60 @@ class SortieHelper:
             res = {}
         return res
 
-    def check_night_battle(self, curr_id: str, challenge_res: dict) -> bool:
+    def check_night_battle(self, curr_id: str, challenge_res: dict) -> str:
         # TODO TODO: simplify and refactor
-        do_night_battle = False
+        res = '0'
         if challenge_res['warReport']['canDoNightWar'] == 0:
             self.logger.info('Battle is finished by day')
-            do_night_battle = False
+            res = '0'
         elif curr_id in T_CONST.BOSS_NODES:
             e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
             self.logger.info('---- BOSS BATTLE (TODO NIGHT BATTLE) ----')
             self.logger.info(e_list)
             if curr_id == T_CONST.BOSS_NODES[0]:
                 if e_list[0] == 0 or e_list[3] == 0:
-                    do_night_battle = True
+                    res = '1'
                 elif e_list.count(0) >= 2:
-                    do_night_battle = True
+                    res = '1'
                 else:
                     if self.boss_retry_count[0] == T_CONST.BOSS_RETRY_LIMITS[0]:
-                        do_night_battle = True
+                        res = '1'
                     else:
                         self.boss_retry_count[0] += 1
                         raise ThermopylaeSortieResume("E6-1 BOSS NEEDS RE-BATTLE")
             elif curr_id == T_CONST.BOSS_NODES[1]:
                 if e_list.count(0) >= 2:
-                    do_night_battle = True
+                    res = '1'
                 else:
                     if self.boss_retry_count[1] == T_CONST.BOSS_RETRY_LIMITS[1]:
-                        do_night_battle = True
+                        res = '1'
                     else:
                         self.boss_retry_count[1] += 1
                         raise ThermopylaeSortieResume("E6-2 BOSS NEEDS RE-BATTLE")
             elif curr_id == T_CONST.BOSS_NODES[2]:
                 if e_list.count(0) >= 3:
-                    do_night_battle = True
+                    res = '1'
                 else:
                     if self.boss_retry_count[2] == T_CONST.BOSS_RETRY_LIMITS[2]:
-                        do_night_battle = True
+                        res = '1'
                     else:
                         self.boss_retry_count[2] += 1
                         raise ThermopylaeSortieResume("E6-3 BOSS NEEDS RE-BATTLE")
             else:
                 self.logger.error(f"Wrong access [{curr_id}] to night battle process for boss nodes.")
         elif curr_id in T_CONST.REWARD_NODES:
-            do_night_battle = True
+            res = '1'
         elif challenge_res['warReport']['canDoNightWar'] == 1:
             e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
             self.logger.info(e_list)
             if e_list[0] != 0:  # if enemy's flagship is sunken
-                do_night_battle = True
+                res = '1'
             else:
-                do_night_battle = False
+                res = '0'
         else:
             self.logger.info("Cannot process battle info; no night battle.")
-            do_night_battle = False
-        return do_night_battle
+            res = '0'
+        return res
 
     def process_battle_result(self, battle_res: dict, fleet: list):
         res_str = f"==== {wgv_utils.get_war_evaluation(battle_res['resultLevel'])} ===="
