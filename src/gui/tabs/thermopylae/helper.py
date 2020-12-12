@@ -134,11 +134,7 @@ class SortieHelper:
             elif '$ssss' in data:
                 self.logger.info('Visiting shop succeed!')
                 res = True
-            elif 'hadResetSelectFlag' in data and data['hadResetSelectFlag'] == 1:
-                self.logger.warning('Shop has been reset')
-                res = True
-            elif 'hadResetSelectFlag' in data and data['hadResetSelectFlag'] == 0:
-                self.logger.warning('Shop has not been reset')
+            elif 'hadResetSelectFlag' in data:
                 res = True
             else:
                 self.logger.error(data)
@@ -310,7 +306,7 @@ class SortieHelper:
             return res, data
 
         spy_data = self._reconnecting_calls(_spy, 'Detection')
-        self.logger.info(wgv_utils.process_spy_json(spy_data))
+        self.logger.info(wgv_utils.process_spy_json(spy_data))  # TODO: this should put in main
         return spy_data
 
     def challenge(self, formation: str) -> dict:
@@ -397,14 +393,12 @@ class SortieHelper:
         try:
             next_node = self.get_map_node_by_id(node_id)
             if len(next_node['next_node']) == 0:
-                # Boss node
-                next_node_id = ""
+                next_node_id = ""  # Boss node
             else:
                 next_node_id = str(next_node['next_node'][0])
         except KeyError:
             self.logger.error('Access wrong nodes.')
             next_node_id = "-1"
-        print('nextttttttttttttttttt is {}'.format(next_node_id))
         return next_node_id
 
     def set_adjutant_info(self, adj_data: dict) -> None:
@@ -443,6 +437,7 @@ class SortieHelper:
         return res
 
     def check_adjutant_level_bump(self) -> int:
+        # TODO: combine this and bump_level
         """
         Check if adjutant level can be bumped
 
@@ -569,7 +564,7 @@ class SortieHelper:
                     res = '1'
                 else:
                     self.boss_retry_count[node_idx] += 1
-                    raise ThermopylaeSortieResume(f"E6-{node_idx+1} BOSS NEEDS RE-BATTLE")
+                    raise ThermopylaeSortieResume(f"E6-{node_idx + 1} BOSS NEEDS RE-BATTLE")
         elif curr_id in T_CONST.REWARD_NODES:
             res = '1'
         elif challenge_res['warReport']['canDoNightWar'] == 1:
@@ -595,7 +590,7 @@ class SortieHelper:
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
             self.logger.info(ship_str)
 
-    # def process_boss_reward_result(self, reward_res: dict) -> str:
+        # def process_boss_reward_result(self, reward_res: dict) -> str:
         # TODO: fail due to stupid WGR developer's coding practice
         """
         self.logger.info("######## BOSS REWARDS ########")

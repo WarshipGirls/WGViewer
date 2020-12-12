@@ -10,6 +10,7 @@ TODO: replace raise?
 TODO free up dock space if needed
 TODO: remove all hard coding
 TODO: refactor
+TODO: use set instead of list wherever posible
 
 WGR BUG:
 - if you withdraw and re-enter a sub map w/o readyFire, then your adjutant data is not reset
@@ -61,6 +62,7 @@ class Sortie:
 
     # ================================
     # Pre battle checke
+    # TODO: move these to their own class
     # ================================
 
     def pre_battle_set_info(self) -> bool:
