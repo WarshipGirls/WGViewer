@@ -29,6 +29,16 @@ from .helper import SortieHelper
 from .pre_sortie import PreSortieCheck
 from . import constants as T_CONST
 
+# TODO? Long term, make this available to other maps
+CHAPTER_ID: str = '10006'
+SUB_MAP1_ID: str = '9316'
+E61_0_ID: str = '931601'
+E61_A1_ID: str = '931602'
+E61_B1_ID: str = '931604'
+E61_C1_ID: str = '931607'
+E62_A1_ID: str = '931702'
+E63_A1_ID: str = '931802'
+
 
 class Sortie:
 
@@ -63,10 +73,10 @@ class Sortie:
 
     def _reset_chapter(self) -> None:
         # chapter can only be reset after E6-3
-        reset_res = self.helper.reset_chapter('10006')
+        reset_res = self.helper.reset_chapter(CHAPTER_ID)
         self.set_boat_pool([])
         self.set_fleet([])
-        self.set_sub_map('9316')
+        self.set_sub_map(SUB_MAP1_ID)
         self.helper.set_adjutant_info(reset_res['adjutantData'])
         self.set_sortie_tickets(ticket=reset_res['ticket'])
 
@@ -142,6 +152,8 @@ class Sortie:
             pass
 
     def resume_sortie(self) -> None:
+        # TODO: may still have some corner cases to catch
+
         def _try_buying_ships(_ss_list, _shop_res):
             _buying_list = self.helper.find_affordable_ships(_ss_list, _shop_res)
             if len(_buying_list) > 0:
@@ -150,7 +162,6 @@ class Sortie:
                 _res = None
             return _res
 
-        # TODO: may still have some corner cases to catch
         self.logger.info(f"[RESUME] Sortie {self.curr_node}")
         try:
             self.helper.api_readyFire(self.curr_sub_map)
@@ -188,12 +199,11 @@ class Sortie:
                 self.set_fleet(buy_res['boatPool'])
 
             node_status = self.get_node_status(self.curr_node)
-            print("node status = {}".format(node_status))
+            self.logger.debug("node status = {}".format(node_status))
             if node_status == -1:
-                print(self.curr_node)
-                print(self.curr_sub_map)
-                print(self.user_data['nodeList'])
-                self.logger.error('Unexpected node. Should do a fresh start.')
+                self.logger.debug(self.curr_node)
+                self.logger.debug(self.curr_sub_map)
+                self.logger.debug(self.user_data['nodeList'])
             elif node_status == 3:
                 next_node = self.helper.get_next_node_by_id(self.curr_node)
                 while next_node not in T_CONST.BOSS_NODES:
@@ -207,7 +217,7 @@ class Sortie:
                 while next_node not in T_CONST.BOSS_NODES:
                     next_node = self.single_node_sortie(self.curr_node)
                 # boss fight
-                self.logger.info("!! REACHING BOSS NODE 2 !!")
+                self.logger.info("[RESUME] Reaching Boss Node")
                 self.single_node_sortie(next_node)
             else:
                 self.logger.debug(self.curr_node)
@@ -231,14 +241,14 @@ class Sortie:
         try:
             if self.curr_node == "0" or self.curr_sub_map == "0":
                 self._clean_memory()
-                self.api.setChapterBoat('10006', self.final_fleet)
-                self.curr_node = '931601'
-                self.curr_sub_map = '9316'
+                self.api.setChapterBoat(CHAPTER_ID, self.final_fleet)
+                self.curr_node = E61_0_ID
+                self.curr_sub_map = SUB_MAP1_ID
             next_id = self.starting_node()
 
             while next_id not in T_CONST.BOSS_NODES:
                 next_id = self.single_node_sortie(next_id)
-            self.logger.info("!! REACHING BOSS NODE 1 !!")
+            self.logger.info("[FRESH] Reaching Boss Node")
             self.single_node_sortie(next_id)
         except ThermopylaeSoriteExit as e:
             self.logger.debug(e)
@@ -305,7 +315,7 @@ class Sortie:
         else:
             self.battle_fleet = set([int(j) for j in fleet])
 
-        if self.curr_node == '931607':
+        if self.curr_node == E61_C1_ID:
             if len(ss) == 0:
                 # TODO: this is not covered; a raise is before this one
                 raise ThermopylaeSoriteExit
@@ -347,7 +357,7 @@ class Sortie:
         # Get from a list of int (max length of 5), return a list of ship_id (str)
         res = set()
         for ship_id in shop_data:
-            if self.curr_node[:4] == '9316' and ship_id in self.battle_fleet:
+            if self.curr_node[:4] == SUB_MAP1_ID and ship_id in self.battle_fleet:
                 # in E6-1, don't buy repeated ships
                 continue
             if ship_id in self.main_fleet:
@@ -364,10 +374,10 @@ class Sortie:
         self.helper.api_newNext(str(curr_node_id))
 
         buy_res = None
-        if curr_node_id == '931602':
+        if curr_node_id == E61_A1_ID:
             shop_res = self.helper.get_ship_store()
             buy_res = self.helper.buy_ships(self.escort_DD, shop_res)
-        elif curr_node_id == '931604':
+        elif curr_node_id == E61_B1_ID:
             shop_res = self.helper.get_ship_store()
             buy_res = self.helper.buy_ships(self.escort_CV, shop_res)
         else:
@@ -379,7 +389,7 @@ class Sortie:
                 set_sleep()
                 shop_res = self.helper.get_ship_store('1')
                 ss_list = self.find_SS(shop_res['boats'])
-                if len(ss_list) == 0 and self.curr_node in ['931607', '931702', '931802']:
+                if len(ss_list) == 0 and self.curr_node in [E61_C1_ID, E62_A1_ID, E63_A1_ID]:
                     raise ThermopylaeSortieRestart
                 else:
                     pass
@@ -396,7 +406,7 @@ class Sortie:
             self.set_boat_pool(buy_res['boatPool'])
             self.set_fleet(buy_res['boatPool'])
 
-        if curr_node_id in ['931602', '931702']:
+        if curr_node_id in [E61_A1_ID, '931702']:
             self.api.changeAdjutant('10082')
             # TODO: check adjutnat level
             self.helper.cast_skill()
