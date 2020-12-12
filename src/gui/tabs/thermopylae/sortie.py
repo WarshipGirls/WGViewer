@@ -18,6 +18,7 @@ WGR BUG:
 """
 
 from logging import getLogger
+from typing import Union
 
 from src import data as wgv_data
 from src.exceptions.wgr_error import get_error
@@ -130,14 +131,6 @@ class Sortie:
     def resume_sortie(self) -> None:
         # TODO: may still have some corner cases to catch
 
-        def _try_buying_ships(_ss_list, _shop_res):
-            _buying_list = self.helper.find_affordable_ships(_ss_list, _shop_res)
-            if len(_buying_list) > 0:
-                _res = self.helper.buy_ships(_buying_list, shop_res)
-            else:
-                _res = None
-            return _res
-
         self.logger.info(f"[RESUME] Sortie {self.curr_node}")
         try:
             self.helper.api_readyFire(self.curr_sub_map)
@@ -160,7 +153,7 @@ class Sortie:
                 if len(ss_list) == 0:
                     pass
                 else:
-                    buy_res = _try_buying_ships(ss_list, shop_res)
+                    buy_res = self.buy_wanted_ships(ss_list, shop_res)
             elif '$reset-$data' in shop_res and shop_res['$reset-$data'] is not None:
                 self.logger.debug("[RESUME]: User has already used up purchase opportunity")
             else:
@@ -296,6 +289,25 @@ class Sortie:
     # Helpers
     # ================================
 
+    def buy_wanted_ships(self, _list: list, shop_res: dict) -> Union[None, dict]:
+        """
+        Given a list of ship ids, find all affordable ships
+        @param _list: a list of ship id(s)
+        @type _list: list of int
+        @param shop_res: server response of six/canSelectList
+        @type shop_res: dict
+        @return:
+            - None, if no ships can be bought
+            - dict, server response of six/selectBoat
+        @rtype: None, or a dict
+        """
+        purchase_list = self.helper.find_affordable_ships(_list, shop_res)
+        if len(purchase_list) == 0:
+            buy_res = None
+        else:
+            buy_res = self.helper.buy_ships(purchase_list, shop_res)
+        return buy_res
+
     def check_sub_map_done(self) -> None:
         self.user_data = self.pre_sortie.fetch_user_data()
         curr_node = self.user_data['nodeId']
@@ -371,7 +383,6 @@ class Sortie:
 
         self.helper.api_newNext(str(curr_node_id))
 
-        buy_res = None
         if curr_node_id == E61_A1_ID:
             shop_res = self.helper.get_ship_store()
             buy_res = self.helper.buy_ships(self.escort_DD, shop_res)
@@ -393,13 +404,8 @@ class Sortie:
                     pass
             else:
                 pass
+            buy_res = self.buy_wanted_ships(ss_list, shop_res)
 
-            # TODO: same as inner funciton of resume_sortie
-            purchase_list = self.helper.find_affordable_ships(ss_list, shop_res)
-            if len(purchase_list) == 0:
-                pass
-            else:
-                buy_res = self.helper.buy_ships(purchase_list, shop_res)
         if buy_res is None:
             pass
         else:
@@ -442,7 +448,7 @@ class Sortie:
         else:
             pass
 
-        return self.one_sortie(curr_node_id)
+        return self._complete_sortie(curr_node_id)
 
     def resume_node_sortie(self, curr_node_id: str) -> str:
         self.logger.info('********************************')
@@ -452,10 +458,9 @@ class Sortie:
         self.logger.info('********************************')
         self.helper.api_readyFire(self.curr_node[:4])
 
-        return self.one_sortie(curr_node_id)
+        return self._complete_sortie(curr_node_id)
 
-    def one_sortie(self, curr_node_id: str) -> str:
-        # TODO: get a more informative name
+    def _complete_sortie(self, curr_node_id: str) -> str:
 
         set_sleep()
         supply_res = self.helper.supply_boats(list(self.battle_fleet))
