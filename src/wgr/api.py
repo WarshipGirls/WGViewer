@@ -9,6 +9,7 @@ from requests.utils import cookiejar_from_dict
 from time import sleep
 from urllib.request import Request, build_opener, HTTPCookieProcessor
 from urllib.error import URLError
+from http.client import HTTPResponse
 
 from src.gui.login.helper import LoginHelper
 
@@ -68,7 +69,10 @@ class WGR_API:
         _req.add_header(key='User-Agent', val='Dalvik/2.1.0 (Linux; U; Android 9.1.1; SAMSUNG-SM-G900A Build/LMY47X)')
         while not res:
             try:
-                raw_data = opener.open(_req, timeout=10).read()
+                # raw_data = opener.open(_req, timeout=10).read()
+                response = opener.open(_req, timeout=10)
+                self.wait_until_success(response)
+                raw_data = response.read()
                 try:
                     byte_data = zlib.decompress(raw_data)
                     data = literal_eval(byte_data.decode('ascii'))  # encoding type determined by chardet
@@ -87,6 +91,18 @@ class WGR_API:
             else:
                 pass
         return data
+
+    @staticmethod
+    def wait_until_success(response: HTTPResponse, _timeout: float = 2.0, _timewait: float = 0.5) -> None:
+        # for urlopen
+        timer = 0
+        while response.status == 204:
+            sleep(_timewait)
+            timer += _timewait
+            if timer > _timeout:
+                break
+            if response.status == 200:
+                break
 
     @staticmethod
     def _int_list_to_str(int_list: list) -> str:
