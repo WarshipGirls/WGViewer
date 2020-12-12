@@ -483,54 +483,7 @@ class Sortie:
         else:
             pass
 
-        set_sleep()
-        supply_res = self.helper.supply_boats(list(self.battle_fleet))
-        self.update_side_dock_resources(supply_res['userVo'])
-
-        repair_res = self.helper.process_repair(supply_res['shipVO'], T_CONST.SHIP_REPAIR_LEVELS)  # pre-battle repair
-        if 'userVo' in repair_res:
-            self.update_side_dock_resources(repair_res['userVo'])
-            self.update_side_dock_repair(repair_res['packageVo'])
-
-        set_sleep()
-        self.helper.spy()
-
-        set_sleep()
-
-        formation = self.helper.get_challenge_formation(curr_node_id=self.curr_node, battle_fleet_size=len(self.battle_fleet))
-        challenge_res = self.helper.challenge(formation)
-
-        do_night_battle = self.helper.is_night_battle(curr_node_id, challenge_res)
-
-        set_sleep(level=2)
-        if do_night_battle is True:
-            self.logger.info("Entering night war...")
-            battle_res = self.helper.get_war_result('1')
-        else:
-            battle_res = self.helper.get_war_result('0')
-        self.helper.process_battle_result(battle_res, list(self.battle_fleet))
-
-        set_sleep()
-        repair_res = self.helper.process_repair(battle_res['shipVO'], T_CONST.SHIP_REPAIR_LEVELS)  # post-battle repair
-        if 'userVo' in repair_res:
-            self.update_side_dock_resources(repair_res['userVo'])
-            self.update_side_dock_repair(repair_res['packageVo'])
-
-        if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
-            next_id = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
-            if next_id != "" and next_id != "-1":
-                self.logger.info('********************************')
-                self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
-                self.logger.info('********************************')
-            elif next_id == "":
-                self.logger.info('---- BOSS NODE FINISHED ----')
-            else:
-                pass
-        else:
-            self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Restarting...")
-            raise ThermopylaeSortieRestart
-        self.check_sub_map_done(next_id)
-        return next_id
+        return self.one_sortie(curr_node_id)
 
     def resume_node_sortie(self, curr_node_id: str) -> str:
         self.logger.info('********************************')
@@ -539,6 +492,13 @@ class Sortie:
         self.logger.info(self.helper.adjutant_info)
         self.logger.info('********************************')
         self.helper.api_readyFire(self.curr_node[:4])
+
+        return self.one_sortie(curr_node_id)
+
+    def one_sortie(self, curr_node_id: str) -> str:
+        # TODO: get a more informative name
+
+        set_sleep()
         supply_res = self.helper.supply_boats(list(self.battle_fleet))
         self.update_side_dock_resources(supply_res['userVo'])
 
