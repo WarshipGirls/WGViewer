@@ -39,7 +39,6 @@ class Sortie:
         self.logger = getLogger('TabThermopylae')
 
         # Used for pre-battle
-        self.fleet_info = None
         self.map_data = None
         self.user_data = None
 
@@ -76,16 +75,17 @@ class Sortie:
         else:
             pass
         self.set_sortie_tickets()
-        self.set_adjutant_info()
+        self.update_adjutant_label()
 
         # check if the sortie "final fleet" is set or not
-        b = self.fleet_info['chapterInfo']['boats']
+        fleet_info = self.pre_sortie.fetch_fleet_info()
+        b = fleet_info['chapterInfo']['boats']
         if len(b) == 0:
             self.logger.info('User has not entered E6. Select from old settings')
             last_fleets = user_e6['boats']
-        elif len(b) == 22 and self.fleet_info['chapterInfo']['level_id'] in ['9316', '9317', '9318']:
+        elif len(b) == 22 and fleet_info['chapterInfo']['level_id'] in ['9316', '9317', '9318']:
             self.logger.info('User has entered E6.')
-            self.set_sub_map(self.fleet_info['chapterInfo']['level_id'])
+            self.set_sub_map(fleet_info['chapterInfo']['level_id'])
             last_fleets = b
         else:
             self.logger.info('Invalid settings for using this function')
@@ -104,8 +104,6 @@ class Sortie:
         return res
 
     def pre_battle_calls(self) -> bool:
-        self.pre_sortie.fetch_fleet_info()
-        set_sleep()
         self.pre_sortie.fetch_map_data()
         set_sleep()
         self.pre_sortie.fetch_user_data()
@@ -181,7 +179,6 @@ class Sortie:
         self.set_boat_pool([])
         self.set_fleet([])
         self.set_sub_map('9316')
-        # self.set_adjutant_info(reset_res['adjutantData'])
         self.helper.set_adjutant_info(reset_res['adjutantData'])
         self.set_sortie_tickets(ticket=reset_res['ticket'])
 
@@ -338,8 +335,7 @@ class Sortie:
         else:
             self.parent.update_purchasable(str(num))
 
-    def set_adjutant_info(self) -> None:
-        # TODO: very similar functions in helper.py; may remove one of them
+    def update_adjutant_label(self) -> None:
         adj = self.user_data['adjutantData']
         self.parent.update_adjutant_name(T_CONST.ADJUTANT_ID_TO_NAME[adj['id']])
         self.parent.update_adjutant_exp(f"Lv. {adj['level']} {adj['exp']}/{adj['exp_top']}")

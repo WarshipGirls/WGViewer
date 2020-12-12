@@ -14,17 +14,17 @@ class PreSortieCheck:
         self.api: API_SIX = api
         self.is_realrun = is_realrun
 
-        self.fleet_info = None
         self.map_data = None
         self.user_data = None
 
-    def fetch_fleet_info(self) -> None:
-        self.fleet_info: dict = self.api.getFleetInfo()
-        if 'eid' in self.fleet_info:
-            get_error(self.fleet_info['eid'])
-            return
+    def fetch_fleet_info(self) -> dict:
+        fleet_info: dict = self.api.getFleetInfo()
+        if 'eid' in fleet_info:
+            get_error(fleet_info['eid'])
+            return {}
         if self.is_realrun is False:
-            save_json('six_getFleetInfo.json', self.fleet_info)
+            save_json('six_getFleetInfo.json', fleet_info)
+        return fleet_info
 
     def fetch_map_data(self) -> None:
         self.map_data: dict = self.api.getPveData()
