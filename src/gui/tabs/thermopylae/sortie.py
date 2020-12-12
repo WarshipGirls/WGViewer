@@ -151,47 +151,39 @@ class Sortie:
             return _res
 
         # TODO: may still have some corner cases to catch
-        self.logger.info(f"Resume sortie from node {self.curr_node}")
+        self.logger.info(f"[RESUME] Sortie {self.curr_node}")
         try:
             self.helper.api_readyFire(self.curr_sub_map)
             self.check_sub_map_done()
 
+            buy_res = None
+            # Access shop for the first time
             shop_res = self.api.canSelectList('0')
             if 'eid' in shop_res:
                 get_error(shop_res['eid'])
-                buy_res = None
             elif '$ssss' in shop_res:
-                self.logger.debug('trying visiting store')
-                if shop_res['hadResetSelectFlag'] == 0:
+                self.logger.debug("[RESUME]: Visiting shop")
+                ss_list = self.find_SS(shop_res['boats'])
+                if (len(ss_list) == 0) and (shop_res['hadResetSelectFlag'] == 0):
+                    # Access shop for the second time
+                    shop_res = self.api.canSelectList('1')
                     ss_list = self.find_SS(shop_res['boats'])
-                    if len(ss_list) == 0:
-                        # do a second fetch
-                        shop_res = self.api.canSelectList('1')
-                        ss_list = self.find_SS(shop_res['boats'])
-                        if len(ss_list) == 0:
-                            buy_res = None
-                        else:
-                            buy_res = _try_buying_ships(ss_list, shop_res)
-                    else:
-                        buy_res = _try_buying_ships(ss_list, shop_res)
                 else:
-                    ss_list = self.find_SS(shop_res['boats'])
-                    if len(ss_list) == 0:
-                        buy_res = None
-                    else:
-                        buy_res = _try_buying_ships(ss_list, shop_res)
+                    pass
+                if len(ss_list) == 0:
+                    pass
+                else:
+                    buy_res = _try_buying_ships(ss_list, shop_res)
             elif '$reset-$data' in shop_res and shop_res['$reset-$data'] is not None:
-                self.logger.debug('user has already used up purchase opportunity')
-                buy_res = None
+                self.logger.debug("[RESUME]: User has already used up purchase opportunity")
             else:
                 self.logger.debug(shop_res)
-                buy_res = None
 
             if buy_res is None:
-                self.logger.debug("using previous boat pool")
+                self.logger.debug("[RESUME] Use previous boat pool")
                 self.set_fleet(self.user_data['boatPool'])
             else:
-                self.logger.debug("using new boat pool")
+                self.logger.debug("[RESUME] Use new boat pool")
                 self.set_boat_pool(buy_res['boatPool'])
                 self.set_fleet(buy_res['boatPool'])
 
