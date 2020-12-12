@@ -8,9 +8,8 @@ RIGHT NOW everything pre-battle is fixed
 TODO: multiple consecutive run w/o interference
 TODO: replace raise?
 TODO free up dock space if needed
-TODO: remove all hard coding
-TODO: refactor
 TODO: use set instead of list wherever posible
+TODO: add message to every TS exception
 TODO: organized function names
 
 WGR BUG:
@@ -317,8 +316,7 @@ class Sortie:
 
         if self.curr_node == E61_C1_ID:
             if len(ss) == 0:
-                # TODO: this is not covered; a raise is before this one
-                raise ThermopylaeSoriteExit
+                raise ThermopylaeSortieRestart("No SS for E61 C1. Restarting")
             else:
                 self.battle_fleet = set([int(j) for j in ss])
         else:
@@ -344,12 +342,10 @@ class Sortie:
     # ================================
 
     def starting_node(self) -> str:
-        # First let the server know which sub-map you are on; otherwise without this, withdraw resets to the first sub-map
-        print(self.curr_node)
-        print(self.curr_sub_map)
+        # First readyFire() let the server know the sub-map you are on
         self.helper.api_readyFire(self.curr_sub_map)
         self.helper.api_withdraw()
-        # second readyFire
+        # Second readyFire
         next_node_id = self.helper.api_readyFire(self.curr_sub_map)
         return self.single_node_sortie(next_node_id)
 
@@ -366,11 +362,13 @@ class Sortie:
 
     def single_node_sortie(self, curr_node_id: str) -> str:
         self.curr_node = curr_node_id
+
         self.logger.info('********************************')
         self.logger.info("Start combat on {}".format(self.curr_node))
-        self.logger.info(self.helper.points)
-        self.logger.info(self.helper.adjutant_info)
+        self.logger.debug(self.helper.points)
+        self.logger.debug(self.helper.adjutant_info)
         self.logger.info('********************************')
+
         self.helper.api_newNext(str(curr_node_id))
 
         buy_res = None
@@ -390,48 +388,55 @@ class Sortie:
                 shop_res = self.helper.get_ship_store('1')
                 ss_list = self.find_SS(shop_res['boats'])
                 if len(ss_list) == 0 and self.curr_node in [E61_C1_ID, E62_A1_ID, E63_A1_ID]:
-                    raise ThermopylaeSortieRestart
+                    raise ThermopylaeSortieRestart("SL to get SS on starting node of submaps")
                 else:
                     pass
             else:
                 pass
 
+            # TODO: same as inner funciton of resume_sortie
             purchase_list = self.helper.find_affordable_ships(ss_list, shop_res)
-            if len(purchase_list) > 0:
+            if len(purchase_list) == 0:
+                pass
+            else:
                 buy_res = self.helper.buy_ships(purchase_list, shop_res)
-
         if buy_res is None:
             pass
         else:
             self.set_boat_pool(buy_res['boatPool'])
             self.set_fleet(buy_res['boatPool'])
 
-        if curr_node_id in [E61_A1_ID, '931702']:
-            self.api.changeAdjutant('10082')
-            # TODO: check adjutnat level
+        adj = self.helper.get_adjutant_info()
+        if curr_node_id in [E61_A1_ID, E62_A1_ID]:
+            if adj['id'] == T_CONST.ADJUTANT_IDS[0]:
+                pass
+            else:
+                self.api.changeAdjutant(T_CONST.ADJUTANT_IDS[0])
             self.helper.cast_skill()
-        elif curr_node_id == '931802':
-            # TODO: move to helper; and put before 9318
-            self.api.changeAdjutant('10282')
+        elif curr_node_id == E63_A1_ID:
+            if adj['id'] == T_CONST.ADJUTANT_IDS[2]:
+                pass
+            else:
+                self.api.changeAdjutant(T_CONST.ADJUTANT_IDS[2])
             skill_res = self.helper.cast_skill()
             new_boat = skill_res['boat_add']
             if len(set(new_boat).intersection(set(self.main_fleet))) >= 2:
                 self.boat_pool.union(new_boat)
             else:
-                raise ThermopylaeSortieRestart("Bad luck with Habakkuk; Restart")
+                raise ThermopylaeSortieRestart("Bad luck with Habakkuk. Restarting")
         else:
             pass
 
         set_sleep()
         if set(self.battle_fleet) == set(self.final_fleet):
-            self.logger.debug('final fleet is done. skip setting!')
+            self.logger.debug("Final fleet is set already. Skipping set")
         else:
             self.set_fleet(list(self.boat_pool))
             self.helper.set_war_fleets(list(self.battle_fleet))
 
         if self.helper.check_adjutant_level_bump() == 0:
             if self.helper.bump_level() is False:
-                self.logger.info('Bumping failed. Should restart current sub-map.')
+                raise ThermopylaeSortieRestart("Adjutant level bumping failed. Restarting")
             else:
                 pass
         else:
@@ -442,8 +447,8 @@ class Sortie:
     def resume_node_sortie(self, curr_node_id: str) -> str:
         self.logger.info('********************************')
         self.logger.info("Resume combat on {}".format(curr_node_id))
-        self.logger.info(self.helper.points)
-        self.logger.info(self.helper.adjutant_info)
+        self.logger.debug(self.helper.points)
+        self.logger.debug(self.helper.adjutant_info)
         self.logger.info('********************************')
         self.helper.api_readyFire(self.curr_node[:4])
 
