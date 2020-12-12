@@ -69,13 +69,13 @@ class API_SIX(WGR_API):
         return self._api_call(link)
 
     def readyFire(self, sub_map_id: str):
-        # you can still readyFire after you enter a map
+        # !! NEED TO CALL THIS EVERYTIME YOU ENTER THE THERMOPYLAE MODE
         link = 'six/readyFire/' + sub_map_id
         return self._api_call(link)
 
     def resetChapter(self, sortie_map: str):
         # used when after passing the final sub-map of a chapter
-        link = 'resetChapter/' + sortie_map
+        link = 'six/resetChapter/' + sortie_map
         return self._api_call(link)
 
     def selectBoat(self, selected_boats: list, skill_card: str = '0'):

@@ -7,6 +7,10 @@ TODO: multiple consecutive run w/o interference
 TODO: replace raise?
 TODO: remove all hard coding
 TODO: refactor
+
+WGR BUG:
+- if you withdraw and re-enter a sub map w/o readyFire, then your adjutant data is not reset
+    - i.e. you can quit E6-1Boss and restart w/o calling readyFire, you can have Lv.5 adjutant at the beginning
 """
 
 import json
@@ -186,32 +190,41 @@ class Sortie:
     # ================================
 
     def check_sub_map_done(self, curr_node: str) -> None:
-        if curr_node == "":
-            self._get_user_data()
-            curr_node = self.user_data['nodeId']
+        # TODO
+        # if curr_node == "":
+        self._get_user_data()
+        curr_node = self.user_data['nodeId']
+        
+        self.helper.api_readyFire(curr_node[:4])
         node_status = self.get_node_status(curr_node)
+        print("//////////////////////////////")
+        print(curr_node)
+        print(node_status)
+        print("//////////////////////////////")
         if (curr_node in T_CONST.BOSS_NODES) and (node_status == 3):
             self.helper.api_passLevel()
             self._get_user_data()
             self.set_sub_map(self.user_data['levelId'])
-            if self.curr_sub_map == '9318':
+            if self.curr_sub_map == '9318' and curr_node == '931821':
                 raise ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
             else:
                 raise ThermopylaeSortieRestart("BOSS FIGHT DONE!")
 
     def _reset_chapter(self) -> None:
         # chapter can only be reset after E6-3
-        reset_res = self.api.resetChapter('10006')
+        reset_res = self.helper.reset_chapter('10006')
         self.set_boat_pool([])
         self.set_fleet([])
         self.set_sub_map('9316')
         # self.set_adjutant_info(reset_res['adjutantData'])
         self.helper.set_adjutant_info(reset_res['adjutantData'])
+        self.set_sortie_tickets(ticket=reset_res['ticket'])
 
     def resume_sortie(self) -> None:
         # TODO: still have some corner cases to catch
         self.logger.info(f"Resume sortie from node {self.curr_node}")
         try:
+            self.helper.api_readyFire(self.curr_sub_map)
             self.check_sub_map_done(self.curr_node)
 
             shop_res = self.api.canSelectList('0')
@@ -270,6 +283,9 @@ class Sortie:
             # TODO: a fresh run with rebattle boss lead to -1 here
             print("node status = {}".format(node_status))
             if node_status == -1:
+                print(self.curr_node)
+                print(self.curr_sub_map)
+                print(self.user_data['nodeList'])
                 self.logger.error('Unexpected node. Should do a fresh start.')
             elif node_status == 3:
                 next_node = self.helper.get_next_node_by_id(self.curr_node)
@@ -277,8 +293,6 @@ class Sortie:
                     next_node = self.single_node_sortie(next_node)
                 # boss fight
                 self.single_node_sortie(next_node)
-                # if self.check_sub_map_done(self.curr_node) is True:
-                #     return
             elif node_status in [1, 2]:
                 next_node = self.curr_node
                 if node_status == 2:
@@ -286,9 +300,8 @@ class Sortie:
                 while next_node not in T_CONST.BOSS_NODES:
                     next_node = self.single_node_sortie(self.curr_node)
                 # boss fight
+                self.logger.info("!! REACHING BOSS NODE 2 !!")
                 self.single_node_sortie(next_node)
-                # if self.check_sub_map_done(self.curr_node) is True:
-                #     return
             else:
                 self.logger.debug(self.curr_node)
         except ThermopylaeSoriteExit as e:
@@ -297,6 +310,7 @@ class Sortie:
             return
         except ThermopylaeSortieRestart as e:
             set_sleep()
+            self.logger.debug(e)
             self.start_fresh_sortie()
         except ThermopylaeSortieResume as e:
             set_sleep()
@@ -317,18 +331,18 @@ class Sortie:
 
             while next_id not in T_CONST.BOSS_NODES:
                 next_id = self.single_node_sortie(next_id)
-            self.logger.info("!! REACHING BOSS NODE !!")
+            self.logger.info("!! REACHING BOSS NODE 1 !!")
             self.single_node_sortie(next_id)
-            # if self.check_sub_map_done(self.curr_node) is True:
-            #     return
         except ThermopylaeSoriteExit as e:
             self.logger.debug(e)
             self.parent.button_fresh_sortie.setEnabled(True)
             return
         except ThermopylaeSortieRestart as e:
             set_sleep()
+            self.logger.debug(e)
             self.start_fresh_sortie()
         except ThermopylaeSortieResume as e:
+            set_sleep()
             self.logger.debug(e)
             self.resume_sortie()
         except ThermopylaeSortieDone as e:
@@ -349,9 +363,16 @@ class Sortie:
     def set_sub_map(self, sub_map_id: str) -> None:
         self.curr_sub_map = sub_map_id
 
-    def set_sortie_tickets(self) -> None:
-        self.parent.update_ticket(self.user_data['ticket'])
-        self.parent.update_purchasable(self.user_data['canChargeNum'])
+    def set_sortie_tickets(self, ticket: int = None, num: int = None) -> None:
+        if ticket is None:
+            self.parent.update_ticket(self.user_data['ticket'])
+        else:
+            self.parent.update_ticket(str(ticket))
+
+        if num is None:
+            self.parent.update_purchasable(self.user_data['canChargeNum'])
+        else:
+            self.parent.update_purchasable(str(num))
 
     def set_adjutant_info(self) -> None:
         # TODO: very similar functions in helper.py; may remove one of them
@@ -409,6 +430,8 @@ class Sortie:
 
     def starting_node(self) -> str:
         # First let the server know which sub-map you are on; otherwise without this, withdraw resets to the first sub-map
+        print(self.curr_node)
+        print(self.curr_sub_map)
         self.helper.api_readyFire(self.curr_sub_map)
         self.helper.api_withdraw()
         # second readyFire
@@ -448,6 +471,7 @@ class Sortie:
             ss_list = self.find_SS(shop_res['boats'])
             if len(ss_list) == 0:
                 # second shop fetch
+                set_sleep()
                 shop_res = self.helper.get_ship_store('1')
                 ss_list = self.find_SS(shop_res['boats'])
                 if len(ss_list) == 0 and self.curr_node in ['931607', '931702', '931802']:
@@ -467,22 +491,31 @@ class Sortie:
             self.set_boat_pool(buy_res['boatPool'])
             self.set_fleet(buy_res['boatPool'])
 
-        if self.battle_fleet == set(self.final_fleet):
+        if curr_node_id in ['931602', '931702']:
+            self.api.changeAdjutant('10082')
+            # TODO: check adjutnat level
+            self.helper.cast_skill()
+        elif curr_node_id == '931802':
+            # TODO: move to helper; and put before 9318
+            self.api.changeAdjutant('10282')
+            skill_res = self.helper.cast_skill()
+            new_boat = skill_res['boat_add']
+            if len(set(new_boat).intersection(set(self.main_fleet))) >= 2:
+                self.boat_pool.union(new_boat)
+            else:
+                raise ThermopylaeSortieRestart("Bad luck with Habakkuk; Restart")
+        else:
+            pass
+
+        set_sleep()
+        if set(self.battle_fleet) == set(self.final_fleet):
             self.logger.debug('final fleet is done. skip setting!')
         else:
             self.set_fleet(list(self.boat_pool))
             self.helper.set_war_fleets(list(self.battle_fleet))
 
-        # cast skill
-        if curr_node_id in ['931602', '931702']:
-            self.helper.cast_skill()
-        elif curr_node_id == '931802':
-            # TODO habakkuk; maybe not here
-            pass
-        else:
-            pass
-
-        if self.helper.can_bump() is True:
+        bumping_check = self.helper.can_bump()
+        if bumping_check == 0:
             if self.helper.bump_level() is False:
                 self.logger.info('Bumping failed. Should restart current sub-map.')
             else:
@@ -529,15 +562,29 @@ class Sortie:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
 
+        # if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
+        #     next_id = str(self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id']))
+        #     self.logger.info('********************************')
+        #     self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
+        #     self.logger.info('********************************')
+        # else:
+        #     self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Restarting...")
+        #     raise ThermopylaeSortieRestart
+
+        # self.check_sub_map_done(next_id)
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
-            next_id = str(self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id']))
-            self.logger.info('********************************')
-            self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
-            self.logger.info('********************************')
+            next_id = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
+            if next_id != "" and next_id != "-1":
+                self.logger.info('********************************')
+                self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
+                self.logger.info('********************************')
+            elif next_id == "":
+                self.logger.info('---- BOSS NODE FINISHED ----')
+            else:
+                pass
         else:
             self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Restarting...")
             raise ThermopylaeSortieRestart
-
         self.check_sub_map_done(next_id)
         return next_id
 

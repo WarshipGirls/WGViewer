@@ -60,12 +60,16 @@ class SortieHelper:
             if 'eid' in data:
                 get_error(data['eid'])
                 res = False
+            elif 'code' in data:
+                get_error(data['code'])
+                res = False
             elif 'attach' in data:
                 res = True
             else:
                 self.logger.debug(data)
                 res = False
             return res, data
+
         return self._reconnecting_calls(_pass, 'collect boss reward')
 
     def api_withdraw(self) -> dict:
@@ -73,6 +77,9 @@ class SortieHelper:
             data = self.api.withdraw()
             if 'eid' in data:
                 get_error(data['eid'])
+                res = False
+            elif 'code' in data:
+                get_error(data['code'])
                 res = False
             elif 'getLevelList' in data:
                 self.logger.info("Retreat success. Fresh start is ready.")
@@ -132,6 +139,9 @@ class SortieHelper:
             elif 'hadResetSelectFlag' in data and data['hadResetSelectFlag'] == 1:
                 self.logger.warning('Shop has been reset')
                 res = True
+            elif 'hadResetSelectFlag' in data and data['hadResetSelectFlag'] == 0:
+                self.logger.warning('Shop has not been reset')
+                res = True
             else:
                 self.logger.error(data)
                 res = False
@@ -146,7 +156,7 @@ class SortieHelper:
         self.logger.info('Affordable ships: ')
         for ship in store_data['$ssss']:
             star = int(ship[0])
-            cost = star * int(ship[2])
+            cost = int(ship[2]) * (2 ** (star - 1))
             output_str = "{:15s}\tSTAR{:3s} COST{:4s}".format(self.user_ships[str(ship[1])]["Name"], str(star), str(cost))
             self.logger.info(output_str)
         # if store_data['buff'] != 0:
@@ -215,7 +225,10 @@ class SortieHelper:
 
         res_data = self._reconnecting_calls(_cast_skill, 'cast adjutant skill')
 
-        self.update_adjutant_info(res_data['adjutantData'], res_data['strategic_point'])
+        if res_data['adjutantData']['id'] == '10082':
+            self.update_adjutant_info(res_data['adjutantData'], res_data['strategic_point'])
+        elif res_data['adjutantData']['id'] == '10282':
+            self.update_adjutant_info(res_data['adjutantData'], self.get_curr_points())
         return res_data
 
     def reorder_battle_list(self, unorder: list) -> list:
@@ -330,6 +343,21 @@ class SortieHelper:
 
         return self._reconnecting_calls(_result, 'receive result')
 
+    def reset_chapter(self, chapter_id: str) -> dict:
+        def _reset() -> Tuple[bool, dict]:
+            data = self.api.resetChapter(chapter_id)
+            if 'eid' in data:
+                get_error(data['eid'])
+                res = False
+            elif 'adjutantData' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+                res = False
+            return res, data
+
+        return self._reconnecting_calls(_reset, 'reset chapter')
+
     # ================================
     # Getter / Setter
     # ================================
@@ -346,8 +374,9 @@ class SortieHelper:
 
     def get_map_node_by_id(self, node_id: str) -> dict:
         try:
-            node = next(i for i in self.map_data['combatLevelNode'] if i['id'] == node_id)
+            node = next(i for i in self.map_data['combatLevelNode'] if i['id'] == str(node_id))
         except StopIteration:
+            self.logger.debug(node_id)
             self.logger.error('Access wrong nodes.')
             node = {}
         return node
@@ -364,6 +393,7 @@ class SortieHelper:
         except KeyError:
             self.logger.error('Access wrong nodes.')
             next_node_id = "-1"
+        print('nextttttttttttttttttt is {}'.format(next_node_id))
         return next_node_id
 
     def set_adjutant_info(self, adj_data: dict) -> None:
@@ -401,21 +431,33 @@ class SortieHelper:
                 res.append(ship_id)
         return res
 
-    def can_bump(self) -> bool:
+    def can_bump(self) -> int:
+        """
+        Check if adjutant level can be bumped
+
+        @return: bump result
+            - -1: cannot bump / should not bump
+            - 0: can bump
+            - 1: max level, no bump
+        @rtype: int
+        """
         if self.adjutant_info is None:
-            res = False
+            res = -1
         else:
+            adj_lvl = int(self.adjutant_info['level'])
+            if adj_lvl == 10:
+                return 1
+
             curr_exp = int(self.adjutant_info["exp"])
             next_exp = int(self.adjutant_info["exp_top"])
             required_exp = next_exp - curr_exp
-
             if self.get_curr_points() >= required_exp and self.get_curr_points() >= 5:
-                if int(self.adjutant_info['level']) >= 8 and required_exp > 5:
-                    res = False
+                if adj_lvl >= 8 and required_exp > 5:
+                    res = -1
                 else:
-                    res = True
+                    res = 0
             else:
-                res = False
+                res = -1
 
         self.logger.debug(f'bumping check result = {res}')
         return res
@@ -444,7 +486,7 @@ class SortieHelper:
             self.logger.debug(res)
             return False
 
-    def update_adjutant_info(self, adj_data, strategic_point):
+    def update_adjutant_info(self, adj_data: dict, strategic_point: int) -> None:
         # TODO: use signal? and manage signals globally?
         _name = T_CONST.ADJUTANT_ID_TO_NAME[adj_data['id']]
         _exp = f"Lv. {adj_data['level']} {adj_data['exp']}/{adj_data['exp_top']}"
@@ -558,7 +600,7 @@ class SortieHelper:
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
             self.logger.info(ship_str)
 
-    # def process_boss_reward_result(self, reward_res: dict) -> str:
+        # def process_boss_reward_result(self, reward_res: dict) -> str:
         # TODO: fail due to stupid WGR developer's coding practice
         """
         self.logger.info("######## BOSS REWARDS ########")
@@ -578,6 +620,5 @@ class SortieHelper:
         sub_map = next((j for j in reward_res['shipVO'] if j['id'] == '10006'))['level_id']
         return sub_map
         """
-
 
 # End of File

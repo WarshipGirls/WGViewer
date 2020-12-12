@@ -217,6 +217,7 @@ class TabThermopylae(QWidget):
     # ================================
 
     def on_pre_battle(self) -> None:
+        # TODO callback
         self.button_pre_battle.setEnabled(True)
         self.button_fresh_sortie.setEnabled(False)
         self.button_resume_sortie.setEnabled(False)
