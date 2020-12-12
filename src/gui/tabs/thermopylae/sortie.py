@@ -48,12 +48,9 @@ class Sortie:
         self.logger = getLogger('TabThermopylae')
         self.is_realrun = is_realrun
 
-        # self.max_retry = 5
-
         self.fleet_info = None
         self.map_data = None
         self.user_data = None
-        self.can_start = False
         self.helper = None
         self.repair_level = 1
         self.curr_node = '0'
@@ -146,12 +143,12 @@ class Sortie:
         self._get_pve_data()
         self._get_user_data()
 
-        self.can_start = self.pre_battle_set_info()
-        if self.can_start is False:
+        if self.pre_battle_set_info() is False:
             self.logger.warning("Failed to pre-battle checking due to above reason.")
+            return False
         else:
             self.logger.warning("Pre-battle checking is done.")
-        return self.can_start
+            return True
 
     def pre_battle(self) -> None:
         self.logger.info("Start pre battle checking...")
