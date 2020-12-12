@@ -166,6 +166,7 @@ class SortieHelper:
 
     # TODO: reorder arguments?
     def buy_ships(self, purchase_list: list, shop_data: dict = None, buff_card: str = '0') -> dict:
+        purchase_list = list(set(purchase_list))
         def _selectBoat() -> [bool, object]:
             data = self.api.selectBoat(purchase_list, buff_card)
             if 'eid' in data:
@@ -441,6 +442,8 @@ class SortieHelper:
             - 1: max level, no bump
         @rtype: int
         """
+        print(self.adjutant_info)
+        print(self.get_curr_points())
         if self.adjutant_info is None:
             res = -1
         else:
@@ -451,8 +454,12 @@ class SortieHelper:
             curr_exp = int(self.adjutant_info["exp"])
             next_exp = int(self.adjutant_info["exp_top"])
             required_exp = next_exp - curr_exp
-            if self.get_curr_points() >= required_exp and self.get_curr_points() >= 5:
-                if adj_lvl >= 8 and required_exp > 5:
+            # required_buy_times = ceil(required_exp / 5)
+            # required_points = required_buy_times * 5
+            required_points = ceil(required_exp / 5) * 5
+            # if self.get_curr_points() >= required_exp and self.get_curr_points() >= 5:
+            if self.get_curr_points() >= required_points:
+                if adj_lvl >= 8 and required_points > 5:
                     res = -1
                 else:
                     res = 0

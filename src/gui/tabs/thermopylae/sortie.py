@@ -2,7 +2,7 @@
 The implementation of auto E6 sortie is quite unnecessarily complicated at this point,
 please help improve the logic if possible! Many Thanks! - @pwyq
 
-TODO: one-complete-run w/o interference
+
 TODO: multiple consecutive run w/o interference
 TODO: replace raise?
 TODO: remove all hard coding
@@ -440,14 +440,14 @@ class Sortie:
 
     def find_SS(self, shop_data: list) -> list:
         # Get from a list of int (max length of 5), return a list of ship_id (str)
-        res = []
+        res = set()
         for ship_id in shop_data:
             if self.curr_node[:4] == '9316' and ship_id in self.battle_fleet:
                 # in E6-1, don't buy repeated ships
                 continue
             if ship_id in self.main_fleet:
-                res.append(str(ship_id))
-        return res
+                res.add(str(ship_id))
+        return list(res)
 
     def single_node_sortie(self, curr_node_id: str) -> str:
         self.curr_node = curr_node_id
