@@ -474,8 +474,7 @@ class Sortie:
             self.set_fleet(list(self.boat_pool))
             self.helper.set_war_fleets(list(self.battle_fleet))
 
-        bumping_check = self.helper.can_bump()
-        if bumping_check == 0:
+        if self.helper.check_adjutant_level_bump() == 0:
             if self.helper.bump_level() is False:
                 self.logger.info('Bumping failed. Should restart current sub-map.')
             else:

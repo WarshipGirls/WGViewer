@@ -442,7 +442,7 @@ class SortieHelper:
                 res.append(ship_id)
         return res
 
-    def can_bump(self) -> int:
+    def check_adjutant_level_bump(self) -> int:
         """
         Check if adjutant level can be bumped
 
@@ -452,8 +452,6 @@ class SortieHelper:
             - 1: max level, no bump
         @rtype: int
         """
-        print(self.adjutant_info)
-        print(self.get_curr_points())
         if self.adjutant_info is None:
             res = -1
         else:
@@ -464,10 +462,7 @@ class SortieHelper:
             curr_exp = int(self.adjutant_info["exp"])
             next_exp = int(self.adjutant_info["exp_top"])
             required_exp = next_exp - curr_exp
-            # required_buy_times = ceil(required_exp / 5)
-            # required_points = required_buy_times * 5
             required_points = ceil(required_exp / 5) * 5
-            # if self.get_curr_points() >= required_exp and self.get_curr_points() >= 5:
             if self.get_curr_points() >= required_points:
                 if adj_lvl >= 8 and required_points > 5:
                     res = -1
@@ -475,8 +470,6 @@ class SortieHelper:
                     res = 0
             else:
                 res = -1
-
-        self.logger.debug(f'bumping check result = {res}')
         return res
 
     def bump_level(self) -> bool:
@@ -516,7 +509,6 @@ class SortieHelper:
         print(self.get_adjutant_info())
 
     def process_repair(self, ships: list, repair_levels: [int, list]) -> dict:
-        # TODO update bucket on side dock
         repairs = []
         ship_ids = []
         for ship in ships:
@@ -599,11 +591,11 @@ class SortieHelper:
             shipname = next((j for j in battle_res['shipVO'] if j['id'] == ship_id))['title']
             ship = ships[i]
             # TODO fix the output format
-            ship_str = "{:12s}\tLv.{:4s}\t+{:4s} Exp".format(shipname, str(ship['level']), str(ship['expAdd']))
+            ship_str = "{:12s}\tLv.{:4s}\t+{}Exp".format(shipname, str(ship['level']), str(ship['expAdd']))
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
             self.logger.info(ship_str)
 
-        # def process_boss_reward_result(self, reward_res: dict) -> str:
+    # def process_boss_reward_result(self, reward_res: dict) -> str:
         # TODO: fail due to stupid WGR developer's coding practice
         """
         self.logger.info("######## BOSS REWARDS ########")
