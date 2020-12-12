@@ -525,17 +525,10 @@ class Sortie:
         self.helper.process_battle_result(battle_res, list(self.battle_fleet))
 
         set_sleep()
-        repair_res = self.helper.process_repair(battle_res['shipVO'], T_CONST.SHIP_REPAIR_LEVELS)  # post-battle repair
-        if 'userVo' in repair_res:
-            self.update_side_dock_resources(repair_res['userVo'])
-            self.update_side_dock_repair(repair_res['packageVo'])
-
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
             next_id = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
             if next_id != "" and next_id != "-1":
-                self.logger.info('********************************')
                 self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
-                self.logger.info('********************************')
             elif next_id == "":
                 self.logger.info('---- BOSS NODE FINISHED ----')
             else:
