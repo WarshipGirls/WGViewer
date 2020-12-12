@@ -1,6 +1,6 @@
 # TODO: add these settings to GUI
-BOSS_RETRY_LIMIT = 3
-CONNECTION_RETRY_LIMIT = 3
+BOSS_RETRY_LIMITS: list = [3, 5, 10]
+CONNECTION_RETRY_LIMIT: int = 3
 """
 The list is used to determine the order of submarines in E6 (thermopylae) battle fleet.
 It is manually sorted, as of Game ver5.1.0, based on following criteria:
@@ -11,7 +11,7 @@ It is manually sorted, as of Game ver5.1.0, based on following criteria:
 Since there are only 6 slots for a fleet, so top submarines matter only;
 rest are for the sake of completeness.
 """
-SUBMARINE_ORDER = [
+SUBMARINE_ORDER: list = [
     11035111,  # 'U-1405',
     11028911,  # 'U81',
     11019711,  # 'U47',
@@ -37,8 +37,8 @@ SUBMARINE_ORDER = [
     10035911,  # '吕-34',
     10046311,  # '神鹰',
 ]
-REWARD_NODES = ['931604', '931610', '931702', '931706', '931717', '931802', '931809']
-BOSS_NODES = ['931617', '931722', '931821']
-ADJUTANT_ID_TO_NAME = {'10082': "紫貂", '10182': "Kearsarge", '10282': "Habakkuk"}
-ITEMS = {23: '战备券', 20041: '磁盘', 20141: '小型船舾装图纸', 20241: '中型船舾装图纸', 20341: '大型舰舾装图纸'}
-SUBMAPID_TO_NAME = {'9316': "E6-1", '9317': "E6-2", '9318': "E6-3"}
+REWARD_NODES: list = ['931604', '931610', '931702', '931706', '931717', '931802', '931809']
+BOSS_NODES: list = ['931617', '931722', '931821']
+ADJUTANT_ID_TO_NAME: dict = {'10082': "紫貂", '10182': "Kearsarge", '10282': "Habakkuk"}
+ITEMS: dict = {23: '战备券', 20041: '磁盘', 20141: '小型船舾装图纸', 20241: '中型船舾装图纸', 20341: '大型舰舾装图纸'}
+SUBMAPID_TO_NAME: dict = {'9316': "E6-1", '9317': "E6-2", '9318': "E6-3"}

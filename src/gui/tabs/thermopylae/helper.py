@@ -1,12 +1,10 @@
-import json
-
 from logging import getLogger
 from math import ceil
 from typing import Callable, Tuple
 
 from src import utils as wgv_utils
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
-from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume
+from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieResume
 from src.wgr.six import API_SIX  # only for typehints
 from . import constants as T_CONST
 
@@ -19,9 +17,9 @@ class SortieHelper:
         self.user_ships = user_ships
         self.map_data = map_data
 
-        self.boss_retry_count = 0
-        self.points = 10
-        self.adjutant_info = {}  # level, curr_exp, exp_cap
+        self.boss_retry_count = [0] * 3
+        self.points: int = 10
+        self.adjutant_info: dict = {}  # level, curr_exp, exp_cap
 
     def _reconnecting_calls(self, func: Callable, func_info: str) -> [dict, object]:
         # This redundancy while-loop (compared to api.py's while-loop) deals with WarshipGirlsExceptions;
@@ -167,6 +165,7 @@ class SortieHelper:
     # TODO: reorder arguments?
     def buy_ships(self, purchase_list: list, shop_data: dict = None, buff_card: str = '0') -> dict:
         purchase_list = list(set(purchase_list))
+
         def _selectBoat() -> [bool, object]:
             data = self.api.selectBoat(purchase_list, buff_card)
             if 'eid' in data:
@@ -541,12 +540,13 @@ class SortieHelper:
         return res
 
     def is_night_battle(self, curr_id: str, challenge_res: dict) -> bool:
+        # TODO TODO: simplify and refactor
+        do_night_battle = False
         if challenge_res['warReport']['canDoNightWar'] == 0:
             self.logger.info('Battle finished by day')
             do_night_battle = False
         elif curr_id in T_CONST.BOSS_NODES:
             e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
-            # TODO TODO: simplify and refactor
             self.logger.info('---- BOSS BATTLE (TODO NIGHT BATTLE) ----')
             self.logger.info(e_list)
             if curr_id == T_CONST.BOSS_NODES[0]:
@@ -555,29 +555,31 @@ class SortieHelper:
                 elif e_list.count(0) >= 2:
                     do_night_battle = True
                 else:
-                    if self.boss_retry_count == T_CONST.BOSS_RETRY_LIMIT:
+                    if self.boss_retry_count[0] == T_CONST.BOSS_RETRY_LIMITS[0]:
                         do_night_battle = True
                     else:
-                        self.boss_retry_count += 1
+                        self.boss_retry_count[0] += 1
                         raise ThermopylaeSortieResume("E6-1 BOSS NEEDS RE-BATTLE")
             elif curr_id == T_CONST.BOSS_NODES[1]:
                 if e_list.count(0) >= 2:
                     do_night_battle = True
                 else:
-                    if self.boss_retry_count == T_CONST.BOSS_RETRY_LIMIT:
+                    if self.boss_retry_count[1] == T_CONST.BOSS_RETRY_LIMITS[1]:
                         do_night_battle = True
                     else:
-                        self.boss_retry_count += 1
+                        self.boss_retry_count[1] += 1
                         raise ThermopylaeSortieResume("E6-2 BOSS NEEDS RE-BATTLE")
-            else:
+            elif curr_id == T_CONST.BOSS_NODES[2]:
                 if e_list.count(0) >= 3:
                     do_night_battle = True
                 else:
-                    if self.boss_retry_count == T_CONST.BOSS_RETRY_LIMIT:
+                    if self.boss_retry_count[2] == T_CONST.BOSS_RETRY_LIMITS[2]:
                         do_night_battle = True
                     else:
-                        self.boss_retry_count += 1
+                        self.boss_retry_count[2] += 1
                         raise ThermopylaeSortieResume("E6-3 BOSS NEEDS RE-BATTLE")
+            else:
+                self.logger.error(f"Wrong access [{curr_id}] to night battle process for boss nodes.")
         elif curr_id in T_CONST.REWARD_NODES:
             do_night_battle = True
         elif challenge_res['warReport']['canDoNightWar'] == 1:
