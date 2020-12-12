@@ -15,8 +15,6 @@ WGR BUG:
     - i.e. you can quit E6-1Boss and restart w/o calling readyFire, you can have Lv.5 adjutant at the beginning
 """
 
-import json
-
 from logging import getLogger
 
 from src import data as wgv_data
@@ -25,12 +23,8 @@ from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestar
 from src.utils.general import set_sleep
 from src.wgr.six import API_SIX
 from .helper import SortieHelper
+from .pre_sortie import PreSortieCheck
 from . import constants as T_CONST
-
-
-def save_json(name, data):
-    with open(name, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
 
 
 class Sortie:
@@ -43,7 +37,6 @@ class Sortie:
         self.battle_fleet = set()  # ships that on battle
         self.final_fleet = final_fleet  # fill up required number of boats
         self.logger = getLogger('TabThermopylae')
-        self.is_realrun = is_realrun
 
         # Used for pre-battle
         self.fleet_info = None
@@ -58,6 +51,7 @@ class Sortie:
         self.escort_CV = []  # For 1CV to pass first few levels only, 不挠
         self.user_ships = wgv_data.get_processed_userShipVo()
 
+        self.pre_sortie = PreSortieCheck(self.api, is_realrun)
         self.logger.info("Init E6...")
 
     def _clean_memory(self) -> None:
@@ -68,33 +62,6 @@ class Sortie:
     # ================================
     # Pre battle checke
     # ================================
-
-    def _get_fleet_info(self) -> None:
-        self.fleet_info: dict = self.api.getFleetInfo()
-        if 'eid' in self.fleet_info:
-            get_error(self.fleet_info['eid'])
-            return
-        if self.is_realrun is False:
-            save_json('six_getFleetInfo.json', self.fleet_info)
-        set_sleep()
-
-    def _get_pve_data(self) -> None:
-        self.map_data: dict = self.api.getPveData()
-        if 'eid' in self.map_data:
-            get_error(self.map_data['eid'])
-            return
-        if self.is_realrun is False:
-            save_json('six_getPveData.json', self.map_data)
-        set_sleep()
-
-    def _get_user_data(self) -> None:
-        self.user_data: dict = self.api.getUserData()
-        if 'eid' in self.user_data:
-            get_error(self.user_data['eid'])
-            return
-        if self.is_realrun:
-            save_json('six_getUserData.json', self.user_data)
-        set_sleep()
 
     def pre_battle_set_info(self) -> bool:
         # TODO free up dock space if needed
@@ -137,9 +104,12 @@ class Sortie:
         return res
 
     def pre_battle_calls(self) -> bool:
-        self._get_fleet_info()
-        self._get_pve_data()
-        self._get_user_data()
+        self.pre_sortie.fetch_fleet_info()
+        set_sleep()
+        self.pre_sortie.fetch_map_data()
+        set_sleep()
+        self.pre_sortie.fetch_user_data()
+        set_sleep()
 
         if self.pre_battle_set_info() is False:
             self.logger.warning("Failed to pre-battle checking due to above reason.")
@@ -187,9 +157,9 @@ class Sortie:
     # ================================
 
     def check_sub_map_done(self, curr_node: str) -> None:
-        self._get_user_data()
+        self.pre_sortie.fetch_user_data()
         curr_node = self.user_data['nodeId']
-        
+
         self.helper.api_readyFire(curr_node[:4])
         node_status = self.get_node_status(curr_node)
         print("//////////////////////////////")
@@ -198,7 +168,7 @@ class Sortie:
         print("//////////////////////////////")
         if (curr_node in T_CONST.BOSS_NODES) and (node_status == 3):
             self.helper.api_passLevel()
-            self._get_user_data()
+            self.pre_sortie.fetch_user_data()
             self.set_sub_map(self.user_data['levelId'])
             if self.curr_sub_map == '9318' and curr_node == '931821':
                 raise ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
