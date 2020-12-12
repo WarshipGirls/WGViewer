@@ -14,9 +14,6 @@ class PreSortieCheck:
         self.api: API_SIX = api
         self.is_realrun = is_realrun
 
-        self.map_data = None
-        self.user_data = None
-
     def fetch_fleet_info(self) -> dict:
         fleet_info: dict = self.api.getFleetInfo()
         if 'eid' in fleet_info:
@@ -26,20 +23,22 @@ class PreSortieCheck:
             save_json('six_getFleetInfo.json', fleet_info)
         return fleet_info
 
-    def fetch_map_data(self) -> None:
-        self.map_data: dict = self.api.getPveData()
-        if 'eid' in self.map_data:
-            get_error(self.map_data['eid'])
-            return
+    def fetch_map_data(self) -> dict:
+        map_data: dict = self.api.getPveData()
+        if 'eid' in map_data:
+            get_error(map_data['eid'])
+            return {}
         if self.is_realrun is False:
-            save_json('six_getPveData.json', self.map_data)
+            save_json('six_getPveData.json', map_data)
+        return map_data
 
-    def fetch_user_data(self) -> None:
-        self.user_data: dict = self.api.getUserData()
-        if 'eid' in self.user_data:
-            get_error(self.user_data['eid'])
-            return
+    def fetch_user_data(self) -> dict:
+        user_data: dict = self.api.getUserData()
+        if 'eid' in user_data:
+            get_error(user_data['eid'])
+            return {}
         if self.is_realrun:
-            save_json('six_getUserData.json', self.user_data)
+            save_json('six_getUserData.json', user_data)
+        return user_data
 
 # End of File

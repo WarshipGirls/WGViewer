@@ -104,9 +104,9 @@ class Sortie:
         return res
 
     def pre_battle_calls(self) -> bool:
-        self.pre_sortie.fetch_map_data()
+        self.map_data = self.pre_sortie.fetch_map_data()
         set_sleep()
-        self.pre_sortie.fetch_user_data()
+        self.user_data = self.pre_sortie.fetch_user_data()
         set_sleep()
 
         if self.pre_battle_set_info() is False:
