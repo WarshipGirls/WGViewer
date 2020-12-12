@@ -3,6 +3,8 @@ The implementation of auto E6 sortie is quite unnecessarily complicated at this 
 please help improve the logic if possible! Many Thanks! - @pwyq
 
 
+This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
+RIGHT NOW everything pre-battle is fixed
 TODO: multiple consecutive run w/o interference
 TODO: replace raise?
 TODO: remove all hard coding
@@ -35,9 +37,6 @@ def save_json(name, data):
 
 
 class Sortie:
-    # This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
-    # TODO long term
-    # RIGHT NOW everything pre-battle is fixed
 
     def __init__(self, parent, api: API_SIX, fleet: list, final_fleet: list, is_realrun: bool):
         super().__init__()
@@ -80,7 +79,8 @@ class Sortie:
         if 'eid' in self.fleet_info:
             get_error(self.fleet_info['eid'])
             return
-        save_json('six_getFleetInfo.json', self.fleet_info)  # TODO only for testing; delete later
+        if self.is_realrun is False:
+            save_json('six_getFleetInfo.json', self.fleet_info)
         set_sleep()
 
     def _get_pve_data(self) -> None:
@@ -88,7 +88,8 @@ class Sortie:
         if 'eid' in self.map_data:
             get_error(self.map_data['eid'])
             return
-        save_json('six_getPveData.json', self.map_data)  # TODO only for testing
+        if self.is_realrun is False:
+            save_json('six_getPveData.json', self.map_data)
         set_sleep()
 
     def _get_user_data(self) -> None:
@@ -96,7 +97,8 @@ class Sortie:
         if 'eid' in self.user_data:
             get_error(self.user_data['eid'])
             return
-        save_json('six_getUserData.json', self.user_data)  # TODO only for testing
+        if self.is_realrun:
+            save_json('six_getUserData.json', self.user_data)
         set_sleep()
 
     def pre_battle_set_info(self) -> bool:
@@ -190,8 +192,6 @@ class Sortie:
     # ================================
 
     def check_sub_map_done(self, curr_node: str) -> None:
-        # TODO
-        # if curr_node == "":
         self._get_user_data()
         curr_node = self.user_data['nodeId']
         
@@ -280,7 +280,6 @@ class Sortie:
                 self.set_fleet(buy_res['boatPool'])
 
             node_status = self.get_node_status(self.curr_node)
-            # TODO: a fresh run with rebattle boss lead to -1 here
             print("node status = {}".format(node_status))
             if node_status == -1:
                 print(self.curr_node)
@@ -562,16 +561,6 @@ class Sortie:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
 
-        # if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
-        #     next_id = str(self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id']))
-        #     self.logger.info('********************************')
-        #     self.logger.info(f"Next node: {self.helper.get_map_node_by_id(next_id)['flag']}")
-        #     self.logger.info('********************************')
-        # else:
-        #     self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Restarting...")
-        #     raise ThermopylaeSortieRestart
-
-        # self.check_sub_map_done(next_id)
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
             next_id = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
             if next_id != "" and next_id != "-1":
