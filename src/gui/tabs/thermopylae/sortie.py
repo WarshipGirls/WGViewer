@@ -11,6 +11,7 @@ TODO free up dock space if needed
 TODO: remove all hard coding
 TODO: refactor
 TODO: use set instead of list wherever posible
+TODO: organized function names
 
 WGR BUG:
 - if you withdraw and re-enter a sub map w/o readyFire, then your adjutant data is not reset
@@ -62,69 +63,24 @@ class Sortie:
 
     # ================================
     # Pre battle checke
-    # TODO: move these to their own class
     # ================================
-
-    def pre_battle_set_info(self) -> bool:
-        # Insepect the validity for user to use this function
-        user_e6 = next(i for i in self.user_data['chapterList'] if i['id'] == "10006")
-        if self.user_data['chapterId'] != '10006':
-            self.logger.warning("You are in the middle of a battle other than E6. Exiting")
-            return False
-        elif len(user_e6['boats']) != 22:
-            self.logger.warning("You have not passed E6 manually. Exiting")
-            return False
-        else:
-            pass
-        self.set_sortie_tickets()
-        self.update_adjutant_label()
-
-        # check if the sortie "final fleet" is set or not
-        fleet_info = self.pre_sortie.fetch_fleet_info()
-        b = fleet_info['chapterInfo']['boats']
-        if len(b) == 0:
-            self.logger.info('User has not entered E6. Select from old settings')
-            last_fleets = user_e6['boats']
-        elif len(b) == 22 and fleet_info['chapterInfo']['level_id'] in ['9316', '9317', '9318']:
-            self.logger.info('User has entered E6.')
-            self.set_sub_map(fleet_info['chapterInfo']['level_id'])
-            last_fleets = b
-        else:
-            self.logger.info('Invalid settings for using this function')
-            self.logger.info('1. Ensure you have cleared E6-3; 2. You are not in a battle OR in E6')
-            return False
-
-        self.set_boat_pool(self.user_data['boatPool'])
-        self.curr_node = str(self.user_data['nodeId'])
-
-        if len(last_fleets) != 22:
-            self.logger.warning("Invalid last boats settings.")
-            res = False
-        else:
-            self.final_fleet = last_fleets
-            res = True
-        return res
-
-    def pre_battle_calls(self) -> bool:
-        self.map_data = self.pre_sortie.fetch_map_data()
-        set_sleep()
-        self.user_data = self.pre_sortie.fetch_user_data()
-        set_sleep()
-
-        if self.pre_battle_set_info() is False:
-            self.logger.warning("Failed to pre-battle checking due to above reason.")
-            return False
-        else:
-            self.logger.warning("Pre-battle checking is done.")
-            return True
 
     def pre_battle(self) -> None:
         self.logger.info("Start pre battle checking...")
 
-        if self.pre_battle_calls() is False:
+        if self.pre_sortie.pre_battle_calls() is False:
             return
 
-        # init data
+        self.map_data = self.pre_sortie.get_map_data()
+        self.user_data = self.pre_sortie.get_user_data()
+
+        self.set_sortie_tickets(ticket=self.user_data['ticket'], num=self.user_data['canChargeNum'])
+        self.update_adjutant_label(self.user_data['adjutantData'])
+        self.set_boat_pool(self.user_data['boatPool'])
+        self.curr_node = str(self.user_data['nodeId'])
+        self.set_sub_map(self.pre_sortie.get_sub_map_id())
+
+        # init SortieHelper
         self.helper = SortieHelper(self.parent, self.api, self.user_ships, self.map_data)
         self.helper.set_adjutant_info(self.user_data['adjutantData'])
         self.helper.set_curr_points(self.user_data['strategic_point'])
@@ -337,8 +293,7 @@ class Sortie:
         else:
             self.parent.update_purchasable(str(num))
 
-    def update_adjutant_label(self) -> None:
-        adj = self.user_data['adjutantData']
+    def update_adjutant_label(self, adj: dict) -> None:
         self.parent.update_adjutant_name(T_CONST.ADJUTANT_ID_TO_NAME[adj['id']])
         self.parent.update_adjutant_exp(f"Lv. {adj['level']} {adj['exp']}/{adj['exp_top']}")
         self.parent.update_points(str(self.user_data['strategic_point']))
