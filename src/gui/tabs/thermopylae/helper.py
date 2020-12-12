@@ -577,7 +577,7 @@ class SortieHelper:
                     res = '1'
                 else:
                     self.boss_retry_count[node_idx] += 1
-                    raise ThermopylaeSortieResume("E6-2 BOSS NEEDS RE-BATTLE")
+                    raise ThermopylaeSortieResume(f"E6-{node_idx+1} BOSS NEEDS RE-BATTLE")
         elif curr_id in T_CONST.REWARD_NODES:
             res = '1'
         elif challenge_res['warReport']['canDoNightWar'] == 1:
