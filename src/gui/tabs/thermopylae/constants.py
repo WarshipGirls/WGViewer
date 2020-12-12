@@ -1,6 +1,7 @@
 # TODO: add these settings to GUI
 BOSS_RETRY_LIMITS: list = [3, 5, 10]
 CONNECTION_RETRY_LIMIT: int = 3
+SHIP_REPAIR_LEVELS = [1]
 """
 The list is used to determine the order of submarines in E6 (thermopylae) battle fleet.
 It is manually sorted, as of Game ver5.1.0, based on following criteria:

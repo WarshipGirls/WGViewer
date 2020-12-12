@@ -20,14 +20,11 @@ import json
 from logging import getLogger
 
 from src import data as wgv_data
-from src.utils.general import set_sleep
 from src.exceptions.wgr_error import get_error
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume, ThermopylaeSortieDone
-from .helper import SortieHelper
-
-# Following are only for typehints
+from src.utils.general import set_sleep
 from src.wgr.six import API_SIX
-
+from .helper import SortieHelper
 from . import constants as T_CONST
 
 
@@ -48,21 +45,22 @@ class Sortie:
         self.logger = getLogger('TabThermopylae')
         self.is_realrun = is_realrun
 
+        # Used for pre-battle
         self.fleet_info = None
         self.map_data = None
         self.user_data = None
+
         self.helper = None
-        self.repair_level = 1
-        self.curr_node = '0'
-        self.curr_sub_map = '0'
-        self.boat_pool = set()  # host existing boats
+        self.curr_node: str = '0'
+        self.curr_sub_map: str = '0'
+        self.boat_pool: set = set()  # host existing boats
         self.escort_DD = []  # For 2DD to pass first few levels only, 萤火虫，布雷恩
         self.escort_CV = []  # For 1CV to pass first few levels only, 不挠
         self.user_ships = wgv_data.get_processed_userShipVo()
 
         self.logger.info("Init E6...")
 
-    def _clean_memory(self):
+    def _clean_memory(self) -> None:
         self.logger.info("Reset ship card pool, battle fleet and curr node")
         self.set_boat_pool([])
         self.set_fleet([])
@@ -72,7 +70,7 @@ class Sortie:
     # ================================
 
     def _get_fleet_info(self) -> None:
-        self.fleet_info = self.api.getFleetInfo()
+        self.fleet_info: dict = self.api.getFleetInfo()
         if 'eid' in self.fleet_info:
             get_error(self.fleet_info['eid'])
             return
@@ -81,7 +79,7 @@ class Sortie:
         set_sleep()
 
     def _get_pve_data(self) -> None:
-        self.map_data = self.api.getPveData()
+        self.map_data: dict = self.api.getPveData()
         if 'eid' in self.map_data:
             get_error(self.map_data['eid'])
             return
@@ -90,7 +88,7 @@ class Sortie:
         set_sleep()
 
     def _get_user_data(self) -> None:
-        self.user_data = self.api.getUserData()
+        self.user_data: dict = self.api.getUserData()
         if 'eid' in self.user_data:
             get_error(self.user_data['eid'])
             return
@@ -523,7 +521,7 @@ class Sortie:
         supply_res = self.helper.supply_boats(list(self.battle_fleet))
         self.update_side_dock_resources(supply_res['userVo'])
 
-        repair_res = self.helper.process_repair(supply_res['shipVO'], [self.repair_level])  # pre-battle repair
+        repair_res = self.helper.process_repair(supply_res['shipVO'], T_CONST.SHIP_REPAIR_LEVELS)  # pre-battle repair
         if 'userVo' in repair_res:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
@@ -553,7 +551,7 @@ class Sortie:
         self.helper.process_battle_result(battle_res, list(self.battle_fleet))
 
         set_sleep()
-        repair_res = self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
+        repair_res = self.helper.process_repair(battle_res['shipVO'], T_CONST.SHIP_REPAIR_LEVELS)  # post-battle repair
         if 'userVo' in repair_res:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
@@ -584,7 +582,7 @@ class Sortie:
         supply_res = self.helper.supply_boats(list(self.battle_fleet))
         self.update_side_dock_resources(supply_res['userVo'])
 
-        repair_res = self.helper.process_repair(supply_res['shipVO'], [self.repair_level])  # pre-battle repair
+        repair_res = self.helper.process_repair(supply_res['shipVO'], T_CONST.SHIP_REPAIR_LEVELS)  # pre-battle repair
         if 'userVo' in repair_res:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
@@ -614,7 +612,7 @@ class Sortie:
         self.helper.process_battle_result(battle_res, list(self.battle_fleet))
 
         set_sleep()
-        repair_res = self.helper.process_repair(battle_res['shipVO'], [self.repair_level])  # post-battle repair
+        repair_res = self.helper.process_repair(battle_res['shipVO'], T_CONST.SHIP_REPAIR_LEVELS)  # post-battle repair
         if 'userVo' in repair_res:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
