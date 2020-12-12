@@ -59,7 +59,7 @@ class PreSortieCheck:
     # Pre Battle Checkings
     # ================================
 
-    def pre_battle_set_info(self, user_data: dict) -> bool:
+    def pre_battle_validation(self, user_data: dict) -> bool:
         # Insepect the validity for user to use this function
         user_e6 = next(i for i in user_data['chapterList'] if i['id'] == "10006")
         if user_data['chapterId'] != '10006':
@@ -100,11 +100,11 @@ class PreSortieCheck:
         self.user_data = self.fetch_user_data()
         set_sleep()
 
-        if self.pre_battle_set_info(self.user_data) is False:
+        if self.pre_battle_validation(self.user_data) is False:
             self.logger.warning("Failed to pre-battle checking due to above reason.")
             return False
         else:
-            self.logger.warning("Pre-battle checking is done.")
+            self.logger.info("Pre-battle checking is done.")
             return True
 
     # ================================

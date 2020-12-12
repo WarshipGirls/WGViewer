@@ -80,7 +80,7 @@ class Sortie:
         self.set_sortie_tickets(ticket=reset_res['ticket'])
 
     # ================================
-    # Pre Battle Check
+    # Entry points
     # ================================
 
     def pre_battle(self) -> None:
@@ -126,29 +126,6 @@ class Sortie:
             self.logger.info('Can choose a fresh start or resume existing battle')
         else:
             self.logger.info('Can choose a fresh start')
-
-    # ================================
-    # Entry points
-    # ================================
-
-    def check_sub_map_done(self) -> None:
-        self.user_data = self.pre_sortie.fetch_user_data()
-        curr_node = self.user_data['nodeId']
-        self.helper.api_readyFire(curr_node[:4])
-        node_status = self.get_node_status(curr_node)
-
-        self.logger.debug(curr_node)
-        self.logger.debug(node_status)
-        if (curr_node in T_CONST.BOSS_NODES) and (node_status == 3):
-            self.helper.api_passLevel()
-            self.user_data = self.pre_sortie.fetch_user_data()
-            self.set_sub_map(self.user_data['levelId'])
-            if self.curr_sub_map == '9318' and curr_node == '931821':
-                raise ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
-            else:
-                raise ThermopylaeSortieRestart("BOSS FIGHT DONE!")
-        else:
-            pass
 
     def resume_sortie(self) -> None:
         # TODO: may still have some corner cases to catch
@@ -276,8 +253,12 @@ class Sortie:
         except StopIteration:
             return -1
 
-    def set_sub_map(self, sub_map_id: str) -> None:
-        self.curr_sub_map = sub_map_id
+    def set_boat_pool(self, boat_pool: list) -> None:
+        self.boat_pool = set(boat_pool)
+        label_text = "BOAT POOL | "
+        for s in self.boat_pool:
+            label_text += f"{self.user_ships[s]['Name']} "
+        self.parent.update_boat_pool_label(label_text)
 
     def set_sortie_tickets(self, ticket: int = None, num: int = None) -> None:
         if ticket is None:
@@ -290,17 +271,60 @@ class Sortie:
         else:
             self.parent.update_purchasable(str(num))
 
+    def set_sub_map(self, sub_map_id: str) -> None:
+        self.curr_sub_map = sub_map_id
+
     def update_adjutant_label(self, adj: dict) -> None:
         self.parent.update_adjutant_name(T_CONST.ADJUTANT_ID_TO_NAME[adj['id']])
         self.parent.update_adjutant_exp(f"Lv. {adj['level']} {adj['exp']}/{adj['exp_top']}")
         self.parent.update_points(str(self.user_data['strategic_point']))
 
-    def set_boat_pool(self, boat_pool: list) -> None:
-        self.boat_pool = set(boat_pool)
-        label_text = "BOAT POOL | "
-        for s in self.boat_pool:
-            label_text += f"{self.user_ships[s]['Name']} "
-        self.parent.update_boat_pool_label(label_text)
+    def update_battle_fleet_label(self, fleet: list) -> None:
+        label_text = "ON BATTLE | "
+        for s in fleet:
+            label_text += f"{self.user_ships[str(s)]['Name']} "
+        self.parent.update_fleet_label(label_text)
+
+    def update_side_dock_repair(self, x) -> None:
+        # assume only bucket is updated in packageVo; for more secure, use next()
+        self.parent.update_repair_bucket(x[0]['num'])
+
+    def update_side_dock_resources(self, x) -> None:
+        self.parent.update_resources(x['oil'], x['ammo'], x['steel'], x['aluminium'])
+
+    # ================================
+    # Helpers
+    # ================================
+
+    def check_sub_map_done(self) -> None:
+        self.user_data = self.pre_sortie.fetch_user_data()
+        curr_node = self.user_data['nodeId']
+        self.helper.api_readyFire(curr_node[:4])
+        node_status = self.get_node_status(curr_node)
+
+        self.logger.debug(curr_node)
+        self.logger.debug(node_status)
+        if (curr_node in T_CONST.BOSS_NODES) and (node_status == 3):
+            self.helper.api_passLevel()
+            self.user_data = self.pre_sortie.fetch_user_data()
+            self.set_sub_map(self.user_data['levelId'])
+            if self.curr_sub_map == '9318' and curr_node == '931821':
+                raise ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
+            else:
+                raise ThermopylaeSortieRestart("BOSS FIGHT DONE!")
+        else:
+            pass
+
+    def find_SS(self, shop_data: list) -> list:
+        # Get from a list of int (max length of 5), return a list of ship_id (str)
+        res = set()
+        for ship_id in shop_data:
+            if self.curr_node[:4] == SUB_MAP1_ID and ship_id in self.battle_fleet:
+                # in E6-1, don't buy repeated ships
+                continue
+            if ship_id in self.main_fleet:
+                res.add(str(ship_id))
+        return list(res)
 
     def set_fleet(self, fleet: list) -> None:
         # The list may contain string or integer elements
@@ -324,23 +348,6 @@ class Sortie:
 
         self.update_battle_fleet_label(list(self.battle_fleet))
 
-    def update_battle_fleet_label(self, fleet: list) -> None:
-        label_text = "ON BATTLE | "
-        for s in fleet:
-            label_text += f"{self.user_ships[str(s)]['Name']} "
-        self.parent.update_fleet_label(label_text)
-
-    def update_side_dock_resources(self, x) -> None:
-        self.parent.update_resources(x['oil'], x['ammo'], x['steel'], x['aluminium'])
-
-    def update_side_dock_repair(self, x) -> None:
-        # assume only bucket is updated in packageVo; for more secure, use next()
-        self.parent.update_repair_bucket(x[0]['num'])
-
-    # ================================
-    # Combat
-    # ================================
-
     def starting_node(self) -> str:
         # First readyFire() let the server know the sub-map you are on
         self.helper.api_readyFire(self.curr_sub_map)
@@ -349,16 +356,9 @@ class Sortie:
         next_node_id = self.helper.api_readyFire(self.curr_sub_map)
         return self.single_node_sortie(next_node_id)
 
-    def find_SS(self, shop_data: list) -> list:
-        # Get from a list of int (max length of 5), return a list of ship_id (str)
-        res = set()
-        for ship_id in shop_data:
-            if self.curr_node[:4] == SUB_MAP1_ID and ship_id in self.battle_fleet:
-                # in E6-1, don't buy repeated ships
-                continue
-            if ship_id in self.main_fleet:
-                res.add(str(ship_id))
-        return list(res)
+    # ================================
+    # Combat
+    # ================================
 
     def single_node_sortie(self, curr_node_id: str) -> str:
         self.curr_node = curr_node_id
