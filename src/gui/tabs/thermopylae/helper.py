@@ -329,6 +329,9 @@ class SortieHelper:
         return self._reconnecting_calls(_challenge, 'Combat')
 
     def get_war_result(self, is_night: str = '0') -> dict:
+        if is_night == '1':
+            self.logger.info('Fighting night battle!')
+
         def _result() -> Tuple[bool, dict]:
             data = self.api.getWarResult(is_night)
             if 'eid' in data:
@@ -547,11 +550,11 @@ class SortieHelper:
             res = {}
         return res
 
-    def is_night_battle(self, curr_id: str, challenge_res: dict) -> bool:
+    def check_night_battle(self, curr_id: str, challenge_res: dict) -> bool:
         # TODO TODO: simplify and refactor
         do_night_battle = False
         if challenge_res['warReport']['canDoNightWar'] == 0:
-            self.logger.info('Battle finished by day')
+            self.logger.info('Battle is finished by day')
             do_night_battle = False
         elif curr_id in T_CONST.BOSS_NODES:
             e_list = challenge_res['warReport']['hpBeforeNightWarEnemy']
@@ -598,7 +601,7 @@ class SortieHelper:
             else:
                 do_night_battle = False
         else:
-            self.logger.info("Cannot process battle info. Exiting")
+            self.logger.info("Cannot process battle info; no night battle.")
             do_night_battle = False
         return do_night_battle
 

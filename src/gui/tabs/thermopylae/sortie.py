@@ -514,17 +514,12 @@ class Sortie:
         formation = self.helper.get_challenge_formation(curr_node_id=self.curr_node, battle_fleet_size=len(self.battle_fleet))
         challenge_res = self.helper.challenge(formation)
 
-        do_night_battle = self.helper.is_night_battle(curr_node_id, challenge_res)
-
         set_sleep(level=2)
-        if do_night_battle is True:
-            self.logger.info("Entering night war...")
-            battle_res = self.helper.get_war_result('1')
-        else:
-            battle_res = self.helper.get_war_result('0')
+        is_night_battle = self.helper.check_night_battle(curr_node_id, challenge_res)
+        night_battle_option = '1' if is_night_battle is True else '0'
+        battle_res = self.helper.get_war_result(night_battle_option)
         self.helper.process_battle_result(battle_res, list(self.battle_fleet))
 
-        set_sleep()
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:
             next_id = self.helper.get_next_node_by_id(battle_res['nodeInfo']['node_id'])
             if next_id != "" and next_id != "-1":
@@ -532,10 +527,11 @@ class Sortie:
             elif next_id == "":
                 self.logger.info('---- BOSS NODE FINISHED ----')
             else:
-                pass
+                self.logger.error(f'Unexpected next node id: {next_id}')
         else:
             self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Restarting...")
             raise ThermopylaeSortieRestart
+
         self.check_sub_map_done(next_id)
         return next_id
 
