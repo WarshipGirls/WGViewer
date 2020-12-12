@@ -7,6 +7,7 @@ This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 
 RIGHT NOW everything pre-battle is fixed
 TODO: multiple consecutive run w/o interference
 TODO: replace raise?
+TODO free up dock space if needed
 TODO: remove all hard coding
 TODO: refactor
 
@@ -63,7 +64,6 @@ class Sortie:
     # ================================
 
     def pre_battle_set_info(self) -> bool:
-        # TODO free up dock space if needed
         # Insepect the validity for user to use this function
         user_e6 = next(i for i in self.user_data['chapterList'] if i['id'] == "10006")
         if self.user_data['chapterId'] != '10006':
@@ -496,14 +496,8 @@ class Sortie:
         self.helper.spy()
 
         set_sleep()
-        if self.curr_node in ['931608', '931610']:  # only these two nodes need anti-sub
-            formation = '5'
-        elif self.curr_node in self.helper.get_reward_nodes():
-            formation = '4'
-        elif len(self.battle_fleet) >= 4:
-            formation = '2'
-        else:
-            formation = '1'
+
+        formation = self.helper.get_challenge_formation(curr_node_id=self.curr_node, battle_fleet_size=len(self.battle_fleet))
         challenge_res = self.helper.challenge(formation)
 
         do_night_battle = self.helper.is_night_battle(curr_node_id, challenge_res)
@@ -557,14 +551,7 @@ class Sortie:
         self.helper.spy()
 
         set_sleep()
-        if self.curr_node in ['931608', '931610']:  # only these two nodes need anti-sub
-            formation = '5'
-        elif self.curr_node in self.helper.get_reward_nodes():
-            formation = '4'
-        elif len(self.battle_fleet) >= 4:
-            formation = '2'
-        else:
-            formation = '1'
+        formation = self.helper.get_challenge_formation(curr_node_id=self.curr_node, battle_fleet_size=len(self.battle_fleet))
         challenge_res = self.helper.challenge(formation)
 
         do_night_battle = self.helper.is_night_battle(curr_node_id, challenge_res)

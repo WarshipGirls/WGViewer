@@ -37,7 +37,7 @@ class PreSortieCheck:
         if 'eid' in user_data:
             get_error(user_data['eid'])
             return {}
-        if self.is_realrun:
+        if self.is_realrun is False:
             save_json('six_getUserData.json', user_data)
         return user_data
 

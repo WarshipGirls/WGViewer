@@ -362,15 +362,23 @@ class SortieHelper:
     # Getter / Setter
     # ================================
 
+    @staticmethod
+    def get_challenge_formation(curr_node_id: str, battle_fleet_size: int) -> str:
+        if curr_node_id in ['931608', '931610']:  # only these two nodes need anti-sub
+            formation = '5'
+        elif curr_node_id in T_CONST.REWARD_NODES or curr_node_id in T_CONST.BOSS_NODES:
+            formation = '4'
+        elif battle_fleet_size >= 4:
+            formation = '2'
+        else:
+            formation = '1'
+        return formation
+
     def get_curr_points(self) -> int:
         return self.points
 
     def get_adjutant_info(self) -> dict:
         return self.adjutant_info
-
-    @staticmethod
-    def get_reward_nodes() -> list:
-        return T_CONST.REWARD_NODES
 
     def get_map_node_by_id(self, node_id: str) -> dict:
         try:
