@@ -5,10 +5,10 @@ import urllib.request
 from PyQt5.QtWidgets import QMessageBox
 from packaging import version
 
-from src.utils import get_app_version, open_url, _force_quit, popup_msg
+from src import utils as wgv_utils
 
 
-class VersionCheck:
+class WGViewerVersionCheck:
     def __init__(self, parent):
         self.latest_ver = None
         self.parent = parent
@@ -22,7 +22,7 @@ class VersionCheck:
         url = 'https://raw.githubusercontent.com/WarshipGirls/WGViewer/master/version'
         req = urllib.request.urlopen(url)
         if req.getcode() == 200:
-            user_ver = version.parse(get_app_version())
+            user_ver = version.parse(wgv_utils.get_app_version())
             self.latest_ver = req.read().decode()
             latest_ver = version.parse(self.latest_ver)
 
@@ -38,7 +38,7 @@ class VersionCheck:
                 logging.error(f'LOGIN - Version check has unexpected outcome user: {user_ver}, cloud: {latest_ver}')
                 res = -1
         else:
-            popup_msg('Latest app version check failed due to bad Internet connection.')
+            wgv_utils.popup_msg('Latest app version check failed due to bad Internet connection.')
             res = 1
 
         if res == 0:
@@ -46,14 +46,14 @@ class VersionCheck:
         elif res == 1:
             logging.info('LOGIN - Version check succeed. User skips the latest download.')
         elif res == -1:
-            popup_msg('Version check failed. Please re-download the application.', 'Info')
-            _force_quit(0)
+            wgv_utils.popup_msg('Version check failed. Please re-download the application.', 'Info')
+            wgv_utils.force_quit(0)
         else:
             pass
 
     def detail_version_check(self, user_ver: version.Version, latest_ver: version.Version) -> int:
         if user_ver.major < latest_ver.major:
-            popup_msg(f'WGViewer v{self.latest_ver} is available. This is a mandatory major update', 'Major Update')
+            wgv_utils.popup_msg(f'WGViewer v{self.latest_ver} is available. This is a mandatory major update', 'Major Update')
             res = True
         elif user_ver.minor < latest_ver.minor:
             res = self.is_update('Minor Update', 'a recommended')
@@ -83,5 +83,5 @@ class VersionCheck:
     def download_update() -> int:
         # TODO long-term: auto start download?
         logging.info('LOGIN - Link to latest version of WGViewer')
-        open_url('https://github.com/WarshipGirls/WGViewer/releases')
+        wgv_utils.open_url('https://github.com/WarshipGirls/WGViewer/releases')
         return 0

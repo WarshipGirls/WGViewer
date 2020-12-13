@@ -22,13 +22,13 @@ class ShipTableDelegate(QStyledItemDelegate):
         else:
             print("clicked " + str(index.row()) + ", " + str(index.column()))
 
-    def _equip_popup(self, row, col, cid, btn_on):
+    def _equip_popup(self, row: int, col: int, cid: int, btn_on: bool) -> None:
         self.w = EquipPopup(self, row, col, cid, btn_on)
         self.w.show()
 
-    def handle_event(self, row, col, eid):
+    def handle_event(self, row: int, col: int, eid: int) -> None:
         # the chain of following is disgusting
-        self._view.model().sourceModel().update_one_equip(row, col, str(eid))
+        self._view.model().sourceModel().update_one_equip(row, col, eid)
         self.w.close()
 
 # End of File

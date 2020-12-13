@@ -8,13 +8,13 @@ from PyQt5.QtWidgets import (
     QVBoxLayout
 )
 
-from src import data as wgr_data
-from src.utils import get_user_resolution
+from src import data as wgv_data
+from src.utils.wgv_pyqt import get_user_resolution
 
 
 class ExpTable(QWidget):
     # Long term TODO: max coefficient by iter through user's engineering bay stats
-    def __init__(self, filename):
+    def __init__(self, filename: str):
         super().__init__()
         self.filename = filename
 
@@ -34,20 +34,20 @@ class ExpTable(QWidget):
     # Getter / Setter
     # ================================
 
-    def set_col_count(self, cols):
+    def set_col_count(self, cols: int) -> None:
         self.table_model.setColumnCount(cols)
 
-    def get_row_count(self):
+    def get_row_count(self) -> int:
         return self.table_model.rowCount()
 
-    def get_col_count(self):
+    def get_col_count(self) -> int:
         return self.table_model.columnCount()
 
     # ================================
     # UI
     # ================================
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         self.merge_cells()
         self.init_header_ui()
         self.highlight_data([3, 4, 5, 6], highlight_color=None, bold=True)
@@ -65,7 +65,7 @@ class ExpTable(QWidget):
             _, h = get_user_resolution()
             self.table_view.setRowHeight(i, int(0.019 * h))
 
-    def init_header_ui(self):
+    def init_header_ui(self) -> None:
         for c in [3, 7, 11]:
             item = self.table_model.itemFromIndex(self.table_model.index(0, c))
             f = item.font()
@@ -75,13 +75,13 @@ class ExpTable(QWidget):
             item = self.table_model.itemFromIndex(self.table_model.index(1, c))
             item.setBackground(QColor(89, 89, 89))
 
-    def merge_cells(self):
+    def merge_cells(self) -> None:
         self.table_view.setSpan(0, 0, 1, 3)
         self.table_view.setSpan(0, 3, 1, 4)
         self.table_view.setSpan(0, 7, 1, 4)
         self.table_view.setSpan(0, 11, 1, 2)
 
-    def highlight_data(self, cols, highlight_color=None, bold=False):
+    def highlight_data(self, cols: list, highlight_color: QColor = None, bold: bool = False) -> None:
         indices = []
         for col in cols:
             indices += self.get_n_max_val_idx_by_col(col)
@@ -108,20 +108,20 @@ class ExpTable(QWidget):
     # Data processing
     # ================================
 
-    def load_csv(self, csv_path) -> object:
+    def load_csv(self, csv_path: str) -> None:
         with open(csv_path, "r") as f:
             for row in csv.reader(f):
                 items = [QStandardItem(field) for field in row]
                 self.table_model.appendRow(items)
 
-    def set_success_rate(self):
-        raw = wgr_data.get_big_success_rate()
-        item = QStandardItem(str(raw[0]))
-        item.setToolTip(f'Expedition Detail\nSuccess\t\t{raw[1]}\nGrate Success\t{raw[2]}')
+    def set_success_rate(self) -> None:
+        raw, n, d = wgv_data.get_big_success_rate()
+        item = QStandardItem(str(raw))
+        item.setToolTip(f'Expedition Detail\nSuccess\t\t{n}\nGrate Success\t{d}')
         self.table_model.setItem(0, self.get_col_count() - 1, item)
 
-    def set_expectation_income(self):
-        rate = wgr_data.get_big_success_rate()[0]
+    def set_expectation_income(self) -> None:
+        rate, _, _ = wgv_data.get_big_success_rate()
         for row in range(2, self.get_row_count()):
             for col in [11, 12, 13, 14]:
                 d = self.table_model.index(row, col - 4).data()
@@ -132,7 +132,7 @@ class ExpTable(QWidget):
                     t = (1 - rate) * d + rate * d * 1.5
                     self.table_model.setItem(row, col, QStandardItem(str(int(t))))
 
-    def get_n_max_val_idx_by_col(self, col, n=4):
+    def get_n_max_val_idx_by_col(self, col: int, n: int = 4) -> list:
         tmp = {}
         for row in range(2, self.get_row_count()):
             idx = self.table_model.index(row, col)

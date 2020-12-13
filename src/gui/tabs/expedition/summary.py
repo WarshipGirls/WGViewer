@@ -18,7 +18,7 @@ class DailySummary(QWidget):
         self.layout.addWidget(self.tab)
         self.setLayout(self.layout)
 
-    def init_table(self):
+    def init_table(self) -> None:
         self.tab.setColumnCount(8)
         self.tab.setRowCount(5)
 
@@ -34,7 +34,7 @@ class DailySummary(QWidget):
         self.set_labels(labels_col1, 4)
         self.set_labels(labels_col2, 6)
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         self.tab.setShowGrid(False)
         self.tab.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.tab.horizontalHeader().hide()
@@ -46,11 +46,11 @@ class DailySummary(QWidget):
         self.tab.setSelectionMode(QTableView.NoSelection)
         self.tab.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
-    def set_labels(self, labels, col):
+    def set_labels(self, labels: list, col: int) -> None:
         for row in range(1, 5):
             self.tab.setItem(row, col, QTableWidgetItem(labels[row - 1]))
 
-    def update_val(self, data, row, col):
+    def update_val(self, data: int, row: int, col: int) -> None:
         self.tab.setItem(row, col, QTableWidgetItem(str(data)))
 
 # End of File

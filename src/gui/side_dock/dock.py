@@ -1,5 +1,7 @@
 import logging
 import os
+from typing import Tuple
+
 import pytz
 import re
 import sys
@@ -8,22 +10,22 @@ import time
 from datetime import datetime, timedelta
 
 from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QSize, QTimer, QSettings
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QCloseEvent, QResizeEvent
 from PyQt5.QtWidgets import (
     QTableView, QAbstractItemView,
     QVBoxLayout, QHBoxLayout,
-    QDockWidget, QWidget, QLabel, QLineEdit, QMessageBox, QCheckBox
+    QDockWidget, QWidget, QLabel, QLineEdit, QMessageBox, QCheckBox, QLayout
 )
 
-from src import data as wgr_data
-from src.func import constants as CONST
-from src.func.helper import Helper
-from src.utils import clear_desc, get_user_resolution
+from src import data as wgv_data
+from src import utils as wgv_utils
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 
+TASK_TYPE = {'1': "SINGLE", '2': "DAILY", '3': "WEEKLY", '4': "LIMITED TIME"}
 
-def get_data_path(relative_path):
+
+def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
@@ -36,9 +38,8 @@ class SideDock(QDockWidget):
 
     def __init__(self, parent):
         super(SideDock, self).__init__(parent)
-        _, self.user_screen_h = get_user_resolution()
-        self.qsettings = QSettings(wgr_data.get_qsettings_file(), QSettings.IniFormat)
-        self.hlp = Helper()
+        _, self.user_screen_h = wgv_utils.get_user_resolution()
+        self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
 
         # index 0 for daily, 1 for weekly, 2+ for tasks/events
         self.task_counter_desc_labels = []
@@ -86,30 +87,30 @@ class SideDock(QDockWidget):
         self.sig_resized.connect(self.update_geometry)
         self.sig_closed.connect(parent.on_dock_closed)
 
-        self.init_ui()
+        self._init_ui()
         self.set_data()
 
-    def set_data(self):
-        d = wgr_data.get_api_initGame()
+    def set_data(self) -> None:
+        d = wgv_data.get_api_initGame()
         self.on_received_lists(d)
         self.on_received_resource(d)
         self.on_received_name(d)
         self.on_received_tasks(d)
 
-    def init_ui(self):
+    def _init_ui(self) -> None:
         self.setFloating(False)
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.setMinimumWidth(int(0.4 * self.user_screen_h))
         self.setWindowTitle("Navy Base Overview")
 
-        self.init_name_info()
-        self.init_sign_info()
-        self.init_resource_info()
-        self.init_bath_info()
-        self.init_triple_list()
-        self.init_task_panel()
+        self._init_name_info()
+        self._init_sign_info()
+        self._init_resource_info()
+        self._init_bath_info()
+        self._init_triple_list()
+        self._init_task_panel()
 
-    def init_name_info(self):
+    def _init_name_info(self) -> None:
         self.name_layout.setContentsMargins(0, 0, 0, 0)
 
         self.name_layout.addWidget(self.name_label)
@@ -118,11 +119,11 @@ class SideDock(QDockWidget):
         self.name_layout.addWidget(self.equip_count_label)
         self.name_layout.addWidget(self.collect_count_label)
 
-    def init_sign_info(self):
+    def _init_sign_info(self) -> None:
         icon_path = get_data_path('assets/icons/sign_16.png')
         self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition)
 
-    def init_resource_info(self):
+    def _init_resource_info(self) -> None:
         data = [
             [1000000, 1000000, 1000000, 1000000, 200000],
             [10000, 10000, 10000, 10000, 100],
@@ -144,7 +145,7 @@ class SideDock(QDockWidget):
         self.table_view.horizontalScrollBar().setEnabled(False)
         self.table_view.verticalScrollBar().setEnabled(False)
 
-    def init_bath_info(self):
+    def _init_bath_info(self) -> None:
         self.bathlist_view_widget = QWidget(self)
         self.bathlist_view_layout = QVBoxLayout(self.bathlist_view_widget)
         self.bathlist_view_layout.setContentsMargins(0, 0, 0, 0)
@@ -153,46 +154,46 @@ class SideDock(QDockWidget):
             _, self.bath_counter_labels[i] = self.bathlist_view.add_item("Repairing Dock Locked", "")
         self.bathlist_view_layout.addWidget(self.bathlist_view)
 
-    def init_triple_list(self):
+    def _init_triple_list(self) -> None:
         self.triple_list_view_widget = QWidget(self)
         self.triple_list_view = QHBoxLayout(self.triple_list_view_widget)
         self.triple_list_view.setContentsMargins(0, 0, 0, 0)
-        self.init_construction_info()
-        self.init_development_info()
-        self.init_expedition_info()
+        self._init_construction_info()
+        self._init_development_info()
+        self._init_expedition_info()
         self.triple_list_view.addWidget(self.buildlist_view)
         self.triple_list_view.addWidget(self.devlist_view)
         self.triple_list_view.addWidget(self.explist_view)
 
-    def init_construction_info(self):
+    def _init_construction_info(self) -> None:
         self.buildlist_view = BuildListView()
         for i in range(4):
             _, self.build_counter_labels[i] = self.buildlist_view.add_item("Constr. Slot", "Locked")
 
-    def init_development_info(self):
+    def _init_development_info(self) -> None:
         self.devlist_view = DevListView()
         for i in range(4):
             _, self.dev_counter_labels[i] = self.devlist_view.add_item("Dev. Slot", "Locked")
 
-    def init_expedition_info(self):
+    def _init_expedition_info(self) -> None:
         self.explist_view = ExpListView()
         for i in range(4):
             _, self.exp_counter_labels[i] = self.explist_view.add_item("Exped. Fleet", "Idling")
 
-    def init_task_panel(self):
+    def _init_task_panel(self) -> None:
         self.task_panel_widget = QWidget(self)
         self.task_panel_view = QHBoxLayout(self.task_panel_widget)
         self.task_panel_view.setContentsMargins(0, 0, 0, 0)
-        self.init_task_info()
-        self.init_countdowns()
+        self._init_task_info()
+        self._init_countdowns()
         self.task_panel_view.addWidget(self.tasklist_view)
         self.task_panel_view.addWidget(self.countdowns_layout_widget)
 
-    def init_task_info(self):
+    def _init_task_info(self) -> None:
         # Tasks view can be scrolled
         self.tasklist_view = TaskListView()
 
-    def init_countdowns(self):
+    def _init_countdowns(self) -> None:
         # TODO? design problem now the most suitable count is 4, 5 would be max
         # although MoeFantasy opens mostly 1 event at a time, rarely 2.
         self.countdowns_layout_widget = QWidget(self)
@@ -223,13 +224,13 @@ class SideDock(QDockWidget):
         self.task_counters.append(d_counter)
         self.task_counters.append(w_counter)
 
-        self.init_task_counters()
+        self._init_task_counters()
 
     # ================================
     # Getter / Setter
     # ================================
 
-    def add_task_countdown(self, text, _time, idx):
+    def add_task_countdown(self, text: str, _time: int, idx: int) -> None:
         l1 = QLabel(self.countdowns_layout_widget)
         l1.setText(text)
         l1.adjustSize()
@@ -243,7 +244,7 @@ class SideDock(QDockWidget):
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, idx)
 
     @staticmethod
-    def get_tasks_countdowns():
+    def get_tasks_countdowns() -> Tuple[datetime, datetime, float, float]:
         """
         returns [UTC+8 Time (in format), Local Time (in format), next daily (in sec), next weekly (in sec)]
         """
@@ -251,7 +252,7 @@ class SideDock(QDockWidget):
         cn_time = utc_time.astimezone(pytz.timezone('Asia/Shanghai'))
         local_time = utc_time.astimezone()
 
-        def datetime_to_unixtime(t):
+        def datetime_to_unixtime(t: datetime) -> float:
             return time.mktime(t.timetuple())
 
         if cn_time.hour < 3:
@@ -285,11 +286,11 @@ class SideDock(QDockWidget):
         return cid
 
     @staticmethod
-    def get_ship_type(_id):
-        return CONST.build_type[_id]
+    def get_ship_type(_id: int) -> str:
+        return wgv_utils.get_build_type(_id)
 
     @staticmethod
-    def _remove_widget(parent, widget):
+    def _remove_widget(parent, widget: [QLayout, QWidget]) -> None:
         logging.warning("Deleting widget")
         parent.removeWidget(widget)
         widget.deleteLater()
@@ -300,7 +301,7 @@ class SideDock(QDockWidget):
     # Timer Related
     # ================================
 
-    def count_down(self, counters, labels, timers, idx):
+    def count_down(self, counters: list, labels: list, timers: list, idx: int) -> None:
         counters[idx] -= 1
         if counters[idx] > 0:
             pass
@@ -327,7 +328,7 @@ class SideDock(QDockWidget):
                 timers[idx].stop()
         labels[idx].setText(str(timedelta(seconds=counters[idx])))
 
-    def start_new_timer(self, counters, labels, timers, idx):
+    def start_new_timer(self, counters: list, labels: list, timers: list, idx: int) -> None:
         """
         Creates a QTimer() object and auto connects to 1 sec count down.
         Then auto start
@@ -341,7 +342,7 @@ class SideDock(QDockWidget):
             timers[idx] = tr
         tr.start()
 
-    def init_task_counters(self):
+    def _init_task_counters(self) -> None:
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, 0)
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, 1)
 
@@ -350,44 +351,61 @@ class SideDock(QDockWidget):
     # ================================
 
     @pyqtSlot(dict)
-    def on_received_resource(self, data):
+    def on_received_resource(self, data: dict) -> None:
         if data is not None:
             u = data["userVo"]
             x = data["packageVo"]
-            self.table_model._data[0][0] = u["oil"]
-            self.table_model._data[0][1] = u["ammo"]
-            self.table_model._data[0][2] = u["steel"]
-            self.table_model._data[0][3] = u["aluminium"]
-            self.table_model._data[0][4] = u["gold"]
-            self.table_model._data[1][0] = next((i for i in x if i["itemCid"] == 541), {"num": 0})["num"]
-            self.table_model._data[1][1] = next((i for i in x if i["itemCid"] == 141), {"num": 0})["num"]
-            self.table_model._data[1][2] = next((i for i in x if i["itemCid"] == 241), {"num": 0})["num"]
-            self.table_model._data[1][3] = next((i for i in x if i["itemCid"] == 741), {"num": 0})["num"]
-            self.table_model._data[1][4] = next((i for i in x if i["itemCid"] == 66641), {"num": 0})["num"]
-            self.table_model._data[2][0] = next((i for i in x if i["itemCid"] == 10441), {"num": 0})["num"]
-            self.table_model._data[2][1] = next((i for i in x if i["itemCid"] == 10341), {"num": 0})["num"]
-            self.table_model._data[2][2] = next((i for i in x if i["itemCid"] == 10241), {"num": 0})["num"]
-            self.table_model._data[2][3] = next((i for i in x if i["itemCid"] == 10141), {"num": 0})["num"]
-            self.table_model._data[2][4] = next((i for i in x if i["itemCid"] == 10541), {"num": 0})["num"]
-            # formatting numbers
-            for r in range(3):
-                for c in range(5):
-                    self.table_model._data[r][c] = f'{self.table_model._data[r][c]:,}'
+            self.table_model.update_fuel(u["oil"])
+            self.table_model.update_ammo(u["ammo"])
+            self.table_model.update_steel(u["steel"])
+            self.table_model.update_bauxite(u["aluminium"])
+            self.table_model.update_gold(u["gold"])
+            t = next((i for i in x if i["itemCid"] == 541), {"num": 0})["num"]
+            self.table_model.update_repair(t)
+            t = next((i for i in x if i["itemCid"] == 141), {"num": 0})["num"]
+            self.table_model.update_build(t)
+            t = next((i for i in x if i["itemCid"] == 241), {"num": 0})["num"]
+            self.table_model.update_bp_construct(t)
+            t = next((i for i in x if i["itemCid"] == 741), {"num": 0})["num"]
+            self.table_model.update_bp_dev(t)
+            t = next((i for i in x if i["itemCid"] == 66641), {"num": 0})["num"]
+            self.table_model.update_revive(t)
+            t = next((i for i in x if i["itemCid"] == 10441), {"num": 0})["num"]
+            self.table_model.update_DD(t)
+            t = next((i for i in x if i["itemCid"] == 10341), {"num": 0})["num"]
+            self.table_model.update_CA(t)
+            t = next((i for i in x if i["itemCid"] == 10241), {"num": 0})["num"]
+            self.table_model.update_BB(t)
+            t = next((i for i in x if i["itemCid"] == 10141), {"num": 0})["num"]
+            self.table_model.update_CV(t)
+            t = next((i for i in x if i["itemCid"] == 10541), {"num": 0})["num"]
+            self.table_model.update_SS(t)
 
     @pyqtSlot(dict)
-    def on_received_name(self, data):
+    def update_lvl_label(self, x: dict) -> None:
+        if x is not None:
+            self.lvl_label.setText("Lv. " + str(x["level"]))
+            lvl_tooltip = str(x["exp"]) + " / " + str(x["nextLevelExpNeed"])
+            self.lvl_label.setToolTip(lvl_tooltip)
+
+    @pyqtSlot(dict)
+    def on_received_name(self, data: dict) -> None:
         if data is not None:
             x = data["userVo"]["detailInfo"]
             self.name_label.setText(x["username"])
-            self.lvl_label.setText("Lv. " + str(x["level"]))
-            lvl_tooltip = str(x["exp"]) + " / " + str(x["nextLevelExpNeed"]) + ", resource soft cap = " + str(data["userVo"]["resourcesTops"][0])
-            self.lvl_label.setToolTip(lvl_tooltip)
+            name_tooltip = "resource soft cap = " + str(data["userVo"]["resourcesTops"][0])
+            self.name_label.setToolTip(name_tooltip)
+
+            self.update_lvl_label(x)
+
             ship_icon = get_data_path('assets/icons/ship_16.png')
             ship_str = f"<html><img src='{ship_icon}'></html> " + str(x["shipNum"]) + " / " + str(x["shipNumTop"])
             self.ship_count_label.setText(ship_str)
+
             equip_icon = get_data_path('assets/icons/equip_16.png')
             equip_str = f"<html><img src='{equip_icon}'></html> " + str(x["equipmentNum"]) + " / " + str(x["equipmentNumTop"])
             self.equip_count_label.setText(equip_str)
+
             collect_icon = get_data_path('assets/icons/collect_16.png')
             collect_str = f"<html><img src='{collect_icon}'></html> " + str(len(data["unlockShip"])) + " / " + str(x["basicShipNum"])
             self.collect_count_label.setText(collect_str)
@@ -395,7 +413,7 @@ class SideDock(QDockWidget):
             self.sign_widget.setText(data["friendVo"]["sign"])
 
     @pyqtSlot(dict)
-    def on_received_lists(self, data):
+    def on_received_lists(self, data: dict) -> None:
         if data is not None:
             def calc_left_time(t):
                 return 0 if int(time.time()) < t else (t - int(time.time()))
@@ -433,12 +451,12 @@ class SideDock(QDockWidget):
                 self.explist_view.update_item(idx, 0, n)
 
     @pyqtSlot(dict)
-    def on_received_tasks(self, data):
+    def on_received_tasks(self, data: dict) -> None:
         if data is not None:
             t = data["taskVo"]
             for i in t:
                 stat = str(i["condition"][0]["finishedAmount"]) + " / " + str(i["condition"][0]["totalAmount"])
-                desc = clear_desc(i["desc"])
+                desc = wgv_utils.clear_desc(i["desc"])
                 if '#' in desc:
                     # TODO: (lowest priority) how to find `#s10030711#n` ? looks like not the same ID in docks
                     desc = re.sub(r'\[[^]]*\]', i["title"], desc)
@@ -449,7 +467,7 @@ class SideDock(QDockWidget):
                     lim_flag = True
                 else:
                     lim_flag = False
-                prefix = CONST.task_type[i['type']]
+                prefix = TASK_TYPE[i['type']]
                 title = f"{prefix}\t{i['title']}"
                 self.tasklist_view.add_item(title, stat, desc, lim_flag)
 
@@ -461,17 +479,17 @@ class SideDock(QDockWidget):
     # Events
     # ================================
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QResizeEvent) -> None:
         # overriding resizeEvent() method
         self.sig_resized.emit()
         return super(SideDock, self).resizeEvent(event)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent) -> None:
         cb = QCheckBox('Do not show on start-up.')
         box = QMessageBox(QMessageBox.Question, "INFO", "Do you want to close side dock?\n(Can re-open in View menu)",
                           QMessageBox.Yes | QMessageBox.No, self)
 
-        box.setStyleSheet(wgr_data.get_color_scheme())
+        box.setStyleSheet(wgv_data.get_color_scheme())
         box.setDefaultButton(QMessageBox.No)
         box.setCheckBox(cb)
 
@@ -482,7 +500,7 @@ class SideDock(QDockWidget):
             event.ignore()
         self.qsettings.setValue("UI/no_side_dock", cb.isChecked())
 
-    def update_geometry(self):
+    def update_geometry(self) -> None:
         y = 0.03 * self.user_screen_h
         h = 0.05 * self.user_screen_h
         gap = 0.01 * self.user_screen_h

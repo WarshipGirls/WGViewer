@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QHeaderView, QTableView
 )
 
-from src import data as wgr_data
+from src import data as wgv_data
 from src.wgr.api import WGR_API
 from .ships.delegate import ShipTableDelegate
 from .ships.model import ShipModel
@@ -17,7 +17,7 @@ from .ships.proxy_model import ShipSortFilterProxyModel
 from .ships.top_checkbox import TopCheckboxes
 
 
-def get_data_path(relative_path):
+def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
     res = os.path.join(bundle_dir, relative_path)
@@ -28,7 +28,7 @@ class TabShips(QWidget):
     def __init__(self, tab_name: str, is_realrun: bool):
         super().__init__()
         logging.info("SHIPS - Creating Ships Tab...")
-        self.api = WGR_API(wgr_data.load_cookies())
+        self.api = WGR_API(wgv_data.load_cookies())
 
         self.setObjectName(tab_name)
         self.content_widget = None
@@ -47,19 +47,19 @@ class TabShips(QWidget):
         else:
             self._testrun()
 
-    def _realrun(self):
+    def _realrun(self) -> None:
         data = self.api.getShipList()
-        wgr_data.save_api_getShipList(data)
+        wgv_data.save_api_getShipList(data)
         self.on_received_shiplist(data)
 
-    def _testrun(self):
+    def _testrun(self) -> None:
         logging.debug("SHIPS - Starting tests...")
-        data = wgr_data.get_api_getShipList()
+        data = wgv_data.get_api_getShipList()
         # logging.error(len(data['userShipVO']))
         data['userShipVO'] = data['userShipVO'][:5]
         self.on_received_shiplist(data)
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         scroll_box = QVBoxLayout(self)
         self.setLayout(scroll_box)
         scroll = QScrollArea(self)
@@ -96,7 +96,7 @@ class TabShips(QWidget):
 
         self.init_view_settings()
 
-    def init_view_settings(self):
+    def init_view_settings(self) -> None:
         self.table_view.setItemDelegate(ShipTableDelegate(self.table_view))
 
         self.table_view.setSortingEnabled(True)
@@ -106,7 +106,7 @@ class TabShips(QWidget):
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
     @pyqtSlot(dict)
-    def on_received_shiplist(self, data):
+    def on_received_shiplist(self, data) -> None:
         if data is None:
             logging.error("SHIPS - Invalid ship list data.")
         else:

@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor
 from PyQt5.QtWidgets import QTreeView, QAbstractItemView, QHeaderView
@@ -28,10 +30,10 @@ class AlignListView(QTreeView):
 
         self.doubleClicked.connect(self.on_click)
 
-    def on_click(self, index):
+    def on_click(self, index: int) -> None:
         pass
 
-    def add_item(self, key, value, desc=None, is_limited=False):
+    def add_item(self, key: str, value: str, desc: str = None, is_limited: bool = False) -> Tuple[QStandardItem, QStandardItem]:
         # TODO: add function, when user clicked, pop up build/dev/repair etc
         first = QStandardItem(key)
         if desc is not None:
