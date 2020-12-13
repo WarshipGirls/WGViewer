@@ -8,6 +8,8 @@ from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieResume
 from src.wgr.six import API_SIX
 from . import constants as T_CONST
 
+SUB_MAP3_ID: str = '9318'
+
 
 class SortieHelper:
     def __init__(self, tab_thermopylae, api: API_SIX, user_ships: dict, map_data: dict):
@@ -156,8 +158,8 @@ class SortieHelper:
     @staticmethod
     def get_buff_card_cost(buff_id: str) -> int:
         try:
-            assert(len(buff_id) == 6)
-            cost = T_CONST.BUFF_BASE_COST[int(buff_id[:4])] * (2**(int(buff_id[-2:])-1))
+            assert (len(buff_id) == 6)
+            cost = T_CONST.BUFF_BASE_COST[int(buff_id[:4])] * (2 ** (int(buff_id[-2:]) - 1))
             return cost
         except AssertionError:
             return -1
@@ -451,6 +453,18 @@ class SortieHelper:
         else:
             pass
         return res, buff_id
+
+    @staticmethod
+    def is_buy_buff(node_id: str) -> bool:
+        try:
+            assert (len(node_id) == 6)
+            if node_id in SUB_MAP3_ID:
+                res = True
+            else:
+                res = False
+            return res
+        except AssertionError:
+            return False
 
     def check_adjutant_level_bump(self) -> int:
         # TODO: combine this and bump_level

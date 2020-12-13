@@ -27,7 +27,6 @@ from . import constants as T_CONST
 
 CHAPTER_ID: str = '10006'
 SUB_MAP1_ID: str = '9316'
-SUB_MAP3_ID: str = '9318'
 E61_0_ID: str = '931601'
 E61_A1_ID: str = '931602'
 E61_B1_ID: str = '931604'
@@ -124,18 +123,6 @@ class Sortie:
         else:
             self.logger.info('Can choose a fresh start')
 
-    @staticmethod
-    def is_buy_buff(node_id: str) -> bool:
-        try:
-            assert (len(node_id) == 6)
-            if node_id in SUB_MAP3_ID:
-                res = True
-            else:
-                res = False
-            return res
-        except AssertionError:
-            return False
-
     def resume_sortie(self) -> None:
         # TODO: may still have some corner cases to catch
 
@@ -158,7 +145,7 @@ class Sortie:
                     ss_list = self.find_SS(shop_res['boats'])
                 else:
                     pass
-                is_buff = self.is_buy_buff(self.curr_node)
+                is_buff = self.helper.is_buy_buff(self.curr_node)
                 if len(ss_list) == 0:
                     pass
                 else:
@@ -416,7 +403,7 @@ class Sortie:
                     pass
             else:
                 pass
-            is_buff = self.is_buy_buff(self.curr_node)
+            is_buff = self.helper.is_buy_buff(self.curr_node)
             buy_res = self.buy_wanted_ships(purchase_list=ss_list, shop_data=shop_res, is_buff=is_buff)
 
         if buy_res is None:
