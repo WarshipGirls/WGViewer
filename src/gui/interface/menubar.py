@@ -1,7 +1,6 @@
 import os
 import sys
 from typing import Callable
-from urllib.request import urlopen
 
 from PyQt5.QtCore import QSettings, pyqtSlot
 from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
@@ -177,7 +176,9 @@ class MainInterfaceMenuBar(QMenuBar):
             pass
 
     def open_version_log(self) -> None:
-        text = urlopen('https://raw.githubusercontent.com/WarshipGirls/WGViewer/master/docs/version_log.md').read().decode('ascii')
+        # text = urlopen('https://raw.githubusercontent.com/WarshipGirls/WGViewer/master/docs/version_log.md').read().decode('ascii')
+        with open(get_data_path("docs/version_log.md"), 'r') as f:
+            text = f.read()
         self.version_log = ScrollBoxWindow(self, 'WGViewer Version Logs', text)
         self.version_log.setStyleSheet(wgv_data.get_color_scheme())
         self.version_log.show()
