@@ -54,14 +54,13 @@ class SortieHelper:
     def buy_exp(self) -> dict:
         def _buy_exp() -> Tuple[bool, dict]:
             data = self.api.adjutantExp()
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
-                res = False
             elif 'adjutantData' in data:
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_buy_exp, 'buy exp')
@@ -71,16 +70,15 @@ class SortieHelper:
 
         def _selectBoat() -> [bool, object]:
             data = self.api.selectBoat(purchase_list, buff_card)
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
                 self.logger.warning("Buying ships failed...")
-                res = False
             elif 'boatPool' in data:
                 self.logger.info("Buying ships successfully!")
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         self.logger.debug('prepare to buy')
@@ -99,16 +97,15 @@ class SortieHelper:
     def cast_skill(self) -> dict:
         def _cast_skill() -> Tuple[bool, dict]:
             data = self.api.useAdjutant()
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
                 self.logger.warning("Failed to cast adjutant skill...")
-                res = False
             elif 'adjutantData' in data:
                 self.logger.info("Adjutant skill casted successfully!")
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         res_data = self._reconnecting_calls(_cast_skill, 'cast adjutant skill')
@@ -124,14 +121,13 @@ class SortieHelper:
     def challenge(self, formation: str) -> dict:
         def _challenge() -> Tuple[bool, dict]:
             data = self.api.challenge(formation)
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
-                res = False
             elif 'warReport' in data:
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_challenge, 'Combat')
@@ -139,16 +135,15 @@ class SortieHelper:
     def enter_next_node(self, next_node: str) -> dict:
         def _newNext() -> Tuple[bool, dict]:
             data = self.api.newNext(next_node)
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
-                res = False
             elif 'nodeId' in data:
                 node_name = self.get_map_node_by_id(next_node)['flag']
                 self.logger.info(f"Proceed to {node_name} succeed!")
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_newNext, 'enter next node')
@@ -156,9 +151,9 @@ class SortieHelper:
     def get_ship_store(self, is_refresh: str = '0') -> dict:
         def _canSelectList() -> Tuple[bool, dict]:
             data = self.api.canSelectList(is_refresh)
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
-                res = False
             elif '$ssss' in data:
                 self.logger.info('Visiting shop succeed!')
                 res = True
@@ -166,7 +161,6 @@ class SortieHelper:
                 res = True
             else:
                 self.logger.error(data)
-                res = False
             return res, data
 
         store_data = self._reconnecting_calls(_canSelectList, 'visit shop')
@@ -191,14 +185,13 @@ class SortieHelper:
 
         def _result() -> Tuple[bool, dict]:
             data = self.api.getWarResult(is_night)
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
-                res = False
             elif 'warResult' in data:
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_result, 'receive result')
@@ -206,16 +199,15 @@ class SortieHelper:
     def repair_ships(self, fleet: list) -> dict:
         def _repair() -> Tuple[bool, dict]:
             data = self.api.instantRepairShips(fleet)
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
                 self.logger.warning(f"Failed to repair {fleet}")
-                res = False
             elif 'shipVOs' in data:
                 self.logger.info("Repaired successfully")
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_repair, 'repair')
@@ -223,14 +215,13 @@ class SortieHelper:
     def scout_enemy(self) -> dict:
         def _spy() -> Tuple[bool, dict]:
             data = self.api.spy()
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
-                res = False
             elif 'enemyVO' in data:
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_spy, 'Detection')
@@ -238,14 +229,13 @@ class SortieHelper:
     def set_war_fleets(self, fleet: list) -> dict:
         def _set_fleets() -> Tuple[bool, dict]:
             data = self.api.setWarFleet(fleet)
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
-                res = False
             elif 'fleet' in data and len(data['fleet']) > 0:
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_set_fleets, 'set battle fleet')
@@ -253,16 +243,15 @@ class SortieHelper:
     def supply_boats(self, fleets: list) -> dict:
         def _supply_boats() -> Tuple[bool, dict]:
             data = self.api.supplyBoats(fleets)
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
                 self.logger.warning("Supply ships failed...")
-                res = False
             elif 'userVo' in data:
                 self.logger.info("Supply boats successfully!")
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_supply_boats, 'supply')
@@ -274,14 +263,13 @@ class SortieHelper:
     def reset_chapter(self, chapter_id: str) -> dict:
         def _reset() -> Tuple[bool, dict]:
             data = self.api.resetChapter(chapter_id)
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
-                res = False
             elif 'adjutantData' in data:
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_reset, 'reset chapter')
@@ -289,10 +277,10 @@ class SortieHelper:
     def enter_sub_map(self, sub_map_id: str) -> dict:
         def _readyFire() -> Tuple[bool, int]:
             data = self.api.readyFire(sub_map_id)
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
                 next_node_id = -1
-                res = False
             elif '$currentVo' in data:
                 self.logger.info('Entering map succeed!')
                 next_node_id = self.get_next_node_by_id(data['$currentVo']['nodeId'])
@@ -300,7 +288,6 @@ class SortieHelper:
             else:
                 self.logger.debug(data)
                 next_node_id = -1
-                res = False
             return res, next_node_id
 
         return self._reconnecting_calls(_readyFire, 'enter the map')
@@ -308,18 +295,16 @@ class SortieHelper:
     def retreat_sub_map(self) -> dict:
         def _withdraw() -> Tuple[bool, dict]:
             data = self.api.withdraw()
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
-                res = False
             elif 'code' in data:
                 get_error(data['code'])
-                res = False
             elif 'getLevelList' in data:
                 self.logger.info("Retreat success. Fresh start is ready.")
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_withdraw, 'restart')
@@ -327,17 +312,15 @@ class SortieHelper:
     def pass_sub_map(self) -> dict:
         def _pass() -> Tuple[bool, dict]:
             data = self.api.passLevel()
+            res = False
             if 'eid' in data:
                 get_error(data['eid'])
-                res = False
             elif 'code' in data:
                 get_error(data['code'])
-                res = False
             elif 'attach' in data:
                 res = True
             else:
                 self.logger.debug(data)
-                res = False
             return res, data
 
         return self._reconnecting_calls(_pass, 'collect boss reward')
