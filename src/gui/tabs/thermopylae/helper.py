@@ -310,7 +310,6 @@ class SortieHelper:
             return res, data
 
         spy_data = self._reconnecting_calls(_spy, 'Detection')
-        self.logger.info(wgv_utils.process_spy_json(spy_data))  # TODO: this should put in main
         return spy_data
 
     def challenge(self, formation: str) -> dict:
@@ -466,60 +465,43 @@ class SortieHelper:
         except AssertionError:
             return False
 
-    def check_adjutant_level_bump(self) -> int:
-        # TODO: combine this and bump_level
-        """
-        Check if adjutant level can be bumped
-
-        @return: bump result
-            - -1: cannot bump / should not bump
-            - 0: can bump
-            - 1: max level, no bump
-        @rtype: int
-        """
+    def bump_level(self) -> int:
         if self.adjutant_info is None:
-            res = -1
-        else:
-            adj_lvl = int(self.adjutant_info['level'])
-            if adj_lvl == 10:
-                return 1
+            return -1
 
-            curr_exp = int(self.adjutant_info["exp"])
-            next_exp = int(self.adjutant_info["exp_top"])
-            required_exp = next_exp - curr_exp
-            required_points = ceil(required_exp / 5) * 5
-            if self.get_curr_points() >= required_points:
-                if adj_lvl >= 8 and required_points > 5:
-                    res = -1
-                else:
-                    res = 0
-            else:
-                res = -1
-        return res
+        adj_lvl = int(self.adjutant_info['level'])
+        if adj_lvl == 10:
+            return 1
 
-    def bump_level(self) -> bool:
         curr_exp = int(self.adjutant_info["exp"])
         next_exp = int(self.adjutant_info["exp_top"])
         required_exp = next_exp - curr_exp
+        required_points = ceil(required_exp / 5) * 5
+        next_adj_lvl = adj_lvl + 1
+        if self.get_curr_points() >= required_points:
+            if adj_lvl >= 8 and required_points > 5:
+                res = 0
+            else:
+                exp_res = None
+                while required_points > 0:
+                    exp_res = self.buy_exp()
+                    required_points -= 5
+                    self.update_adjutant_info(exp_res['adjutantData'], exp_res['strategic_point'])
+                    wgv_utils.set_sleep()
 
-        next_adj_lvl = int(self.adjutant_info["level"]) + 1
-        self.logger.info(f"Bumping adjutant level to Lv.{next_adj_lvl}")
-        buy_times = ceil(required_exp / 5)
-        res = None
-        while buy_times > 0:
-            res = self.buy_exp()
-            buy_times -= 1
-            self.update_adjutant_info(res['adjutantData'], res['strategic_point'])
-            wgv_utils.set_sleep()
-
-        if 'adjutantData' not in res:
-            return False
-        elif int(res['adjutantData']['level']) == next_adj_lvl:
-            self.logger.info("Bumping level successfully")
-            return True
+                if exp_res is None:
+                    res = -1
+                elif 'adjutantData' not in exp_res:
+                    res = -1
+                elif int(exp_res['adjutantData']['level']) == next_adj_lvl:
+                    self.logger.info("Bumping level successfully")
+                    res = 0
+                else:
+                    self.logger.debug(exp_res)
+                    res = -1
         else:
-            self.logger.debug(res)
-            return False
+            res = 0
+        return res
 
     def update_adjutant_info(self, adj_data: dict, strategic_point: int) -> None:
         # TODO: use signal? and manage signals globally?
@@ -615,7 +597,6 @@ class SortieHelper:
             ship_id = fleet[i]
             shipname = next((j for j in battle_res['shipVO'] if j['id'] == ship_id))['title']
             ship = ships[i]
-            # TODO fix the output format
             ship_str = "{:12s}\tLv.{:4s}\t+{}Exp".format(shipname, str(ship['level']), str(ship['expAdd']))
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
             self.logger.info(ship_str)

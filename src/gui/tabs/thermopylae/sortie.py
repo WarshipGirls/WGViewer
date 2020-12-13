@@ -19,6 +19,7 @@ from typing import Union
 from src import data as wgv_data
 from src.exceptions.wgr_error import get_error
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume, ThermopylaeSortieDone
+from src.utils.game_combat import process_spy_json
 from src.utils.general import set_sleep
 from src.wgr.six import API_SIX
 from .helper import SortieHelper
@@ -440,7 +441,7 @@ class Sortie:
             self.set_fleet(list(self.boat_pool))
             self.helper.set_war_fleets(list(self.battle_fleet))
 
-        if self.helper.check_adjutant_level_bump() == 0 and self.helper.bump_level() is False:
+        if self.helper.bump_level() == -1:
             raise ThermopylaeSortieRestart("Adjutant level bumping failed. Restarting")
         else:
             pass
@@ -469,7 +470,8 @@ class Sortie:
             self.update_side_dock_repair(repair_res['packageVo'])
 
         set_sleep()
-        self.helper.scout_enemy()
+        spy_res = self.helper.scout_enemy()
+        self.logger.info(process_spy_json(spy_res))
 
         set_sleep()
         formation = self.helper.get_challenge_formation(curr_node_id=self.curr_node, battle_fleet_size=len(self.battle_fleet))
