@@ -382,19 +382,30 @@ class SideDock(QDockWidget):
             self.table_model.update_SS(t)
 
     @pyqtSlot(dict)
+    def update_lvl_label(self, x: dict) -> None:
+        if x is not None:
+            self.lvl_label.setText("Lv. " + str(x["level"]))
+            lvl_tooltip = str(x["exp"]) + " / " + str(x["nextLevelExpNeed"])
+            self.lvl_label.setToolTip(lvl_tooltip)
+
+    @pyqtSlot(dict)
     def on_received_name(self, data: dict) -> None:
         if data is not None:
             x = data["userVo"]["detailInfo"]
             self.name_label.setText(x["username"])
-            self.lvl_label.setText("Lv. " + str(x["level"]))
-            lvl_tooltip = str(x["exp"]) + " / " + str(x["nextLevelExpNeed"]) + ", resource soft cap = " + str(data["userVo"]["resourcesTops"][0])
-            self.lvl_label.setToolTip(lvl_tooltip)
+            name_tooltip = "resource soft cap = " + str(data["userVo"]["resourcesTops"][0])
+            self.name_label.setToolTip(name_tooltip)
+
+            self.update_lvl_label(x)
+
             ship_icon = get_data_path('assets/icons/ship_16.png')
             ship_str = f"<html><img src='{ship_icon}'></html> " + str(x["shipNum"]) + " / " + str(x["shipNumTop"])
             self.ship_count_label.setText(ship_str)
+
             equip_icon = get_data_path('assets/icons/equip_16.png')
             equip_str = f"<html><img src='{equip_icon}'></html> " + str(x["equipmentNum"]) + " / " + str(x["equipmentNumTop"])
             self.equip_count_label.setText(equip_str)
+
             collect_icon = get_data_path('assets/icons/collect_16.png')
             collect_str = f"<html><img src='{collect_icon}'></html> " + str(len(data["unlockShip"])) + " / " + str(x["basicShipNum"])
             self.collect_count_label.setText(collect_str)

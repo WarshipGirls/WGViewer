@@ -15,12 +15,13 @@ from .game_combat import (
     process_spy_json
 )
 from .game_info import (
-    get_all_ship_types, get_build_type, get_combat_formation, get_ship_los, get_ship_type, get_war_evaluation
+    get_all_ship_types, get_build_type, get_combat_formation, get_heading_type, get_ship_los, get_ship_type, get_war_evaluation
 )
 from .general import (
     clear_desc, 
     force_quit, 
     get_app_version, get_curr_time, get_game_version, 
+    set_sleep, 
     ts_to_countdown, ts_to_date
 )
 from .shipname import (

@@ -39,6 +39,7 @@ class LoginSession:
         for i in range(self.max_retry):
             try:
                 r = self.session.post(url=url, data=data, json=json, **kwargs)
+                self.wait_until_success(r)
                 r.close()
                 return r
             except self.accept_errors as e:
@@ -46,5 +47,17 @@ class LoginSession:
                 sleep(self.sleep_time)
                 if i == 4:
                     raise
+
+    @staticmethod
+    def wait_until_success(response: Response, timeout: float = 2.0, timewait: float = 0.5) -> None:
+        # for session.get() / post()
+        timer = 0
+        while response.status_code == 204:
+            sleep(timewait)
+            timer += timewait
+            if timer > timeout:
+                break
+            if response.status_code == 200:
+                break
 
 # End of File

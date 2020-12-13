@@ -3,7 +3,6 @@ from .boat import API_BOAT
 
 
 class API_SIX(WGR_API):
-    # TODO find purchase ticket
     def __init__(self, cookies):
         super().__init__(cookies)
         self.boats_api = API_BOAT(cookies)
@@ -41,6 +40,10 @@ class API_SIX(WGR_API):
         link = 'six/cha11enge/' + formation
         return self._api_call(link)
 
+    def chargeTicket(self):
+        link = 'six/chargeTicket/3'
+        return self._api_call(link)
+
     def getUserData(self):
         link = 'six/getuserdata'        # no typo, all lowercase
         return self._api_call(link)
@@ -66,11 +69,13 @@ class API_SIX(WGR_API):
         return self._api_call(link)
 
     def readyFire(self, sub_map_id: str):
+        # !! NEED TO CALL THIS EVERYTIME YOU ENTER THE THERMOPYLAE MODE
         link = 'six/readyFire/' + sub_map_id
         return self._api_call(link)
 
     def resetChapter(self, sortie_map: str):
-        link = 'resetChapter/' + sortie_map
+        # used when after passing the final sub-map of a chapter
+        link = 'six/resetChapter/' + sortie_map
         return self._api_call(link)
 
     def selectBoat(self, selected_boats: list, skill_card: str = '0'):
@@ -78,7 +83,7 @@ class API_SIX(WGR_API):
         return self._api_urlopen(link)
 
     def setChapterBoat(self, sortie_map: str, fleets: list):
-        # sortie_map from 9301 to 9318 in the order of E1 (9301,9302,9303) to E6 (9316,9317,9318)
+        # chapter id: 10001 (E1) to 10006 (E6)
         link = 'six/setChapterBoat/' + sortie_map + '/' + self._int_list_to_str(fleets)
         return self._api_urlopen(link)
 
