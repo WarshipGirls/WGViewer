@@ -4,7 +4,6 @@
 2. This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
     RIGHT NOW everything pre-battle is fixed
 3. This file hosts high-level battle decisions; low-level pre/post processing code is host in ./helper.py
-TODO: multiple consecutive run w/o interference
 TODO: replace raise?
 TODO free up dock space if needed
 """

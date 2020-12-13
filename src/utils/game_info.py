@@ -14,15 +14,29 @@ BUILD_TYPE = {1: "Type S.", 2: "Type M.", 3: "Type L.", 4: "?", 5: "?"}
 # This one is not 100% confirmed (I assumed from challenge['warType'])
 COURSEHEADING_TYPE = {1: 'Parallel', 2: 'Heading', 3: 'T+', 4: 'T-'}
 
+
 def get_heading_type(heading_id: int) -> str:
-    return COURSEHEADING_TYPE[heading_id]
+    try:
+        res = COURSEHEADING_TYPE[heading_id]
+    except KeyError:
+        res = str(heading_id)
+    return res
+
 
 def get_build_type(build_id: int) -> str:
-    return BUILD_TYPE[build_id]
+    try:
+        res = BUILD_TYPE[build_id]
+    except KeyError:
+        res = str(build_id)
+    return res
 
 
 def get_combat_formation(formation_id: int) -> str:
-    return FORMATION[formation_id]
+    try:
+        res = FORMATION[formation_id]
+    except KeyError:
+        res = str(formation_id)
+    return res
 
 
 def get_ship_type(ship_type_id: int) -> str:
@@ -38,10 +52,18 @@ def get_all_ship_types() -> dict:
 
 
 def get_ship_los(range_id: int) -> str:
-    return RANGE_TYPE[range_id]
+    try:
+        res = RANGE_TYPE[range_id]
+    except KeyError:
+        res = str(range_id)
+    return res
 
 
 def get_war_evaluation(idx: int) -> str:
-    return WAR_EVALUATION[idx]
+    try:
+        res = WAR_EVALUATION[idx]
+    except KeyError:
+        res = str(idx)
+    return res
 
 # End of File

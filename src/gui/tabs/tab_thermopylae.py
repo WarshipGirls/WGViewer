@@ -15,6 +15,10 @@ from .thermopylae.ship_window import ShipSelectWindow
 from .thermopylae.sortie import Sortie
 
 
+# TODO: record consumption resources; and time
+# TODO: show ship +star in label
+# TODO: multiple consecutive run w/o interference
+
 class TabThermopylae(QWidget):
     sig_fuel = pyqtSignal(int)
     sig_ammo = pyqtSignal(int)

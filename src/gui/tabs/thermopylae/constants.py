@@ -1,6 +1,7 @@
 # TODO: add these settings to GUI
 # User Settings
 BOSS_RETRY_LIMITS: list = [3, 5, 10]
+BOSS_RETRY_STANDARDS: list = [1, 2, 2]
 CONNECTION_RETRY_LIMIT: int = 3
 SHIP_REPAIR_LEVELS: list = [1]
 # CONSTANTS

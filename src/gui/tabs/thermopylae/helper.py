@@ -445,9 +445,9 @@ class SortieHelper:
         if challenge_res['warReport']['canDoNightWar'] == 0:
             res = '0'
         elif curr_id in T_CONST.BOSS_NODES:
-            self.logger.info('---- BOSS BATTLE (TODO NIGHT BATTLE) ----')
+            self.logger.info('---- BOSS BATTLE ----')
             node_idx = T_CONST.BOSS_NODES.index(curr_id)
-            if e_list.count(0) >= 2:
+            if e_list.count(0) >= T_CONST.BOSS_RETRY_STANDARDS[node_idx]:
                 res = '1'
             else:
                 if self.boss_retry_count[node_idx] == T_CONST.BOSS_RETRY_LIMITS[node_idx]:
