@@ -435,18 +435,11 @@ class Sortie:
             self.set_boat_pool(buy_res['boatPool'])
             self.set_fleet(buy_res['boatPool'])
 
-        adj = self.helper.get_adjutant_info()
         if curr_node_id in [E61_A1_ID, E62_A1_ID]:
-            if adj['id'] == T_CONST.ADJUTANT_IDS[0]:
-                pass
-            else:
-                self.api.changeAdjutant(T_CONST.ADJUTANT_IDS[0])
+            self.api.changeAdjutant(T_CONST.ADJUTANT_IDS[0])
             self.helper.cast_skill()
         elif curr_node_id == E63_A1_ID:
-            if adj['id'] == T_CONST.ADJUTANT_IDS[2]:
-                pass
-            else:
-                self.api.changeAdjutant(T_CONST.ADJUTANT_IDS[2])
+            self.api.changeAdjutant(T_CONST.ADJUTANT_IDS[2])  # Need to change everytime
             skill_res = self.helper.cast_skill()
             new_boat = skill_res['boat_add']
             if len(set(new_boat).intersection(set(self.main_fleet))) >= 2:
