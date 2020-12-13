@@ -47,11 +47,14 @@ class Sortie:
         self.user_data: dict = {}
 
         self.helper = None
+        self.boat_pool: set = set()  # host existing boats
         self.curr_node: str = '0'
         self.curr_sub_map: str = '0'
-        self.boat_pool: set = set()  # host existing boats
-        self.escort_DD: list = [11008211, 11009211]  # For 2DD to pass first few levels only, 萤火虫，布雷恩
-        self.escort_CV: list = [10031913]  # For 1CV to pass first few levels only, 不挠
+        self.escort_DD_cids: list = [11008211, 11009211]  # For 2DD to pass first few levels only, 萤火虫，布雷恩
+        self.escort_DD: list = []
+        self.escort_CV_cids: list = [10031913]  # For 1CV to pass first few levels only, 不挠
+        self.escort_CV: list = []
+        self.tickets: int = 0
         self.user_ships: dict = wgv_data.get_processed_userShipVo()
 
         self.pre_sortie = PreSortieCheck(self.api, is_realrun)
@@ -64,9 +67,10 @@ class Sortie:
 
     def _reset_chapter(self) -> None:
         # chapter can only be reset after E6-3
+        if self.tickets <= 0:
+            raise ThermopylaeSoriteExit("Insufficient sortie ticket. Cannot Reset Chapter")
         reset_res = self.helper.reset_chapter(E6_ID)
-        self.set_boat_pool([])
-        self.set_fleet([])
+        self._clean_memory()
         self.set_sub_map(T_CONST.SUB_MAP1_ID)
         self.helper.set_adjutant_info(reset_res['adjutantData'])
         self.set_sortie_tickets(ticket=reset_res['ticket'])
@@ -107,9 +111,11 @@ class Sortie:
             if ship['Class'] == "SS":
                 self.main_fleet.append(ship_id)
                 output_str += "\tMAIN FORCE"
-            elif ship['cid'] in self.escort_DD:
+            elif ship['cid'] in self.escort_DD_cids:
+                self.escort_DD.append(ship_id)
                 output_str += "\tESCORT DD"
-            elif ship['cid'] in self.escort_CV:
+            elif ship['cid'] in self.escort_CV_cids:
+                self.escort_CV.append(ship_id)
                 output_str += "\tESCORT CV"
             else:
                 pass
@@ -204,11 +210,20 @@ class Sortie:
 
     def start_fresh_sortie(self) -> None:
         try:
-            if self.curr_node == "0" or self.curr_sub_map == "0":
+            if self.curr_node == T_CONST.BOSS_NODES[2] and self.curr_sub_map == T_CONST.SUB_MAP3_ID:
+                chapter_status = self.get_chapter_status(E6_ID)
+                if chapter_status == 1:
+                    self.curr_node = E61_0_ID
+                    self.set_sub_map(T_CONST.SUB_MAP1_ID)
+                else:
+                    pass
+            elif self.curr_node == "0" or self.curr_sub_map == "0":
                 self._clean_memory()
                 self.api.setChapterBoat(E6_ID, self.final_fleet)
                 self.curr_node = E61_0_ID
-                self.curr_sub_map = T_CONST.SUB_MAP1_ID
+                self.set_sub_map(T_CONST.SUB_MAP1_ID)
+            else:
+                pass
             next_id = self.starting_node()
 
             while next_id not in T_CONST.BOSS_NODES:
@@ -235,6 +250,13 @@ class Sortie:
     # Getter / Setter (incl. UI)
     # ================================
 
+    def get_chapter_status(self, chapter_id: str) -> int:
+        try:
+            node = next((i for i in self.user_data['chapterList'] if i['id'] == chapter_id))
+            return int(node['status'])
+        except StopIteration:
+            return -1
+
     def get_node_status(self, node_id: str) -> int:
         try:
             node = next((i for i in self.user_data['nodeList'] if i['node_id'] == node_id))
@@ -252,8 +274,10 @@ class Sortie:
     def set_sortie_tickets(self, ticket: int = None, num: int = None) -> None:
         if ticket is None:
             self.parent.update_ticket(self.user_data['ticket'])
+            self.tickets = int(self.user_data['ticket'])
         else:
             self.parent.update_ticket(str(ticket))
+            self.tickets = ticket
 
         if num is None:
             self.parent.update_purchasable(self.user_data['canChargeNum'])

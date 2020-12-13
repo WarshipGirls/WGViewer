@@ -78,6 +78,7 @@ class PreSortieCheck:
             self.logger.info('User has not entered E6. Select from old settings')
             self.sub_map_id = fleet_info['chapterInfo']['level_id']
             last_fleets = user_e6['boats']
+            self.api.setChapterBoat('10006', last_fleets)
         elif len(b) == 22 and fleet_info['chapterInfo']['level_id'] in T_CONST.SUB_MAP_IDS:
             self.logger.info('User has entered E6.')
             self.sub_map_id = fleet_info['chapterInfo']['level_id']
