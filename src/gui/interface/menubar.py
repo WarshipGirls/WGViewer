@@ -27,7 +27,6 @@ class MainInterfaceMenuBar(QMenuBar):
         self.version_log = None
 
         self.init_file_menu()
-        self.init_tabs_menu()
         self.init_view_menu()
         self.init_links_menu()
         self.init_preferences_menu()
@@ -52,16 +51,19 @@ class MainInterfaceMenuBar(QMenuBar):
         menu.addSeparator()
         menu.addAction(self.create_action("Quit", wgv_utils.quit_application))
 
-    def init_tabs_menu(self) -> None:
-        menu = self.addMenu(self.tr("&Tabs"))
-        menu.addAction(self.create_action("Open &Advance Tab", lambda: self.parent.main_tabs.add_tab('tab_adv'), "Ctrl+A"))
-        menu.addAction(self.create_action("Open &Dock Tab", lambda: self.parent.main_tabs.add_tab('tab_dock'), "Ctrl+D"))
-        menu.addAction(self.create_action("Open &Expedition Tab", lambda: self.parent.main_tabs.add_tab('tab_exp'), "Ctrl+E"))
-        menu.addAction(self.create_action("Open &Thermopylae Tab", lambda: self.parent.main_tabs.add_tab('tab_thermopylae'), "Ctrl+T"))
-
     def init_view_menu(self) -> None:
         menu = self.addMenu(self.tr("&View"))
-        menu.addAction(self.create_action("Open &Navy Base Overview", self.parent.create_side_dock, "Ctrl+N"))
+
+        # View-Tabs (sub menu)
+        tabs_menu = menu.addMenu(self.tr("&Tabs"))
+        tabs_menu.addAction(self.create_action("Open &Advance Tab", lambda: self.parent.main_tabs.add_tab('tab_adv'), "Ctrl+Shift+A"))
+        tabs_menu.addAction(self.create_action("Open &Dock Tab", lambda: self.parent.main_tabs.add_tab('tab_dock'), "Ctrl+Shift+D"))
+        tabs_menu.addAction(self.create_action("Open &Expedition Tab", lambda: self.parent.main_tabs.add_tab('tab_exp'), "Ctrl+Shift+E"))
+        tabs_menu.addAction(self.create_action("Open &Thermopylae Tab", lambda: self.parent.main_tabs.add_tab('tab_thermopylae'), "Ctrl+Shift+T"))
+
+        menu.addSeparator()
+
+        menu.addAction(self.create_action("Open &Navy Base Overview", self.parent.create_side_dock, "Ctrl+Shift+N"))
 
     def init_preferences_menu(self) -> None:
         menu = self.addMenu(self.tr("&Preferences"))
