@@ -22,7 +22,7 @@ from .helper import SortieHelper
 from .pre_sortie import PreSortieCheck
 from . import constants as T_CONST
 
-CHAPTER_ID: str = '10006'
+E6_ID: str = '10006'
 E61_0_ID: str = '931601'
 E61_A1_ID: str = '931602'
 E61_B1_ID: str = '931604'
@@ -64,7 +64,7 @@ class Sortie:
 
     def _reset_chapter(self) -> None:
         # chapter can only be reset after E6-3
-        reset_res = self.helper.reset_chapter(CHAPTER_ID)
+        reset_res = self.helper.reset_chapter(E6_ID)
         self.set_boat_pool([])
         self.set_fleet([])
         self.set_sub_map(T_CONST.SUB_MAP1_ID)
@@ -202,7 +202,7 @@ class Sortie:
         try:
             if self.curr_node == "0" or self.curr_sub_map == "0":
                 self._clean_memory()
-                self.api.setChapterBoat(CHAPTER_ID, self.final_fleet)
+                self.api.setChapterBoat(E6_ID, self.final_fleet)
                 self.curr_node = E61_0_ID
                 self.curr_sub_map = T_CONST.SUB_MAP1_ID
             next_id = self.starting_node()
