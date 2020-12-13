@@ -11,7 +11,9 @@ ITEMS: dict = {23: '战备券', 20041: '磁盘', 20141: '小型船舾装图纸',
 REWARD_NODES: list = ['931604', '931610', '931702', '931706', '931717', '931802', '931809']
 SUBMAPID_TO_NAME: dict = {'9316': "E6-1", '9317': "E6-2", '9318': "E6-3"}
 SUB_MAP1_ID: str = '9316'
+SUB_MAP2_ID: str = '9317'
 SUB_MAP3_ID: str = '9318'
+SUB_MAP_IDS: list = [SUB_MAP1_ID, SUB_MAP2_ID, SUB_MAP3_ID]
 # Cost can be found in six/getPveData['combatBuff']; to save iteration time, copied only id-to-cost here
 BUFF_BASE_COST: dict = {
     1001: 3, 1002: 2, 1003: 6, 1004: 6, 1005: 3,

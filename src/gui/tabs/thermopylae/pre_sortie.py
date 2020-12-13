@@ -5,6 +5,7 @@ from logging import getLogger
 from src.exceptions.wgr_error import get_error
 from src.utils.general import set_sleep
 from src.wgr.six import API_SIX
+from . import constants as T_CONST
 
 
 def save_json(name, data):
@@ -18,7 +19,6 @@ class PreSortieCheck:
         self.is_realrun = is_realrun
 
         self.logger = getLogger('TabThermopylae')
-        self.curr_node: str = ""
         self.final_fleet: list = []
         self.sub_map_id: str = ""
         self.map_data: dict = {}
@@ -76,8 +76,9 @@ class PreSortieCheck:
         b = fleet_info['chapterInfo']['boats']
         if len(b) == 0:
             self.logger.info('User has not entered E6. Select from old settings')
+            self.sub_map_id = fleet_info['chapterInfo']['level_id']
             last_fleets = user_e6['boats']
-        elif len(b) == 22 and fleet_info['chapterInfo']['level_id'] in ['9316', '9317', '9318']:
+        elif len(b) == 22 and fleet_info['chapterInfo']['level_id'] in T_CONST.SUB_MAP_IDS:
             self.logger.info('User has entered E6.')
             self.sub_map_id = fleet_info['chapterInfo']['level_id']
             last_fleets = b
@@ -110,9 +111,6 @@ class PreSortieCheck:
     # ================================
     # Getter
     # ================================
-
-    def get_curr_node(self) -> str:
-        return self.curr_node
 
     def get_final_fleet(self) -> list:
         return self.final_fleet

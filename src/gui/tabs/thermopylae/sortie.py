@@ -90,6 +90,10 @@ class Sortie:
         self.update_adjutant_label(self.user_data['adjutantData'])
         self.set_boat_pool(self.user_data['boatPool'])
         self.set_sub_map(self.pre_sortie.get_sub_map_id())
+        if len(self.final_fleet) == 0:
+            self.final_fleet = self.pre_sortie.get_final_fleet()
+        else:
+            pass
 
         # Initialize SortieHelper
         self.helper = SortieHelper(self.parent, self.api, self.user_ships, self.map_data)
@@ -318,7 +322,7 @@ class Sortie:
             if self.curr_sub_map == T_CONST.SUB_MAP3_ID and curr_node == T_CONST.BOSS_NODES[2]:
                 raise ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
             else:
-                raise ThermopylaeSortieRestart("BOSS FIGHT DONE!")
+                raise ThermopylaeSortieRestart("Redo Final Boss Fight")
         else:
             pass
 
