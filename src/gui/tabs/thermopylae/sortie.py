@@ -1,16 +1,12 @@
 """
-The implementation of auto E6 sortie is quite unnecessarily complicated at this point,
-please help improve the logic if possible! Many Thanks! - @pwyq
-
-This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
-RIGHT NOW everything pre-battle is fixed
+1. The implementation of auto E6 sortie is quite unnecessarily complicated at this point,
+    please help improve the logic if possible! Many Thanks! - @pwyq
+2. This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
+    RIGHT NOW everything pre-battle is fixed
+3. This file hosts high-level battle decisions; low-level pre/post processing code is host in ./helper.py
 TODO: multiple consecutive run w/o interference
 TODO: replace raise?
 TODO free up dock space if needed
-
-WGR BUG:
-- if you withdraw and re-enter a sub map w/o readyFire, then your adjutant data is not reset
-    - i.e. you can quit E6-1Boss and restart w/o calling readyFire, you can have Lv.5 adjutant at the beginning
 """
 
 from logging import getLogger
@@ -27,7 +23,6 @@ from .pre_sortie import PreSortieCheck
 from . import constants as T_CONST
 
 CHAPTER_ID: str = '10006'
-SUB_MAP1_ID: str = '9316'
 E61_0_ID: str = '931601'
 E61_A1_ID: str = '931602'
 E61_B1_ID: str = '931604'
@@ -72,7 +67,7 @@ class Sortie:
         reset_res = self.helper.reset_chapter(CHAPTER_ID)
         self.set_boat_pool([])
         self.set_fleet([])
-        self.set_sub_map(SUB_MAP1_ID)
+        self.set_sub_map(T_CONST.SUB_MAP1_ID)
         self.helper.set_adjutant_info(reset_res['adjutantData'])
         self.set_sortie_tickets(ticket=reset_res['ticket'])
 
@@ -209,7 +204,7 @@ class Sortie:
                 self._clean_memory()
                 self.api.setChapterBoat(CHAPTER_ID, self.final_fleet)
                 self.curr_node = E61_0_ID
-                self.curr_sub_map = SUB_MAP1_ID
+                self.curr_sub_map = T_CONST.SUB_MAP1_ID
             next_id = self.starting_node()
 
             while next_id not in T_CONST.BOSS_NODES:
@@ -233,7 +228,7 @@ class Sortie:
             self._reset_chapter()
 
     # ================================
-    # Setter / Getter
+    # Getter / Setter (incl. UI)
     # ================================
 
     def get_node_status(self, node_id: str) -> int:
@@ -320,7 +315,7 @@ class Sortie:
             self.helper.pass_sub_map()
             self.user_data = self.pre_sortie.fetch_user_data()
             self.set_sub_map(self.user_data['levelId'])
-            if self.curr_sub_map == '9318' and curr_node == '931821':
+            if self.curr_sub_map == T_CONST.SUB_MAP3_ID and curr_node == T_CONST.BOSS_NODES[2]:
                 raise ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
             else:
                 raise ThermopylaeSortieRestart("BOSS FIGHT DONE!")
@@ -331,7 +326,7 @@ class Sortie:
         # Get from a list of int (max length of 5), return a list of ship_id (str)
         res = set()
         for ship_id in shop_data:
-            if self.curr_node[:4] == SUB_MAP1_ID and ship_id in self.battle_fleet:
+            if self.curr_node[:4] == T_CONST.SUB_MAP1_ID and ship_id in self.battle_fleet:
                 # in E6-1, don't buy repeated ships
                 continue
             if ship_id in self.main_fleet:

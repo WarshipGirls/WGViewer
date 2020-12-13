@@ -8,8 +8,6 @@ from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieResume
 from src.wgr.six import API_SIX
 from . import constants as T_CONST
 
-SUB_MAP3_ID: str = '9318'
-
 
 class SortieHelper:
     def __init__(self, tab_thermopylae, api: API_SIX, user_ships: dict, map_data: dict):
@@ -505,7 +503,7 @@ class SortieHelper:
     def is_buy_buff(node_id: str) -> bool:
         try:
             assert (len(node_id) == 6)
-            if node_id in SUB_MAP3_ID:
+            if node_id in T_CONST.SUB_MAP3_ID:
                 res = True
             else:
                 res = False
