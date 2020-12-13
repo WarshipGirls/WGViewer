@@ -14,7 +14,8 @@ a = Analysis(['gui_main.py'],
              cipher=block_cipher,
              noarchive=False)
 
-a.datas += [('assets/banner.png','D:\\github\\WGViewer\\assets\\banner.png','DATA'),
+a.datas += [('docs/version_log.md','D:\\github\\WGViewer\\docs\\version_log.md','DATA'),
+('assets/banner.png','D:\\github\\WGViewer\\assets\\banner.png','DATA'),
 ('assets/favicon.ico','D:\\github\\WGViewer\\assets\\favicon.ico','DATA'),
 ('assets/data/errorCode.json','D:\\github\\WGViewer\\assets\\data\\errorCode.json','DATA'),
 ('assets/data/exp_data.csv','D:\\github\\WGViewer\\assets\\data\\exp_data.csv','DATA'),
