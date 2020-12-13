@@ -2,15 +2,11 @@
 The implementation of auto E6 sortie is quite unnecessarily complicated at this point,
 please help improve the logic if possible! Many Thanks! - @pwyq
 
-
 This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
 RIGHT NOW everything pre-battle is fixed
 TODO: multiple consecutive run w/o interference
 TODO: replace raise?
 TODO free up dock space if needed
-TODO: use set instead of list wherever posible
-TODO: add message to every TS exception
-TODO: organized function names
 
 WGR BUG:
 - if you withdraw and re-enter a sub map w/o readyFire, then your adjutant data is not reset
@@ -29,9 +25,9 @@ from .helper import SortieHelper
 from .pre_sortie import PreSortieCheck
 from . import constants as T_CONST
 
-# TODO? Long term, make this available to other maps
 CHAPTER_ID: str = '10006'
 SUB_MAP1_ID: str = '9316'
+SUB_MAP3_ID: str = '9318'
 E61_0_ID: str = '931601'
 E61_A1_ID: str = '931602'
 E61_B1_ID: str = '931604'
@@ -45,7 +41,7 @@ class Sortie:
     def __init__(self, parent, api: API_SIX, fleet: list, final_fleet: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
-        self.api: API_SIX = api
+        self.api = api
         self.main_fleet = fleet  # main fleets (6SS)
         self.battle_fleet = set()  # ships that on battle
         self.final_fleet = final_fleet  # fill up required number of boats
@@ -128,12 +124,24 @@ class Sortie:
         else:
             self.logger.info('Can choose a fresh start')
 
+    @staticmethod
+    def is_buy_buff(node_id: str) -> bool:
+        try:
+            assert (len(node_id) == 6)
+            if node_id in SUB_MAP3_ID:
+                res = True
+            else:
+                res = False
+            return res
+        except AssertionError:
+            return False
+
     def resume_sortie(self) -> None:
         # TODO: may still have some corner cases to catch
 
         self.logger.info(f"[RESUME] Sortie {self.curr_node}")
         try:
-            self.helper.api_readyFire(self.curr_sub_map)
+            self.helper.enter_sub_map(self.curr_sub_map)
             self.check_sub_map_done()
 
             buy_res = None
@@ -150,10 +158,11 @@ class Sortie:
                     ss_list = self.find_SS(shop_res['boats'])
                 else:
                     pass
+                is_buff = self.is_buy_buff(self.curr_node)
                 if len(ss_list) == 0:
                     pass
                 else:
-                    buy_res = self.buy_wanted_ships(ss_list, shop_res)
+                    buy_res = self.buy_wanted_ships(purchase_list=ss_list, shop_data=shop_res, is_buff=is_buff)
             elif '$reset-$data' in shop_res and shop_res['$reset-$data'] is not None:
                 self.logger.debug("[RESUME]: User has already used up purchase opportunity")
             else:
@@ -289,35 +298,38 @@ class Sortie:
     # Helpers
     # ================================
 
-    def buy_wanted_ships(self, _list: list, shop_res: dict) -> Union[None, dict]:
+    def buy_wanted_ships(self, purchase_list: list, shop_data: dict, is_buff: bool) -> Union[None, dict]:
         """
         Given a list of ship ids, find all affordable ships
-        @param _list: a list of ship id(s)
-        @type _list: list of int
-        @param shop_res: server response of six/canSelectList
-        @type shop_res: dict
+
+        @param purchase_list: a list of ship id(s)
+        @type purchase_list: list of int
+        @param shop_data: server response of six/canSelectList
+        @type shop_data: dict
+        @param is_buff: whether to buy buff at current node
+        @type is_buff: bool
         @return:
             - None, if no ships can be bought
             - dict, server response of six/selectBoat
         @rtype: None, or a dict
         """
-        purchase_list = self.helper.find_affordable_ships(_list, shop_res)
+        purchase_list, buff_id = self.helper.find_affordable_ships(purchase_list=purchase_list, shop_data=shop_data, is_buff=is_buff)
         if len(purchase_list) == 0:
             buy_res = None
         else:
-            buy_res = self.helper.buy_ships(purchase_list, shop_res)
+            buy_res = self.helper.buy_ships(purchase_list=purchase_list, shop_data=shop_data, buff_card=buff_id)
         return buy_res
 
     def check_sub_map_done(self) -> None:
         self.user_data = self.pre_sortie.fetch_user_data()
         curr_node = self.user_data['nodeId']
-        self.helper.api_readyFire(curr_node[:4])
+        self.helper.enter_sub_map(curr_node[:4])
         node_status = self.get_node_status(curr_node)
 
         self.logger.debug(curr_node)
         self.logger.debug(node_status)
         if (curr_node in T_CONST.BOSS_NODES) and (node_status == 3):
-            self.helper.api_passLevel()
+            self.helper.pass_sub_map()
             self.user_data = self.pre_sortie.fetch_user_data()
             self.set_sub_map(self.user_data['levelId'])
             if self.curr_sub_map == '9318' and curr_node == '931821':
@@ -362,10 +374,10 @@ class Sortie:
 
     def starting_node(self) -> str:
         # First readyFire() let the server know the sub-map you are on
-        self.helper.api_readyFire(self.curr_sub_map)
-        self.helper.api_withdraw()
+        self.helper.enter_sub_map(self.curr_sub_map)
+        self.helper.retreat_sub_map()
         # Second readyFire
-        next_node_id = self.helper.api_readyFire(self.curr_sub_map)
+        next_node_id = self.helper.enter_sub_map(self.curr_sub_map)
         return self.single_node_sortie(next_node_id)
 
     # ================================
@@ -381,7 +393,7 @@ class Sortie:
         self.logger.debug(self.helper.adjutant_info)
         self.logger.info('********************************')
 
-        self.helper.api_newNext(str(curr_node_id))
+        self.helper.enter_next_node(str(curr_node_id))
 
         if curr_node_id == E61_A1_ID:
             shop_res = self.helper.get_ship_store()
@@ -404,7 +416,8 @@ class Sortie:
                     pass
             else:
                 pass
-            buy_res = self.buy_wanted_ships(ss_list, shop_res)
+            is_buff = self.is_buy_buff(self.curr_node)
+            buy_res = self.buy_wanted_ships(purchase_list=ss_list, shop_data=shop_res, is_buff=is_buff)
 
         if buy_res is None:
             pass
@@ -440,11 +453,8 @@ class Sortie:
             self.set_fleet(list(self.boat_pool))
             self.helper.set_war_fleets(list(self.battle_fleet))
 
-        if self.helper.check_adjutant_level_bump() == 0:
-            if self.helper.bump_level() is False:
-                raise ThermopylaeSortieRestart("Adjutant level bumping failed. Restarting")
-            else:
-                pass
+        if self.helper.check_adjutant_level_bump() == 0 and self.helper.bump_level() is False:
+            raise ThermopylaeSortieRestart("Adjutant level bumping failed. Restarting")
         else:
             pass
 
@@ -456,7 +466,7 @@ class Sortie:
         self.logger.debug(self.helper.points)
         self.logger.debug(self.helper.adjutant_info)
         self.logger.info('********************************')
-        self.helper.api_readyFire(self.curr_node[:4])
+        self.helper.enter_sub_map(self.curr_node[:4])
 
         return self._complete_sortie(curr_node_id)
 
@@ -472,7 +482,7 @@ class Sortie:
             self.update_side_dock_repair(repair_res['packageVo'])
 
         set_sleep()
-        self.helper.spy()
+        self.helper.scout_enemy()
 
         set_sleep()
         formation = self.helper.get_challenge_formation(curr_node_id=self.curr_node, battle_fleet_size=len(self.battle_fleet))
@@ -492,8 +502,8 @@ class Sortie:
             else:
                 self.logger.error(f'Unexpected next node id: {next_id}')
         else:
-            self.logger.info(f"Failed to clean {self.helper.get_map_node_by_id(self.curr_node)['flag']}. Restarting...")
-            raise ThermopylaeSortieRestart
+            node_name = self.helper.get_map_node_by_id(self.curr_node)['flag']
+            raise ThermopylaeSortieRestart(f"Failed to clean {node_name}. Restarting...")
 
         self.check_sub_map_done()
         return next_id

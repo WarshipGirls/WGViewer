@@ -5,7 +5,7 @@ from typing import Callable, Tuple
 from src import utils as wgv_utils
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieResume
-from src.wgr.six import API_SIX  # only for typehints
+from src.wgr.six import API_SIX
 from . import constants as T_CONST
 
 
@@ -17,7 +17,7 @@ class SortieHelper:
         self.user_ships = user_ships
         self.map_data = map_data
 
-        self.boss_retry_count = [0] * 3
+        self.boss_retry_count: list = [0] * 3
         self.points: int = 10
         self.adjutant_info: dict = {}  # level, curr_exp, exp_cap
 
@@ -32,14 +32,12 @@ class SortieHelper:
                 self.logger.info(f"{func_info}...")
                 res, data = func()
             except WarshipGirlsExceptions as e:
-                self.logger.warning(f'Failed to {func_info} due to {e}')
-                self.logger.warning('Trying reconnecting...')
+                self.logger.warning(f"Failed to {func_info} due to {e}. Trying reconnecting...")
                 wgv_utils.set_sleep()
 
             tries += 1
             if tries >= T_CONST.CONNECTION_RETRY_LIMIT:
-                self.logger.error(f"Failed to {func_info} after {T_CONST.CONNECTION_RETRY_LIMIT} reconnections. Please try again later.")
-                raise ThermopylaeSoriteExit()
+                raise ThermopylaeSoriteExit(f"Failed to {func_info} after {T_CONST.CONNECTION_RETRY_LIMIT} reconnections")
             else:
                 pass
         return data
@@ -52,7 +50,7 @@ class SortieHelper:
     #   - unknown; unexpected
     # ================================================================
 
-    def api_passLevel(self) -> dict:
+    def pass_sub_map(self) -> dict:
         def _pass() -> Tuple[bool, dict]:
             data = self.api.passLevel()
             if 'eid' in data:
@@ -70,7 +68,7 @@ class SortieHelper:
 
         return self._reconnecting_calls(_pass, 'collect boss reward')
 
-    def api_withdraw(self) -> dict:
+    def retreat_sub_map(self) -> dict:
         def _withdraw() -> Tuple[bool, dict]:
             data = self.api.withdraw()
             if 'eid' in data:
@@ -89,7 +87,7 @@ class SortieHelper:
 
         return self._reconnecting_calls(_withdraw, 'restart')
 
-    def api_readyFire(self, sub_map_id: str) -> dict:
+    def enter_sub_map(self, sub_map_id: str) -> dict:
         def _readyFire() -> Tuple[bool, int]:
             data = self.api.readyFire(sub_map_id)
             if 'eid' in data:
@@ -108,7 +106,7 @@ class SortieHelper:
 
         return self._reconnecting_calls(_readyFire, 'enter the map')
 
-    def api_newNext(self, next_node: str) -> dict:
+    def enter_next_node(self, next_node: str) -> dict:
         def _newNext() -> Tuple[bool, dict]:
             data = self.api.newNext(next_node)
             if 'eid' in data:
@@ -153,12 +151,17 @@ class SortieHelper:
             cost = int(ship[2]) * (2 ** (star - 1))
             output_str = "{:15s}\tSTAR{:3s} COST{:4s}".format(self.user_ships[str(ship[1])]["Name"], str(star), str(cost))
             self.logger.info(output_str)
-        # if store_data['buff'] != 0:
-        #     TODO? get buff; but who needs buff anyway?
-        # pass
         return store_data
 
-    # TODO: reorder arguments?
+    @staticmethod
+    def get_buff_card_cost(buff_id: str) -> int:
+        try:
+            assert(len(buff_id) == 6)
+            cost = T_CONST.BUFF_BASE_COST[int(buff_id[:4])] * (2**(int(buff_id[-2:])-1))
+            return cost
+        except AssertionError:
+            return -1
+
     def buy_ships(self, purchase_list: list, shop_data: dict = None, buff_card: str = '0') -> dict:
         purchase_list = list(set(purchase_list))
 
@@ -176,8 +179,8 @@ class SortieHelper:
                 res = False
             return res, data
 
-        print('prepare to buy')
-        print(purchase_list)
+        self.logger.debug('prepare to buy')
+        self.logger.debug(purchase_list)
         buy_data = self._reconnecting_calls(_selectBoat, 'buy ships')
 
         if 'strategic_point' in buy_data and shop_data is not None:
@@ -221,9 +224,9 @@ class SortieHelper:
 
         res_data = self._reconnecting_calls(_cast_skill, 'cast adjutant skill')
 
-        if res_data['adjutantData']['id'] == '10082':
+        if res_data['adjutantData']['id'] == T_CONST.ADJUTANT_IDS[0]:
             self.update_adjutant_info(res_data['adjutantData'], res_data['strategic_point'])
-        elif res_data['adjutantData']['id'] == '10282':
+        elif res_data['adjutantData']['id'] == T_CONST.ADJUTANT_IDS[2]:
             self.update_adjutant_info(res_data['adjutantData'], self.get_curr_points())
         return res_data
 
@@ -233,7 +236,6 @@ class SortieHelper:
         for cid in T_CONST.SUBMARINE_ORDER:
             i = 0
             while i < len(unorder):
-
                 if self.user_ships[str(unorder[i])]['cid'] == cid:
                     res.append(unorder[i])
                     break
@@ -275,7 +277,7 @@ class SortieHelper:
 
         return self._reconnecting_calls(_supply_boats, 'supply')
 
-    def repair(self, fleet: list) -> dict:
+    def repair_ships(self, fleet: list) -> dict:
         def _repair() -> Tuple[bool, dict]:
             data = self.api.instantRepairShips(fleet)
             if 'eid' in data:
@@ -292,7 +294,7 @@ class SortieHelper:
 
         return self._reconnecting_calls(_repair, 'repair')
 
-    def spy(self) -> dict:
+    def scout_enemy(self) -> dict:
         def _spy() -> Tuple[bool, dict]:
             data = self.api.spy()
             if 'eid' in data:
@@ -326,7 +328,9 @@ class SortieHelper:
 
     def get_war_result(self, is_night: str = '0') -> dict:
         if is_night == '1':
-            self.logger.info('Fighting night battle!')
+            self.logger.info("Fighting night battle")
+        else:
+            pass
 
         def _result() -> Tuple[bool, dict]:
             data = self.api.getWarResult(is_night)
@@ -402,11 +406,11 @@ class SortieHelper:
         return next_node_id
 
     def set_adjutant_info(self, adj_data: dict) -> None:
-        print(adj_data)
+        self.logger.debug(adj_data)
         self.adjutant_info = adj_data
 
     def set_curr_points(self, points) -> None:
-        print(f"{self.points} -> {points}")
+        self.logger.debug(f"{self.points} -> {points}")
         self.points = points
         self.tab_thermopylae.update_points(self.points)
 
@@ -414,27 +418,39 @@ class SortieHelper:
     # Assistant methods
     # ================================
 
-    def find_affordable_ships(self, purchase_list: list, shop_data: dict) -> list:
+    def find_affordable_ships(self, purchase_list: list, shop_data: dict, is_buff: bool) -> Tuple[list, str]:
         if len(purchase_list) == 0:
-            return []
+            return [], '0'
 
-        # if point is insufficient, buy from the least expensive to the most
+        # If point is insufficient, buy from the least expensive to the most
         purchase_list = [int(i) for i in purchase_list]
         ship_id_to_price = {}
         for ship in purchase_list:
             price = shop_data['buyPointArr'][shop_data['boats'].index(ship)]
             ship_id_to_price[ship] = price
-        # sort by price
+        # Sort by price
         sorted_list = dict(sorted(ship_id_to_price.items(), key=lambda i: i[1]))
         total = 0
         res = []
         for ship_id in sorted_list:
             total += sorted_list[ship_id]
             if total > self.get_curr_points():
+                total -= sorted_list[ship_id]
                 break
             else:
                 res.append(ship_id)
-        return res
+        # Getting buff if meets conditions
+        buff_id = '0'
+        if (is_buff is True) and (shop_data['buff'] in T_CONST.WORTH_BUYING_BUFFS):
+            buff_price = self.get_buff_card_cost(shop_data['buff'])
+            total += buff_price
+            if total <= self.get_curr_points():
+                buff_id = str(shop_data['buff'])
+            else:
+                pass
+        else:
+            pass
+        return res, buff_id
 
     def check_adjutant_level_bump(self) -> int:
         # TODO: combine this and bump_level
@@ -501,7 +517,7 @@ class SortieHelper:
         self.set_curr_points(strategic_point)
         self.tab_thermopylae.update_adjutant_name(_name)
         self.tab_thermopylae.update_adjutant_exp(_exp)
-        print(self.get_adjutant_info())
+        self.logger.debug(self.get_adjutant_info())
 
     def process_repair(self, ships: list, repair_levels: [int, list]) -> dict:
         repairs = []
@@ -532,7 +548,7 @@ class SortieHelper:
         if len(to_repair) > 0:
             names = [self.user_ships[str(i)]['Name'] for i in to_repair]
             self.logger.info(f'Start to repair {names}')
-            res = self.repair(to_repair)
+            res = self.repair_ships(to_repair)
         else:
             res = {}
         return res

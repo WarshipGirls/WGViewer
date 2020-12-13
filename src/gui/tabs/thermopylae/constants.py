@@ -44,3 +44,23 @@ ADJUTANT_IDS: list = ['10082', '10181', '10282']
 ADJUTANT_ID_TO_NAME: dict = {'10082': "紫貂", '10182': "Kearsarge", '10282': "Habakkuk"}
 ITEMS: dict = {23: '战备券', 20041: '磁盘', 20141: '小型船舾装图纸', 20241: '中型船舾装图纸', 20341: '大型舰舾装图纸'}
 SUBMAPID_TO_NAME: dict = {'9316': "E6-1", '9317': "E6-2", '9318': "E6-3"}
+# buff_id (e.g.) 100101 = id + level
+WORTH_BUYING_BUFFS = [
+    1001,  # 肌肉记忆
+    1002,  # 长跑训练
+    1005,  # 黑科技
+    1009,  # 关键一击
+]
+# Cost can be found in six/getPveData['combatBuff']; to save iteration time, copied only id-to-cost here
+BUFF_BASE_COST = {
+    1001: 3,
+    1002: 2,
+    1003: 6,
+    1004: 6,
+    1005: 3,
+    1006: 5,
+    1007: 4,
+    1008: 2,
+    1009: 5,
+    1010: 4
+}
