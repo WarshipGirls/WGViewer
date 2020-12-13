@@ -117,6 +117,8 @@ class SortieHelper:
             self.update_adjutant_info(res_data['adjutantData'], res_data['strategic_point'])
         elif res_data['adjutantData']['id'] == T_CONST.ADJUTANT_IDS[2]:
             self.update_adjutant_info(res_data['adjutantData'], self.get_curr_points())
+        else:
+            pass
         return res_data
 
     def challenge(self, formation: str) -> dict:
@@ -201,21 +203,6 @@ class SortieHelper:
 
         return self._reconnecting_calls(_result, 'receive result')
 
-    def reorder_battle_list(self, unorder: list) -> list:
-        # Based on criteria mentioned in src/gui/tabs/thermopylae/constants.py
-        res = []
-        for cid in T_CONST.SUBMARINE_ORDER:
-            i = 0
-            while i < len(unorder):
-                if self.user_ships[str(unorder[i])]['cid'] == cid:
-                    res.append(unorder[i])
-                    break
-                else:
-                    i += 1
-            if len(res) == len(unorder):
-                break
-        return res
-
     def repair_ships(self, fleet: list) -> dict:
         def _repair() -> Tuple[bool, dict]:
             data = self.api.instantRepairShips(fleet)
@@ -299,23 +286,24 @@ class SortieHelper:
 
         return self._reconnecting_calls(_reset, 'reset chapter')
 
-    def pass_sub_map(self) -> dict:
-        def _pass() -> Tuple[bool, dict]:
-            data = self.api.passLevel()
+    def enter_sub_map(self, sub_map_id: str) -> dict:
+        def _readyFire() -> Tuple[bool, int]:
+            data = self.api.readyFire(sub_map_id)
             if 'eid' in data:
                 get_error(data['eid'])
+                next_node_id = -1
                 res = False
-            elif 'code' in data:
-                get_error(data['code'])
-                res = False
-            elif 'attach' in data:
+            elif '$currentVo' in data:
+                self.logger.info('Entering map succeed!')
+                next_node_id = self.get_next_node_by_id(data['$currentVo']['nodeId'])
                 res = True
             else:
                 self.logger.debug(data)
+                next_node_id = -1
                 res = False
-            return res, data
+            return res, next_node_id
 
-        return self._reconnecting_calls(_pass, 'collect boss reward')
+        return self._reconnecting_calls(_readyFire, 'enter the map')
 
     def retreat_sub_map(self) -> dict:
         def _withdraw() -> Tuple[bool, dict]:
@@ -336,24 +324,23 @@ class SortieHelper:
 
         return self._reconnecting_calls(_withdraw, 'restart')
 
-    def enter_sub_map(self, sub_map_id: str) -> dict:
-        def _readyFire() -> Tuple[bool, int]:
-            data = self.api.readyFire(sub_map_id)
+    def pass_sub_map(self) -> dict:
+        def _pass() -> Tuple[bool, dict]:
+            data = self.api.passLevel()
             if 'eid' in data:
                 get_error(data['eid'])
-                next_node_id = -1
                 res = False
-            elif '$currentVo' in data:
-                self.logger.info('Entering map succeed!')
-                next_node_id = self.get_next_node_by_id(data['$currentVo']['nodeId'])
+            elif 'code' in data:
+                get_error(data['code'])
+                res = False
+            elif 'attach' in data:
                 res = True
             else:
                 self.logger.debug(data)
-                next_node_id = -1
                 res = False
-            return res, next_node_id
+            return res, data
 
-        return self._reconnecting_calls(_readyFire, 'enter the map')
+        return self._reconnecting_calls(_pass, 'collect boss reward')
 
     # ================================================================
     # Getter / Setter
@@ -611,6 +598,21 @@ class SortieHelper:
         sub_map = next((j for j in reward_res['shipVO'] if j['id'] == '10006'))['level_id']
         return sub_map
     """
+
+    def reorder_battle_list(self, unorder: list) -> list:
+        # Based on criteria mentioned in src/gui/tabs/thermopylae/constants.py
+        res = []
+        for cid in T_CONST.SUBMARINE_ORDER:
+            i = 0
+            while i < len(unorder):
+                if self.user_ships[str(unorder[i])]['cid'] == cid:
+                    res.append(unorder[i])
+                    break
+                else:
+                    i += 1
+            if len(res) == len(unorder):
+                break
+        return res
 
     def update_adjutant_info(self, adj_data: dict, strategic_point: int) -> None:
         # TODO: use signal? and manage signals globally?
