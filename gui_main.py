@@ -6,6 +6,7 @@ import sys
 from PyQt5.QtGui import QIcon, QFontDatabase
 from PyQt5.QtWidgets import QApplication
 
+from src.data import get_data_dir
 from src.utils import get_app_version
 from src.gui.login.form import LoginForm
 
@@ -27,14 +28,22 @@ def init_app_settings() -> None:
     WGV_APP.setApplicationVersion(get_app_version())
 
 
+def init_fonts() -> None:
+    QFontDatabase().addApplicationFont(get_data_path('assets/fonts/Consolas.ttf'))
+
+
+def init_logging() -> None:
+    _level = logging.DEBUG
+    _format = ' %(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    _log_file = get_data_path(os.path.join(get_data_dir(), 'wgviewer_debug.log'))
+    _handlers = [logging.FileHandler(_log_file), logging.StreamHandler()]
+    logging.basicConfig(level=_level, format=_format, handlers=_handlers)
+
+
 def init_qsettings() -> None:
     WGV_APP.setOrganizationName("WarshipGirls")
     WGV_APP.setOrganizationDomain("https://github.com/WarshipGirls")
     WGV_APP.setApplicationName("Warship Girls Viewer")
-
-
-def init_fonts() -> None:
-    QFontDatabase().addApplicationFont(get_data_path('assets/fonts/Consolas.ttf'))
 
 
 def _realrun() -> None:
@@ -64,9 +73,9 @@ if __name__ == '__main__':
     init_app_settings()
     init_qsettings()
     init_fonts()
-
     # https://stackoverflow.com/q/43109355/14561914
-    logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    init_logging()
+
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
         # running in a PyInstaller bundle
         login_form = LoginForm()
