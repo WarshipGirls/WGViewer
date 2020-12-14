@@ -1,8 +1,8 @@
-from PyQt5.QtCore import QPoint, QRect, QSettings, QSize
+from PyQt5.QtCore import QPoint, QRect, QSettings, QSize, Qt
 from PyQt5.QtWidgets import (
     QStyle, QStyleOptionTab, QStylePainter,
     QTabBar, QTabWidget,
-    QMainWindow, QStatusBar, QPushButton, QVBoxLayout,
+    QMainWindow, QStatusBar, QPushButton, QVBoxLayout, QLabel, QWidget, QGridLayout,
 )
 
 from src.data import get_qsettings_file
@@ -101,7 +101,12 @@ class GlobalSettingsWindow(QMainWindow):
         self.setCentralWidget(self.vertical_tabs)
 
         self.reset_button.clicked.connect(self.on_reset)
-        self.status_bar.addWidget(self.reset_button)
+        status_bar_content_widget = QWidget()
+        status_bar_content_layout = QGridLayout(status_bar_content_widget)
+        status_bar_content_layout.addWidget(QLabel("Some changes will only be effective upon next start"), 0, 0, 1, 1, Qt.AlignVCenter | Qt.AlignLeft)
+        status_bar_content_layout.addWidget(self.reset_button, 0,1,1,1, Qt.AlignVCenter | Qt.AlignRight)
+        self.status_bar.addWidget(status_bar_content_widget, 1)
+        self.status_bar.setSizeGripEnabled(False)
         self.setStatusBar(self.status_bar)
         self.setLayout(QVBoxLayout())
 

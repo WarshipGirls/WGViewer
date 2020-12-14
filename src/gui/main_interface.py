@@ -108,8 +108,16 @@ class MainInterface(QMainWindow):
             self.side_dock = SideDock(self)
         else:
             self.side_dock.show()
-        # TODO: position
-        self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
+        if self.qsettings.contains(QKEYS.UI_SIDEDOCK_POS) is True:
+            if self.qsettings.value(QKEYS.UI_SIDEDOCK_POS) == 'right':
+                pos = Qt.RightDockWidgetArea
+            elif self.qsettings.value(QKEYS.UI_SIDEDOCK_POS) == 'left':
+                pos = Qt.LeftDockWidgetArea
+            else:
+                pos = Qt.RightDockWidgetArea
+        else:
+            pos = Qt.RightDockWidgetArea
+        self.addDockWidget(pos, self.side_dock)
 
     def init_side_dock(self) -> None:
         self.create_side_dock()
