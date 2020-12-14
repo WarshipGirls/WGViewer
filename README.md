@@ -29,6 +29,12 @@ As of `v0.2.1dev`,
 
 Please see [at this directory](screenshots). Updating as work progresses.
 
+## Download
+
+| OS          | WGViewer version | Link           |
+|:-----------:|:----------------:|:--------------:|
+| Windows x64 | 0.2.1dev         | [download][d1] |
+
 ## Development
 
 - Primary:
@@ -88,3 +94,5 @@ The copyright of the shipgirl art resources used in the WGViewer belong to Moefa
 [CN]: http://www.jianniang.com/
 [JP]: http://ssr.moefantasy.co.jp/
 [Intl]: http://www.warshipgirls.com/en/
+
+[d1]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1dev/WGViewer.exe
