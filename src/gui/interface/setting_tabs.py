@@ -54,7 +54,6 @@ class UISettings(QWidget):
         self.tab_ther = QCheckBox("Thermopylae", self)
         self.handle_tab_init(self.tab_ther, 'UI/TAB/thermopylae')
 
-        self.reset_button = QPushButton('Reset')
         self.init_page_ui()
 
     def init_page_ui(self) -> None:
@@ -112,12 +111,6 @@ class UISettings(QWidget):
             row += 1
             self.layout.addWidget(QLabel(""), row, 0, 1, 4)
 
-        self.reset_button.clicked.connect(self.on_reset)
-        self.reset_button.setMaximumWidth(30)
-        self.reset_button.set
-        row += 1
-        self.layout.addWidget(self.reset_button, row, 3, 1, 1)
-
     def on_reset(self) -> None:
         # If this gets bigger, use a group or container
         self.side_dock.setChecked(True)
@@ -155,22 +148,20 @@ class GameSettings(QWidget):
         self.layout = QGridLayout()
         self.setLayout(self.layout)
 
-        _d = self.get_default('GAME/random_seed')
+        _d = self.get_init_value('GAME/random_seed')
         self.seed_input = self.create_qlineedit(default=_d, max_len=16)
-        _d = self.get_default('GAME/speed_lo_bound')
+        _d = self.get_init_value('GAME/speed_lo_bound')
         self.speed_lo_input = self.create_qlineedit(default=_d, max_len=3)
-        _d = self.get_default('GAME/speed_hi_bound')
+        _d = self.get_init_value('GAME/speed_hi_bound')
         self.speed_hi_input = self.create_qlineedit(default=_d, max_len=3)
-        _d = self.get_default('CONNECTION/session_retries')
+        _d = self.get_init_value('CONNECTION/session_retries')
         self.session_retries = self.create_qlineedit(default=_d, max_len=2)
-        _d = self.get_default('CONNECTION/session_sleep')
+        _d = self.get_init_value('CONNECTION/session_sleep')
         self.session_sleep = self.create_qlineedit(default=_d, max_len=2)
-        _d = self.get_default('CONNECTION/api_retries')
+        _d = self.get_init_value('CONNECTION/api_retries')
         self.api_retries = self.create_qlineedit(default=_d, max_len=2)
-        _d = self.get_default('CONNECTION/api_sleep')
+        _d = self.get_init_value('CONNECTION/api_sleep')
         self.api_sleep = self.create_qlineedit(default=_d, max_len=2)
-
-        self.reset_button = QPushButton('Reset')
 
         self.init_ui()
 
@@ -198,11 +189,11 @@ class GameSettings(QWidget):
         speed_label.setToolTip("Set server request intervals.\nInvalid inputs will be ignored (such as low > high)")
         self.layout.addWidget(speed_label, row, 0, 1, 1)
         self.layout.addWidget(create_qlabel('Lower Bound'), row, 1, 1, 1)
-        _d = self.get_default('GAME/speed_lo_bound')
+        _d = self.get_init_value('GAME/speed_lo_bound')
         self.speed_lo_input.textChanged.connect(lambda res: self.create_input(res, self.speed_lo_input, _d, 'GAME/speed_lo_bound'))
         self.layout.addWidget(self.speed_lo_input, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel('Upper Bound'), row, 3, 1, 1)
-        _d = self.get_default('GAME/speed_hi_bound')
+        _d = self.get_init_value('GAME/speed_hi_bound')
         self.speed_hi_input.textChanged.connect(lambda res: self.create_input(res, self.speed_hi_input, _d, 'GAME/speed_hi_bound'))
         self.layout.addWidget(self.speed_hi_input, row, 4, 1, 1)
 
@@ -214,21 +205,21 @@ class GameSettings(QWidget):
         row += 1
         self.layout.addWidget(create_qlabel(text='Retry Limit', font_size=HEADER3), row, 0, 1, 1)
         self.layout.addWidget(create_qlabel(text='session'), row, 1, 1, 1)
-        _d = self.get_default('CONNECTION/session_retries')
+        _d = self.get_init_value('CONNECTION/session_retries')
         self.session_retries.textChanged.connect(lambda res: self.create_input(res, self.session_retries, _d, 'CONNECTION/session_retries'))
         self.layout.addWidget(self.session_retries, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel(text='sleep (sec)'), row, 3, 1, 1)
-        _d = self.get_default('CONNECTION/session_sleep')
+        _d = self.get_init_value('CONNECTION/session_sleep')
         self.session_sleep.textChanged.connect(lambda res: self.create_input(res, self.session_sleep, _d, 'CONNECTION/session_sleep'))
         self.layout.addWidget(self.session_sleep, row, 4, 1, 1)
 
         row += 1
         self.layout.addWidget(create_qlabel(text='WGR API'), row, 1, 1, 1)
-        _d = self.get_default('CONNECTION/api_retries')
+        _d = self.get_init_value('CONNECTION/api_retries')
         self.api_retries.textChanged.connect(lambda res: self.create_input(res, self.api_retries, _d, 'CONNECTION/api_retries'))
         self.layout.addWidget(self.api_retries, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel(text='sleep (sec)'), row, 3, 1, 1)
-        _d = self.get_default('CONNECTION/api_sleep')
+        _d = self.get_init_value('CONNECTION/api_sleep')
         self.api_sleep.textChanged.connect(lambda res: self.create_input(res, self.api_sleep, _d, 'CONNECTION/api_sleep'))
         self.layout.addWidget(self.api_sleep, row, 4, 1, 1)
 
@@ -237,26 +228,28 @@ class GameSettings(QWidget):
             row += 1
             self.layout.addWidget(QLabel(""), row, 0, 1, 4)
 
-        self.reset_button.clicked.connect(self.on_reset)
-        self.reset_button.setMaximumWidth(30)
-        row += 1
-        self.layout.addWidget(self.reset_button, row, 4, 1, 1)
-
     def on_reset(self) -> None:
-        _d = self.get_default('GAME/random_seed')
-        self.seed_input.setPlaceholderText(_d)
-        _d = self.get_default('GAME/speed_lo_bound')
-        self.speed_lo_input.setPlaceholderText(_d)
-        _d = self.get_default('GAME/speed_hi_bound')
-        self.speed_hi_input.setPlaceholderText(_d)
-        _d = self.get_default('CONNECTION/session_retries')
-        self.session_retries.setPlaceholderText(_d)
-        _d = self.get_default('CONNECTION/session_sleep')
-        self.session_sleep.setPlaceholderText(_d)
-        _d = self.get_default('CONNECTION/api_retries')
-        self.api_retries.setPlaceholderText(_d)
-        _d = self.get_default('CONNECTION/api_sleep')
-        self.api_sleep.setPlaceholderText(_d)
+        _d = self.get_init_value('GAME/random_seed', True)
+        self.seed_input.setText(str(_d))
+        # self.seed_input.setPlaceholderText(str(_d))
+        _d = self.get_init_value('GAME/speed_lo_bound', True)
+        self.speed_lo_input.setText(str(_d))
+        # self.speed_lo_input.setPlaceholderText(str(_d))
+        _d = self.get_init_value('GAME/speed_hi_bound', True)
+        self.speed_hi_input.setText(str(_d))
+        # self.speed_hi_input.setPlaceholderText(str(_d))
+        _d = self.get_init_value('CONNECTION/session_retries', True)
+        # self.session_retries.setPlaceholderText(str(_d))
+        self.session_retries.setText(str(_d))
+        _d = self.get_init_value('CONNECTION/session_sleep', True)
+        self.session_sleep.setText(str(_d))
+        # self.session_sleep.setPlaceholderText(str(_d))
+        _d = self.get_init_value('CONNECTION/api_retries', True)
+        self.api_retries.setText(str(_d))
+        # self.api_retries.setPlaceholderText(str(_d))
+        _d = self.get_init_value('CONNECTION/api_sleep', True)
+        self.api_sleep.setText(str(_d))
+        # self.api_sleep.setPlaceholderText(str(_d))
 
     def create_input(self, _input: str, _edit: QLineEdit, _default: int, _field: str) -> None:
         if _input == '':
@@ -266,8 +259,8 @@ class GameSettings(QWidget):
             _input = int(_input)
         self.qsettings.setValue(_field, _input)
 
-    def get_default(self, field: str) -> int:
-        if self.qsettings.contains(field) is True:
+    def get_init_value(self, field: str, is_default: bool = False) -> int:
+        if (self.qsettings.contains(field) is True) and (is_default is False):
             d = int(self.qsettings.value(field))
         else:
             if field == 'GAME/random_seed':
@@ -294,6 +287,6 @@ class GameSettings(QWidget):
             random.seed(int(time()))
         else:
             random.seed(int(_input))
-        self.qsettings.setValue('GAME/random_seed')
+        self.qsettings.setValue('GAME/random_seed', int(_input))
 
 # End of File

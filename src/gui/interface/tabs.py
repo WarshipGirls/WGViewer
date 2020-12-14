@@ -42,7 +42,6 @@ class MainInterfaceTabs(QWidget):
         self.tab_adv = None
         self.tab_thermopylae = None
         self.tabs = QTabWidget()
-        self.tabs.setTabBar(QTabBar())
         self.init_ui()
 
         # TODO now tab_dock init important data

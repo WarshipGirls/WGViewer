@@ -3,7 +3,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QStyle, QStyleOptionTab, QStylePainter,
     QTabBar, QTabWidget,
-    QProxyStyle, QMainWindow, QWidget
+    QProxyStyle, QMainWindow, QWidget, QStatusBar, QPushButton, QVBoxLayout
 )
 
 from src.data.wgv_qsettings import get_qsettings_file
@@ -53,9 +53,16 @@ class TabBar(QTabBar):
 class TabWidget(QTabWidget):
     def __init__(self):
         super().__init__()
+        self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
         self.setTabBar(TabBar())
         self.setTabPosition(QTabWidget.West)
-        self.setStyleSheet(get_color_scheme())
+        # self.setStyleSheet(get_color_scheme())
+        # can also add QIcon as 2nd argument
+        self.ui_settings = UISettings(self.qsettings)
+        self.addTab(self.ui_settings, "UI")
+        self.game_settings = GameSettings(self.qsettings)
+        self.addTab(self.game_settings, "GAME")
+
 
 
 ''' This seems useless
@@ -79,19 +86,47 @@ class GlobalSettingsWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         # self.setStyle(ProxyStyle())
-        self.vertical_tabs = TabWidget()
-        self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
-        # can also add QIcon as 2nd argument
-        self.vertical_tabs.addTab(UISettings(self.qsettings), "UI")
-        self.vertical_tabs.addTab(GameSettings(self.qsettings), "GAME")
 
+        # self.layout = QVBoxLayout()
+        self.vertical_tabs = TabWidget()
+
+        self.status_bar = QStatusBar()
+        self.reset_button = QPushButton('Reset')
+        # self.setStatusBar(self.status_bar)
         self.init_ui()
+        # self.vertical_tabs.show()
+        self.show()
 
     def init_ui(self) -> None:
+        # self.layout.addWidget(self.vertical_tabs)
+
+        # can also add QIcon as 2nd argument
+        # self.vertical_tabs.addTab(UISettings(self.qsettings), "UI")
+        # self.vertical_tabs.addTab(GameSettings(self.qsettings), "GAME")
+        self.setStyleSheet(get_color_scheme())
+
         user_w, user_h = get_user_resolution()
         w = int(user_w / 3)
         h = int(user_h * 4 / 9)
-        self.vertical_tabs.resize(w, h)
-        self.vertical_tabs.show()
+        # self.vertical_tabs.resize(w, h)
+        self.resize(w, h)
+        self.setCentralWidget(self.vertical_tabs)
+        # can also add QIcon as 2nd argument
+        # self.vertical_tabs.addTab(UISettings(self.qsettings), "UI")
+        # self.vertical_tabs.addTab(GameSettings(self.qsettings), "GAME")
+
+        self.reset_button.clicked.connect(self.on_reset)
+        self.status_bar.addWidget(self.reset_button)
+        self.setStatusBar(self.status_bar)
+        # self.setLayout(self.layout)
+        self.setLayout(QVBoxLayout())
+
+    def on_reset(self) -> None:
+        if self.vertical_tabs.currentIndex() == 0:
+            self.vertical_tabs.ui_settings.on_reset()
+        elif self.vertical_tabs.currentIndex() == 1:
+            self.vertical_tabs.game_settings.on_reset()
+        else:
+            pass
 
 # End of File
