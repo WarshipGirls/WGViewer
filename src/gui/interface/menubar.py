@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from src import data as wgv_data
 from src import utils as wgv_utils
+from src.func import qsettings_keys as QKEYS
 from src.gui.custom_widgets import ScrollBoxWindow
 from .settings import GlobalSettingsWindow
 
@@ -170,11 +171,11 @@ class MainInterfaceMenuBar(QMenuBar):
     # ================================
 
     def use_native_style(self) -> None:
-        self.qsettings.setValue("style", "native")
+        self.qsettings.setValue(QKEYS.STYLE, "native")
         self.parent.set_color_scheme()
 
     def use_qdarkstyle(self) -> None:
-        self.qsettings.setValue("style", "qdarkstyle")
+        self.qsettings.setValue(QKEYS.STYLE, "qdarkstyle")
         self.parent.set_color_scheme()
 
     # ================================

@@ -7,6 +7,7 @@ from PyQt5.QtCore import QRegExp
 from PyQt5.QtGui import QColor, QFont, QRegExpValidator
 from PyQt5.QtWidgets import QWidget, QGridLayout, QCheckBox, QComboBox, QLabel, QLineEdit
 
+from src.func import qsettings_keys as QKEYS
 from src.gui.custom_widgets import QHLine
 
 HEADER1: int = 20
@@ -46,13 +47,13 @@ class UISettings(QWidget):
         self.dropdown_side_dock.currentTextChanged.connect(self.handle_side_dock_pos)
 
         self.tab_adv = QCheckBox("Advance Functions", self)
-        self.handle_tab_init(self.tab_adv, 'UI/TAB/advance')
+        self.handle_tab_init(self.tab_adv, QKEYS.UI_TAB_ADV)
         self.tab_exp = QCheckBox("Expedition", self)
-        self.handle_tab_init(self.tab_exp, 'UI/TAB/expedition')
+        self.handle_tab_init(self.tab_exp, QKEYS.UI_TAB_EXP)
         self.tab_ship = QCheckBox("Dock", self)
-        self.handle_tab_init(self.tab_ship, 'UI/TAB/ship')
+        self.handle_tab_init(self.tab_ship, QKEYS.UI_TAB_SHIP)
         self.tab_ther = QCheckBox("Thermopylae", self)
-        self.handle_tab_init(self.tab_ther, 'UI/TAB/thermopylae')
+        self.handle_tab_init(self.tab_ther, QKEYS.UI_TAB_THER)
 
         self.init_ui()
 
@@ -72,7 +73,7 @@ class UISettings(QWidget):
         row += 1
         self.layout.addWidget(QHLine(parent=self, color=QColor(0, 0, 0), width=10), row, 0, 1, 4)
         row += 1
-        if self.qsettings.value('UI/no_side_dock') == 'true':
+        if self.qsettings.value(QKEYS.UI_SIDEDOCK) == 'true':
             self.side_dock.setChecked(False)
         else:
             self.side_dock.setChecked(True)
@@ -89,22 +90,22 @@ class UISettings(QWidget):
         row += 1
         self.layout.addWidget(QHLine(parent=self, color=QColor(0, 0, 0), width=10), row, 0, 1, 4)
         row += 1
-        if self.qsettings.value('UI/TABS/advance') == 'true':
+        if self.qsettings.value(QKEYS.UI_TAB_ADV) == 'true':
             self.tab_adv.setChecked(True)
         else:
             self.tab_adv.setChecked(False)
 
-        if self.qsettings.value('UI/TABS/expedition') == 'true':
+        if self.qsettings.value(QKEYS.UI_TAB_EXP) == 'true':
             self.tab_exp.setChecked(True)
         else:
             self.tab_exp.setChecked(False)
 
-        if self.qsettings.value('UI/TABS/ship') == 'true':
+        if self.qsettings.value(QKEYS.UI_TAB_SHIP) == 'true':
             self.tab_ship.setChecked(True)
         else:
             self.tab_ship.setChecked(False)
 
-        if self.qsettings.value('UI/TABS/thermopylae') == 'true':
+        if self.qsettings.value(QKEYS.UI_TAB_THER) == 'true':
             self.tab_ther.setChecked(True)
         else:
             self.tab_ther.setChecked(False)
@@ -130,17 +131,17 @@ class UISettings(QWidget):
 
     def handle_side_dock_pos(self) -> None:
         if self.dropdown_side_dock.currentText() == 'Right':
-            self.qsettings.setValue('UI/side_dock_pos', 'right')
+            self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 'right')
         elif self.dropdown_side_dock.currentText() == 'Left':
-            self.qsettings.setValue(('UI/side_dock_pos', 'left'))
+            self.qsettings.setValue((QKEYS.UI_SIDEDOCK_POS, 'left'))
         else:
-            self.qsettings.setValue('UI/side_dock_pos', 'right')
+            self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 'right')
 
     def handle_side_dock_init(self) -> None:
         if self.side_dock.isChecked() is True:
-            self.qsettings.setValue('UI/no_side_dock', False)
+            self.qsettings.setValue(QKEYS.UI_SIDEDOCK, False)
         else:
-            self.qsettings.setValue('UI/no_side_dock', True)
+            self.qsettings.setValue(QKEYS.UI_SIDEDOCK, True)
 
     def handle_tab_init(self, cb: QCheckBox, name: str) -> None:
         if cb.isChecked() is True:
@@ -157,21 +158,21 @@ class GameSettings(QWidget):
         self.layout = QGridLayout()
         self.setLayout(self.layout)
 
-        _d = self.get_init_value('GAME/random_seed')
+        _d = self.get_init_value(QKEYS.GAME_RANDOM_SEED)
         self.seed_input = self.create_qlineedit(default=_d, max_len=16)
-        _d = self.get_init_value('GAME/speed_lo_bound')
+        _d = self.get_init_value(QKEYS.GAME_SPD_LO)
         self.speed_lo_input = self.create_qlineedit(default=_d, max_len=3)
-        _d = self.get_init_value('GAME/speed_hi_bound')
+        _d = self.get_init_value(QKEYS.GAME_SPD_HI)
         self.speed_hi_input = self.create_qlineedit(default=_d, max_len=3)
-        _d = self.get_init_value('CONNECTION/session_retries')
+        _d = self.get_init_value(QKEYS.CONN_SESS_RTY)
         self.session_retries = self.create_qlineedit(default=_d, max_len=2)
-        _d = self.get_init_value('CONNECTION/session_sleep')
+        _d = self.get_init_value(QKEYS.CONN_SESS_SLP)
         self.session_sleep = self.create_qlineedit(default=_d, max_len=2)
-        _d = self.get_init_value('CONNECTION/api_retries')
+        _d = self.get_init_value(QKEYS.CONN_API_RTY)
         self.api_retries = self.create_qlineedit(default=_d, max_len=2)
-        _d = self.get_init_value('CONNECTION/api_sleep')
+        _d = self.get_init_value(QKEYS.CONN_API_SLP)
         self.api_sleep = self.create_qlineedit(default=_d, max_len=2)
-        _d = self.get_init_value('CONNECTION/ther_boss_retry')
+        _d = self.get_init_value(QKEYS.CONN_THER_RTY)
         self.ther_boss_retry = self.create_qlineedit(default=_d, max_len=1)
 
         self.init_ui()
@@ -206,12 +207,12 @@ class GameSettings(QWidget):
         speed_label.setToolTip("Set server request intervals.\nInvalid inputs will be ignored (such as low > high)")
         self.layout.addWidget(speed_label, row, 0, 1, 1)
         self.layout.addWidget(create_qlabel('Lower Bound'), row, 1, 1, 1)
-        _d = self.get_init_value('GAME/speed_lo_bound')
-        self.speed_lo_input.textChanged.connect(lambda res: self.create_input(res, self.speed_lo_input, _d, 'GAME/speed_lo_bound'))
+        _d = self.get_init_value(QKEYS.GAME_SPD_LO)
+        self.speed_lo_input.textChanged.connect(lambda res: self.create_input(res, self.speed_lo_input, _d, QKEYS.GAME_SPD_LO))
         self.layout.addWidget(self.speed_lo_input, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel('Upper Bound'), row, 3, 1, 1)
-        _d = self.get_init_value('GAME/speed_hi_bound')
-        self.speed_hi_input.textChanged.connect(lambda res: self.create_input(res, self.speed_hi_input, _d, 'GAME/speed_hi_bound'))
+        _d = self.get_init_value(QKEYS.GAME_SPD_HI)
+        self.speed_hi_input.textChanged.connect(lambda res: self.create_input(res, self.speed_hi_input, _d, QKEYS.GAME_SPD_HI))
         self.layout.addWidget(self.speed_hi_input, row, 4, 1, 1)
         return row
 
@@ -224,30 +225,30 @@ class GameSettings(QWidget):
         row += 1
         self.layout.addWidget(create_qlabel(text='Retry Limit', font_size=HEADER3), row, 0, 1, 1)
         self.layout.addWidget(create_qlabel(text='session'), row, 1, 1, 1)
-        _d = self.get_init_value('CONNECTION/session_retries')
-        self.session_retries.textChanged.connect(lambda res: self.create_input(res, self.session_retries, _d, 'CONNECTION/session_retries'))
+        _d = self.get_init_value(QKEYS.CONN_SESS_RTY)
+        self.session_retries.textChanged.connect(lambda res: self.create_input(res, self.session_retries, _d, QKEYS.CONN_SESS_RTY))
         self.layout.addWidget(self.session_retries, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel(text='sleep (sec)'), row, 3, 1, 1)
-        _d = self.get_init_value('CONNECTION/session_sleep')
-        self.session_sleep.textChanged.connect(lambda res: self.create_input(res, self.session_sleep, _d, 'CONNECTION/session_sleep'))
+        _d = self.get_init_value(QKEYS.CONN_SESS_SLP)
+        self.session_sleep.textChanged.connect(lambda res: self.create_input(res, self.session_sleep, _d, QKEYS.CONN_SESS_SLP))
         self.layout.addWidget(self.session_sleep, row, 4, 1, 1)
 
         row += 1
         self.layout.addWidget(create_qlabel(text='WGR API'), row, 1, 1, 1)
-        _d = self.get_init_value('CONNECTION/api_retries')
-        self.api_retries.textChanged.connect(lambda res: self.create_input(res, self.api_retries, _d, 'CONNECTION/api_retries'))
+        _d = self.get_init_value(QKEYS.CONN_API_RTY)
+        self.api_retries.textChanged.connect(lambda res: self.create_input(res, self.api_retries, _d, QKEYS.CONN_API_RTY))
         self.layout.addWidget(self.api_retries, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel(text='sleep (sec)'), row, 3, 1, 1)
-        _d = self.get_init_value('CONNECTION/api_sleep')
-        self.api_sleep.textChanged.connect(lambda res: self.create_input(res, self.api_sleep, _d, 'CONNECTION/api_sleep'))
+        _d = self.get_init_value(QKEYS.CONN_API_SLP)
+        self.api_sleep.textChanged.connect(lambda res: self.create_input(res, self.api_sleep, _d, QKEYS.CONN_API_SLP))
         self.layout.addWidget(self.api_sleep, row, 4, 1, 1)
         return row
 
     def init_thermopylae(self, row: int) -> int:
         row += 1
         self.layout.addWidget(create_qlabel(text='Thermopylae'), row, 1, 1, 1)
-        _d = self.get_init_value('CONNECTION/ther_boss_retry')
-        self.ther_boss_retry.textChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry, _d, 'CONNECTION/ther_boss_retry'))
+        _d = self.get_init_value(QKEYS.CONN_THER_RTY)
+        self.ther_boss_retry.textChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry, _d, QKEYS.CONN_THER_RTY))
         self.layout.addWidget(self.ther_boss_retry, row, 2, 1, 1)
         row += 1
 
@@ -260,21 +261,21 @@ class GameSettings(QWidget):
             self.layout.addWidget(QLabel(""), row, 0, 1, 4)
 
     def on_reset(self) -> None:
-        _d = self.get_init_value('GAME/random_seed', True)
+        _d = self.get_init_value(QKEYS.GAME_RANDOM_SEED, True)
         self.seed_input.setText(str(_d))
-        _d = self.get_init_value('GAME/speed_lo_bound', True)
+        _d = self.get_init_value(QKEYS.GAME_SPD_LO, True)
         self.speed_lo_input.setText(str(_d))
-        _d = self.get_init_value('GAME/speed_hi_bound', True)
+        _d = self.get_init_value(QKEYS.GAME_SPD_HI, True)
         self.speed_hi_input.setText(str(_d))
-        _d = self.get_init_value('CONNECTION/session_retries', True)
+        _d = self.get_init_value(QKEYS.CONN_SESS_RTY, True)
         self.session_retries.setText(str(_d))
-        _d = self.get_init_value('CONNECTION/session_sleep', True)
+        _d = self.get_init_value(QKEYS.CONN_SESS_SLP, True)
         self.session_sleep.setText(str(_d))
-        _d = self.get_init_value('CONNECTION/api_retries', True)
+        _d = self.get_init_value(QKEYS.CONN_API_RTY, True)
         self.api_retries.setText(str(_d))
-        _d = self.get_init_value('CONNECTION/api_sleep', True)
+        _d = self.get_init_value(QKEYS.CONN_API_SLP, True)
         self.api_sleep.setText(str(_d))
-        _d = self.get_init_value('CONNECTION/ther_boss_retry', True)
+        _d = self.get_init_value(QKEYS.CONN_THER_RTY, True)
         self.ther_boss_retry.setText(str(_d))
 
     def create_input(self, _input: str, _edit: QLineEdit, _default: int, _field: str) -> None:
@@ -289,21 +290,21 @@ class GameSettings(QWidget):
         if (self.qsettings.contains(field) is True) and (is_default is False):
             d = int(self.qsettings.value(field))
         else:
-            if field == 'GAME/random_seed':
+            if field == QKEYS.GAME_RANDOM_SEED:
                 d = 42
-            elif field == 'GAME/speed_lo_bound':
+            elif field == QKEYS.GAME_SPD_LO:
                 d = 5
-            elif field == 'GAME/speed_hi_bound':
+            elif field == QKEYS.GAME_SPD_HI:
                 d = 10
-            elif field == 'CONNECTION/session_retries':
+            elif field == QKEYS.CONN_SESS_RTY:
                 d = 5
-            elif field == 'CONNECTION/session_sleep':
+            elif field == QKEYS.CONN_SESS_SLP:
                 d = 3
-            elif field == 'CONNECTION/api_retries':
+            elif field == QKEYS.CONN_API_RTY:
                 d = 5
-            elif field == 'CONNECTION/api_sleep':
+            elif field == QKEYS.CONN_API_SLP:
                 d = 3
-            elif field == 'CONNECTION/ther_boss_retry':
+            elif field == QKEYS.CONN_THER_RTY:
                 d = 3
             else:
                 d = 5
@@ -315,6 +316,6 @@ class GameSettings(QWidget):
             random.seed(int(time()))
         else:
             random.seed(int(_input))
-        self.qsettings.setValue('GAME/random_seed', int(_input))
+        self.qsettings.setValue(QKEYS.GAME_RANDOM_SEED, int(_input))
 
 # End of File

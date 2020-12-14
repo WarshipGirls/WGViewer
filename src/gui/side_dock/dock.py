@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgv_data
 from src import utils as wgv_utils
+from src.func import qsettings_keys as QKEYS
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 
@@ -498,7 +499,7 @@ class SideDock(QDockWidget):
             self.sig_closed.emit()
         else:
             event.ignore()
-        self.qsettings.setValue("UI/no_side_dock", cb.isChecked())
+        self.qsettings.setValue(QKEYS.UI_SIDEDOCK, cb.isChecked())
 
     def update_geometry(self) -> None:
         y = 0.03 * self.user_screen_h

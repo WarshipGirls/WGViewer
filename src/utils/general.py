@@ -8,6 +8,7 @@ from time import sleep
 from PyQt5.QtCore import QSettings
 
 from src.data import get_qsettings_file
+from src.func import qsettings_keys as QKEYS
 
 qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
 
@@ -43,8 +44,8 @@ def ts_to_date(ts: int) -> str:
 
 def set_sleep(level: float = 1.0):
     # There must be some interval between Game API calls
-    lo = int(qsettings.value('GAME/speed_lo_bound'))
-    hi = int(qsettings.value('GAME/speed_hi_bound'))
+    lo = int(qsettings.value(QKEYS.GAME_SPD_LO))
+    hi = int(qsettings.value(QKEYS.GAME_SPD_HI))
     try:
         assert (lo < hi)
         sleep(randint(lo, hi) * level)

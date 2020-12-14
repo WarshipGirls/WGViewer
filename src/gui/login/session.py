@@ -9,18 +9,19 @@ from PyQt5.QtCore import QSettings
 from requests import Response
 
 from src.data import get_qsettings_file
+from src.func import qsettings_keys as QKEYS
 
 
 class LoginSession:
     def __init__(self):
         self.session = requests.sessions.Session()
         self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
-        if self.qsettings.contains('CONNECTION/session_retries') is True:
-            self.max_retry = int(self.qsettings.value('CONNECTION/session_retries'))
+        if self.qsettings.contains(QKEYS.CONN_SESS_RTY) is True:
+            self.max_retry = int(self.qsettings.value(QKEYS.CONN_SESS_RTY))
         else:
             self.max_retry = 5
-        if self.qsettings.contains('CONNECTION/session_sleep') is True:
-            self.sleep_time = int(self.qsettings.value('CONNECTION/session_sleep'))
+        if self.qsettings.contains(QKEYS.CONN_SESS_SLP) is True:
+            self.sleep_time = int(self.qsettings.value(QKEYS.CONN_SESS_SLP))
         else:
             self.sleep_time = 3
 

@@ -6,6 +6,7 @@ from PyQt5.QtCore import QSettings
 
 from src import utils as wgv_utils
 from src.data import get_qsettings_file
+from src.func import qsettings_keys as QKEYS
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieResume
 from src.wgr.six import API_SIX
@@ -21,8 +22,8 @@ class SortieHelper:
         self.map_data = map_data
 
         self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
-        if self.qsettings.contains('CONNECTION/ther_boss_retry'):
-            self.reconnection_limit = int(self.qsettings.value('CONNECTION/ther_boss_retry'))
+        if self.qsettings.contains(QKEYS.CONN_THER_RTY):
+            self.reconnection_limit = int(self.qsettings.value(QKEYS.CONN_THER_RTY))
         else:
             self.reconnection_limit = 3
 

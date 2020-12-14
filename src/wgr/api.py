@@ -14,6 +14,7 @@ from urllib.error import URLError
 from http.client import HTTPResponse
 
 from src.data import get_qsettings_file
+from src.func import qsettings_keys as QKEYS
 from src.gui.login.helper import LoginHelper
 
 
@@ -29,12 +30,12 @@ class WGR_API:
 
         self.hlp = LoginHelper()
         qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
-        if qsettings.contains('CONNECTION/api_retries') is True:
-            self.max_retry = int(qsettings.value('CONNECTION/api_retries'))
+        if qsettings.contains(QKEYS.CONN_API_RTY) is True:
+            self.max_retry = int(qsettings.value(QKEYS.CONN_API_RTY))
         else:
             self.max_retry = 5
-        if qsettings.contains('CONNECTION/api_sleep') is True:
-            self.sleep_time = int(qsettings.value('CONNECTION/api_sleep'))
+        if qsettings.contains(QKEYS.CONN_API_SLP) is True:
+            self.sleep_time = int(qsettings.value(QKEYS.CONN_API_SLP))
         else:
             self.sleep_time = 3
 
