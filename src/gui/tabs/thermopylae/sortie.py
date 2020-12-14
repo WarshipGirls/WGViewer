@@ -11,7 +11,11 @@ TODO free up dock space if needed
 from logging import getLogger
 from typing import Union
 
+from PyQt5.QtCore import QSettings
+
 from src import data as wgv_data
+from src.data import get_qsettings_file
+from src.func import qsettings_keys as QKEYS
 from src.exceptions.wgr_error import get_error
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume, ThermopylaeSortieDone
 from src.utils import process_spy_json, set_sleep
@@ -39,6 +43,12 @@ class Sortie:
         self.battle_fleet = set()  # ships that on battle
         self.final_fleet = final_fleet  # fill up required number of boats
         self.logger = getLogger('TabThermopylae')
+
+        self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
+        if self.qsettings.contains(QKEYS.THER_REPAIRS):
+            self.repair_levels = self.qsettings.value(QKEYS.THER_REPAIRS)
+        else:
+            self.repair_levels = [2]
 
         # Used for pre-battle
         self.map_data: dict = {}
@@ -478,7 +488,12 @@ class Sortie:
         supply_res = self.helper.supply_boats(list(self.battle_fleet))
         self.update_side_dock_resources(supply_res['userVo'])
 
-        repair_res = self.helper.process_repair(supply_res['shipVO'], T_CONST.SHIP_REPAIR_LEVELS)  # pre-battle repair
+        # pre-battle repair
+        if (curr_node_id not in T_CONST.BOSS_NODES) and (curr_node_id not in T_CONST.REWARD_NODES):
+            repair_res = self.helper.process_repair(supply_res['shipVO'], self.repair_levels)
+        else:
+            # repairs to full HP
+            repair_res = self.helper.process_repair(supply_res['shipVO'], [1])
         if 'userVo' in repair_res:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])

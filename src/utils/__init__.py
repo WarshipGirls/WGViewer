@@ -12,7 +12,8 @@ delete the __init__.py and re-run __auto_gen__.py
     
 from .game_combat import (
     get_repair_type, 
-    process_spy_json
+    process_spy_json, 
+    repair_id_to_text, repair_text_to_id
 )
 from .game_info import (
     get_all_ship_types, get_build_type, get_combat_formation, get_heading_type, get_ship_los, get_ship_type, get_war_evaluation

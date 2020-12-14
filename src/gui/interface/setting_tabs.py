@@ -8,6 +8,7 @@ from PyQt5.QtCore import QRegExp
 from PyQt5.QtGui import QColor, QFont, QRegExpValidator
 from PyQt5.QtWidgets import QWidget, QGridLayout, QCheckBox, QComboBox, QLabel, QLineEdit, QSpinBox
 
+from src.utils import repair_id_to_text, repair_text_to_id
 from src.func import qsettings_keys as QKEYS
 from src.gui.custom_widgets import QHLine
 
@@ -17,6 +18,12 @@ from src.gui.custom_widgets import QHLine
 HEADER1: int = 20
 HEADER2: int = 15
 HEADER3: int = 12
+
+
+def create_qcombobox(choices: list) -> QComboBox:
+    c = QComboBox()
+    c.addItems(choices)
+    return c
 
 
 def create_qlabel(text: str, font_size: int = -1) -> QLabel:
@@ -64,7 +71,7 @@ class UISettings(QWidget):
 
         self.side_dock = QCheckBox("Navy Base Overview", self)
         self.side_dock.stateChanged.connect(self.handle_side_dock_init)
-        self.dropdown_side_dock = QComboBox()
+        self.dropdown_side_dock = create_qcombobox(['Right', 'Left'])
         self.dropdown_side_dock.currentTextChanged.connect(self.handle_side_dock_pos)
 
         self.tab_adv = QCheckBox("Advance Functions", self)
@@ -100,7 +107,6 @@ class UISettings(QWidget):
             self.side_dock.setChecked(True)
         self.layout.addWidget(self.side_dock, row, 0, 1, 1)
         self.dropdown_side_dock.setToolTip("Set the default position of side dock")
-        self.dropdown_side_dock.addItems(['Right', 'Left'])
         self.layout.addWidget(self.dropdown_side_dock, row, 1, 1, 1)
         return row
 
@@ -353,7 +359,17 @@ class TabsSettings(QWidget):
         self.ther_boss_std: List[QSpinBox] = [
             create_qspinbox(int(_d[0]), 0, 6),
             create_qspinbox(int(_d[1]), 0, 6),
-            create_qspinbox(int(_d[2]), 0, 6),
+            create_qspinbox(int(_d[2]), 0, 6)
+        ]
+        _d = self.get_init_value(QKEYS.THER_REPAIRS)
+        repair_choices = ['Slightly Damaged', 'Moderately Damaged', 'Heavily Damaged']
+        self.ther_repairs: List[QComboBox] = [
+            create_qcombobox(repair_choices),
+            create_qcombobox(repair_choices),
+            create_qcombobox(repair_choices),
+            create_qcombobox(repair_choices),
+            create_qcombobox(repair_choices),
+            create_qcombobox(repair_choices),
         ]
 
         self.init_ui()
@@ -368,23 +384,42 @@ class TabsSettings(QWidget):
         self.layout.addWidget(create_qlabel(text='Bosses Retries'), row, 1)
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY)
         self.ther_boss_retry[0].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[0], _d, 0, QKEYS.THER_BOSS_RTY))
-        self.layout.addWidget(self.ther_boss_retry[0], row, 2)
         self.ther_boss_retry[1].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[1], _d, 1, QKEYS.THER_BOSS_RTY))
-        self.layout.addWidget(self.ther_boss_retry[1], row, 3)
         self.ther_boss_retry[2].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[2], _d, 2, QKEYS.THER_BOSS_RTY))
+        self.layout.addWidget(self.ther_boss_retry[0], row, 2)
+        self.layout.addWidget(self.ther_boss_retry[1], row, 3)
         self.layout.addWidget(self.ther_boss_retry[2], row, 4)
 
         row += 1
-        ther_boss_retry_std_label = create_qlabel(text='On sunken')
+        ther_boss_retry_std_label = create_qlabel(text='On Sunken')
         ther_boss_retry_std_label.setToolTip("Sunken at least how many enemies to disable boss re-fight")
         self.layout.addWidget(ther_boss_retry_std_label, row, 1)
         _d = self.get_init_value(QKEYS.THER_BOSS_STD)
         self.ther_boss_std[0].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[0], _d, 0, QKEYS.THER_BOSS_STD))
-        self.layout.addWidget(self.ther_boss_std[0], row, 2)
         self.ther_boss_std[1].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[1], _d, 1, QKEYS.THER_BOSS_STD))
-        self.layout.addWidget(self.ther_boss_std[1], row, 3)
         self.ther_boss_std[2].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[2], _d, 2, QKEYS.THER_BOSS_STD))
+        self.layout.addWidget(self.ther_boss_std[0], row, 2)
+        self.layout.addWidget(self.ther_boss_std[1], row, 3)
         self.layout.addWidget(self.ther_boss_std[2], row, 4)
+
+        row += 1
+        ther_repair_levels_label = create_qlabel(text='Fleet Repair Levels')
+        ther_repair_levels_label.setToolTip("Set the repair levels for battle fleet\n1st row:\t#1 #2 #3\n2nd row:\t#4 #5 #6")
+        self.layout.addWidget(ther_repair_levels_label, row, 1)
+        _d = self.get_init_value(QKEYS.THER_REPAIRS)
+        self.ther_repairs[0].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[0], _d, 0, QKEYS.THER_REPAIRS))
+        self.ther_repairs[1].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[1], _d, 1, QKEYS.THER_REPAIRS))
+        self.ther_repairs[2].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[2], _d, 2, QKEYS.THER_REPAIRS))
+        self.layout.addWidget(self.ther_repairs[0], row, 2)
+        self.layout.addWidget(self.ther_repairs[1], row, 3)
+        self.layout.addWidget(self.ther_repairs[2], row, 4)
+        row += 1
+        self.ther_repairs[3].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[3], _d, 3, QKEYS.THER_REPAIRS))
+        self.ther_repairs[4].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[4], _d, 4, QKEYS.THER_REPAIRS))
+        self.ther_repairs[5].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[5], _d, 5, QKEYS.THER_REPAIRS))
+        self.layout.addWidget(self.ther_repairs[3], row, 2)
+        self.layout.addWidget(self.ther_repairs[4], row, 3)
+        self.layout.addWidget(self.ther_repairs[5], row, 4)
 
         row += 1
         return row
@@ -404,6 +439,15 @@ class TabsSettings(QWidget):
             save = _default
         self.qsettings.setValue(_field, save)
 
+    def dropdown_input(self, _input: str, _edit: QComboBox, _default: list, idx: int, _field: str) -> None:
+        if _input == '':
+            save = _default
+            _edit.setPlaceholderText(repair_id_to_text(_default[idx]))
+        else:
+            _default[idx] = repair_text_to_id(_input)
+            save = _default
+        self.qsettings.setValue(_field, save)
+
     def on_reset(self) -> None:
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY, True)
         self.ther_boss_retry[0].setText(str(_d[0]))
@@ -415,6 +459,14 @@ class TabsSettings(QWidget):
         self.ther_boss_std[1].setText(str(_d[1]))
         self.ther_boss_std[2].setText(str(_d[2]))
 
+        _d = self.get_init_value(QKEYS.THER_REPAIRS, True)
+        self.ther_repairs[0].setCurrentIndex(0)
+        self.ther_repairs[1].setCurrentIndex(0)
+        self.ther_repairs[2].setCurrentIndex(0)
+        self.ther_repairs[3].setCurrentIndex(0)
+        self.ther_repairs[4].setCurrentIndex(0)
+        self.ther_repairs[5].setCurrentIndex(0)
+
     def get_init_value(self, field: str, is_default: bool = False) -> list:
         if (self.qsettings.contains(field) is True) and (is_default is False):
             d = self.qsettings.value(field)
@@ -423,6 +475,8 @@ class TabsSettings(QWidget):
                 d = [3, 5, 10]
             elif field == QKEYS.THER_BOSS_STD:
                 d = [1, 2, 2]
+            elif field == QKEYS.THER_REPAIRS:
+                d = [2, 2, 2, 2, 2]
             else:
                 logging.error(f"Unsupported QKEYS filed {field}")
                 d = 1

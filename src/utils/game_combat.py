@@ -25,6 +25,17 @@ def get_repair_type(ship_info: dict) -> int:
     return res
 
 
+def repair_id_to_text(repair_level: int) -> str:
+    x = {0: 'Full HP', 1: 'Slightly Damaged', 2: 'Moderately Damaged', 3: 'Heavily Damaged', 4: 'Sunken'}
+    return x[repair_level]
+
+
+def repair_text_to_id(repair_text: str) -> int:
+    # {v: k for k, v in my_map.items()}
+    x = {'Full HP': 0, 'Slightly Damaged': 1, 'Moderately Damaged': 2, 'Heavily Damaged': 3, 'Sunken': 4}
+    return x[repair_text]
+
+
 def process_spy_json(spy_json: dict, all_equipment: [dict, None] = None) -> str:
     enemy_info = spy_json['enemyVO']
     detect_result = "success" if enemy_info['isFound'] == 1 else "fail"

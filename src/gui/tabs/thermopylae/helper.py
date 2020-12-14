@@ -26,6 +26,14 @@ class SortieHelper:
             self.reconnection_limit = int(self.qsettings.value(QKEYS.CONN_THER_RTY))
         else:
             self.reconnection_limit = 3
+        if self.qsettings.contains(QKEYS.THER_BOSS_RTY):
+            self.boss_retry_limit = self.qsettings.value(QKEYS.THER_BOSS_RTY)
+        else:
+            self.boss_retry_limit = [3, 5, 10]
+        if self.qsettings.contains(QKEYS.THER_BOSS_STD):
+            self.boss_retry_standard = self.qsettings.value(QKEYS.THER_BOSS_STD)
+        else:
+            self.boss_retry_standard = [1, 2, 2]
 
         self.boss_retry_count: list = [0] * 3
         self.points: int = 10
@@ -457,10 +465,10 @@ class SortieHelper:
         elif curr_id in T_CONST.BOSS_NODES:
             self.logger.info('---- BOSS BATTLE ----')
             node_idx = T_CONST.BOSS_NODES.index(curr_id)
-            if e_list.count(0) >= T_CONST.BOSS_RETRY_STANDARDS[node_idx]:
+            if e_list.count(0) >= self.boss_retry_standard[node_idx]:
                 res = '1'
             else:
-                if self.boss_retry_count[node_idx] == T_CONST.BOSS_RETRY_LIMITS[node_idx]:
+                if self.boss_retry_count[node_idx] == self.boss_retry_limit[node_idx]:
                     res = '1'
                 else:
                     self.boss_retry_count[node_idx] += 1

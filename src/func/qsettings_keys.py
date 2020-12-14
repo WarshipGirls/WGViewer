@@ -24,6 +24,7 @@ UI_SIDEDOCK_POS: str = 'UI/side_dock_pos'
 
 THER_BOSS_RTY: str = 'THER/bosses_retries'
 THER_BOSS_STD: str = 'THER/bosses_retry_standard'
+THER_REPAIRS: str = 'THER/repair_levels'
 
 UI_TAB_ADV: str = 'UI/TAB/advance'
 UI_TAB_EXP: str = 'UI/TAB/expedition'
