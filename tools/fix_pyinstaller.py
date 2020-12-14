@@ -11,7 +11,7 @@ This is not limited to just images either. Any file can be packaged along with t
 spec_root: str = "\'D:\\\github\\\WGViewer\'"
 
 CUSTOM_DATA_FILES: list = [
-  "('docs/version_log.md','D:\\github\\WGViewer\\docs\\version_log.md','DATA'),"
+  "('docs/version_log.md','D:\\\\github\\\\WGViewer\\\\docs\\\\version_log.md','DATA'),"
 ]
 
 def header(_spec_root: str) -> str:
