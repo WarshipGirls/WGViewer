@@ -2,10 +2,11 @@ import logging
 import random
 
 from time import time
+from typing import List, Union
 
 from PyQt5.QtCore import QRegExp
 from PyQt5.QtGui import QColor, QFont, QRegExpValidator
-from PyQt5.QtWidgets import QWidget, QGridLayout, QCheckBox, QComboBox, QLabel, QLineEdit
+from PyQt5.QtWidgets import QWidget, QGridLayout, QCheckBox, QComboBox, QLabel, QLineEdit, QSpinBox
 
 from src.func import qsettings_keys as QKEYS
 from src.gui.custom_widgets import QHLine
@@ -35,6 +36,15 @@ def create_qlineedit(default: int, max_len: int) -> QLineEdit:
     q.setPlaceholderText(str(default))
     q.setMaxLength(max_len)
     q.setValidator(get_int_mask())
+    return q
+
+
+def create_qspinbox(default: int, min_val: int, max_val: int, step: int = 1) -> QSpinBox:
+    q = QSpinBox()
+    q.setValue(default)
+    q.setMinimum(min_val)
+    q.setMaximum(max_val)
+    q.setSingleStep(step)
     return q
 
 
@@ -167,24 +177,26 @@ class GameSettings(QWidget):
         self.qsettings = qsettings
 
         self.layout = QGridLayout()
+        for col in range(5):
+            self.layout.setColumnStretch(col, 1)
         self.setLayout(self.layout)
 
         _d = self.get_init_value(QKEYS.GAME_RANDOM_SEED)
         self.seed_input = create_qlineedit(default=_d, max_len=16)
         _d = self.get_init_value(QKEYS.GAME_SPD_LO)
-        self.speed_lo_input = create_qlineedit(default=_d, max_len=3)
+        self.speed_lo_input = create_qspinbox(_d, 5, 999)
         _d = self.get_init_value(QKEYS.GAME_SPD_HI)
-        self.speed_hi_input = create_qlineedit(default=_d, max_len=3)
+        self.speed_hi_input = create_qspinbox(_d, 10, 999)
         _d = self.get_init_value(QKEYS.CONN_SESS_RTY)
-        self.session_retries = create_qlineedit(default=_d, max_len=2)
+        self.session_retries = create_qspinbox(_d, 1, 99)
         _d = self.get_init_value(QKEYS.CONN_SESS_SLP)
-        self.session_sleep = create_qlineedit(default=_d, max_len=2)
+        self.session_sleep = create_qspinbox(_d, 1, 99)
         _d = self.get_init_value(QKEYS.CONN_API_RTY)
-        self.api_retries = create_qlineedit(default=_d, max_len=2)
+        self.api_retries = create_qspinbox(_d, 1, 99)
         _d = self.get_init_value(QKEYS.CONN_API_SLP)
-        self.api_sleep = create_qlineedit(default=_d, max_len=2)
+        self.api_sleep = create_qspinbox(_d, 1, 99)
         _d = self.get_init_value(QKEYS.CONN_THER_RTY)
-        self.ther_boss_retry = create_qlineedit(default=_d, max_len=1)
+        self.ther_boss_retry = create_qspinbox(_d, 1, 9)
 
         self.init_ui()
 
@@ -211,11 +223,11 @@ class GameSettings(QWidget):
         self.layout.addWidget(speed_label, row, 0, 1, 1)
         self.layout.addWidget(create_qlabel('Lower Bound'), row, 1, 1, 1)
         _d = self.get_init_value(QKEYS.GAME_SPD_LO)
-        self.speed_lo_input.textChanged.connect(lambda res: self.create_input(res, self.speed_lo_input, _d, QKEYS.GAME_SPD_LO))
+        self.speed_lo_input.valueChanged.connect(lambda res: self.create_input(res, self.speed_lo_input, _d, QKEYS.GAME_SPD_LO))
         self.layout.addWidget(self.speed_lo_input, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel('Upper Bound'), row, 3, 1, 1)
         _d = self.get_init_value(QKEYS.GAME_SPD_HI)
-        self.speed_hi_input.textChanged.connect(lambda res: self.create_input(res, self.speed_hi_input, _d, QKEYS.GAME_SPD_HI))
+        self.speed_hi_input.valueChanged.connect(lambda res: self.create_input(res, self.speed_hi_input, _d, QKEYS.GAME_SPD_HI))
         self.layout.addWidget(self.speed_hi_input, row, 4, 1, 1)
         return row
 
@@ -229,21 +241,21 @@ class GameSettings(QWidget):
         self.layout.addWidget(create_qlabel(text='Retry Limit', font_size=HEADER3), row, 0, 1, 1)
         self.layout.addWidget(create_qlabel(text='session'), row, 1, 1, 1)
         _d = self.get_init_value(QKEYS.CONN_SESS_RTY)
-        self.session_retries.textChanged.connect(lambda res: self.create_input(res, self.session_retries, _d, QKEYS.CONN_SESS_RTY))
+        self.session_retries.valueChanged.connect(lambda res: self.create_input(res, self.session_retries, _d, QKEYS.CONN_SESS_RTY))
         self.layout.addWidget(self.session_retries, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel(text='sleep (sec)'), row, 3, 1, 1)
         _d = self.get_init_value(QKEYS.CONN_SESS_SLP)
-        self.session_sleep.textChanged.connect(lambda res: self.create_input(res, self.session_sleep, _d, QKEYS.CONN_SESS_SLP))
+        self.session_sleep.valueChanged.connect(lambda res: self.create_input(res, self.session_sleep, _d, QKEYS.CONN_SESS_SLP))
         self.layout.addWidget(self.session_sleep, row, 4, 1, 1)
 
         row += 1
         self.layout.addWidget(create_qlabel(text='WGR API'), row, 1, 1, 1)
         _d = self.get_init_value(QKEYS.CONN_API_RTY)
-        self.api_retries.textChanged.connect(lambda res: self.create_input(res, self.api_retries, _d, QKEYS.CONN_API_RTY))
+        self.api_retries.valueChanged.connect(lambda res: self.create_input(res, self.api_retries, _d, QKEYS.CONN_API_RTY))
         self.layout.addWidget(self.api_retries, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel(text='sleep (sec)'), row, 3, 1, 1)
         _d = self.get_init_value(QKEYS.CONN_API_SLP)
-        self.api_sleep.textChanged.connect(lambda res: self.create_input(res, self.api_sleep, _d, QKEYS.CONN_API_SLP))
+        self.api_sleep.valueChanged.connect(lambda res: self.create_input(res, self.api_sleep, _d, QKEYS.CONN_API_SLP))
         self.layout.addWidget(self.api_sleep, row, 4, 1, 1)
         return row
 
@@ -251,7 +263,7 @@ class GameSettings(QWidget):
         row += 1
         self.layout.addWidget(create_qlabel(text='Thermopylae'), row, 1, 1, 1)
         _d = self.get_init_value(QKEYS.CONN_THER_RTY)
-        self.ther_boss_retry.textChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry, _d, QKEYS.CONN_THER_RTY))
+        self.ther_boss_retry.valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry, _d, QKEYS.CONN_THER_RTY))
         self.layout.addWidget(self.ther_boss_retry, row, 2, 1, 1)
         row += 1
 
@@ -281,7 +293,7 @@ class GameSettings(QWidget):
         _d = self.get_init_value(QKEYS.CONN_THER_RTY, True)
         self.ther_boss_retry.setText(str(_d))
 
-    def create_input(self, _input: str, _edit: QLineEdit, _default: int, _field: str) -> None:
+    def create_input(self, _input: str, _edit: Union[QLineEdit, QSpinBox], _default: int, _field: str) -> None:
         if _input == '':
             _input = _default
             _edit.setPlaceholderText(str(_default))
@@ -327,16 +339,22 @@ class TabsSettings(QWidget):
         super().__init__()
         self.qsettings = qsettings
         self.layout = QGridLayout()
+        for col in range(5):
+            self.layout.setColumnStretch(col, 1)
         self.setLayout(self.layout)
 
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY)
-        self.ther_boss1_retry = create_qlineedit(default=_d[0], max_len=1)
-        self.ther_boss2_retry = create_qlineedit(default=_d[1], max_len=1)
-        self.ther_boss3_retry = create_qlineedit(default=_d[2], max_len=1)
+        self.ther_boss_retry: List[QSpinBox] = [
+            create_qspinbox(int(_d[0]), 0, 9),
+            create_qspinbox(int(_d[1]), 0, 9),
+            create_qspinbox(int(_d[2]), 0, 9)
+        ]
         _d = self.get_init_value(QKEYS.THER_BOSS_STD)
-        self.ther_boss1_std = create_qlineedit(default=_d[0], max_len=1)
-        self.ther_boss2_std = create_qlineedit(default=_d[1], max_len=1)
-        self.ther_boss3_std = create_qlineedit(default=_d[2], max_len=1)
+        self.ther_boss_std: List[QSpinBox] = [
+            create_qspinbox(int(_d[0]), 0, 6),
+            create_qspinbox(int(_d[1]), 0, 6),
+            create_qspinbox(int(_d[2]), 0, 6),
+        ]
 
         self.init_ui()
 
@@ -349,24 +367,24 @@ class TabsSettings(QWidget):
         self.layout.addWidget(create_qlabel(text='Thermopylae', font_size=HEADER3), row, 0)
         self.layout.addWidget(create_qlabel(text='Bosses Retries'), row, 1)
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY)
-        self.ther_boss1_retry.textChanged.connect(lambda res: self.create_input(res, self.ther_boss1_retry, _d, 0, QKEYS.THER_BOSS_RTY))
-        self.layout.addWidget(self.ther_boss1_retry, row, 2)
-        self.ther_boss2_retry.textChanged.connect(lambda res: self.create_input(res, self.ther_boss2_retry, _d, 1, QKEYS.THER_BOSS_RTY))
-        self.layout.addWidget(self.ther_boss2_retry, row, 3)
-        self.ther_boss3_retry.textChanged.connect(lambda res: self.create_input(res, self.ther_boss3_retry, _d, 2, QKEYS.THER_BOSS_RTY))
-        self.layout.addWidget(self.ther_boss3_retry, row, 4)
+        self.ther_boss_retry[0].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[0], _d, 0, QKEYS.THER_BOSS_RTY))
+        self.layout.addWidget(self.ther_boss_retry[0], row, 2)
+        self.ther_boss_retry[1].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[1], _d, 1, QKEYS.THER_BOSS_RTY))
+        self.layout.addWidget(self.ther_boss_retry[1], row, 3)
+        self.ther_boss_retry[2].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[2], _d, 2, QKEYS.THER_BOSS_RTY))
+        self.layout.addWidget(self.ther_boss_retry[2], row, 4)
 
         row += 1
         ther_boss_retry_std_label = create_qlabel(text='On sunken')
         ther_boss_retry_std_label.setToolTip("Sunken at least how many enemies to disable boss re-fight")
         self.layout.addWidget(ther_boss_retry_std_label, row, 1)
         _d = self.get_init_value(QKEYS.THER_BOSS_STD)
-        self.ther_boss1_std.textChanged.connect(lambda res: self.create_input(res, self.ther_boss1_std, _d, 0, QKEYS.THER_BOSS_STD))
-        self.layout.addWidget(self.ther_boss1_std, row, 2)
-        self.ther_boss2_std.textChanged.connect(lambda res: self.create_input(res, self.ther_boss2_std, _d, 1, QKEYS.THER_BOSS_STD))
-        self.layout.addWidget(self.ther_boss2_std, row, 3)
-        self.ther_boss3_std.textChanged.connect(lambda res: self.create_input(res, self.ther_boss3_std, _d, 2, QKEYS.THER_BOSS_STD))
-        self.layout.addWidget(self.ther_boss3_std, row, 4)
+        self.ther_boss_std[0].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[0], _d, 0, QKEYS.THER_BOSS_STD))
+        self.layout.addWidget(self.ther_boss_std[0], row, 2)
+        self.ther_boss_std[1].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[1], _d, 1, QKEYS.THER_BOSS_STD))
+        self.layout.addWidget(self.ther_boss_std[1], row, 3)
+        self.ther_boss_std[2].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[2], _d, 2, QKEYS.THER_BOSS_STD))
+        self.layout.addWidget(self.ther_boss_std[2], row, 4)
 
         row += 1
         return row
@@ -377,29 +395,25 @@ class TabsSettings(QWidget):
             row += 1
             self.layout.addWidget(QLabel(""), row, 0, 1, 4)
 
-    def create_input(self, _input: str, _edit: QLineEdit, _default: list, idx: int, _field: str) -> None:
+    def create_input(self, _input: str, _edit: QSpinBox, _default: list, idx: int, _field: str) -> None:
         if _input == '':
             save = _default
             _edit.setPlaceholderText(str(_default[idx]))
         else:
-            x = int(_input)
-            if _field == QKEYS.THER_BOSS_STD:
-                if (x < 0) or (x > 6):
-                    x = 2
-            _default[idx] = x
+            _default[idx] = int(_input)
             save = _default
         self.qsettings.setValue(_field, save)
 
     def on_reset(self) -> None:
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY, True)
-        self.ther_boss1_retry.setText(str(_d[0]))
-        self.ther_boss1_retry.setText(str(_d[1]))
-        self.ther_boss1_retry.setText(str(_d[2]))
+        self.ther_boss_retry[0].setText(str(_d[0]))
+        self.ther_boss_retry[1].setText(str(_d[1]))
+        self.ther_boss_retry[2].setText(str(_d[2]))
 
         _d = self.get_init_value(QKEYS.THER_BOSS_STD, True)
-        self.ther_boss1_std.setText(str(_d[0]))
-        self.ther_boss2_std.setText(str(_d[1]))
-        self.ther_boss3_std.setText(str(_d[2]))
+        self.ther_boss_std[0].setText(str(_d[0]))
+        self.ther_boss_std[1].setText(str(_d[1]))
+        self.ther_boss_std[2].setText(str(_d[2]))
 
     def get_init_value(self, field: str, is_default: bool = False) -> list:
         if (self.qsettings.contains(field) is True) and (is_default is False):
@@ -411,6 +425,7 @@ class TabsSettings(QWidget):
                 d = [1, 2, 2]
             else:
                 logging.error(f"Unsupported QKEYS filed {field}")
+                d = 1
         return d
 
 # End of File
