@@ -7,7 +7,7 @@ from time import sleep
 
 from PyQt5.QtCore import QSettings
 
-from src.data.wgv_qsettings import get_qsettings_file
+from src.data import get_qsettings_file
 
 qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
 

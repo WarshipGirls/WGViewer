@@ -54,10 +54,15 @@ class UISettings(QWidget):
         self.tab_ther = QCheckBox("Thermopylae", self)
         self.handle_tab_init(self.tab_ther, 'UI/TAB/thermopylae')
 
-        self.init_page_ui()
+        self.init_ui()
 
-    def init_page_ui(self) -> None:
+    def init_ui(self) -> None:
         row = 0
+        row = self.init_side_dock(row)
+        row = self.init_tabs(row)
+        self.init_hack(row)
+
+    def init_side_dock(self, row: int) -> int:
         header = create_qlabel(text="ON START", font_size=HEADER2)
         self.layout.addWidget(header, row, 0, 1, 4)
 
@@ -75,7 +80,9 @@ class UISettings(QWidget):
         self.dropdown_side_dock.setToolTip("Set the default position of side dock")
         self.dropdown_side_dock.addItems(['Right', 'Left'])
         self.layout.addWidget(self.dropdown_side_dock, row, 1, 1, 1)
+        return row
 
+    def init_tabs(self, row: int) -> int:
         row += 1
         h3 = create_qlabel(text="TABS", font_size=12)
         self.layout.addWidget(h3, row, 0, 1, 4)
@@ -105,7 +112,9 @@ class UISettings(QWidget):
         self.layout.addWidget(self.tab_exp, row, 1, 1, 1)
         self.layout.addWidget(self.tab_ship, row, 2, 1, 1)
         self.layout.addWidget(self.tab_ther, row, 3, 1, 1)
+        return row
 
+    def init_hack(self, row: int) -> None:
         # following is a hack; TODO: setRowStretch is not working properly
         for h in range(10):
             row += 1
@@ -175,6 +184,11 @@ class GameSettings(QWidget):
 
     def init_ui(self):
         row = 0
+        row = self.init_overall(row)
+        row = self.init_connections(row)
+        self.init_hack(row)
+
+    def init_overall(self, row: int) -> int:
         self.layout.addWidget(create_qlabel(text='Overall', font_size=HEADER2))
         row += 1
         self.layout.addWidget(QHLine(parent=self, color=QColor(0, 0, 0), width=10), row, 0, 1, 5)
@@ -196,7 +210,9 @@ class GameSettings(QWidget):
         _d = self.get_init_value('GAME/speed_hi_bound')
         self.speed_hi_input.textChanged.connect(lambda res: self.create_input(res, self.speed_hi_input, _d, 'GAME/speed_hi_bound'))
         self.layout.addWidget(self.speed_hi_input, row, 4, 1, 1)
+        return row
 
+    def init_connections(self, row: int) -> int:
         row += 1
         self.layout.addWidget(create_qlabel(text='Connection', font_size=HEADER2), row, 0, 1, 1)
         row += 1
@@ -222,7 +238,9 @@ class GameSettings(QWidget):
         _d = self.get_init_value('CONNECTION/api_sleep')
         self.api_sleep.textChanged.connect(lambda res: self.create_input(res, self.api_sleep, _d, 'CONNECTION/api_sleep'))
         self.layout.addWidget(self.api_sleep, row, 4, 1, 1)
+        return row
 
+    def init_hack(self, row: int) -> None:
         # following is a hack; TODO: setRowStretch is not working properly
         for h in range(10):
             row += 1

@@ -2,7 +2,10 @@ from logging import getLogger
 from math import ceil
 from typing import Callable, Tuple
 
+from PyQt5.QtCore import QSettings
+
 from src import utils as wgv_utils
+from src.data import get_qsettings_file
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieResume
 from src.wgr.six import API_SIX
@@ -16,6 +19,8 @@ class SortieHelper:
         self.logger = getLogger('TabThermopylae')
         self.user_ships = user_ships
         self.map_data = map_data
+
+        self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
 
         self.boss_retry_count: list = [0] * 3
         self.points: int = 10

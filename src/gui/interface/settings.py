@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QStatusBar, QPushButton, QVBoxLayout,
 )
 
-from src.data.wgv_qsettings import get_qsettings_file
+from src.data import get_qsettings_file
 from src.utils.wgv_pyqt import get_user_resolution
 from src.data.wgv_qsettings import get_color_scheme
 from .setting_tabs import UISettings, GameSettings
