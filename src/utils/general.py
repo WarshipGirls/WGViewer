@@ -1,7 +1,7 @@
 import os
 import re
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from random import randint
 from time import sleep
 
@@ -24,6 +24,10 @@ def get_app_version() -> str:
 
 def get_curr_time() -> str:
     return datetime.now().strftime("%H:%M:%S")
+
+
+def get_today() -> str:
+    return date.today().strftime('%Y-%m-%d')
 
 
 def get_game_version() -> str:

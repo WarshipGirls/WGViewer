@@ -17,7 +17,7 @@ from .wgv_json import (
 )
 from .wgv_path import (
     clear_cache_folder, 
-    get_data_dir, get_init_dir, get_temp_dir, get_user_dir, get_zip_dir
+    get_data_dir, get_init_dir, get_log_dir, get_temp_dir, get_user_dir, get_zip_dir
 )
 from .wgv_process import (
     find_all_indices, find_index, 
