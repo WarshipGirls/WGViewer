@@ -5,6 +5,12 @@ from datetime import datetime, timedelta
 from random import randint
 from time import sleep
 
+from PyQt5.QtCore import QSettings
+
+from src.data.wgv_qsettings import get_qsettings_file
+
+qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
+
 
 def clear_desc(text: str) -> str:
     # This garbage code (like ^C454545FF00000000) is probably due to cocoa?
@@ -37,7 +43,12 @@ def ts_to_date(ts: int) -> str:
 
 def set_sleep(level: float = 1.0):
     # There must be some interval between Game API calls
-    # TODO: make this global settings
-    sleep(randint(5, 10) * level)
+    lo = int(qsettings.value('GAME/speed_lo_bound'))
+    hi = int(qsettings.value('GAME/speed_hi_bound'))
+    try:
+        assert (lo < hi)
+        sleep(randint(lo, hi) * level)
+    except AssertionError:
+        sleep(randint(5, 10) * level)
 
 # End of File

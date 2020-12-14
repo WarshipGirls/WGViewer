@@ -4,6 +4,8 @@ import zlib
 
 from ast import literal_eval
 from socket import timeout
+
+from PyQt5.QtCore import QSettings
 from requests import exceptions
 from requests.utils import cookiejar_from_dict
 from time import sleep
@@ -11,6 +13,7 @@ from urllib.request import Request, build_opener, HTTPCookieProcessor
 from urllib.error import URLError
 from http.client import HTTPResponse
 
+from src.data import get_qsettings_file
 from src.gui.login.helper import LoginHelper
 
 
@@ -25,8 +28,15 @@ class WGR_API:
         self.cookies = cookies['cookies']
 
         self.hlp = LoginHelper()
-        self.max_retry = 10
-        self.sleep_time = 5
+        qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
+        if qsettings.contains('CONNECTION/api_retries') is True:
+            self.max_retry = int(qsettings.value('CONNECTION/api_retries'))
+        else:
+            self.max_retry = 5
+        if qsettings.contains('CONNECTION/api_sleep') is True:
+            self.sleep_time = int(qsettings.value('CONNECTION/api_sleep'))
+        else:
+            self.sleep_time = 3
 
     def _api_call(self, link: str) -> dict:
         # This uses requests.sessions.Session().get() / post()

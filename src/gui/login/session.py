@@ -5,14 +5,24 @@ import logging
 
 from time import sleep
 
+from PyQt5.QtCore import QSettings
 from requests import Response
+
+from src.data import get_qsettings_file
 
 
 class LoginSession:
     def __init__(self):
         self.session = requests.sessions.Session()
-        self.max_retry = 5
-        self.sleep_time = 3
+        self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
+        if self.qsettings.contains('CONNECTION/session_retries') is True:
+            self.max_retry = int(self.qsettings.value('CONNECTION/session_retries'))
+        else:
+            self.max_retry = 5
+        if self.qsettings.contains('CONNECTION/session_sleep') is True:
+            self.sleep_time = int(self.qsettings.value('CONNECTION/session_sleep'))
+        else:
+            self.sleep_time = 3
 
         self.accept_errors = (
             requests.exceptions.ConnectTimeout,

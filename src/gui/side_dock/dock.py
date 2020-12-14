@@ -22,7 +22,7 @@ from src import utils as wgv_utils
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 
-TASK_TYPE = {'1': "SINGLE", '2': "DAILY", '3': "WEEKLY", '4': "LIMITED TIME"}
+TASK_TYPE: dict = {'1': "SINGLE", '2': "DAILY", '3': "WEEKLY", '4': "LIMITED TIME"}
 
 
 def get_data_path(relative_path: str) -> str:

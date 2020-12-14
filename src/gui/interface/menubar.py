@@ -46,7 +46,7 @@ class MainInterfaceMenuBar(QMenuBar):
         # The ampersand in the menu item's text sets Alt+F as a shortcut for this menu.
         menu = self.addMenu(self.tr("&File"))
 
-        menu.addAction(self.create_action("Settings", self.open_global_settings))
+        menu.addAction(self.create_action("&Settings", self.open_global_settings))
 
         menu.addSeparator()
 
