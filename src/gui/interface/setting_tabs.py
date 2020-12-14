@@ -10,6 +10,9 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QCheckBox, QComboBox, QLabel, 
 from src.func import qsettings_keys as QKEYS
 from src.gui.custom_widgets import QHLine
 
+# TODO: repeadted function calls in __init__, init members with None
+# TODO: common functions in classes
+
 HEADER1: int = 20
 HEADER2: int = 15
 HEADER3: int = 12
@@ -25,6 +28,14 @@ def create_qlabel(text: str, font_size: int = -1) -> QLabel:
     font.setBold(True)
     l.setFont(font)
     return l
+
+
+def create_qlineedit(default: int, max_len: int) -> QLineEdit:
+    q = QLineEdit()
+    q.setPlaceholderText(str(default))
+    q.setMaxLength(max_len)
+    q.setValidator(get_int_mask())
+    return q
 
 
 def get_int_mask() -> QRegExpValidator:
@@ -159,31 +170,23 @@ class GameSettings(QWidget):
         self.setLayout(self.layout)
 
         _d = self.get_init_value(QKEYS.GAME_RANDOM_SEED)
-        self.seed_input = self.create_qlineedit(default=_d, max_len=16)
+        self.seed_input = create_qlineedit(default=_d, max_len=16)
         _d = self.get_init_value(QKEYS.GAME_SPD_LO)
-        self.speed_lo_input = self.create_qlineedit(default=_d, max_len=3)
+        self.speed_lo_input = create_qlineedit(default=_d, max_len=3)
         _d = self.get_init_value(QKEYS.GAME_SPD_HI)
-        self.speed_hi_input = self.create_qlineedit(default=_d, max_len=3)
+        self.speed_hi_input = create_qlineedit(default=_d, max_len=3)
         _d = self.get_init_value(QKEYS.CONN_SESS_RTY)
-        self.session_retries = self.create_qlineedit(default=_d, max_len=2)
+        self.session_retries = create_qlineedit(default=_d, max_len=2)
         _d = self.get_init_value(QKEYS.CONN_SESS_SLP)
-        self.session_sleep = self.create_qlineedit(default=_d, max_len=2)
+        self.session_sleep = create_qlineedit(default=_d, max_len=2)
         _d = self.get_init_value(QKEYS.CONN_API_RTY)
-        self.api_retries = self.create_qlineedit(default=_d, max_len=2)
+        self.api_retries = create_qlineedit(default=_d, max_len=2)
         _d = self.get_init_value(QKEYS.CONN_API_SLP)
-        self.api_sleep = self.create_qlineedit(default=_d, max_len=2)
+        self.api_sleep = create_qlineedit(default=_d, max_len=2)
         _d = self.get_init_value(QKEYS.CONN_THER_RTY)
-        self.ther_boss_retry = self.create_qlineedit(default=_d, max_len=1)
+        self.ther_boss_retry = create_qlineedit(default=_d, max_len=1)
 
         self.init_ui()
-
-    @staticmethod
-    def create_qlineedit(default: int, max_len: int) -> QLineEdit:
-        q = QLineEdit()
-        q.setPlaceholderText(str(default))
-        q.setMaxLength(max_len)
-        q.setValidator(get_int_mask())
-        return q
 
     def init_ui(self):
         row = 0
@@ -193,7 +196,7 @@ class GameSettings(QWidget):
         self.init_hack(row)
 
     def init_overall(self, row: int) -> int:
-        self.layout.addWidget(create_qlabel(text='Overall', font_size=HEADER2))
+        self.layout.addWidget(create_qlabel(text='Overall', font_size=HEADER2), row, 0)
         row += 1
         self.layout.addWidget(QHLine(parent=self, color=QColor(0, 0, 0), width=10), row, 0, 1, 5)
 
@@ -308,7 +311,7 @@ class GameSettings(QWidget):
                 d = 3
             else:
                 d = 5
-                logging.error(field)
+                logging.error(f"Unsupported QKEYS filed {field}")
         return d
 
     def set_random_seed(self, _input: str) -> None:
@@ -317,5 +320,97 @@ class GameSettings(QWidget):
         else:
             random.seed(int(_input))
         self.qsettings.setValue(QKEYS.GAME_RANDOM_SEED, int(_input))
+
+
+class TabsSettings(QWidget):
+    def __init__(self, qsettings):
+        super().__init__()
+        self.qsettings = qsettings
+        self.layout = QGridLayout()
+        self.setLayout(self.layout)
+
+        _d = self.get_init_value(QKEYS.THER_BOSS_RTY)
+        self.ther_boss1_retry = create_qlineedit(default=_d[0], max_len=1)
+        self.ther_boss2_retry = create_qlineedit(default=_d[1], max_len=1)
+        self.ther_boss3_retry = create_qlineedit(default=_d[2], max_len=1)
+        _d = self.get_init_value(QKEYS.THER_BOSS_STD)
+        self.ther_boss1_std = create_qlineedit(default=_d[0], max_len=1)
+        self.ther_boss2_std = create_qlineedit(default=_d[1], max_len=1)
+        self.ther_boss3_std = create_qlineedit(default=_d[2], max_len=1)
+
+        self.init_ui()
+
+    def init_ui(self):
+        row = 0
+        row = self.init_thermopylae(row)
+        self.init_hack(row)
+
+    def init_thermopylae(self, row: int) -> int:
+        self.layout.addWidget(create_qlabel(text='Thermopylae', font_size=HEADER3), row, 0)
+        self.layout.addWidget(create_qlabel(text='Bosses Retries'), row, 1)
+        _d = self.get_init_value(QKEYS.THER_BOSS_RTY)
+        self.ther_boss1_retry.textChanged.connect(lambda res: self.create_input(res, self.ther_boss1_retry, _d, 0, QKEYS.THER_BOSS_RTY))
+        self.layout.addWidget(self.ther_boss1_retry, row, 2)
+        self.ther_boss2_retry.textChanged.connect(lambda res: self.create_input(res, self.ther_boss2_retry, _d, 1, QKEYS.THER_BOSS_RTY))
+        self.layout.addWidget(self.ther_boss2_retry, row, 3)
+        self.ther_boss3_retry.textChanged.connect(lambda res: self.create_input(res, self.ther_boss3_retry, _d, 2, QKEYS.THER_BOSS_RTY))
+        self.layout.addWidget(self.ther_boss3_retry, row, 4)
+
+        row += 1
+        ther_boss_retry_std_label = create_qlabel(text='On sunken')
+        ther_boss_retry_std_label.setToolTip("Sunken at least how many enemies to disable boss re-fight")
+        self.layout.addWidget(ther_boss_retry_std_label, row, 1)
+        _d = self.get_init_value(QKEYS.THER_BOSS_STD)
+        self.ther_boss1_std.textChanged.connect(lambda res: self.create_input(res, self.ther_boss1_std, _d, 0, QKEYS.THER_BOSS_STD))
+        self.layout.addWidget(self.ther_boss1_std, row, 2)
+        self.ther_boss2_std.textChanged.connect(lambda res: self.create_input(res, self.ther_boss2_std, _d, 1, QKEYS.THER_BOSS_STD))
+        self.layout.addWidget(self.ther_boss2_std, row, 3)
+        self.ther_boss3_std.textChanged.connect(lambda res: self.create_input(res, self.ther_boss3_std, _d, 2, QKEYS.THER_BOSS_STD))
+        self.layout.addWidget(self.ther_boss3_std, row, 4)
+
+        row += 1
+        return row
+
+    def init_hack(self, row: int) -> None:
+        # following is a hack; TODO: setRowStretch is not working properly
+        for h in range(10):
+            row += 1
+            self.layout.addWidget(QLabel(""), row, 0, 1, 4)
+
+    def create_input(self, _input: str, _edit: QLineEdit, _default: list, idx: int, _field: str) -> None:
+        if _input == '':
+            save = _default
+            _edit.setPlaceholderText(str(_default[idx]))
+        else:
+            x = int(_input)
+            if _field == QKEYS.THER_BOSS_STD:
+                if (x < 0) or (x > 6):
+                    x = 2
+            _default[idx] = x
+            save = _default
+        self.qsettings.setValue(_field, save)
+
+    def on_reset(self) -> None:
+        _d = self.get_init_value(QKEYS.THER_BOSS_RTY, True)
+        self.ther_boss1_retry.setText(str(_d[0]))
+        self.ther_boss1_retry.setText(str(_d[1]))
+        self.ther_boss1_retry.setText(str(_d[2]))
+
+        _d = self.get_init_value(QKEYS.THER_BOSS_STD, True)
+        self.ther_boss1_std.setText(str(_d[0]))
+        self.ther_boss2_std.setText(str(_d[1]))
+        self.ther_boss3_std.setText(str(_d[2]))
+
+    def get_init_value(self, field: str, is_default: bool = False) -> list:
+        if (self.qsettings.contains(field) is True) and (is_default is False):
+            d = self.qsettings.value(field)
+        else:
+            if field == QKEYS.THER_BOSS_RTY:
+                d = [3, 5, 10]
+            elif field == QKEYS.THER_BOSS_STD:
+                d = [1, 2, 2]
+            else:
+                logging.error(f"Unsupported QKEYS filed {field}")
+        return d
 
 # End of File

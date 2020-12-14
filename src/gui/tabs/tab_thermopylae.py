@@ -18,6 +18,8 @@ from .thermopylae.sortie import Sortie
 # TODO: record consumption resources; and time
 # TODO: show ship +star in label
 # TODO: multiple consecutive run w/o interference
+# TODO: let user selected 2-star + 3-star escort DD and a escort CV
+
 
 class TabThermopylae(QWidget):
     sig_fuel = pyqtSignal(int)

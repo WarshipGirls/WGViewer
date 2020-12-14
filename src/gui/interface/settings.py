@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
 
 from src.data import get_qsettings_file, get_color_scheme
 from src.utils import get_user_resolution
-from .setting_tabs import UISettings, GameSettings
+from .setting_tabs import UISettings, GameSettings, TabsSettings
 
 
 class TabBar(QTabBar):
@@ -59,6 +59,8 @@ class TabWidget(QTabWidget):
         self.addTab(self.ui_settings, "UI")
         self.game_settings = GameSettings(self.qsettings)
         self.addTab(self.game_settings, "GAME")
+        self.tabs_settings = TabsSettings(self.qsettings)
+        self.addTab(self.tabs_settings, "TABS")
 
 
 ''' This seems useless
@@ -115,6 +117,8 @@ class GlobalSettingsWindow(QMainWindow):
             self.vertical_tabs.ui_settings.on_reset()
         elif self.vertical_tabs.currentIndex() == 1:
             self.vertical_tabs.game_settings.on_reset()
+        elif self.vertical_tabs.currentIndex() == 2:
+            self.vertical_tabs.tabs_settings.on_reset()
         else:
             pass
 
