@@ -1,4 +1,8 @@
-# Version Log
+## 0.2.1dev
+> 2020 December 14th; pre-released
+
+- ALL: Implemented global settings page; organized all setting keys
+- ALL: Implemented saving logs to local
 
 ## 0.2.0dev
 

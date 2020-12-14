@@ -14,7 +14,7 @@ assignees: ''
     - what did you observe
     - what were your expected behavior(s)
 - upload WGViewer developers log (drag & drop here)
-    - WGViewer Top Menu Bar -> `File` -> `Open Cache Folder` -> `wgviewer_debug.log`
+    - WGViewer Top Menu Bar -> `File` -> `Open Log Folder` -> `wgviewer-[date].log`
 
 **Screenshots**
 

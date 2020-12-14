@@ -3,7 +3,8 @@
 
 ## Boat or Ship
 
-In our context, we should use `ship` as "A ship can carry a boat, but a boat cannot carry a ship" [src](https://www.marineinsight.com/types-of-ships/7-differences-between-a-ship-and-a-boat/).
+In our context, we should use `ship` as "A ship can carry a boat, but a boat cannot carry a ship" ([src](https://www.marineinsight.com/types-of-ships/7-differences-between-a-ship-and-a-boat/)).
+Submarines shall use `boat` (The infamous German U-boats).
 
 ## World War II Navy Jargon
 

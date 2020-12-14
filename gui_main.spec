@@ -1,21 +1,22 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
 block_cipher = None
-a = Analysis(['gui_main.py'],
-             pathex=['D:\\github\\WGViewer'],
-             binaries=[],
-             datas=[],
-             hiddenimports=[],
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher,
-             noarchive=False)
+a = Analysis(
+  ['gui_main.py'],
+  pathex=['D:\\github\\WGViewer'],
+  binaries=[],
+  datas=[],
+  hiddenimports=[],
+  hookspath=[],
+  runtime_hooks=[],
+  excludes=[],
+  win_no_prefer_redirects=False,
+  win_private_assemblies=False,
+  cipher=block_cipher,
+  noarchive=False
+)
 
-a.datas += [('docs/version_log.md','D:\\github\\WGViewer\\docs\\version_log.md','DATA'),
-('assets/banner.png','D:\\github\\WGViewer\\assets\\banner.png','DATA'),
+a.datas += [('docs/version_log.md','D:\\github\\WGViewer\\docs\\version_log.md','DATA'),('assets/banner.png','D:\\github\\WGViewer\\assets\\banner.png','DATA'),
 ('assets/favicon.ico','D:\\github\\WGViewer\\assets\\favicon.ico','DATA'),
 ('assets/data/errorCode.json','D:\\github\\WGViewer\\assets\\data\\errorCode.json','DATA'),
 ('assets/data/exp_data.csv','D:\\github\\WGViewer\\assets\\data\\exp_data.csv','DATA'),
@@ -49,19 +50,19 @@ a.datas += [('docs/version_log.md','D:\\github\\WGViewer\\docs\\version_log.md',
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(pyz,
-          a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
-          [],
-          name='Warship Girls Viewer' + ('.exe' if sys.platform == 'win32' else ''),
-          debug=False,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=True,
-          upx_exclude=[],
-          runtime_tmpdir=None,
-          console=False,
-          icon='assets/favicon.ico'
-          )
+  a.scripts,
+  a.binaries,
+  a.zipfiles,
+  a.datas,
+  [],
+  name='Warship Girls Viewer' + ('.exe' if sys.platform == 'win32' else ''),
+  debug=False,
+  bootloader_ignore_signals=False,
+  strip=False,
+  upx=True,
+  upx_exclude=[],
+  runtime_tmpdir=None,
+  console=False,
+  icon='assets/favicon.ico'
+)
 

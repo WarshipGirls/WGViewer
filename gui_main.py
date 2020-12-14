@@ -6,8 +6,8 @@ import sys
 from PyQt5.QtGui import QIcon, QFontDatabase
 from PyQt5.QtWidgets import QApplication
 
-from src.data import get_data_dir
-from src.utils import get_app_version
+from src.data import get_log_dir
+from src.utils import get_app_version, get_today
 from src.gui.login.form import LoginForm
 
 
@@ -35,8 +35,9 @@ def init_fonts() -> None:
 def init_logging() -> None:
     _level = logging.DEBUG
     _format = ' %(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    _log_file = get_data_path(os.path.join(get_data_dir(), 'wgviewer_debug.log'))
-    _handlers = [logging.FileHandler(_log_file), logging.StreamHandler()]
+    _log_filename = f'wgviewer-{get_today()}.log'
+    _log_filepath = get_data_path(os.path.join(get_log_dir(), _log_filename))
+    _handlers = [logging.FileHandler(filename=_log_filepath, encoding='utf-8'), logging.StreamHandler()]
     logging.basicConfig(level=_level, format=_format, handlers=_handlers)
 
 

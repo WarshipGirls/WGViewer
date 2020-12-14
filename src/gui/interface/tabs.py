@@ -2,11 +2,13 @@ import logging
 import os
 import sys
 
-from PyQt5.QtCore import QSize, Qt, QThreadPool
+from PyQt5.QtCore import QSize, Qt, QThreadPool, QSettings
 from PyQt5.QtWidgets import (
-    QWidget, QTabWidget, QGridLayout, QTabBar
+    QWidget, QTabWidget, QGridLayout, QTabBar, QLabel
 )
 
+from src.data import get_qsettings_file
+from src.func import qsettings_keys as QKEYS
 from src.gui.tabs.advance_functions import TabAdvanceFunctions
 from src.gui.tabs.tab_thermopylae import TabThermopylae
 from src.gui.tabs.tab_ship import TabShips
@@ -35,6 +37,9 @@ class MainInterfaceTabs(QWidget):
         self.threadpool = threadpool
         self.is_realrun = is_realrun
 
+        self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
+        self.has_tab = False
+
         # do NOT change the order of creation
         self.layout = QGridLayout()
         self.tab_ships = None
@@ -47,19 +52,19 @@ class MainInterfaceTabs(QWidget):
         # TODO now tab_dock init important data
         #   either make tab dock as default (must run)
         #   or run tab dock functions save & load important data later
-        if self.is_realrun is True:
-            # TODO loading speed is really slow
-            # self.add_tab("tab_dock")
-            # self.add_tab("tab_exp")
-            self.add_tab("tab_thermopylae")
-            # self.add_tab("tab_adv")
-            # pass
-        else:
-            # self.add_tab("tab_dock")
-            self.add_tab("tab_thermopylae")
-            # self.add_tab("tab_adv")
+        # TODO loading speed is really slow
+        self.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
+        self.init_tab(QKEYS.UI_TAB_SHIP, 'tab_dock')
+        self.init_tab(QKEYS.UI_TAB_THER, 'tab_thermopylae')
+        self.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
 
-        self.layout.addWidget(self.tabs, 0, 0)
+        if self.has_tab is True:
+            self.layout.addWidget(self.tabs, 0, 0)
+        else:
+            _msg = "No tabs are selected to show on startup.\n"
+            _msg += "Open tabs: \tTop Menu Bar -> View -> Tabs -> ...\n"
+            _msg += "Change settings: \tTop Menu Bar -> File -> Settings -> UI -> ..."
+            self.layout.addWidget(QLabel(_msg))
         self.setLayout(self.layout)
 
     def init_ui(self) -> None:
@@ -71,6 +76,17 @@ class MainInterfaceTabs(QWidget):
         self.tabs.setElideMode(Qt.ElideRight)
         self.tabs.setUsesScrollButtons(True)
         self.tabs.tabCloseRequested.connect(self.close_tab)
+
+    def init_tab(self, key: str, obj_name: str) -> None:
+        if self.qsettings.contains(key):
+            if self.qsettings.value(key) == 'true':
+                self.has_tab = True
+                self.add_tab(obj_name)
+            else:
+                pass
+        else:
+            self.has_tab = True
+            self.add_tab(obj_name)
 
     def add_tab(self, tab_name: str) -> None:
         logging.info(f"TAB - Creating {tab_name}")
@@ -94,8 +110,7 @@ class MainInterfaceTabs(QWidget):
         logging.info(f'TAB - {tab.objectName()} is closed.')
 
         # TODO reopen tab will create a new object
-        #   should we save the old data
-        #   or let the user decide?
+        #   should we save the old data, or let the user decide?
 
         self.reset_tab_object(tab.objectName())
         tab.deleteLater()

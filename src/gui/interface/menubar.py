@@ -51,6 +51,7 @@ class MainInterfaceMenuBar(QMenuBar):
 
         menu.addSeparator()
 
+        menu.addAction(self.create_action("Open &Logs Folder", self.open_log_folder))
         menu.addAction(self.create_action("Open &Cache Folder", self.open_cache_folder))
         menu.addAction(self.create_action("Clear User Cache", self.clear_user_cache))
         menu.addAction(self.create_action("Clear All Cache", self.clear_all_cache))
@@ -107,6 +108,10 @@ class MainInterfaceMenuBar(QMenuBar):
     @staticmethod
     def open_cache_folder() -> None:
         os.startfile(wgv_data.get_data_dir())
+
+    @staticmethod
+    def open_log_folder() -> None:
+        os.startfile(wgv_data.get_log_dir())
 
     @staticmethod
     def clear_user_cache() -> None:

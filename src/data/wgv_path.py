@@ -15,7 +15,7 @@ def _clear_dir(_dir: str, is_all: bool = False) -> bool:
     if is_all is True:
         skips = []
     else:
-        skips = ['zip']
+        skips = ['log', 'zip']
     for filename in os.listdir(_dir):
         if filename in skips:
             continue
@@ -60,6 +60,15 @@ def get_data_dir() -> str:
 
 def get_init_dir() -> str:
     p = os.path.join(get_data_dir(), 'zip', 'init')
+    if not os.path.exists(p):
+        os.makedirs(p)
+    else:
+        pass
+    return p
+
+
+def get_log_dir() -> str:
+    p = os.path.join(get_data_dir(), 'logs')
     if not os.path.exists(p):
         os.makedirs(p)
     else:
