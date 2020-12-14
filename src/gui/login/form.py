@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgv_data
 from src import utils as wgv_utils
+from src.func import qsettings_keys as QKEYS
 from src.exceptions.custom import InterruptExecution
 from src.exceptions.wgr_error import WarshipGirlsExceptions
 from src.func.encryptor import Encryptor
@@ -74,7 +75,7 @@ class LoginForm(QWidget):
         self.auto_start()
 
     def auto_start(self) -> None:
-        if self.qsettings.value("Login/auto") == "true":
+        if self.qsettings.value(QKEYS.LOGIN_AUTO) == "true":
             # QThread cannot handle exceptions for this one
             try:
                 # In case user manually log-in
@@ -92,14 +93,12 @@ class LoginForm(QWidget):
     # ================================
 
     def init_ui(self) -> None:
-        if self.qsettings.value("Login/save") == 'true':
-            self.qsettings.beginGroup('Login')
-            name = self.qsettings.value('username')
-            server = self.qsettings.value('server_text')
-            platform = self.qsettings.value('platform_text')
-            disclaimer = self.qsettings.value('disclaimer')
-            auto_login = self.qsettings.value('auto')
-            self.qsettings.endGroup()
+        if self.qsettings.value(QKEYS.LOGIN_SAVE) == 'true':
+            name = self.qsettings.value(QKEYS.LOGIN_USER)
+            server = self.qsettings.value(QKEYS.LOGIN_SERVER)
+            platform = self.qsettings.value(QKEYS.LOGIN_PLATFORM)
+            disclaimer = self.qsettings.value(QKEYS.LOGIN_DISCLAIMER)
+            auto_login = self.qsettings.value(QKEYS.LOGIN_AUTO)
 
             # Don't change the order
             self.init_name_field(name)
@@ -250,10 +249,10 @@ class LoginForm(QWidget):
         self.sig_login.emit()
 
     def _get_password(self) -> str:
-        if wgv_data.is_key_exists() and self.qsettings.contains('Login/password'):
+        if wgv_data.is_key_exists() and self.qsettings.contains(QKEYS.LOGIN_PSWD):
             try:
                 key = self.encryptor.load_key(wgv_data.get_key_path())
-                res = self.encryptor.decrypt_data(key, self.qsettings.value('Login/password')).decode("utf-8")
+                res = self.encryptor.decrypt_data(key, self.qsettings.value(QKEYS.LOGIN_PSWD)).decode("utf-8")
             except AttributeError:
                 res = ''
                 wgv_utils.popup_msg('Error: Key file or config file may be corrupted.')
@@ -266,20 +265,18 @@ class LoginForm(QWidget):
     # ================================
 
     def on_disclaimer_clicked(self) -> None:
-        self.qsettings.setValue('Login/disclaimer', self.check_disclaimer.isChecked())
+        self.qsettings.setValue(QKEYS.LOGIN_DISCLAIMER, self.check_disclaimer.isChecked())
 
     def on_save_clicked(self) -> None:
         if self.check_save.isChecked():
-            self.qsettings.beginGroup('Login')
-            self.qsettings.setValue("save", self.check_save.isChecked())
-            self.qsettings.setValue("server_text", self.combo_server.currentText())
-            self.qsettings.setValue("platform_text", self.combo_platform.currentText())
-            self.qsettings.setValue("username", self.lineEdit_username.text())
-            self.qsettings.setValue("password", self._get_password())
-            self.qsettings.setValue("disclaimer", self.check_disclaimer.isChecked())
-            self.qsettings.endGroup()
+            self.qsettings.setValue(QKEYS.LOGIN_SAVE, self.check_save.isChecked())
+            self.qsettings.setValue(QKEYS.LOGIN_SERVER, self.combo_server.currentText())
+            self.qsettings.setValue(QKEYS.LOGIN_PLATFORM, self.combo_platform.currentText())
+            self.qsettings.setValue(QKEYS.LOGIN_USER, self.lineEdit_username.text())
+            self.qsettings.setValue(QKEYS.LOGIN_PSWD, self._get_password())
+            self.qsettings.setValue(QKEYS.LOGIN_DISCLAIMER, self.check_disclaimer.isChecked())
         else:
-            self.qsettings.remove("Login")
+            self.qsettings.remove(QKEYS.LOGIN)
             wgv_data.del_key_file()
             self.lineEdit_username.clear()
             self.lineEdit_password.clear()
@@ -296,7 +293,7 @@ class LoginForm(QWidget):
             self.check_auto.setText('Auto login on the application start')
             self.button_login.setEnabled(True)
             self.button_bypass.setEnabled(True)
-        self.qsettings.setValue("Login/auto", self.check_auto.isChecked())
+        self.qsettings.setValue(QKEYS.LOGIN_AUTO, self.check_auto.isChecked())
 
     def update_server_box(self, text: str) -> None:
         self.combo_server.clear()
@@ -430,7 +427,7 @@ class LoginForm(QWidget):
             self.encryptor.save_key(key, wgv_data.get_key_path())
         else:
             key = self.encryptor.load_key(wgv_data.get_key_path())
-        self.qsettings.setValue('Login/password', self.encryptor.encrypt_str(key, _password))
+        self.qsettings.setValue(QKEYS.LOGIN_PSWD, self.encryptor.encrypt_str(key, _password))
 
         self.bee1 = CallbackWorker(self.first_fetch, (self.account, _username, _password), self.handle_result1)
         self.bee1.terminate()

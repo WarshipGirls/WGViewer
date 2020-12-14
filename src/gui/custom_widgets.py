@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QCloseEvent
-from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QScrollArea, QMainWindow, QApplication
+from PyQt5.QtGui import QCloseEvent, QColor, QPalette
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QScrollArea, QMainWindow, QApplication, QFrame
 
 from src.utils.wgv_pyqt import get_user_resolution
 
@@ -48,5 +48,36 @@ class ScrollBoxWindow(QMainWindow):
     def closeEvent(self, e: QCloseEvent) -> None:
         self.sig_close.emit()
 
+
+class QCustomLine(QFrame):
+    def __init__(self, parent, color: QColor, width: int):
+        super().__init__(parent)
+        self.setFrameShadow(QFrame.Plain)
+        self.setLineWidth(width)
+        self.setMidLineWidth(0)
+        self.setContentsMargins(0, 0, 0, 0)
+        # setColor works when there is no default QSS
+        self.setColor(color)
+        # following is a workaround for QSS=qdarkstyle
+        self.setStyleSheet('QFrame { background-color: white }')
+
+    def setColor(self, color) -> None:
+        pal = self.palette()
+        pal.setColor(QPalette.WindowText, color)
+        self.setPalette(pal)
+
+
+class QHLine(QCustomLine):
+    def __init__(self, parent=None, color=QColor(Qt.black), width=10):
+        super().__init__(parent, color, width)
+        self.setFrameShape(QFrame.HLine)
+        self.setObjectName('horizontal_line')
+
+
+class QVLine(QCustomLine):
+    def __init__(self, parent=None, color=QColor(Qt.black), width=10):
+        super().__init__(parent, color, width)
+        self.setFrameShape(QFrame.VLine)
+        self.setObjectName('vertical_line')
 
 # End of File

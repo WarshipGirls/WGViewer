@@ -85,3 +85,5 @@ class WGViewerVersionCheck:
         logging.info('LOGIN - Link to latest version of WGViewer')
         wgv_utils.open_url('https://github.com/WarshipGirls/WGViewer/releases')
         return 0
+
+# End of File

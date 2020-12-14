@@ -2,7 +2,11 @@ from logging import getLogger
 from math import ceil
 from typing import Callable, Tuple
 
+from PyQt5.QtCore import QSettings
+
 from src import utils as wgv_utils
+from src.data import get_qsettings_file
+from src.func import qsettings_keys as QKEYS
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieResume
 from src.wgr.six import API_SIX
@@ -16,6 +20,12 @@ class SortieHelper:
         self.logger = getLogger('TabThermopylae')
         self.user_ships = user_ships
         self.map_data = map_data
+
+        self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
+        if self.qsettings.contains(QKEYS.CONN_THER_RTY):
+            self.reconnection_limit = int(self.qsettings.value(QKEYS.CONN_THER_RTY))
+        else:
+            self.reconnection_limit = 3
 
         self.boss_retry_count: list = [0] * 3
         self.points: int = 10
@@ -35,8 +45,8 @@ class SortieHelper:
                 self.logger.warning(f"Failed to {func_info} due to {e}. Trying reconnecting...")
                 wgv_utils.set_sleep()
             tries += 1
-            if tries >= T_CONST.CONNECTION_RETRY_LIMIT:
-                raise ThermopylaeSoriteExit(f"Failed to {func_info} after {T_CONST.CONNECTION_RETRY_LIMIT} reconnections")
+            if tries >= self.reconnection_limit:
+                raise ThermopylaeSoriteExit(f"Failed to {func_info} after {self.reconnection_limit} reconnections")
             else:
                 pass
         return data

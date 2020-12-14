@@ -2,7 +2,6 @@
 # User Settings
 BOSS_RETRY_LIMITS: list = [3, 5, 10]
 BOSS_RETRY_STANDARDS: list = [1, 2, 2]
-CONNECTION_RETRY_LIMIT: int = 3
 SHIP_REPAIR_LEVELS: list = [1]
 # CONSTANTS
 ADJUTANT_IDS: list = ['10082', '10181', '10282']

@@ -8,6 +8,7 @@ from ast import literal_eval
 from PyQt5.QtCore import QSettings
 
 from src.func.encryptor import Encryptor
+from src.func import qsettings_keys as QKEYS
 
 
 def del_key_file(key_file: str = '.wgr.key') -> None:
@@ -19,11 +20,11 @@ def del_key_file(key_file: str = '.wgr.key') -> None:
 
 def get_color_scheme() -> str:
     qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
-    s = qsettings.value("style") if qsettings.contains("style") else "qdarkstyle"
+    s = qsettings.value(QKEYS.STYLE) if qsettings.contains(QKEYS.STYLE) else "qdarkstyle"
     if s == "native":
         return ""
     else:
-        qsettings.setValue("style", "qdarkstyle")
+        qsettings.setValue(QKEYS.STYLE, "qdarkstyle")
         return qdarkstyle.load_stylesheet(qt_api='pyqt5')
 
 

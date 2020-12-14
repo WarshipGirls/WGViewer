@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
 
 from src import data as wgv_data
 from src import utils as wgv_utils
+from src.func import qsettings_keys as QKEYS
 from src.gui.side_dock.dock import SideDock
 from src.gui.interface.tabs import MainInterfaceTabs
 from src.gui.interface.menubar import MainInterfaceMenuBar
@@ -92,31 +93,41 @@ class MainInterface(QMainWindow):
 
     def init_side_dock(self) -> None:
         # Following only checks on log-in
-        if self.qsettings.contains("UI/no_side_dock") is True:
-            if self.qsettings.value("UI/no_side_dock") == "true":
+        if self.qsettings.contains(QKEYS.UI_SIDEDOCK) is True:
+            if self.qsettings.value(QKEYS.UI_SIDEDOCK) == "true":
                 pass
             else:
                 self.create_side_dock()
         else:
-            self.qsettings.setValue("UI/no_side_dock", False)
+            self.qsettings.setValue(QKEYS.UI_SIDEDOCK, False)
             self.create_side_dock()
     '''
+
     def create_side_dock(self) -> None:
         if self.side_dock is None:
             self.side_dock = SideDock(self)
         else:
             self.side_dock.show()
-        self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
+        if self.qsettings.contains(QKEYS.UI_SIDEDOCK_POS) is True:
+            if self.qsettings.value(QKEYS.UI_SIDEDOCK_POS) == 'right':
+                pos = Qt.RightDockWidgetArea
+            elif self.qsettings.value(QKEYS.UI_SIDEDOCK_POS) == 'left':
+                pos = Qt.LeftDockWidgetArea
+            else:
+                pos = Qt.RightDockWidgetArea
+        else:
+            pos = Qt.RightDockWidgetArea
+        self.addDockWidget(pos, self.side_dock)
 
     def init_side_dock(self) -> None:
         self.create_side_dock()
-        if self.qsettings.contains("UI/no_side_dock") is True:
-            if self.qsettings.value("UI/no_side_dock") == "true":
+        if self.qsettings.contains(QKEYS.UI_SIDEDOCK) is True:
+            if self.qsettings.value(QKEYS.UI_SIDEDOCK) == "true":
                 self.side_dock.hide()
             else:
                 pass
         else:
-            self.qsettings.setValue("UI/no_side_dock", False)
+            self.qsettings.setValue(QKEYS.UI_SIDEDOCK, False)
 
     def init_tray_icon(self) -> None:
         self.tray = TrayIcon(self, get_data_path('assets/favicon.ico'))

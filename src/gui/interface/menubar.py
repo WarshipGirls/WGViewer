@@ -7,7 +7,9 @@ from PyQt5.QtWidgets import QMenuBar, QAction, QMessageBox
 
 from src import data as wgv_data
 from src import utils as wgv_utils
+from src.func import qsettings_keys as QKEYS
 from src.gui.custom_widgets import ScrollBoxWindow
+from .settings import GlobalSettingsWindow
 
 
 def get_data_path(relative_path: str) -> str:
@@ -44,10 +46,17 @@ class MainInterfaceMenuBar(QMenuBar):
     def init_file_menu(self) -> None:
         # The ampersand in the menu item's text sets Alt+F as a shortcut for this menu.
         menu = self.addMenu(self.tr("&File"))
+
+        menu.addAction(self.create_action("&Settings", self.open_global_settings))
+
+        menu.addSeparator()
+
         menu.addAction(self.create_action("Open &Cache Folder", self.open_cache_folder))
         menu.addAction(self.create_action("Clear User Cache", self.clear_user_cache))
         menu.addAction(self.create_action("Clear All Cache", self.clear_all_cache))
+
         menu.addSeparator()
+
         menu.addAction(self.create_action("Quit", wgv_utils.quit_application))
 
     def init_view_menu(self) -> None:
@@ -73,7 +82,7 @@ class MainInterfaceMenuBar(QMenuBar):
 
     def init_links_menu(self) -> None:
         menu = self.addMenu(self.tr("&Links"))
-        menu.addAction(self.create_action("Show Game App Download Links", self.show_download_links))
+        menu.addAction(self.create_action("Game App Download Links", self.show_download_links))
 
     # def init_developers_menu(self) -> None:
     # menu = self.addMenu(self.tr("&Developers"))
@@ -81,9 +90,11 @@ class MainInterfaceMenuBar(QMenuBar):
     def init_help_menu(self) -> None:
         menu = self.addMenu(self.tr("&Help"))
         menu.addAction(self.create_action("&Bug Report / Feature Request", self.submit_issue))
+
         menu.addSeparator()
-        menu.addAction(self.create_action("WGViewer &Version Logs", self.open_version_log))
-        menu.addAction(self.create_action("&About Warship Girls Viewer", self.open_author_info))
+
+        menu.addAction(self.create_action("&Version Logs", self.open_version_log))
+        menu.addAction(self.create_action("&About", self.open_author_info))
 
     # ================================
     # File QActions
@@ -116,6 +127,10 @@ class MainInterfaceMenuBar(QMenuBar):
                 wgv_utils.popup_msg('Clear failed')
         else:
             pass
+
+    def open_global_settings(self) -> None:
+        self.test = GlobalSettingsWindow()
+        # self.test.show()
 
     # ================================
     # Links QActions
@@ -156,11 +171,11 @@ class MainInterfaceMenuBar(QMenuBar):
     # ================================
 
     def use_native_style(self) -> None:
-        self.qsettings.setValue("style", "native")
+        self.qsettings.setValue(QKEYS.STYLE, "native")
         self.parent.set_color_scheme()
 
     def use_qdarkstyle(self) -> None:
-        self.qsettings.setValue("style", "qdarkstyle")
+        self.qsettings.setValue(QKEYS.STYLE, "qdarkstyle")
         self.parent.set_color_scheme()
 
     # ================================
@@ -168,18 +183,18 @@ class MainInterfaceMenuBar(QMenuBar):
     # ================================
 
     def submit_issue(self) -> None:
-        reply = QMessageBox.question(self, 'Report', "Do you want to submit a bug or make an suggestion?",
-                                     QMessageBox.Yes, QMessageBox.No)
+        reply = QMessageBox.question(self, 'Report', "Do you want to submit a bug or make an suggestion?", QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            wgv_utils.open_url('https://github.com/WarshipGirls/WGViewer/issues/new')
+            wgv_utils.open_url('https://github.com/WarshipGirls/WGViewer/issues/new/choose')
         else:
             pass
 
     def open_version_log(self) -> None:
         # text = urlopen('https://raw.githubusercontent.com/WarshipGirls/WGViewer/master/docs/version_log.md').read().decode('ascii')
+        # TODO? Load-on-demand
         with open(get_data_path("docs/version_log.md"), 'r') as f:
             text = f.read()
-        self.version_log = ScrollBoxWindow(self, 'WGViewer Version Logs', text)
+        self.version_log = ScrollBoxWindow(self, 'Version Logs', text)
         self.version_log.setStyleSheet(wgv_data.get_color_scheme())
         self.version_log.show()
 
@@ -199,10 +214,11 @@ class MainInterfaceMenuBar(QMenuBar):
         msg_str += "> "
         msg_str += get_hyperlink('https://github.com/WarshipGirls/WGViewer', 'WGViewer @ Github')
         msg_str += '<br><br>'
+        msg_str += f"<p style=\"text-align: center;\">WGViewer {wgv_utils.get_app_version()}</p>"
         msg_str += "<p style=\"text-align: center;\">&copy; GNU General Public License v3.0</p>"
         msg = QMessageBox()
         msg.setStyleSheet(wgv_data.get_color_scheme())
-        msg.setWindowTitle('About Warship Girls Viewer (WGViewer)')
+        msg.setWindowTitle('WGViewer')
         msg.setText(msg_str)
         msg.exec_()
 
