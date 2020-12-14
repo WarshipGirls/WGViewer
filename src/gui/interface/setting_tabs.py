@@ -171,6 +171,8 @@ class GameSettings(QWidget):
         self.api_retries = self.create_qlineedit(default=_d, max_len=2)
         _d = self.get_init_value('CONNECTION/api_sleep')
         self.api_sleep = self.create_qlineedit(default=_d, max_len=2)
+        _d = self.get_init_value('CONNECTION/ther_boss_retry')
+        self.ther_boss_retry = self.create_qlineedit(default=_d, max_len=1)
 
         self.init_ui()
 
@@ -186,6 +188,7 @@ class GameSettings(QWidget):
         row = 0
         row = self.init_overall(row)
         row = self.init_connections(row)
+        row = self.init_thermopylae(row)
         self.init_hack(row)
 
     def init_overall(self, row: int) -> int:
@@ -240,6 +243,16 @@ class GameSettings(QWidget):
         self.layout.addWidget(self.api_sleep, row, 4, 1, 1)
         return row
 
+    def init_thermopylae(self, row: int) -> int:
+        row += 1
+        self.layout.addWidget(create_qlabel(text='Thermopylae'), row, 1, 1, 1)
+        _d = self.get_init_value('CONNECTION/ther_boss_retry')
+        self.ther_boss_retry.textChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry, _d, 'CONNECTION/ther_boss_retry'))
+        self.layout.addWidget(self.ther_boss_retry, row, 2, 1, 1)
+        row += 1
+
+        return row
+
     def init_hack(self, row: int) -> None:
         # following is a hack; TODO: setRowStretch is not working properly
         for h in range(10):
@@ -261,6 +274,8 @@ class GameSettings(QWidget):
         self.api_retries.setText(str(_d))
         _d = self.get_init_value('CONNECTION/api_sleep', True)
         self.api_sleep.setText(str(_d))
+        _d = self.get_init_value('CONNECTION/ther_boss_retry', True)
+        self.ther_boss_retry.setText(str(_d))
 
     def create_input(self, _input: str, _edit: QLineEdit, _default: int, _field: str) -> None:
         if _input == '':
@@ -288,8 +303,10 @@ class GameSettings(QWidget):
                 d = 5
             elif field == 'CONNECTION/api_sleep':
                 d = 3
+            elif field == 'CONNECTION/ther_boss_retry':
+                d = 3
             else:
-                d = 10
+                d = 5
                 logging.error(field)
         return d
 

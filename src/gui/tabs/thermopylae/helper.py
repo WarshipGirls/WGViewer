@@ -21,6 +21,10 @@ class SortieHelper:
         self.map_data = map_data
 
         self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
+        if self.qsettings.contains('CONNECTION/ther_boss_retry'):
+            self.reconnection_limit = int(self.qsettings.value('CONNECTION/ther_boss_retry'))
+        else:
+            self.reconnection_limit = 3
 
         self.boss_retry_count: list = [0] * 3
         self.points: int = 10
@@ -40,8 +44,8 @@ class SortieHelper:
                 self.logger.warning(f"Failed to {func_info} due to {e}. Trying reconnecting...")
                 wgv_utils.set_sleep()
             tries += 1
-            if tries >= T_CONST.CONNECTION_RETRY_LIMIT:
-                raise ThermopylaeSoriteExit(f"Failed to {func_info} after {T_CONST.CONNECTION_RETRY_LIMIT} reconnections")
+            if tries >= self.reconnection_limit:
+                raise ThermopylaeSoriteExit(f"Failed to {func_info} after {self.reconnection_limit} reconnections")
             else:
                 pass
         return data
