@@ -379,13 +379,13 @@ class Sortie:
             temp = set([int(j) for j in ss])
             self.battle_fleet = self.helper.reorder_battle_list(list(temp))
         else:
-            self.battle_fleet = set([int(j) for j in fleet])
+            self.battle_fleet = set(list(map(int, fleet)))
 
         if self.curr_node == E61_C1_ID:
             if len(ss) == 0:
                 raise ThermopylaeSortieRestart("No SS for E61 C1. Restarting")
             else:
-                self.battle_fleet = set([int(j) for j in ss])
+                self.battle_fleet = set(list(map(int, ss)))
         else:
             pass
 
