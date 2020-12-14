@@ -3,7 +3,7 @@ import time
 import zlib
 from typing import Union
 
-from src.utils.general import get_game_version
+from src.utils import get_game_version
 from src.gui.login.session import LoginSession
 
 HEADER = {

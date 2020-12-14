@@ -3,7 +3,7 @@ import json
 from logging import getLogger
 
 from src.exceptions.wgr_error import get_error
-from src.utils.general import set_sleep
+from src.utils import set_sleep
 from src.wgr.six import API_SIX
 from . import constants as T_CONST
 

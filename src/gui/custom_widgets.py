@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QCloseEvent, QColor, QPalette
 from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QScrollArea, QMainWindow, QApplication, QFrame
 
-from src.utils.wgv_pyqt import get_user_resolution
+from src.utils import get_user_resolution
 
 
 class ScrollLabel(QScrollArea):

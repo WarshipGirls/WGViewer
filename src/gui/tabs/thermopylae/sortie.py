@@ -14,8 +14,7 @@ from typing import Union
 from src import data as wgv_data
 from src.exceptions.wgr_error import get_error
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume, ThermopylaeSortieDone
-from src.utils.game_combat import process_spy_json
-from src.utils.general import set_sleep
+from src.utils import process_spy_json, set_sleep
 from src.wgr.six import API_SIX
 from .helper import SortieHelper
 from .pre_sortie import PreSortieCheck

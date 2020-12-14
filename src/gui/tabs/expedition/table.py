@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgv_data
-from src.utils.wgv_pyqt import get_user_resolution
+from src.utils import get_user_resolution
 
 
 class ExpTable(QWidget):
