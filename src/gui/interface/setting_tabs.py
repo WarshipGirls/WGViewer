@@ -5,7 +5,7 @@ from time import time
 
 from PyQt5.QtCore import QRegExp
 from PyQt5.QtGui import QColor, QFont, QRegExpValidator
-from PyQt5.QtWidgets import QWidget, QGridLayout, QCheckBox, QComboBox, QLabel, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QWidget, QGridLayout, QCheckBox, QComboBox, QLabel, QLineEdit
 
 from src.gui.custom_widgets import QHLine
 
@@ -231,25 +231,18 @@ class GameSettings(QWidget):
     def on_reset(self) -> None:
         _d = self.get_init_value('GAME/random_seed', True)
         self.seed_input.setText(str(_d))
-        # self.seed_input.setPlaceholderText(str(_d))
         _d = self.get_init_value('GAME/speed_lo_bound', True)
         self.speed_lo_input.setText(str(_d))
-        # self.speed_lo_input.setPlaceholderText(str(_d))
         _d = self.get_init_value('GAME/speed_hi_bound', True)
         self.speed_hi_input.setText(str(_d))
-        # self.speed_hi_input.setPlaceholderText(str(_d))
         _d = self.get_init_value('CONNECTION/session_retries', True)
-        # self.session_retries.setPlaceholderText(str(_d))
         self.session_retries.setText(str(_d))
         _d = self.get_init_value('CONNECTION/session_sleep', True)
         self.session_sleep.setText(str(_d))
-        # self.session_sleep.setPlaceholderText(str(_d))
         _d = self.get_init_value('CONNECTION/api_retries', True)
         self.api_retries.setText(str(_d))
-        # self.api_retries.setPlaceholderText(str(_d))
         _d = self.get_init_value('CONNECTION/api_sleep', True)
         self.api_sleep.setText(str(_d))
-        # self.api_sleep.setPlaceholderText(str(_d))
 
     def create_input(self, _input: str, _edit: QLineEdit, _default: int, _field: str) -> None:
         if _input == '':

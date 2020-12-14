@@ -76,7 +76,7 @@ class QHLine(QCustomLine):
 
 class QVLine(QCustomLine):
     def __init__(self, parent=None, color=QColor(Qt.black), width=10):
-        super().__init__(parent, color)
+        super().__init__(parent, color, width)
         self.setFrameShape(QFrame.VLine)
         self.setObjectName('vertical_line')
 
