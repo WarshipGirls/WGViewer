@@ -11,8 +11,8 @@ import zlib
 
 from PyQt5.QtWidgets import QPushButton
 
-from src.data.wgv_qsettings import save_cookies
-from src.utils.general import get_app_version
+from src.data import save_cookies
+from src.utils import get_app_version
 from src.exceptions.wgr_error import get_error
 from .helper import LoginHelper
 from .session import LoginSession

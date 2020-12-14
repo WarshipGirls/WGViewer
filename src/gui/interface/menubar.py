@@ -129,6 +129,7 @@ class MainInterfaceMenuBar(QMenuBar):
             pass
 
     def open_global_settings(self) -> None:
+        # TODO: init at MI start up; and show it here
         self.test = GlobalSettingsWindow()
         # self.test.show()
 

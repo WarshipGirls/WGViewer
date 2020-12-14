@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import QTableView
 
 from src import data as wgv_data
 from src import utils as wgv_utils
-from src.utils.general import clear_desc, ts_to_date
 from src.wgr.boat import API_BOAT
 from . import constant as SCONST
 
@@ -140,10 +139,10 @@ class ShipModel(QStandardItemModel):
 
     def set_name(self, *args) -> None:
         wig = QStandardItem(args[1])
-        s = "Met on " + ts_to_date(int(args[3]))
+        s = "Met on " + wgv_utils.ts_to_date(int(args[3]))
         if args[2] == 1:
             wig.setIcon(self.ring_icon)
-            s += "\nMarried on " + ts_to_date(int(args[4]))
+            s += "\nMarried on " + wgv_utils.ts_to_date(int(args[4]))
         else:
             pass
         wig.setToolTip(s)
@@ -378,8 +377,8 @@ class ShipModel(QStandardItemModel):
                         i = wgv_data.find_index(self.tactics_json, 'cid', self.user_tactics[idx]['cid'])
                         t = self.tactics_json[i]
                         title = t['title'] + " " + str(t['level'])
-                        d1 = clear_desc(t["desc"])
-                        d2 = clear_desc(t["desc2"])
+                        d1 = wgv_utils.clear_desc(t["desc"])
+                        d2 = wgv_utils.clear_desc(t["desc2"])
                         desc = d1 + "\n" + d2
 
                         item = QStandardItem(title)

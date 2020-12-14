@@ -5,9 +5,8 @@ from PyQt5.QtWidgets import (
     QMainWindow, QStatusBar, QPushButton, QVBoxLayout, QLabel, QWidget, QGridLayout,
 )
 
-from src.data import get_qsettings_file
-from src.utils.wgv_pyqt import get_user_resolution
-from src.data.wgv_qsettings import get_color_scheme
+from src.data import get_qsettings_file, get_color_scheme
+from src.utils import get_user_resolution
 from .setting_tabs import UISettings, GameSettings
 
 
@@ -104,7 +103,7 @@ class GlobalSettingsWindow(QMainWindow):
         status_bar_content_widget = QWidget()
         status_bar_content_layout = QGridLayout(status_bar_content_widget)
         status_bar_content_layout.addWidget(QLabel("Some changes will only be effective upon next start"), 0, 0, 1, 1, Qt.AlignVCenter | Qt.AlignLeft)
-        status_bar_content_layout.addWidget(self.reset_button, 0,1,1,1, Qt.AlignVCenter | Qt.AlignRight)
+        status_bar_content_layout.addWidget(self.reset_button, 0, 1, 1, 1, Qt.AlignVCenter | Qt.AlignRight)
         self.status_bar.addWidget(status_bar_content_widget, 1)
         self.status_bar.setSizeGripEnabled(False)
         self.setStatusBar(self.status_bar)
