@@ -7,29 +7,24 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Bug Description**
 
-**WGViewer version**
-
-(The version number is shown on the app's title bar)
-
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
-
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+- describe
+    - how your bug occurred (step by step)
+    - what did you observe
+    - what were your expected behavior(s)
+- upload WGViewer developers log (drag & drop here)
+    - WGViewer Top Menu Bar -> `File` -> `Open Cache Folder` -> `wgviewer_debug.log`
 
 **Screenshots**
+
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
+
  - OS: [e.g. Windows, Linux, macOS]
- - Version [e.g. 22]
+ - Version [e.g. Win10, Arch5.9]
 
 **Additional context**
+
 Add any other context about the problem here.

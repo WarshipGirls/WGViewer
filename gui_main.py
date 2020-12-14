@@ -76,6 +76,7 @@ if __name__ == '__main__':
     # https://stackoverflow.com/q/43109355/14561914
     init_logging()
 
+    logging.debug(f"\nWGViewer {get_app_version()} STARTS\n")
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
         # running in a PyInstaller bundle
         login_form = LoginForm()
@@ -83,7 +84,6 @@ if __name__ == '__main__':
     else:
         # running in a normal Python process
         assert (len(sys.argv) == 2)
-        logging.info("Warship Girls Viewer started...")
 
         if int(sys.argv[1]):
             login_form = LoginForm()
