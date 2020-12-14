@@ -47,6 +47,7 @@ class MainInterfaceTabs(QWidget):
         self.tab_adv = None
         self.tab_thermopylae = None
         self.tabs = QTabWidget()
+        self._msg_label = None
         self.init_ui()
 
         # TODO now tab_dock init important data
@@ -58,13 +59,11 @@ class MainInterfaceTabs(QWidget):
         self.init_tab(QKEYS.UI_TAB_THER, 'tab_thermopylae')
         self.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
 
+        self.layout.addWidget(self.tabs, 0, 0)
         if self.has_tab is True:
-            self.layout.addWidget(self.tabs, 0, 0)
+            pass
         else:
-            _msg = "No tabs are selected to show on startup.\n"
-            _msg += "Open tabs: \tTop Menu Bar -> View -> Tabs -> ...\n"
-            _msg += "Change settings: \tTop Menu Bar -> File -> Settings -> UI -> ..."
-            self.layout.addWidget(QLabel(_msg))
+            self.add_warning_message()
         self.setLayout(self.layout)
 
     def init_ui(self) -> None:
@@ -80,15 +79,26 @@ class MainInterfaceTabs(QWidget):
     def init_tab(self, key: str, obj_name: str) -> None:
         if self.qsettings.contains(key):
             if self.qsettings.value(key) == 'true':
-                self.has_tab = True
                 self.add_tab(obj_name)
             else:
                 pass
         else:
-            self.has_tab = True
             self.add_tab(obj_name)
 
+    def add_warning_message(self):
+        self._msg_label = self.get_warning_message()
+        self.layout.addWidget(self._msg_label)
+
     def add_tab(self, tab_name: str) -> None:
+        if self._msg_label is None:
+            pass
+        else:
+            self.layout.removeWidget(self._msg_label)
+            self._msg_label.deleteLater()
+            self._msg_label = None
+
+        self.has_tab = True
+
         logging.info(f"TAB - Creating {tab_name}")
         if tab_name == "tab_adv" and self.tab_adv is None:
             self.tab_adv = TabAdvanceFunctions(tab_name, self.parent.side_dock)
@@ -115,6 +125,19 @@ class MainInterfaceTabs(QWidget):
         self.reset_tab_object(tab.objectName())
         tab.deleteLater()
         self.tabs.removeTab(index)
+
+        if self.tabs.count() == 0:
+            self.add_warning_message()
+            self.has_tab = False
+        else:
+            pass
+
+    @staticmethod
+    def get_warning_message() -> QLabel:
+        _msg = "No tabs are selected to show on startup.\n"
+        _msg += "Open tabs: \tTop Menu Bar -> View -> Tabs -> ...\n"
+        _msg += "Change settings: \tTop Menu Bar -> File -> Settings -> UI -> ..."
+        return QLabel(_msg)
 
     def reset_tab_object(self, tab_obj_name: str) -> None:
         # Lesson: `is` for pointing to the same object, `==` for pointing to the same value

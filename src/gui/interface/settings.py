@@ -92,6 +92,7 @@ class GlobalSettingsWindow(QMainWindow):
 
     def init_ui(self) -> None:
         self.setStyleSheet(get_color_scheme())
+        self.setWindowTitle('Settings')
 
         user_w, user_h = get_user_resolution()
         w = int(user_w / 3)
@@ -102,7 +103,7 @@ class GlobalSettingsWindow(QMainWindow):
         self.reset_button.clicked.connect(self.on_reset)
         status_bar_content_widget = QWidget()
         status_bar_content_layout = QGridLayout(status_bar_content_widget)
-        status_bar_content_layout.addWidget(QLabel("Some changes will only be effective upon next start"), 0, 0, 1, 1, Qt.AlignVCenter | Qt.AlignLeft)
+        status_bar_content_layout.addWidget(QLabel("Changes are auto saved; some will only be effective upon next start"), 0, 0, 1, 1, Qt.AlignVCenter | Qt.AlignLeft)
         status_bar_content_layout.addWidget(self.reset_button, 0, 1, 1, 1, Qt.AlignVCenter | Qt.AlignRight)
         self.status_bar.addWidget(status_bar_content_widget, 1)
         self.status_bar.setSizeGripEnabled(False)

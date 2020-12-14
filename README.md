@@ -17,6 +17,14 @@ The idea is to hack the game and use its native APIs to mimic an official client
 
 The official sites of the mobile game, Warship Girls (R), are [here (CN)][CN], [here (JP)][JP] and [here (International)][Intl].
 
+## Features
+
+As of `v0.2.1dev`,
+
+- Auto sortie on Thermopylae Ex-6
+- Display all warships' statistics, with sorting & filtering
+- Display all user's docking/constructing/developing/tasking info on side panel
+
 ## Screenshots
 
 Please see [at this directory](screenshots). Updating as work progresses.
