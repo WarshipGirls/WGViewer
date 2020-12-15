@@ -12,17 +12,16 @@ from src.utils import repair_id_to_text, repair_text_to_id
 from src.func import qsettings_keys as QKEYS
 from src.gui.custom_widgets import QHLine
 
-# TODO: repeadted function calls in __init__, init members with None
-# TODO: common functions in classes
 
 HEADER1: int = 20
 HEADER2: int = 15
 HEADER3: int = 12
 
 
-def create_qcombobox(choices: list) -> QComboBox:
+def create_qcombobox(choices: list, idx: int = 0) -> QComboBox:
     c = QComboBox()
     c.addItems(choices)
+    c.setCurrentIndex(idx)
     return c
 
 
@@ -70,18 +69,12 @@ class UISettings(QWidget):
         self.setLayout(self.layout)
 
         self.side_dock = QCheckBox("Navy Base Overview", self)
-        self.side_dock.stateChanged.connect(self.handle_side_dock_init)
         self.dropdown_side_dock = create_qcombobox(['Right', 'Left'])
-        self.dropdown_side_dock.currentTextChanged.connect(self.handle_side_dock_pos)
 
         self.tab_adv = QCheckBox("Advance Functions", self)
-        self.handle_tab_init(self.tab_adv, QKEYS.UI_TAB_ADV)
         self.tab_exp = QCheckBox("Expedition", self)
-        self.handle_tab_init(self.tab_exp, QKEYS.UI_TAB_EXP)
         self.tab_ship = QCheckBox("Dock", self)
-        self.handle_tab_init(self.tab_ship, QKEYS.UI_TAB_SHIP)
         self.tab_ther = QCheckBox("Thermopylae", self)
-        self.handle_tab_init(self.tab_ther, QKEYS.UI_TAB_THER)
 
         self.init_ui()
 
@@ -101,12 +94,11 @@ class UISettings(QWidget):
         row += 1
         self.layout.addWidget(QHLine(parent=self, color=QColor(0, 0, 0), width=10), row, 0, 1, 4)
         row += 1
-        if self.qsettings.value(QKEYS.UI_SIDEDOCK) == 'true':
-            self.side_dock.setChecked(False)
-        else:
-            self.side_dock.setChecked(True)
+        self.set_checkbox_status(self.side_dock, QKEYS.UI_SIDEDOCK)
+        self.side_dock.stateChanged.connect(self.handle_side_dock_init)
         self.layout.addWidget(self.side_dock, row, 0, 1, 1)
         self.dropdown_side_dock.setToolTip("Set the default position of side dock")
+        self.dropdown_side_dock.currentTextChanged.connect(self.handle_side_dock_pos)
         self.layout.addWidget(self.dropdown_side_dock, row, 1, 1, 1)
         return row
 
@@ -117,25 +109,15 @@ class UISettings(QWidget):
         row += 1
         self.layout.addWidget(QHLine(parent=self, color=QColor(0, 0, 0), width=10), row, 0, 1, 4)
         row += 1
-        if self.qsettings.value(QKEYS.UI_TAB_ADV) == 'true':
-            self.tab_adv.setChecked(True)
-        else:
-            self.tab_adv.setChecked(False)
 
-        if self.qsettings.value(QKEYS.UI_TAB_EXP) == 'true':
-            self.tab_exp.setChecked(True)
-        else:
-            self.tab_exp.setChecked(False)
-
-        if self.qsettings.value(QKEYS.UI_TAB_SHIP) == 'true':
-            self.tab_ship.setChecked(True)
-        else:
-            self.tab_ship.setChecked(False)
-
-        if self.qsettings.value(QKEYS.UI_TAB_THER) == 'true':
-            self.tab_ther.setChecked(True)
-        else:
-            self.tab_ther.setChecked(False)
+        self.set_checkbox_status(self.tab_adv, QKEYS.UI_TAB_ADV)
+        self.set_checkbox_status(self.tab_exp, QKEYS.UI_TAB_EXP)
+        self.set_checkbox_status(self.tab_ship, QKEYS.UI_TAB_SHIP)
+        self.set_checkbox_status(self.tab_ther, QKEYS.UI_TAB_THER)
+        self.tab_adv.stateChanged.connect(lambda res: self.init_checkbox(res, QKEYS.UI_TAB_ADV))
+        self.tab_exp.stateChanged.connect(lambda res: self.init_checkbox(res, QKEYS.UI_TAB_EXP))
+        self.tab_ship.stateChanged.connect(lambda res: self.init_checkbox(res, QKEYS.UI_TAB_SHIP))
+        self.tab_ther.stateChanged.connect(lambda res: self.init_checkbox(res, QKEYS.UI_TAB_THER))
         self.layout.addWidget(self.tab_adv, row, 0, 1, 1)
         self.layout.addWidget(self.tab_exp, row, 1, 1, 1)
         self.layout.addWidget(self.tab_ship, row, 2, 1, 1)
@@ -160,7 +142,7 @@ class UISettings(QWidget):
         if self.dropdown_side_dock.currentText() == 'Right':
             self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 'right')
         elif self.dropdown_side_dock.currentText() == 'Left':
-            self.qsettings.setValue((QKEYS.UI_SIDEDOCK_POS, 'left'))
+            self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 'left')
         else:
             self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 'right')
 
@@ -170,11 +152,19 @@ class UISettings(QWidget):
         else:
             self.qsettings.setValue(QKEYS.UI_SIDEDOCK, True)
 
-    def handle_tab_init(self, cb: QCheckBox, name: str) -> None:
-        if cb.isChecked() is True:
+    def init_checkbox(self, res, name: str) -> None:
+        if res == 2:
             self.qsettings.setValue(name, True)
+        elif res == 0:
+            self.qsettings.setValue(name, False)
         else:
             self.qsettings.setValue(name, False)
+
+    def set_checkbox_status(self, ck: QCheckBox, key: str) -> None:
+        if self.qsettings.value(key) == 'true':
+            ck.setChecked(True)
+        else:
+            ck.setChecked(False)
 
 
 class GameSettings(QWidget):
@@ -189,20 +179,13 @@ class GameSettings(QWidget):
 
         _d = self.get_init_value(QKEYS.GAME_RANDOM_SEED)
         self.seed_input = create_qlineedit(default=_d, max_len=16)
-        _d = self.get_init_value(QKEYS.GAME_SPD_LO)
-        self.speed_lo_input = create_qspinbox(_d, 5, 999)
-        _d = self.get_init_value(QKEYS.GAME_SPD_HI)
-        self.speed_hi_input = create_qspinbox(_d, 10, 999)
-        _d = self.get_init_value(QKEYS.CONN_SESS_RTY)
-        self.session_retries = create_qspinbox(_d, 1, 99)
-        _d = self.get_init_value(QKEYS.CONN_SESS_SLP)
-        self.session_sleep = create_qspinbox(_d, 1, 99)
-        _d = self.get_init_value(QKEYS.CONN_API_RTY)
-        self.api_retries = create_qspinbox(_d, 1, 99)
-        _d = self.get_init_value(QKEYS.CONN_API_SLP)
-        self.api_sleep = create_qspinbox(_d, 1, 99)
-        _d = self.get_init_value(QKEYS.CONN_THER_RTY)
-        self.ther_boss_retry = create_qspinbox(_d, 1, 9)
+        self.speed_lo_input = None
+        self.speed_hi_input = None
+        self.session_retries = None
+        self.session_sleep = None
+        self.api_retries = None
+        self.api_sleep = None
+        self.ther_boss_retry = None
 
         self.init_ui()
 
@@ -229,10 +212,12 @@ class GameSettings(QWidget):
         self.layout.addWidget(speed_label, row, 0, 1, 1)
         self.layout.addWidget(create_qlabel('Lower Bound'), row, 1, 1, 1)
         _d = self.get_init_value(QKEYS.GAME_SPD_LO)
+        self.speed_lo_input = create_qspinbox(_d, 5, 999)
         self.speed_lo_input.valueChanged.connect(lambda res: self.create_input(res, self.speed_lo_input, _d, QKEYS.GAME_SPD_LO))
         self.layout.addWidget(self.speed_lo_input, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel('Upper Bound'), row, 3, 1, 1)
         _d = self.get_init_value(QKEYS.GAME_SPD_HI)
+        self.speed_hi_input = create_qspinbox(_d, 10, 999)
         self.speed_hi_input.valueChanged.connect(lambda res: self.create_input(res, self.speed_hi_input, _d, QKEYS.GAME_SPD_HI))
         self.layout.addWidget(self.speed_hi_input, row, 4, 1, 1)
         return row
@@ -247,20 +232,24 @@ class GameSettings(QWidget):
         self.layout.addWidget(create_qlabel(text='Retry Limit', font_size=HEADER3), row, 0, 1, 1)
         self.layout.addWidget(create_qlabel(text='session'), row, 1, 1, 1)
         _d = self.get_init_value(QKEYS.CONN_SESS_RTY)
+        self.session_retries = create_qspinbox(_d, 1, 99)
         self.session_retries.valueChanged.connect(lambda res: self.create_input(res, self.session_retries, _d, QKEYS.CONN_SESS_RTY))
         self.layout.addWidget(self.session_retries, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel(text='sleep (sec)'), row, 3, 1, 1)
         _d = self.get_init_value(QKEYS.CONN_SESS_SLP)
+        self.session_sleep = create_qspinbox(_d, 1, 99)
         self.session_sleep.valueChanged.connect(lambda res: self.create_input(res, self.session_sleep, _d, QKEYS.CONN_SESS_SLP))
         self.layout.addWidget(self.session_sleep, row, 4, 1, 1)
 
         row += 1
         self.layout.addWidget(create_qlabel(text='WGR API'), row, 1, 1, 1)
         _d = self.get_init_value(QKEYS.CONN_API_RTY)
+        self.api_retries = create_qspinbox(_d, 1, 99)
         self.api_retries.valueChanged.connect(lambda res: self.create_input(res, self.api_retries, _d, QKEYS.CONN_API_RTY))
         self.layout.addWidget(self.api_retries, row, 2, 1, 1)
         self.layout.addWidget(create_qlabel(text='sleep (sec)'), row, 3, 1, 1)
         _d = self.get_init_value(QKEYS.CONN_API_SLP)
+        self.api_sleep = create_qspinbox(_d, 1, 99)
         self.api_sleep.valueChanged.connect(lambda res: self.create_input(res, self.api_sleep, _d, QKEYS.CONN_API_SLP))
         self.layout.addWidget(self.api_sleep, row, 4, 1, 1)
         return row
@@ -269,6 +258,7 @@ class GameSettings(QWidget):
         row += 1
         self.layout.addWidget(create_qlabel(text='Thermopylae'), row, 1, 1, 1)
         _d = self.get_init_value(QKEYS.CONN_THER_RTY)
+        self.ther_boss_retry = create_qspinbox(_d, 1, 9)
         self.ther_boss_retry.valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry, _d, QKEYS.CONN_THER_RTY))
         self.layout.addWidget(self.ther_boss_retry, row, 2, 1, 1)
         row += 1
@@ -285,19 +275,19 @@ class GameSettings(QWidget):
         _d = self.get_init_value(QKEYS.GAME_RANDOM_SEED, True)
         self.seed_input.setText(str(_d))
         _d = self.get_init_value(QKEYS.GAME_SPD_LO, True)
-        self.speed_lo_input.setText(str(_d))
+        self.speed_lo_input.setValue(_d)
         _d = self.get_init_value(QKEYS.GAME_SPD_HI, True)
-        self.speed_hi_input.setText(str(_d))
+        self.speed_hi_input.setValue(_d)
         _d = self.get_init_value(QKEYS.CONN_SESS_RTY, True)
-        self.session_retries.setText(str(_d))
+        self.session_retries.setValue(_d)
         _d = self.get_init_value(QKEYS.CONN_SESS_SLP, True)
-        self.session_sleep.setText(str(_d))
+        self.session_sleep.setValue(_d)
         _d = self.get_init_value(QKEYS.CONN_API_RTY, True)
-        self.api_retries.setText(str(_d))
+        self.api_retries.setValue(_d)
         _d = self.get_init_value(QKEYS.CONN_API_SLP, True)
-        self.api_sleep.setText(str(_d))
+        self.api_sleep.setValue(_d)
         _d = self.get_init_value(QKEYS.CONN_THER_RTY, True)
-        self.ther_boss_retry.setText(str(_d))
+        self.ther_boss_retry.setValue(_d)
 
     def create_input(self, _input: str, _edit: Union[QLineEdit, QSpinBox], _default: int, _field: str) -> None:
         if _input == '':
@@ -361,15 +351,15 @@ class TabsSettings(QWidget):
             create_qspinbox(int(_d[1]), 0, 6),
             create_qspinbox(int(_d[2]), 0, 6)
         ]
-        _d = self.get_init_value(QKEYS.THER_REPAIRS)
+        # _d = self.get_init_value(QKEYS.THER_REPAIRS)
         repair_choices = ['Slightly Damaged', 'Moderately Damaged', 'Heavily Damaged']
         self.ther_repairs: List[QComboBox] = [
-            create_qcombobox(repair_choices),
-            create_qcombobox(repair_choices),
-            create_qcombobox(repair_choices),
-            create_qcombobox(repair_choices),
-            create_qcombobox(repair_choices),
-            create_qcombobox(repair_choices),
+            create_qcombobox(repair_choices, 1),
+            create_qcombobox(repair_choices, 1),
+            create_qcombobox(repair_choices, 1),
+            create_qcombobox(repair_choices, 1),
+            create_qcombobox(repair_choices, 1),
+            create_qcombobox(repair_choices, 1),
         ]
 
         self.init_ui()
@@ -382,10 +372,10 @@ class TabsSettings(QWidget):
     def init_thermopylae(self, row: int) -> int:
         self.layout.addWidget(create_qlabel(text='Thermopylae', font_size=HEADER3), row, 0)
         self.layout.addWidget(create_qlabel(text='Bosses Retries'), row, 1)
-        _d = self.get_init_value(QKEYS.THER_BOSS_RTY)
-        self.ther_boss_retry[0].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[0], _d, 0, QKEYS.THER_BOSS_RTY))
-        self.ther_boss_retry[1].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[1], _d, 1, QKEYS.THER_BOSS_RTY))
-        self.ther_boss_retry[2].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[2], _d, 2, QKEYS.THER_BOSS_RTY))
+        tbr_init = self.get_init_value(QKEYS.THER_BOSS_RTY)
+        self.ther_boss_retry[0].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[0], tbr_init, 0, QKEYS.THER_BOSS_RTY))
+        self.ther_boss_retry[1].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[1], tbr_init, 1, QKEYS.THER_BOSS_RTY))
+        self.ther_boss_retry[2].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[2], tbr_init, 2, QKEYS.THER_BOSS_RTY))
         self.layout.addWidget(self.ther_boss_retry[0], row, 2)
         self.layout.addWidget(self.ther_boss_retry[1], row, 3)
         self.layout.addWidget(self.ther_boss_retry[2], row, 4)
@@ -394,10 +384,10 @@ class TabsSettings(QWidget):
         ther_boss_retry_std_label = create_qlabel(text='On Sunken')
         ther_boss_retry_std_label.setToolTip("Sunken at least how many enemies to disable boss re-fight")
         self.layout.addWidget(ther_boss_retry_std_label, row, 1)
-        _d = self.get_init_value(QKEYS.THER_BOSS_STD)
-        self.ther_boss_std[0].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[0], _d, 0, QKEYS.THER_BOSS_STD))
-        self.ther_boss_std[1].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[1], _d, 1, QKEYS.THER_BOSS_STD))
-        self.ther_boss_std[2].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[2], _d, 2, QKEYS.THER_BOSS_STD))
+        tbs_init = self.get_init_value(QKEYS.THER_BOSS_STD)
+        self.ther_boss_std[0].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[0], tbs_init, 0, QKEYS.THER_BOSS_STD))
+        self.ther_boss_std[1].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[1], tbs_init, 1, QKEYS.THER_BOSS_STD))
+        self.ther_boss_std[2].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[2], tbs_init, 2, QKEYS.THER_BOSS_STD))
         self.layout.addWidget(self.ther_boss_std[0], row, 2)
         self.layout.addWidget(self.ther_boss_std[1], row, 3)
         self.layout.addWidget(self.ther_boss_std[2], row, 4)
@@ -406,17 +396,17 @@ class TabsSettings(QWidget):
         ther_repair_levels_label = create_qlabel(text='Fleet Repair Levels')
         ther_repair_levels_label.setToolTip("Set the repair levels for battle fleet\n1st row:\t#1 #2 #3\n2nd row:\t#4 #5 #6")
         self.layout.addWidget(ther_repair_levels_label, row, 1)
-        _d = self.get_init_value(QKEYS.THER_REPAIRS)
-        self.ther_repairs[0].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[0], _d, 0, QKEYS.THER_REPAIRS))
-        self.ther_repairs[1].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[1], _d, 1, QKEYS.THER_REPAIRS))
-        self.ther_repairs[2].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[2], _d, 2, QKEYS.THER_REPAIRS))
+        tbp_init = self.get_init_value(QKEYS.THER_REPAIRS)
+        self.ther_repairs[0].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[0], tbp_init, 0, QKEYS.THER_REPAIRS))
+        self.ther_repairs[1].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[1], tbp_init, 1, QKEYS.THER_REPAIRS))
+        self.ther_repairs[2].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[2], tbp_init, 2, QKEYS.THER_REPAIRS))
         self.layout.addWidget(self.ther_repairs[0], row, 2)
         self.layout.addWidget(self.ther_repairs[1], row, 3)
         self.layout.addWidget(self.ther_repairs[2], row, 4)
         row += 1
-        self.ther_repairs[3].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[3], _d, 3, QKEYS.THER_REPAIRS))
-        self.ther_repairs[4].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[4], _d, 4, QKEYS.THER_REPAIRS))
-        self.ther_repairs[5].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[5], _d, 5, QKEYS.THER_REPAIRS))
+        self.ther_repairs[3].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[3], tbp_init, 3, QKEYS.THER_REPAIRS))
+        self.ther_repairs[4].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[4], tbp_init, 4, QKEYS.THER_REPAIRS))
+        self.ther_repairs[5].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[5], tbp_init, 5, QKEYS.THER_REPAIRS))
         self.layout.addWidget(self.ther_repairs[3], row, 2)
         self.layout.addWidget(self.ther_repairs[4], row, 3)
         self.layout.addWidget(self.ther_repairs[5], row, 4)
@@ -431,6 +421,7 @@ class TabsSettings(QWidget):
             self.layout.addWidget(QLabel(""), row, 0, 1, 4)
 
     def create_input(self, _input: str, _edit: QSpinBox, _default: list, idx: int, _field: str) -> None:
+        # Lesson: locals() shows all arguments https://stackoverflow.com/a/50763376/14561914
         if _input == '':
             save = _default
             _edit.setPlaceholderText(str(_default[idx]))
@@ -450,33 +441,33 @@ class TabsSettings(QWidget):
 
     def on_reset(self) -> None:
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY, True)
-        self.ther_boss_retry[0].setText(str(_d[0]))
-        self.ther_boss_retry[1].setText(str(_d[1]))
-        self.ther_boss_retry[2].setText(str(_d[2]))
+        self.ther_boss_retry[0].setValue(_d[0])
+        self.ther_boss_retry[1].setValue(_d[1])
+        self.ther_boss_retry[2].setValue(_d[2])
 
         _d = self.get_init_value(QKEYS.THER_BOSS_STD, True)
-        self.ther_boss_std[0].setText(str(_d[0]))
-        self.ther_boss_std[1].setText(str(_d[1]))
-        self.ther_boss_std[2].setText(str(_d[2]))
+        self.ther_boss_std[0].setValue(_d[0])
+        self.ther_boss_std[1].setValue(_d[1])
+        self.ther_boss_std[2].setValue(_d[2])
 
         _d = self.get_init_value(QKEYS.THER_REPAIRS, True)
-        self.ther_repairs[0].setCurrentIndex(0)
-        self.ther_repairs[1].setCurrentIndex(0)
-        self.ther_repairs[2].setCurrentIndex(0)
-        self.ther_repairs[3].setCurrentIndex(0)
-        self.ther_repairs[4].setCurrentIndex(0)
-        self.ther_repairs[5].setCurrentIndex(0)
+        self.ther_repairs[0].setCurrentIndex(1)
+        self.ther_repairs[1].setCurrentIndex(1)
+        self.ther_repairs[2].setCurrentIndex(1)
+        self.ther_repairs[3].setCurrentIndex(1)
+        self.ther_repairs[4].setCurrentIndex(1)
+        self.ther_repairs[5].setCurrentIndex(1)
 
     def get_init_value(self, field: str, is_default: bool = False) -> list:
         if (self.qsettings.contains(field) is True) and (is_default is False):
             d = self.qsettings.value(field)
         else:
             if field == QKEYS.THER_BOSS_RTY:
-                d = [3, 5, 10]
+                d = [3, 5, 9]
             elif field == QKEYS.THER_BOSS_STD:
                 d = [1, 2, 2]
             elif field == QKEYS.THER_REPAIRS:
-                d = [2, 2, 2, 2, 2]
+                d = [2, 2, 2, 2, 2, 2]
             else:
                 logging.error(f"Unsupported QKEYS filed {field}")
                 d = 1
