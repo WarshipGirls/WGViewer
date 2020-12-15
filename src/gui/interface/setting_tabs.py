@@ -370,6 +370,7 @@ class TabsSettings(QWidget):
         self.init_hack(row)
 
     def init_thermopylae(self, row: int) -> int:
+        # TODO add auto ticket buying options & consumption tickets here
         self.layout.addWidget(create_qlabel(text='Thermopylae', font_size=HEADER3), row, 0)
         self.layout.addWidget(create_qlabel(text='Bosses Retries'), row, 1)
         tbr_init = self.get_init_value(QKEYS.THER_BOSS_RTY)

@@ -22,6 +22,8 @@ STYLE: str = 'style'
 UI_SIDEDOCK: str = 'UI/no_side_dock'
 UI_SIDEDOCK_POS: str = 'UI/side_dock_pos'
 
+THER_TKT_AUTO: str = 'THER/ticket_auto_buy'
+THER_TKT_RSC: str = 'THER/ticket_resource_type'  # use one F/A/S/B resource to buy
 THER_BOSS_RTY: str = 'THER/bosses_retries'
 THER_BOSS_STD: str = 'THER/bosses_retry_standard'
 THER_REPAIRS: str = 'THER/repair_levels'
