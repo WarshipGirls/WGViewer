@@ -54,18 +54,13 @@ Please see [at this directory](screenshots). Updating as work progresses.
 > pip install -r requirements.txt
 # 3. run auto build batch script
 > win_build.bat
+# 4. The .exe is now in dist/
 ```
 
 #### Unix
 
 ```
-# 1. start a virtual environment
-# 2. install required packages
-> pip install -r requirements.txt
-# 3. update fix_pyinstaller.py with your directory location, run
-# 4. run commands
-> python tools/fix_pyinstaller.py > gui_main.spec  
-> pyinstaller --clean gui_main.spec
+> $ ./linux_build.sh
 ```
 
 ### Contribution

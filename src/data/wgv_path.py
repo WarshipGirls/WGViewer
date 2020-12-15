@@ -43,7 +43,6 @@ def clear_cache_folder(is_all: bool = False) -> bool:
 
 
 def get_data_dir() -> str:
-    # TODO: unix not tested
     # TODO: mac not tested
     plt = platform.system()
     _dir = ''

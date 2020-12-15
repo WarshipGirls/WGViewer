@@ -114,7 +114,6 @@ if __name__ == '__main__':
             assert (True == start_data_generator())
             assert (True == start_utils_generator())
             mi = MainInterface(wgr_data.load_cookies(), False)
-
             _testrun()
 
     sys.exit(WGV_APP.exec_())

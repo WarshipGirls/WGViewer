@@ -1,4 +1,5 @@
 import os
+import sys
 
 '''
 Example: a.datas += [('images/icon.ico', 'D:\\[workspace]\\App\\src\\images\\icon.ico',  'DATA')]
@@ -8,10 +9,17 @@ and the second is the location of the resource in the source directory.
 This is not limited to just images either. Any file can be packaged along with the source code.
 '''
 
-spec_root: str = "\'D:\\\github\\\WGViewer\'"
+
+if sys.platform.startswith('win32'):
+    SPEC_ROOT: str = "\'D:\\\github\\\WGViewer\'"
+elif sys.platform.startswith('linux'):
+    SPEC_ROOT: str = "/home/pwyq/github/WGViewer"
+else:
+    sys.exit('The OS is not supported yet. Please manually update.')
+
 
 CUSTOM_DATA_FILES: list = [
-  "('docs/version_log.md','D:\\\\github\\\\WGViewer\\\\docs\\\\version_log.md','DATA'),"
+  "('docs/version_log.md','{}/docs/version_log.md','DATA'),".format(SPEC_ROOT)
 ]
 
 def header(_spec_root: str) -> str:
@@ -20,7 +28,7 @@ import sys
 block_cipher = None
 a = Analysis(
   ['gui_main.py'],
-  pathex=[{}],
+  pathex=['{}'],
   binaries=[],
   datas=[],
   hiddenimports=[],
@@ -45,6 +53,7 @@ def datas_import() -> str:
     t = "a.datas += ["
     for c in CUSTOM_DATA_FILES:
       t += c
+      t += "\n"
 
     for subdir, dirs, files in os.walk(root_dir):
         for file in files:
@@ -53,8 +62,14 @@ def datas_import() -> str:
                 continue
             res = os.path.join(subdir, file)
             if "assets" in res:
-                first = res[prefix_len:].replace("\\", "/")
-                second = res.replace("\\", "\\\\")
+                if sys.platform.startswith('win32'):
+                    first = res[prefix_len:].replace("\\", "/")
+                    second = res.replace("\\", "\\\\")
+                elif sys.platform.startswith('linux'):
+                    first = res[prefix_len:]
+                    second = res
+                else:
+                    sys.exit('The OS is not supported yet. Please manually update.')
                 res_str = "('" + first + "','" + second + "','DATA'),\n"
                 t += res_str
     t += "]"
@@ -71,7 +86,7 @@ exe = EXE(pyz,
   a.zipfiles,
   a.datas,
   [],
-  name='Warship Girls Viewer' + ('.exe' if sys.platform == 'win32' else ''),
+  name='WGViewer' + ('.exe' if sys.platform == 'win32' else ''),
   debug=False,
   bootloader_ignore_signals=False,
   strip=False,
@@ -85,6 +100,6 @@ exe = EXE(pyz,
     return t
 
 
-print(header(spec_root))
+print(header(SPEC_ROOT))
 print(datas_import())
 print(footer())
