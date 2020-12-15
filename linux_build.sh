@@ -23,3 +23,5 @@ python fix_pyinstaller.py > ../gui_main.spec
 cd ..
 pyinstaller gui_main.spec
 deactivate
+cd ./dist
+zip WGViewer-linux64.zip WGViewer-linux64
