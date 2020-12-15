@@ -77,6 +77,12 @@ def datas_import() -> str:
 
 
 def footer() -> str:
+    if sys.platform.startswith('win32'):
+        name = 'WGViewer-win64.exe'
+    elif sys.platform.startswith('linux'):
+        name = 'WGViewer-linux64'
+    else:
+        sys.exit('The OS is not supported yet. Please manually update.')
     t = """
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
@@ -86,7 +92,7 @@ exe = EXE(pyz,
   a.zipfiles,
   a.datas,
   [],
-  name='WGViewer' + ('.exe' if sys.platform == 'win32' else ''),
+  name='{}',
   debug=False,
   bootloader_ignore_signals=False,
   strip=False,
@@ -96,7 +102,7 @@ exe = EXE(pyz,
   console=False,
   icon='assets/favicon.ico'
 )
-"""
+""".format(name)
     return t
 
 

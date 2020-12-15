@@ -84,6 +84,12 @@ class TestFileIntegrity(unittest.TestCase):
         self.assertEqual(_file.is_dir(), False)
         self.assertNotEqual(get_file_size(_file), 0)
 
+    def test_linux_build_exists(self):
+        _file = ROOT_DIR.joinpath('linux_build.sh')
+        self.assertEqual(_file.exists(), True)
+        self.assertEqual(_file.is_dir(), False)
+        self.assertNotEqual(get_file_size(_file), 0)
+
     def test_disclaimer_exists(self):
         _file = ROOT_DIR.joinpath('DISCLAIMER.md')
         self.assertEqual(_file.exists(), True)
