@@ -50,12 +50,13 @@ class LoginForm(QWidget):
         self.lineEdit_password = QLineEdit()
         self.combo_platform = QComboBox()
         self.combo_server = QComboBox()
-        self.check_disclaimer = QCheckBox('I have read and understood')
+        # TODO? it's hard to get this checkbox to render the same way across platforms (even with get_user_resolution())
+        self.check_disclaimer = QCheckBox('I have read')
         # TODO? trailing space
         # To limit the trailing space of the checkbox text with max width; still, there is ~2 whitespaces width space presents
         # set text all in label would cause user unable to click text to toggle checkbox; differs from other checkbox, (bad design IMO)
         user_w, _ = wgv_utils.get_user_resolution()
-        self.check_disclaimer.setMaximumWidth(int(0.083 * user_w))
+        self.check_disclaimer.setMaximumWidth(int(0.08 * user_w))
         self.check_save = QCheckBox("Store login info locally with encryption")
         self.check_auto = QCheckBox("Auto login on the application start")
         self.button_login = QPushButton("Login")
@@ -161,7 +162,8 @@ class LoginForm(QWidget):
     def init_platform_field(self, text: str = '') -> None:
         label_platform = create_label('Platform')
         # platforms = ["Choose your platform", "CN-iOS", "CN-Android", "International", "JP"]
-        platforms = ["Choose your platform", "CN-iOS", "CN-Android"]
+        platforms = ["CN-iOS", "CN-Android"]
+        self.combo_platform.setPlaceholderText('Choose your platform')
         self.combo_platform.addItems(platforms)
         self.combo_platform.currentTextChanged.connect(self.update_server_box)
 
@@ -366,7 +368,8 @@ class LoginForm(QWidget):
             self.bee2.start()
         else:
             self.login_failed()
-            wgv_utils.popup_msg(result[1])
+            err_msg = result[1] if result[1] != '' else "Unexpected Connection Error"
+            wgv_utils.popup_msg(err_msg)
 
     def handle_result2(self, result: Tuple[bool, str]) -> None:
         logging.debug(f'LOGIN - Second fetch result {result}')
