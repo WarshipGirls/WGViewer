@@ -61,6 +61,8 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 ```
 > $ ./linux_build.sh
+# Run the application
+> $ ./dist/WGViewer
 ```
 
 ### Contribution

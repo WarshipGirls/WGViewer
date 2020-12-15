@@ -210,7 +210,6 @@ fabric.properties
 example_json/
 tools/S/
 tools/equip_512/
-env/
 *.un~
 *.csv
 *.jpg
@@ -218,13 +217,11 @@ env/
 *.csv~
 *.py~
 test.py
-init.zip
-todo.txt
 dev.log
-test.txt
 six_getUserData.json
 six_getPveData.json
 six_getFleetInfo.json
 pve_getPveData.json
 docs/~$banner.pptx
 debug.log
+*.spec
