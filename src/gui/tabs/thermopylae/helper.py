@@ -148,6 +148,20 @@ class SortieHelper:
 
         return self._reconnecting_calls(_challenge, 'Combat')
 
+    def charge_ticket(self, resource_typd_id: str = '2') -> dict:
+        def _buy() -> Tuple[bool, dict]:
+            data = self.api.chargeTicket(resource=resource_typd_id)
+            res = False
+            if 'eid' in data:
+                get_error(data['eid'])
+            elif 'userResVO' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+            return res, data
+
+        return self._reconnecting_calls(_buy, 'buy ticket')
+
     def enter_next_node(self, next_node: str) -> dict:
         def _newNext() -> Tuple[bool, dict]:
             data = self.api.newNext(next_node)

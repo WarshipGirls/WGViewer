@@ -5,7 +5,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QButtonGroup
 
 import src.data as wgv_data
-from src.func.worker import Worker
+from src.func.worker import Worker, CallbackWorker
 
 from src.wgr.six import API_SIX
 from src.func.log_handler import LogHandler
@@ -19,6 +19,7 @@ from .thermopylae.sortie import Sortie
 # TODO: show ship +star in label
 # TODO: multiple consecutive run w/o interference
 # TODO: let user selected 2-star + 3-star escort DD and a escort CV
+# TODO: organize here
 
 
 class TabThermopylae(QWidget):
@@ -44,7 +45,7 @@ class TabThermopylae(QWidget):
         self.sig_repair.connect(self.resource_info.update_repair)
         self.sig_exp.connect(self.side_dock.update_lvl_label)
 
-        self.api_six = API_SIX(wgv_data.load_cookies())
+        self.api = API_SIX(wgv_data.load_cookies())
         self.fleets = [None] * 6
         self.final_fleet = [None] * 14
         # for testing
@@ -56,23 +57,23 @@ class TabThermopylae(QWidget):
         self.left_layout = QVBoxLayout()
         self.right_layout = QVBoxLayout()
 
-        self.ticket_label = None
-        self.purchasable_label = None
+        self.ticket_label = QLabel("?")
+        self.button_purchase = QPushButton("?")
         self.set_ticket_display()
-        self.adjutant_label = None
-        self.adjutant_exp_label = None
-        self.points_label = None
+        self.adjutant_label = QLabel("?")
+        self.adjutant_exp_label = QLabel("?/?")
+        self.points_label = QLabel("?")
         self.set_adjutant_display()
 
-        self.button_group = None
+        self.button_group = QButtonGroup()
         self.boat_pool_label = QLabel()
         self.boat_pool_label.setFont(QFont('Consolas'))
         self.fleet_label = QLabel()
         self.fleet_label.setFont(QFont('Consolas'))
         self.boat_pool_label.setWordWrap(True)
-        self.button_pre_battle = None
-        self.button_fresh_sortie = None
-        self.button_resume_sortie = None
+        self.button_pre_battle = QPushButton('Pre-Battle &Check')
+        self.button_fresh_sortie = QPushButton('Fresh Start')
+        self.button_resume_sortie = QPushButton('Resume Combat')
         self.init_left_layout()
 
         self.right_text_box = QTextEdit()
@@ -82,9 +83,8 @@ class TabThermopylae(QWidget):
 
         self.w = None
         self.init_ui()
-        self.sortie = Sortie(self, self.api_six, [], [], self.is_realrun)
+        self.sortie = Sortie(self, self.api, [], [], self.is_realrun)
 
-        # TODO: use a callback worker, I need result handling
         self.bee_pre_battle = Worker(self.sortie.pre_battle, ())
         self.bee_pre_battle.finished.connect(self.pre_battle_finished)
         self.bee_pre_battle.terminate()
@@ -103,15 +103,11 @@ class TabThermopylae(QWidget):
         w = QWidget()
         layout = QHBoxLayout(w)
         layout.setContentsMargins(0, 0, 0, 0)
-        ticket_tag = QLabel("Remaining Sortie Tickets")
-        self.ticket_label = QLabel("?")
-        can_buy_tag = QLabel("Purchasable Tickets")
-        # TODO: link the label to chargeTicket
-        self.purchasable_label = QLabel("?")
-        layout.addWidget(ticket_tag)
+        self.button_purchase.clicked.connect(self.on_purchase_clicked)
+        layout.addWidget(QLabel("Remaining Sortie Tickets"))
         layout.addWidget(self.ticket_label)
-        layout.addWidget(can_buy_tag)
-        layout.addWidget(self.purchasable_label)
+        layout.addWidget(QLabel("Purchasable Tickets"))
+        layout.addWidget(self.button_purchase)
         w.setLayout(layout)
         for i in range(4):
             layout.setStretch(i, 0)
@@ -121,15 +117,10 @@ class TabThermopylae(QWidget):
         w = QWidget()
         layout = QHBoxLayout(w)
         layout.setContentsMargins(0, 0, 0, 0)
-        name_tag = QLabel("Adjutant")
-        self.adjutant_label = QLabel("?")
-        self.adjutant_exp_label = QLabel("?/?")
-        point_tag = QLabel("Point")
-        self.points_label = QLabel("?")
-        layout.addWidget(name_tag)
+        layout.addWidget(QLabel("Adjutant"))
         layout.addWidget(self.adjutant_label)
         layout.addWidget(self.adjutant_exp_label)
-        layout.addWidget(point_tag)
+        layout.addWidget(QLabel("Point"))
         layout.addWidget(self.points_label)
         w.setLayout(layout)
         self.left_layout.addWidget(w)
@@ -145,6 +136,7 @@ class TabThermopylae(QWidget):
         # self.add_ship()
 
     def init_left_layout(self) -> None:
+        self.button_purchase.setEnabled(False)
         t = QTextEdit()
         msg = "Notes (dev)\n"
         msg += "1. As of now, this auto sortie function is ONLY for players who passed E6 manually;\n"
@@ -160,15 +152,12 @@ class TabThermopylae(QWidget):
         t.setText(msg)
         t.setReadOnly(True)
 
-        self.button_pre_battle = QPushButton('Pre-Battle Check')
         self.button_pre_battle.clicked.connect(self.on_pre_battle)
         self.button_pre_battle.setEnabled(True)
 
-        self.button_fresh_sortie = QPushButton('Fresh Start')
         self.button_fresh_sortie.clicked.connect(self.on_fresh_sortie)
         self.button_fresh_sortie.setEnabled(False)
 
-        self.button_resume_sortie = QPushButton('Resume Combat')
         self.button_resume_sortie.clicked.connect(self.on_resume_sortie)
         self.button_resume_sortie.setEnabled(False)
 
@@ -187,7 +176,6 @@ class TabThermopylae(QWidget):
 
     def add_ship(self) -> None:
         # TODO long term; not used right now; let user select boats here; now just use last fleets
-        self.button_group = QButtonGroup()
         # for ship_id in self.fleets:
         for i in range(len(self.fleets)):
             t = self.fleets[i]
@@ -218,12 +206,14 @@ class TabThermopylae(QWidget):
         self.w = ShipSelectWindow(self, btn_id)
         self.w.show()
 
+    def on_purchase_clicked(self) -> None:
+        self.sortie.buy_ticket()
+
     # ================================
     # On thread start
     # ================================
 
     def on_pre_battle(self) -> None:
-        # TODO callback
         self.button_pre_battle.setEnabled(True)
         self.button_fresh_sortie.setEnabled(False)
         self.button_resume_sortie.setEnabled(False)
@@ -243,18 +233,22 @@ class TabThermopylae(QWidget):
     # On thread finished
     # ================================
 
-    def sortie_finished(self) -> None:
+    def sortie_finished(self, result: bool) -> None:
         self.logger.info('==== Sortie (dev) is done! ====')
         self.button_fresh_sortie.setEnabled(True)
         self.button_resume_sortie.setEnabled(True)
+        if result is True:
+            # do next battle
+            pass
+        else:
+            # stop?
+            pass
 
     def pre_battle_finished(self) -> None:
         self.logger.info('==== Pre battle checking is done! ====')
-        self.bee_fresh_sortie = Worker(self.sortie.start_fresh_sortie, ())
-        self.bee_fresh_sortie.finished.connect(self.sortie_finished)
+        self.bee_fresh_sortie = CallbackWorker(self.sortie.start_fresh_sortie, (), self.sortie_finished)
         self.bee_fresh_sortie.terminate()
-        self.bee_resume_sortie = Worker(self.sortie.resume_sortie, ())
-        self.bee_resume_sortie.finished.connect(self.sortie_finished)
+        self.bee_resume_sortie = CallbackWorker(self.sortie.resume_sortie, (), self.sortie_finished)
         self.bee_resume_sortie.terminate()
 
     # ================================
@@ -282,7 +276,7 @@ class TabThermopylae(QWidget):
         self.ticket_label.setText(str(data))
 
     def update_purchasable(self, data: int) -> None:
-        self.purchasable_label.setText(str(data))
+        self.button_purchase.setText(str(data))
 
     def update_adjutant_name(self, data: str) -> None:
         self.adjutant_label.setText(data)

@@ -81,7 +81,7 @@ class Sortie:
         self._clean_memory()
         self.set_sub_map(T_CONST.SUB_MAP1_ID)
         self.helper.set_adjutant_info(reset_res['adjutantData'])
-        self.set_sortie_tickets(ticket=reset_res['ticket'])
+        self.update_sortie_ticket(ticket=reset_res['ticket'])
 
     # ================================
     # Entry points
@@ -98,7 +98,10 @@ class Sortie:
         self.user_data = self.pre_sortie.get_user_data()
         self.curr_node = str(self.user_data['nodeId'])
 
-        self.set_sortie_tickets(ticket=self.user_data['ticket'], num=self.user_data['canChargeNum'])
+        ticket_num = int(self.user_data['canChargeNum']) - int(self.user_data['chargeNum'])
+        self.parent.button_purchase.setEnabled(ticket_num > 0)
+        # TODO: auto purchase
+        self.update_sortie_ticket(ticket=self.user_data['ticket'], num=ticket_num)
         self.update_adjutant_label(self.user_data['adjutantData'])
         self.set_boat_pool(self.user_data['boatPool'])
         self.set_sub_map(self.pre_sortie.get_sub_map_id())
@@ -137,7 +140,7 @@ class Sortie:
         else:
             self.logger.info('Can choose a fresh start')
 
-    def resume_sortie(self) -> None:
+    def resume_sortie(self) -> bool:
         # TODO: may still have some corner cases to catch
 
         self.logger.info(f"[RESUME] Sortie {self.curr_node}")
@@ -203,7 +206,7 @@ class Sortie:
         except ThermopylaeSoriteExit as e:
             self.logger.debug(e)
             self.parent.button_fresh_sortie.setEnabled(True)
-            return
+            return False
         except ThermopylaeSortieRestart as e:
             set_sleep()
             self.logger.debug(e)
@@ -215,8 +218,9 @@ class Sortie:
         except ThermopylaeSortieDone as e:
             self.logger.info(e)
             self._reset_chapter()
+            return True
 
-    def start_fresh_sortie(self) -> None:
+    def start_fresh_sortie(self) -> bool:
         try:
             if self.curr_node == T_CONST.BOSS_NODES[2] and self.curr_sub_map == T_CONST.SUB_MAP3_ID:
                 chapter_status = self.get_chapter_status(E6_ID)
@@ -241,7 +245,7 @@ class Sortie:
         except ThermopylaeSoriteExit as e:
             self.logger.debug(e)
             self.parent.button_fresh_sortie.setEnabled(True)
-            return
+            return False
         except ThermopylaeSortieRestart as e:
             set_sleep()
             self.logger.debug(e)
@@ -253,6 +257,7 @@ class Sortie:
         except ThermopylaeSortieDone as e:
             self.logger.info(e)
             self._reset_chapter()
+            return True
 
     # ================================
     # Getter / Setter (incl. UI)
@@ -279,19 +284,6 @@ class Sortie:
             label_text += f"{self.user_ships[s]['Name']} "
         self.parent.update_boat_pool_label(label_text)
 
-    def set_sortie_tickets(self, ticket: int = None, num: int = None) -> None:
-        if ticket is None:
-            self.parent.update_ticket(self.user_data['ticket'])
-            self.tickets = int(self.user_data['ticket'])
-        else:
-            self.parent.update_ticket(str(ticket))
-            self.tickets = ticket
-
-        if num is None:
-            self.parent.update_purchasable(self.user_data['canChargeNum'])
-        else:
-            self.parent.update_purchasable(str(num))
-
     def set_sub_map(self, sub_map_id: str) -> None:
         self.curr_sub_map = sub_map_id
 
@@ -313,9 +305,30 @@ class Sortie:
     def update_side_dock_resources(self, x) -> None:
         self.parent.update_resources(x['oil'], x['ammo'], x['steel'], x['aluminium'])
 
+    def update_sortie_ticket(self, ticket: int = None, num: int = None) -> None:
+        if ticket is None:
+            self.parent.update_ticket(self.user_data['ticket'])
+            self.tickets = int(self.user_data['ticket'])
+        else:
+            self.parent.update_ticket(str(ticket))
+            self.tickets = ticket
+
+        if num is None:
+            self.parent.update_purchasable(self.user_data['canChargeNum'])
+        else:
+            self.parent.update_purchasable(str(num))
+
     # ================================
     # Helpers
     # ================================
+
+    def buy_ticket(self):
+        buy_res = self.helper.charge_ticket()
+        self.update_side_dock_resources(buy_res['userResVO'])
+        # Weekly purchase quota is 3
+        can_buy = 3 - buy_res['chargeNum']
+        self.update_sortie_ticket(ticket=buy_res['ticket'], num=can_buy)
+        self.parent.button_purchase.setEnabled(can_buy > 0)
 
     def buy_wanted_ships(self, purchase_list: list, shop_data: dict, is_buff: bool) -> Union[None, dict]:
         """
