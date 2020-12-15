@@ -9,17 +9,17 @@ verlt() {
 echo ================================================
 echo        Warship Girls Viewer Linux Build
 echo ================================================
-version="$(python -c 'import platform; print(platform.python_version())')"
-
-verlt $version 3.6.0 && echo "Required Python 3.6.0+ is not installed on your system." || echo "Python version check passed"
-
+version="$(python3 -c 'import platform; print(platform.python_version())')"
+yes="Required Python 3.6.0+ is not installed on your system. Your version=$version"
+no="Python version check passed"
+verlt $version 3.6.0 && echo $yes && exit 1 || echo $no
 
 rm -rf ./build/ ./dist/ ./wgv_venv
-python -m virtualenv --python=python3 wgv_venv
+python3 -m virtualenv --python=python3 wgv_venv
 source wgv_venv/bin/activate
 pip install -r ./requirements.txt
 cd tools
-python fix_pyinstaller.py > ../gui_main.spec
+python3 fix_pyinstaller.py > ../gui_main.spec
 cd ..
 pyinstaller gui_main.spec
 deactivate

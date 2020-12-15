@@ -1,8 +1,9 @@
 import os
 import sys
+from pathlib import Path
 
 '''
-Example: a.datas += [('images/icon.ico', 'D:\\[workspace]\\App\\src\\images\\icon.ico',  'DATA')]
+Example: a.datas += [('images/icon.ico', '[workspace]\\WGViewer\\src\\images\\icon.ico',  'DATA')]
 
 The first argument is the location the resource will be available at in the packaged application
 and the second is the location of the resource in the source directory.
@@ -10,13 +11,7 @@ This is not limited to just images either. Any file can be packaged along with t
 '''
 
 
-if sys.platform.startswith('win32'):
-    SPEC_ROOT: str = "\'D:\\\github\\\WGViewer\'"
-elif sys.platform.startswith('linux'):
-    SPEC_ROOT: str = "/home/pwyq/github/WGViewer"
-else:
-    sys.exit('The OS is not supported yet. Please manually update.')
-
+SPEC_ROOT: str = os.path.split(Path().parent.absolute())[0]
 
 CUSTOM_DATA_FILES: list = [
   "('docs/version_log.md','{}/docs/version_log.md','DATA'),".format(SPEC_ROOT)
