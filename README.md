@@ -31,9 +31,10 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 ## Download
 
-| OS          | WGViewer version | Link           |
-|:-----------:|:----------------:|:--------------:|
-| Windows x64 | 0.2.1dev         | [download][d1] |
+| OS          | WGViewer version | Download Links        | Size   | Comment |
+|:-----------:|:----------------:|:---------------------:|:------:|:-------:|
+| Windows x64 | 0.2.1dev         | [GH release][d-win]   | ~42 MB |         |
+| Linux x64   | 0.2.1dev         | [GH release][d-linux] | ~70 MB | unzip it and run on CLI |
 
 ## Development
 
@@ -54,18 +55,15 @@ Please see [at this directory](screenshots). Updating as work progresses.
 > pip install -r requirements.txt
 # 3. run auto build batch script
 > win_build.bat
+# 4. The .exe is now in dist/
 ```
 
 #### Unix
 
 ```
-# 1. start a virtual environment
-# 2. install required packages
-> pip install -r requirements.txt
-# 3. update fix_pyinstaller.py with your directory location, run
-# 4. run commands
-> python tools/fix_pyinstaller.py > gui_main.spec  
-> pyinstaller --clean gui_main.spec
+> $ ./linux_build.sh
+# Run the application
+> $ ./dist/WGViewer-linux64
 ```
 
 ### Contribution
@@ -95,4 +93,5 @@ The copyright of the shipgirl art resources used in the WGViewer belong to Moefa
 [JP]: http://ssr.moefantasy.co.jp/
 [Intl]: http://www.warshipgirls.com/en/
 
-[d1]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1dev/WGViewer.exe
+[d-win]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1-dev/WGViewer-win64.zip
+[d-linux]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1-dev/WGViewer-linux64.zip

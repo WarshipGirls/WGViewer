@@ -54,8 +54,9 @@ class MainInterfaceTabs(QWidget):
         #   either make tab dock as default (must run)
         #   or run tab dock functions save & load important data later
         # TODO loading speed is really slow
-        self.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
+        # The init order cannot be changed right now
         self.init_tab(QKEYS.UI_TAB_SHIP, 'tab_dock')
+        self.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
         self.init_tab(QKEYS.UI_TAB_THER, 'tab_thermopylae')
         self.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
 

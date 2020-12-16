@@ -56,7 +56,7 @@ class TabShips(QWidget):
         logging.debug("SHIPS - Starting tests...")
         data = wgv_data.get_api_getShipList()
         # logging.error(len(data['userShipVO']))
-        data['userShipVO'] = data['userShipVO'][:5]
+        # data['userShipVO'] = data['userShipVO'][:5]
         self.on_received_shiplist(data)
 
     def init_ui(self) -> None:
@@ -113,7 +113,6 @@ class TabShips(QWidget):
             # First sort by level, then sort by cid
             sorted_ships = sorted(data["userShipVO"], key=lambda x: (x['level'], x['shipCid']), reverse=True)
             self.table_model.set_data(sorted_ships)
-            # print("!!! RESTORE THIS AFTER TESTING !!!")
             self.table_model.save_table_data()
             logging.info("SHIPS - Success initialized table and saved table data.")
 

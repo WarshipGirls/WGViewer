@@ -2,6 +2,7 @@
 
 To run tests, use
 
+> # Start a virtual python environment, and install required packages  
 > pytest test_file.py   # for testing single test file  
 > pytest tests          # for testing all tests
 
