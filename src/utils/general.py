@@ -48,8 +48,14 @@ def ts_to_date(ts: int) -> str:
 
 def set_sleep(level: float = 1.0):
     # There must be some interval between Game API calls
-    lo = int(qsettings.value(QKEYS.GAME_SPD_LO))
-    hi = int(qsettings.value(QKEYS.GAME_SPD_HI))
+    if qsettings.contains(QKEYS.GAME_SPD_LO):
+        lo = int(qsettings.value(QKEYS.GAME_SPD_LO))
+    else:
+        lo = 5
+    if qsettings.contains(QKEYS.GAME_SPD_HI):
+        hi = int(qsettings.value(QKEYS.GAME_SPD_HI))
+    else:
+        hi = 10
     try:
         assert (lo < hi)
         sleep(randint(lo, hi) * level)

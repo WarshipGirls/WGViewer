@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import ctypes
 import logging
 import os
@@ -11,6 +13,7 @@ from src.utils import get_app_version, get_today
 from src.gui.login.form import LoginForm
 
 
+
 def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
@@ -18,10 +21,21 @@ def get_data_path(relative_path: str) -> str:
     return relative_path if not os.path.exists(res) else res
 
 
+def check_py_ver() -> None:
+    version = sys.version_info[0:3]
+    if version < (3, 6, 0):
+        sys.exit('WGViewer requires Python >= 3.6.0; your version of Python is ' + sys.version)
+    else:
+        pass
+
+
 def init_app_settings() -> None:
     WGV_APP.setWindowIcon(APP_ICON)
-    app_id = u'PWYQ.WarshipGirlsViewer.WGViewer.version'  # arbitrary string
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+    if sys.platform.startswith('win32'):
+        app_id = u'PWYQ.WarshipGirlsViewer.WGViewer.version'  # arbitrary string
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+    else:
+        pass
 
     # This property holds the base name of the desktop entry for this application
     WGV_APP.setDesktopFileName("WGViewer")
@@ -53,6 +67,7 @@ def _realrun() -> None:
 
 
 def _testrun() -> None:
+
     dev_warning = "\n\n==== TEST WARNING ====\n"
     dev_warning += "In test run, api calls to server won't work!\n"
     dev_warning += "In order to test offline, one real run (to get server data sample) is required!\n"
@@ -84,6 +99,7 @@ if __name__ == '__main__':
         _realrun()
     else:
         # running in a normal Python process
+        check_py_ver()
         assert (len(sys.argv) == 2)
 
         if int(sys.argv[1]):
