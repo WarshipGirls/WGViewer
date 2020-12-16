@@ -1,5 +1,7 @@
 # Screenshots
 
+Note that most of these were taken under Windows OS. Some screenshots taken under Linux OS can be found in `pics/`.
+
 ## Functional
 
 > user dock
