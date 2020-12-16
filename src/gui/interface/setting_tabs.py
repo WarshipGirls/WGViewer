@@ -115,6 +115,10 @@ class UISettings(SettingsTemplate):
         row = self.init_tabs(row)
         self.init_hack(row)
 
+    def handle_sidedock(self):
+        self.qsettings.setValue(QKEYS.UI_SIDEDOCK, self.side_dock.isChecked())
+        self.side_dock_pos.setEnabled(self.side_dock.isChecked())
+
     def init_side_dock(self, row: int) -> int:
         self.layout.addWidget(create_qlabel(text="ON START", font_size=HEADER2), row, 0, 1, 4)
 
@@ -124,7 +128,7 @@ class UISettings(SettingsTemplate):
         self.layout.addWidget(self.h_line, row, 0, 1, 4)
         row += 1
         self.set_checkbox_status(self.side_dock, QKEYS.UI_SIDEDOCK)
-        self.side_dock.stateChanged.connect(lambda res: self.init_checkbox(res, QKEYS.UI_SIDEDOCK))
+        self.side_dock.stateChanged.connect(self.handle_sidedock)
         self.layout.addWidget(self.side_dock, row, 0)
         self.init_dropdown(self.side_dock_pos, QKEYS.UI_SIDEDOCK_POS, 0)
         self.side_dock_pos.setToolTip("Set the default position of side dock")
@@ -155,12 +159,18 @@ class UISettings(SettingsTemplate):
 
     def on_reset(self) -> None:
         self.side_dock_pos.setCurrentIndex(0)
+        self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 0)
         # If this gets bigger, use a group or container
         self.side_dock.setChecked(True)
         self.tab_adv.setChecked(True)
         self.tab_exp.setChecked(True)
         self.tab_ship.setChecked(True)
         self.tab_ther.setChecked(True)
+        self.qsettings.setValue(QKEYS.UI_SIDEDOCK, True)
+        self.qsettings.setValue(QKEYS.UI_TAB_ADV, True)
+        self.qsettings.setValue(QKEYS.UI_TAB_EXP, True)
+        self.qsettings.setValue(QKEYS.UI_TAB_SHIP, True)
+        self.qsettings.setValue(QKEYS.UI_TAB_THER, True)
 
 
 class GameSettings(SettingsTemplate):
@@ -259,14 +269,30 @@ class GameSettings(SettingsTemplate):
         return row
 
     def on_reset(self) -> None:
-        self.seed_input.setText(str(self.get_init_value(QKEYS.GAME_RANDOM_SEED, True)))
-        self.speed_lo_input.setValue(self.get_init_value(QKEYS.GAME_SPD_LO, True))
-        self.speed_hi_input.setValue(self.get_init_value(QKEYS.GAME_SPD_HI, True))
-        self.session_retries.setValue(self.get_init_value(QKEYS.CONN_SESS_RTY, True))
-        self.session_sleep.setValue(self.get_init_value(QKEYS.CONN_SESS_SLP, True))
-        self.api_retries.setValue(self.get_init_value(QKEYS.CONN_API_RTY, True))
-        self.api_sleep.setValue(self.get_init_value(QKEYS.CONN_API_SLP, True))
-        self.ther_boss_retry.setValue(self.get_init_value(QKEYS.CONN_THER_RTY, True))
+        t = str(self.get_init_value(QKEYS.GAME_RANDOM_SEED, True))
+        self.seed_input.setText(t)
+        self.qsettings.setValue(QKEYS.GAME_RANDOM_SEED, t)
+        t = self.get_init_value(QKEYS.GAME_SPD_LO, True)
+        self.speed_lo_input.setValue(t)
+        self.qsettings.setValue(QKEYS.GAME_SPD_LO, t)
+        t = self.get_init_value(QKEYS.GAME_SPD_HI, True)
+        self.speed_hi_input.setValue(t)
+        self.qsettings.setValue(QKEYS.GAME_SPD_HI, t)
+        t = self.get_init_value(QKEYS.CONN_SESS_RTY, True)
+        self.session_retries.setValue(t)
+        self.qsettings.setValue(QKEYS.CONN_SESS_RTY, t)
+        t = self.get_init_value(QKEYS.CONN_SESS_SLP, True)
+        self.session_sleep.setValue(t)
+        self.qsettings.setValue(QKEYS.CONN_SESS_SLP, t)
+        t = self.get_init_value(QKEYS.CONN_API_RTY, True)
+        self.api_retries.setValue(t)
+        self.qsettings.setValue(QKEYS.CONN_API_RTY, t)
+        t = self.get_init_value(QKEYS.CONN_API_SLP, True)
+        self.api_sleep.setValue(t)
+        self.qsettings.setValue(QKEYS.CONN_API_SLP, t)
+        t = self.get_init_value(QKEYS.CONN_THER_RTY, True)
+        self.ther_boss_retry.setValue(t)
+        self.qsettings.setValue(QKEYS.CONN_THER_RTY, t)
 
     def create_input(self, _input: str, _edit: Union[QLineEdit, QSpinBox], _default: int, _field: str) -> None:
         if _input == '':
@@ -346,11 +372,15 @@ class TabsSettings(SettingsTemplate):
         row = self.init_thermopylae(row)
         self.init_hack(row)
 
+    def handle_auto_ticket(self):
+        self.qsettings.setValue(QKEYS.THER_TKT_AUTO, (self.ther_ticket_auto.isChecked()))
+        self.ther_ticket_resource.setEnabled(self.ther_ticket_auto.isChecked())
+
     def init_thermopylae(self, row: int) -> int:
         self.layout.addWidget(create_qlabel(text='Thermopylae', font_size=HEADER3), row, 0)
         self.layout.addWidget(create_qlabel(text='Tickets'), row, 1)
         self.set_checkbox_status(self.ther_ticket_auto, QKEYS.THER_TKT_AUTO)
-        self.ther_ticket_auto.stateChanged.connect(lambda res: self.init_checkbox(res, QKEYS.THER_TKT_AUTO))
+        self.ther_ticket_auto.stateChanged.connect(self.handle_auto_ticket)
         self.layout.addWidget(self.ther_ticket_auto, row, 2)
         self.layout.addWidget(create_qlabel(text='With'), row, 3)
         self.init_dropdown(self.ther_ticket_resource, QKEYS.THER_TKT_RSC, 3)
@@ -410,16 +440,22 @@ class TabsSettings(SettingsTemplate):
 
     def on_reset(self) -> None:
         self.ther_ticket_auto.setChecked(True)
+        self.qsettings.setValue(QKEYS.THER_TKT_AUTO, True)
         self.ther_ticket_resource.setCurrentIndex(3)
+        self.qsettings.setValue(QKEYS.THER_TKT_RSC, 3)
 
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY, True)
+        self.qsettings.setValue(QKEYS.THER_BOSS_RTY, _d)
         for i in range(3):
             self.ther_boss_retry[i].setValue(_d[i])
 
         _d = self.get_init_value(QKEYS.THER_BOSS_STD, True)
+        self.qsettings.setValue(QKEYS.THER_BOSS_STD, _d)
         for i in range(3):
             self.ther_boss_std[i].setValue(_d[i])
 
+        _d = self.get_init_value(QKEYS.THER_REPAIRS, True)
+        self.qsettings.setValue(QKEYS.THER_REPAIRS, _d)
         for i in range(6):
             self.ther_repairs[i].setCurrentIndex(1)
 
