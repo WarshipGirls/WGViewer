@@ -80,6 +80,9 @@ class SettingsTemplate(QWidget):
         else:
             dropdown.setCurrentIndex(default_idx)
 
+    def on_dropdown_change(self, dropdown: QComboBox, key: str) -> None:
+        self.qsettings.setValue(key, dropdown.currentIndex())
+
     def set_checkbox_status(self, ck: QCheckBox, key: str, default: bool = True) -> None:
         if self.qsettings.contains(key) is True:
             ck.setChecked(self.qsettings.value(key) == 'true')
@@ -122,7 +125,7 @@ class UISettings(SettingsTemplate):
         self.layout.addWidget(self.side_dock, row, 0, 1, 1)
         self.init_dropdown(self.side_dock_pos, QKEYS.UI_SIDEDOCK_POS, 0)
         self.side_dock_pos.setToolTip("Set the default position of side dock")
-        self.side_dock_pos.currentTextChanged.connect(self.handle_side_dock_pos)
+        self.side_dock_pos.currentTextChanged.connect(lambda _: self.on_dropdown_change(self.side_dock_pos, QKEYS.UI_SIDEDOCK_POS))
         self.layout.addWidget(self.side_dock_pos, row, 1, 1, 1)
         return row
 
@@ -156,9 +159,6 @@ class UISettings(SettingsTemplate):
         self.tab_exp.setChecked(True)
         self.tab_ship.setChecked(True)
         self.tab_ther.setChecked(True)
-
-    def handle_side_dock_pos(self) -> None:
-        self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, self.side_dock_pos.currentIndex())
 
 
 class GameSettings(SettingsTemplate):
@@ -361,7 +361,7 @@ class TabsSettings(SettingsTemplate):
         self.ticket_auto.stateChanged.connect(lambda res: self.init_checkbox(res, QKEYS.THER_TKT_AUTO))
         self.layout.addWidget(self.ticket_auto, row, 2)
         self.init_dropdown(self.ticket_resource, QKEYS.THER_TKT_RSC, 3)
-        self.ticket_resource.currentIndexChanged.connect(self.handle_thermopylae_resource_type)
+        self.ticket_resource.currentIndexChanged.connect(lambda _: self.on_dropdown_change(self.ticket_resource, QKEYS.THER_TKT_RSC))
         self.layout.addWidget(self.ticket_resource, row, 3)
 
         row += 1
@@ -417,9 +417,6 @@ class TabsSettings(SettingsTemplate):
             _default[idx] = int(_input)
             save = _default
         self.qsettings.setValue(_field, save)
-
-    def handle_thermopylae_resource_type(self):
-        self.qsettings.setValue(QKEYS.THER_TKT_RSC, self.ticket_resource.currentIndex())
 
     def dropdown_input(self, _input: str, _edit: QComboBox, _default: list, idx: int, _field: str) -> None:
         if _input == '':
