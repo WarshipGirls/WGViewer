@@ -15,9 +15,13 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.7
-    - name: Build Binary
-      shell: cmd
-      run: call .\win_build.bat
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+    - name: build with pyinstaller
+      run: |
+        pyinstaller gui_main.spec
 
   build_linux:
     runs-on: ubuntu-latest
