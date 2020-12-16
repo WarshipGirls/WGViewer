@@ -18,10 +18,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install -r requirements.txt
         pip install pyinstaller
-    - name: build with pyinstaller
+    - name: Build Binary
       run: |
-        pyinstaller ./gui_main.spec
+        pyinstaller gui_main.py
 
   build_linux:
     runs-on: ubuntu-latest
