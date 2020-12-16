@@ -12,7 +12,6 @@ from src.utils import repair_id_to_text, repair_text_to_id
 from src.func import qsettings_keys as QKEYS
 from src.gui.custom_widgets import QHLine
 
-
 HEADER1: int = 20
 HEADER2: int = 15
 HEADER3: int = 12
@@ -58,16 +57,39 @@ def get_int_mask() -> QRegExpValidator:
     return QRegExpValidator(QRegExp("[1-9][0-9]*"))
 
 
-class UISettings(QWidget):
-
+class SettingsTemplate(QWidget):
     def __init__(self, qsettings):
         super().__init__()
         self.qsettings = qsettings
-
         self.layout = QGridLayout()
         # Lesson: without setLayout(), it only renders the last QWidget
         self.setLayout(self.layout)
 
+    def init_hack(self, row: int) -> None:
+        # following is a hack; TODO: setRowStretch is not working properly
+        for h in range(10):
+            row += 1
+            self.layout.addWidget(QLabel(""), row, 0, 1, 4)
+
+    def init_checkbox(self, res, name: str) -> None:
+        if res == 2:
+            self.qsettings.setValue(name, True)
+        elif res == 0:
+            self.qsettings.setValue(name, False)
+        else:
+            self.qsettings.setValue(name, False)
+
+    def set_checkbox_status(self, ck: QCheckBox, key: str) -> None:
+        if self.qsettings.contains(key) is True:
+            ck.setChecked(self.qsettings.value(key) == 'true')
+        else:
+            ck.setChecked(True)
+
+
+class UISettings(SettingsTemplate):
+
+    def __init__(self, qsettings):
+        super().__init__(qsettings)
         self.side_dock = QCheckBox("Navy Base Overview", self)
         self.dropdown_side_dock = create_qcombobox(['Right', 'Left'])
 
@@ -124,12 +146,6 @@ class UISettings(QWidget):
         self.layout.addWidget(self.tab_ther, row, 3, 1, 1)
         return row
 
-    def init_hack(self, row: int) -> None:
-        # following is a hack; TODO: setRowStretch is not working properly
-        for h in range(10):
-            row += 1
-            self.layout.addWidget(QLabel(""), row, 0, 1, 4)
-
     def on_reset(self) -> None:
         # If this gets bigger, use a group or container
         self.side_dock.setChecked(True)
@@ -146,30 +162,12 @@ class UISettings(QWidget):
         else:
             self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 'right')
 
-    def init_checkbox(self, res, name: str) -> None:
-        if res == 2:
-            self.qsettings.setValue(name, True)
-        elif res == 0:
-            self.qsettings.setValue(name, False)
-        else:
-            self.qsettings.setValue(name, False)
 
-    def set_checkbox_status(self, ck: QCheckBox, key: str) -> None:
-        if self.qsettings.contains(key) is True:
-            ck.setChecked(self.qsettings.value(key) == 'true')
-        else:
-            ck.setChecked(True)
-
-
-class GameSettings(QWidget):
+class GameSettings(SettingsTemplate):
     def __init__(self, qsettings):
-        super().__init__()
-        self.qsettings = qsettings
-
-        self.layout = QGridLayout()
+        super().__init__(qsettings)
         for col in range(5):
             self.layout.setColumnStretch(col, 1)
-        self.setLayout(self.layout)
 
         _d = self.get_init_value(QKEYS.GAME_RANDOM_SEED)
         self.seed_input = create_qlineedit(default=_d, max_len=16)
@@ -259,12 +257,6 @@ class GameSettings(QWidget):
 
         return row
 
-    def init_hack(self, row: int) -> None:
-        # following is a hack; TODO: setRowStretch is not working properly
-        for h in range(10):
-            row += 1
-            self.layout.addWidget(QLabel(""), row, 0, 1, 4)
-
     def on_reset(self) -> None:
         _d = self.get_init_value(QKEYS.GAME_RANDOM_SEED, True)
         self.seed_input.setText(str(_d))
@@ -324,14 +316,13 @@ class GameSettings(QWidget):
         self.qsettings.setValue(QKEYS.GAME_RANDOM_SEED, int(_input))
 
 
-class TabsSettings(QWidget):
+class TabsSettings(SettingsTemplate):
     def __init__(self, qsettings):
-        super().__init__()
-        self.qsettings = qsettings
-        self.layout = QGridLayout()
+        super().__init__(qsettings)
         for col in range(5):
             self.layout.setColumnStretch(col, 1)
-        self.setLayout(self.layout)
+
+        self.auto_purchase = QCheckBox("Auto Purchase", self)
 
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY)
         self.ther_boss_retry: List[QSpinBox] = [
@@ -366,6 +357,10 @@ class TabsSettings(QWidget):
     def init_thermopylae(self, row: int) -> int:
         # TODO add auto ticket buying options & consumption tickets here
         self.layout.addWidget(create_qlabel(text='Thermopylae', font_size=HEADER3), row, 0)
+        self.layout.addWidget(create_qlabel(text='Tickets'), row, 1)
+        self.layout.addWidget(self.auto_purchase, row, 2)
+
+        row += 1
         self.layout.addWidget(create_qlabel(text='Bosses Retries'), row, 1)
         tbr_init = self.get_init_value(QKEYS.THER_BOSS_RTY)
         self.ther_boss_retry[0].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[0], tbr_init, 0, QKEYS.THER_BOSS_RTY))
@@ -408,12 +403,6 @@ class TabsSettings(QWidget):
 
         row += 1
         return row
-
-    def init_hack(self, row: int) -> None:
-        # following is a hack; TODO: setRowStretch is not working properly
-        for h in range(10):
-            row += 1
-            self.layout.addWidget(QLabel(""), row, 0, 1, 4)
 
     def create_input(self, _input: str, _edit: QSpinBox, _default: list, idx: int, _field: str) -> None:
         # Lesson: locals() shows all arguments https://stackoverflow.com/a/50763376/14561914
