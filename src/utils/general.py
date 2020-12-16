@@ -3,7 +3,7 @@ import re
 
 from datetime import datetime, timedelta, date
 from random import randint
-from time import sleep
+from time import sleep, time
 
 from PyQt5.QtCore import QSettings
 
@@ -24,6 +24,10 @@ def get_app_version() -> str:
 
 def get_curr_time() -> str:
     return datetime.now().strftime("%H:%M:%S")
+
+
+def get_unixtime() -> int:
+    return int(time())
 
 
 def get_today() -> str:

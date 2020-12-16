@@ -1,10 +1,15 @@
+import csv
 import logging
 import os
 import sys
+from typing import List
 
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot, QTimer
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QAbstractTableModel
+
+from src.data import get_user_dir
+from src.utils import get_unixtime
 
 
 def get_data_path(relative_path: str) -> str:
@@ -14,11 +19,53 @@ def get_data_path(relative_path: str) -> str:
     return relative_path if not os.path.exists(res) else res
 
 
+# TODO: change to 15 min = 900 seconds
+COUNTDOWN: int = 2
+
+CSV_HEADER: List[str] = ['time',
+                         'fuel', 'ammo', 'steel', 'baux', 'gold',
+                         'repair', 'build', 'construct', 'dev', 'revive',
+                         'dd', 'ca', 'bb', 'cv', 'ss']
+
+
 class ResourceTableModel(QAbstractTableModel):
     # https://www.learnpyqt.com/courses/model-views/qtableview-modelviews-numpy-pandas/
     def __init__(self, data):
         super(ResourceTableModel, self).__init__()
         self._data = data
+
+        self.csv_filename = os.path.join(get_user_dir(), 'resource_log.csv')
+        self.counter = COUNTDOWN
+        self.timer = QTimer()
+        self.timer.setInterval(1000)
+        self.timer.timeout.connect(self.count_down)
+        self.timer.start()
+
+    def get_data(self) -> list:
+        return self._data
+
+    @staticmethod
+    def flatten_list(nested_lists: list) -> list:
+        return [i for l in nested_lists for i in l]
+
+    def count_down(self) -> None:
+        self.counter -= 1
+        if self.counter >= 0:
+            pass
+        else:
+            self.counter = COUNTDOWN
+            self.write_csv()
+
+    def write_csv(self) -> None:
+        with open(self.csv_filename, 'a', newline='') as f:
+            write = csv.writer(f)
+            if os.path.getsize(self.csv_filename) == 0:
+                write.writerow(CSV_HEADER)
+            else:
+                pass
+            d = [get_unixtime()]
+            d += self.flatten_list(self._data)
+            write.writerow(d)
 
     # ================================
     # Virtual methods

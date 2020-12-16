@@ -25,6 +25,8 @@ from .align_list_view import BathListView, BuildListView, DevListView, ExpListVi
 
 TASK_TYPE: dict = {'1': "SINGLE", '2': "DAILY", '3': "WEEKLY", '4': "LIMITED TIME"}
 
+# TODO: refactor
+
 
 def get_data_path(relative_path: str) -> str:
     # This needs to be in current file

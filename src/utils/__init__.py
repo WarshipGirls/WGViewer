@@ -21,7 +21,7 @@ from .game_info import (
 from .general import (
     clear_desc, 
     force_quit, 
-    get_app_version, get_curr_time, get_game_version, get_today, 
+    get_app_version, get_curr_time, get_game_version, get_today, get_unixtime, 
     set_sleep, 
     ts_to_countdown, ts_to_date
 )
