@@ -93,5 +93,5 @@ The copyright of the shipgirl art resources used in the WGViewer belong to Moefa
 [JP]: http://ssr.moefantasy.co.jp/
 [Intl]: http://www.warshipgirls.com/en/
 
-[d-win]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1-dev/WGViewer-win64.exe
+[d-win]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1-dev/WGViewer-win64.zip
 [d-linux]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1-dev/WGViewer-linux64.zip
