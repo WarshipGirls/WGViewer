@@ -70,7 +70,7 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 WGViewer welcomes contributors!
 
-If you know "hello world" in any programming language, please see the [contribution guide](CONTRIBUTING.md) for more information.
+If you know "hello world" in any programming language, please see the [contribution guide](.github/CONTRIBUTING.md) for more information.
 
 If you don't know coding but still want to help WGViewer becomes better, you may
 - upload missing ship images ([here](https://github.com/WarshipGirls/WGViewer/issues/43));

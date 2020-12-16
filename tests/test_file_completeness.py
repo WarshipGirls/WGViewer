@@ -112,7 +112,7 @@ class TestFileIntegrity(unittest.TestCase):
         self.assertNotEqual(get_file_size(_file), 0)
 
     def test_code_of_conduct_valid(self):
-        _file = ROOT_DIR.joinpath('CODE_OF_CONDUCT.md')
+        _file = ROOT_DIR.joinpath('.github', 'CODE_OF_CONDUCT.md')
         self.assertEqual(_file.exists(), True)
         self.assertNotEqual(get_file_size(_file), 0)
 
@@ -132,6 +132,10 @@ class TestFileIntegrity(unittest.TestCase):
         self.assertNotEqual(get_file_size(_file), 0)
 
         _file = ROOT_DIR.joinpath('.github', 'workflows', 'wgv-pyinstaller.yml')
+        self.assertEqual(_file.exists(), True)
+        self.assertNotEqual(get_file_size(_file), 0)
+
+        _file = ROOT_DIR.joinpath('.github', 'workflows', 'labeler.yml')
         self.assertEqual(_file.exists(), True)
         self.assertNotEqual(get_file_size(_file), 0)
 
