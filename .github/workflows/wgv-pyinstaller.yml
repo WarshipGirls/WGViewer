@@ -21,7 +21,7 @@ jobs:
         pip install pyinstaller
     - name: build with pyinstaller
       run: |
-        pyinstaller gui_main.spec
+        pyinstaller ./gui_main.spec
 
   build_linux:
     runs-on: ubuntu-latest
