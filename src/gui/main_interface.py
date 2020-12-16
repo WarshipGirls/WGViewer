@@ -79,30 +79,6 @@ class MainInterface(QMainWindow):
         self.setLayout(QHBoxLayout())
         self.setWindowTitle(f"Warship Girls Viewer v{wgv_utils.get_app_version()}")
 
-    ''' TODO: remove
-    # Original design is to let user freely open/close side-dock.
-    # Due to the need of hidden pyqt signals connect to the side-dock,
-    # we changed the visibility instead of delete it.
-    def create_side_dock(self):
-        if (self.side_dock_on is False) and (self.side_dock is None):
-            self.side_dock = SideDock(self)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
-            self.side_dock_on = True
-        else:
-            pass
-
-    def init_side_dock(self) -> None:
-        # Following only checks on log-in
-        if self.qsettings.contains(QKEYS.UI_SIDEDOCK) is True:
-            if self.qsettings.value(QKEYS.UI_SIDEDOCK) == "true":
-                pass
-            else:
-                self.create_side_dock()
-        else:
-            self.qsettings.setValue(QKEYS.UI_SIDEDOCK, False)
-            self.create_side_dock()
-    '''
-
     def create_side_dock(self) -> None:
         if self.side_dock is None:
             self.side_dock = SideDock(self)
