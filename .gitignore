@@ -225,3 +225,4 @@ pve_getPveData.json
 docs/~$banner.pptx
 debug.log
 *.spec
+wgv_venv/
