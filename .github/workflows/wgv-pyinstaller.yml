@@ -17,7 +17,7 @@ jobs:
         python-version: 3.7
     - name: Build Binary
       shell: cmd
-      run: call .\win_build.cmd
+      run: call .\win_build.bat
 
   build_linux:
     runs-on: ubuntu-latest
