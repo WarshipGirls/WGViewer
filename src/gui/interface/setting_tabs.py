@@ -161,10 +161,7 @@ class UISettings(QWidget):
             self.qsettings.setValue(name, False)
 
     def set_checkbox_status(self, ck: QCheckBox, key: str) -> None:
-        if self.qsettings.value(key) == 'true':
-            ck.setChecked(True)
-        else:
-            ck.setChecked(False)
+        ck.setChecked(self.qsettings.value(key) == 'true')
 
 
 class GameSettings(QWidget):
