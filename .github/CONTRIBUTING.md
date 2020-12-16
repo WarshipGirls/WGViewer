@@ -13,17 +13,11 @@ To contribute code,
 2. install required packages: `pip install -r requirements.txt`
 3. make a [pull request](../../pulls) when your code is ready :)
 
-### Packing into executable
+## Coding Styles
 
-To build executable on Windows OS, run
-
-> win_build.bat
-
-To build executable on Unix OS, update `fix_pyinstaller.py` with your directory location, run
-
-> python tools/fix_pyinstaller.py > gui_main.spec  
-> pyinstaller --clean gui_main.spec
-
+- This project followed most PEP standards
+- Use indentation = 4 spaces
+- For pure natural language strings, use double-quote; otherwise (involves variables), use single-quote
 
 ## Version Naming
 
@@ -32,7 +26,7 @@ WGViewer uses [packaging.version](https://packaging.pypa.io/en/latest/version.ht
 - `version` format = `major.minor.micro`
 - Valid notations = {a, b, c, r, beta, dev, pre, post, rev}
 - Valid notations can appear once and only once in either `minor` or `micro` for the version number to be valid.
-- notations are dropped when reading `minor` or `micro` field
+- notations are dropped while reading `minor` or `micro` field
   
 Some valid example:
 ``` 
@@ -59,8 +53,20 @@ v0.1.0-side-dock
 v0.1.1dev-docs
 ```
 
-## Coding Styles
+## Commit message conventions
 
-- This project followed most PEP standards
-- Use indentation = 4 spaces
-- For pure natural language strings, use double-quote; otherwise (involves variables), use single-quote
+Please follow the [semantic commit messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716):
+
+WGViewer uses [these prefixes](https://github.com/WarshipGirls/WGViewer/blob/master/.github/pr-prefix-labeler.yml).
+
+## Packing into executable
+
+To build executable on Windows OS, run
+
+> win_build.bat
+
+To build application on Linux OS, run
+
+> ./linux_build.sh
+
+
