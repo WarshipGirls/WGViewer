@@ -95,7 +95,7 @@ class UISettings(QWidget):
         self.layout.addWidget(QHLine(parent=self, color=QColor(0, 0, 0), width=10), row, 0, 1, 4)
         row += 1
         self.set_checkbox_status(self.side_dock, QKEYS.UI_SIDEDOCK)
-        self.side_dock.stateChanged.connect(self.handle_side_dock_init)
+        self.side_dock.stateChanged.connect(lambda res: self.init_checkbox(res, QKEYS.UI_SIDEDOCK))
         self.layout.addWidget(self.side_dock, row, 0, 1, 1)
         self.dropdown_side_dock.setToolTip("Set the default position of side dock")
         self.dropdown_side_dock.currentTextChanged.connect(self.handle_side_dock_pos)
@@ -146,12 +146,6 @@ class UISettings(QWidget):
         else:
             self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 'right')
 
-    def handle_side_dock_init(self) -> None:
-        if self.side_dock.isChecked() is True:
-            self.qsettings.setValue(QKEYS.UI_SIDEDOCK, False)
-        else:
-            self.qsettings.setValue(QKEYS.UI_SIDEDOCK, True)
-
     def init_checkbox(self, res, name: str) -> None:
         if res == 2:
             self.qsettings.setValue(name, True)
@@ -161,7 +155,10 @@ class UISettings(QWidget):
             self.qsettings.setValue(name, False)
 
     def set_checkbox_status(self, ck: QCheckBox, key: str) -> None:
-        ck.setChecked(self.qsettings.value(key) == 'true')
+        if self.qsettings.contains(key) is True:
+            ck.setChecked(self.qsettings.value(key) == 'true')
+        else:
+            ck.setChecked(True)
 
 
 class GameSettings(QWidget):

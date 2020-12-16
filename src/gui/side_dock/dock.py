@@ -486,7 +486,11 @@ class SideDock(QDockWidget):
         return super(SideDock, self).resizeEvent(event)
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        cb = QCheckBox('Do not show on start-up.')
+        cb = QCheckBox('show on start-up')
+        if self.qsettings.contains(QKEYS.UI_SIDEDOCK) is True:
+            cb.setChecked(self.qsettings.value(QKEYS.UI_SIDEDOCK) == 'true')
+        else:
+            pass
         box = QMessageBox(QMessageBox.Question, "INFO", "Do you want to close side dock?\n(Can re-open in View menu)",
                           QMessageBox.Yes | QMessageBox.No, self)
 

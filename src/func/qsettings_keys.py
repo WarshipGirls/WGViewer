@@ -19,7 +19,7 @@ LOGIN_DISCLAIMER: str = 'LOGIN/disclaimer'
 
 STYLE: str = 'style'
 
-UI_SIDEDOCK: str = 'UI/no_side_dock'
+UI_SIDEDOCK: str = 'UI/init_side_dock'
 UI_SIDEDOCK_POS: str = 'UI/side_dock_pos'
 
 THER_TKT_AUTO: str = 'THER/ticket_auto_buy'
