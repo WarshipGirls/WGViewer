@@ -100,8 +100,14 @@ class Sortie:
 
         ticket_num = int(self.user_data['canChargeNum']) - int(self.user_data['chargeNum'])
         self.parent.button_purchase.setEnabled(ticket_num > 0)
-        # TODO: auto purchase
         self.update_sortie_ticket(ticket=self.user_data['ticket'], num=ticket_num)
+        if self.qsettings.contains(QKEYS.THER_TKT_AUTO):
+            if self.qsettings.value(QKEYS.THER_TKT_AUTO) == 'true':
+                self.buy_all_tickets(ticket_num)
+            else:
+                pass
+        else:
+            self.buy_all_tickets(ticket_num)
         self.update_adjutant_label(self.user_data['adjutantData'])
         self.set_boat_pool(self.user_data['boatPool'])
         self.set_sub_map(self.pre_sortie.get_sub_map_id())
@@ -322,13 +328,23 @@ class Sortie:
     # Helpers
     # ================================
 
-    def buy_ticket(self):
-        buy_res = self.helper.charge_ticket()
+    def buy_all_tickets(self, ticket_num):
+        while ticket_num > 0:
+            ticket_num = self.buy_ticket()
+            set_sleep()
+
+    def buy_ticket(self) -> int:
+        if self.qsettings.contains(QKEYS.THER_TKT_RSC) is True:
+            rsc = str(self.qsettings.value(QKEYS.THER_TKT_RSC))
+        else:
+            rsc = '3'
+        buy_res = self.helper.charge_ticket(rsc)
         self.update_side_dock_resources(buy_res['userResVO'])
         # Weekly purchase quota is 3
         can_buy = 3 - buy_res['chargeNum']
         self.update_sortie_ticket(ticket=buy_res['ticket'], num=can_buy)
         self.parent.button_purchase.setEnabled(can_buy > 0)
+        return can_buy
 
     def buy_wanted_ships(self, purchase_list: list, shop_data: dict, is_buff: bool) -> Union[None, dict]:
         """

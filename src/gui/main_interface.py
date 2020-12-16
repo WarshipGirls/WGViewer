@@ -109,9 +109,9 @@ class MainInterface(QMainWindow):
         else:
             self.side_dock.show()
         if self.qsettings.contains(QKEYS.UI_SIDEDOCK_POS) is True:
-            if self.qsettings.value(QKEYS.UI_SIDEDOCK_POS) == 'right':
+            if self.qsettings.value(QKEYS.UI_SIDEDOCK_POS) == '0':
                 pos = Qt.RightDockWidgetArea
-            elif self.qsettings.value(QKEYS.UI_SIDEDOCK_POS) == 'left':
+            elif self.qsettings.value(QKEYS.UI_SIDEDOCK_POS) == '1':
                 pos = Qt.LeftDockWidgetArea
             else:
                 pos = Qt.RightDockWidgetArea

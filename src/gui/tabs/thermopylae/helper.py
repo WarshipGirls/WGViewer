@@ -148,7 +148,7 @@ class SortieHelper:
 
         return self._reconnecting_calls(_challenge, 'Combat')
 
-    def charge_ticket(self, resource_typd_id: str = '2') -> dict:
+    def charge_ticket(self, resource_typd_id: str) -> dict:
         def _buy() -> Tuple[bool, dict]:
             data = self.api.chargeTicket(resource=resource_typd_id)
             res = False

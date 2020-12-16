@@ -72,18 +72,19 @@ class SettingsTemplate(QWidget):
             self.layout.addWidget(QLabel(""), row, 0, 1, 4)
 
     def init_checkbox(self, res, name: str) -> None:
-        if res == 2:
-            self.qsettings.setValue(name, True)
-        elif res == 0:
-            self.qsettings.setValue(name, False)
-        else:
-            self.qsettings.setValue(name, False)
+        self.qsettings.setValue(name, (res == 2))
 
-    def set_checkbox_status(self, ck: QCheckBox, key: str) -> None:
+    def init_dropdown(self, dropdown: QComboBox, key: str, default_idx: int) -> None:
+        if self.qsettings.contains(key) is True:
+            dropdown.setCurrentIndex(int(self.qsettings.value(key)))
+        else:
+            dropdown.setCurrentIndex(default_idx)
+
+    def set_checkbox_status(self, ck: QCheckBox, key: str, default: bool = True) -> None:
         if self.qsettings.contains(key) is True:
             ck.setChecked(self.qsettings.value(key) == 'true')
         else:
-            ck.setChecked(True)
+            ck.setChecked(default)
 
 
 class UISettings(SettingsTemplate):
@@ -91,7 +92,7 @@ class UISettings(SettingsTemplate):
     def __init__(self, qsettings):
         super().__init__(qsettings)
         self.side_dock = QCheckBox("Navy Base Overview", self)
-        self.dropdown_side_dock = create_qcombobox(['Right', 'Left'])
+        self.side_dock_pos = create_qcombobox(['Right', 'Left'])
 
         self.tab_adv = QCheckBox("Advance Functions", self)
         self.tab_exp = QCheckBox("Expedition", self)
@@ -119,9 +120,10 @@ class UISettings(SettingsTemplate):
         self.set_checkbox_status(self.side_dock, QKEYS.UI_SIDEDOCK)
         self.side_dock.stateChanged.connect(lambda res: self.init_checkbox(res, QKEYS.UI_SIDEDOCK))
         self.layout.addWidget(self.side_dock, row, 0, 1, 1)
-        self.dropdown_side_dock.setToolTip("Set the default position of side dock")
-        self.dropdown_side_dock.currentTextChanged.connect(self.handle_side_dock_pos)
-        self.layout.addWidget(self.dropdown_side_dock, row, 1, 1, 1)
+        self.init_dropdown(self.side_dock_pos, QKEYS.UI_SIDEDOCK_POS, 0)
+        self.side_dock_pos.setToolTip("Set the default position of side dock")
+        self.side_dock_pos.currentTextChanged.connect(self.handle_side_dock_pos)
+        self.layout.addWidget(self.side_dock_pos, row, 1, 1, 1)
         return row
 
     def init_tabs(self, row: int) -> int:
@@ -147,6 +149,7 @@ class UISettings(SettingsTemplate):
         return row
 
     def on_reset(self) -> None:
+        self.side_dock_pos.setCurrentIndex(0)
         # If this gets bigger, use a group or container
         self.side_dock.setChecked(True)
         self.tab_adv.setChecked(True)
@@ -155,12 +158,7 @@ class UISettings(SettingsTemplate):
         self.tab_ther.setChecked(True)
 
     def handle_side_dock_pos(self) -> None:
-        if self.dropdown_side_dock.currentText() == 'Right':
-            self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 'right')
-        elif self.dropdown_side_dock.currentText() == 'Left':
-            self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 'left')
-        else:
-            self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, 'right')
+        self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, self.side_dock_pos.currentIndex())
 
 
 class GameSettings(SettingsTemplate):
@@ -322,7 +320,8 @@ class TabsSettings(SettingsTemplate):
         for col in range(5):
             self.layout.setColumnStretch(col, 1)
 
-        self.auto_purchase = QCheckBox("Auto Purchase", self)
+        self.ticket_auto = QCheckBox("Auto Purchase", self)
+        self.ticket_resource = create_qcombobox(['Fuel', 'Ammunition', 'Steel', 'Bauxite'])
 
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY)
         self.ther_boss_retry: List[QSpinBox] = [
@@ -358,7 +357,12 @@ class TabsSettings(SettingsTemplate):
         # TODO add auto ticket buying options & consumption tickets here
         self.layout.addWidget(create_qlabel(text='Thermopylae', font_size=HEADER3), row, 0)
         self.layout.addWidget(create_qlabel(text='Tickets'), row, 1)
-        self.layout.addWidget(self.auto_purchase, row, 2)
+        self.set_checkbox_status(self.ticket_auto, QKEYS.THER_TKT_AUTO)
+        self.ticket_auto.stateChanged.connect(lambda res: self.init_checkbox(res, QKEYS.THER_TKT_AUTO))
+        self.layout.addWidget(self.ticket_auto, row, 2)
+        self.init_dropdown(self.ticket_resource, QKEYS.THER_TKT_RSC, 3)
+        self.ticket_resource.currentIndexChanged.connect(self.handle_thermopylae_resource_type)
+        self.layout.addWidget(self.ticket_resource, row, 3)
 
         row += 1
         self.layout.addWidget(create_qlabel(text='Bosses Retries'), row, 1)
@@ -414,6 +418,9 @@ class TabsSettings(SettingsTemplate):
             save = _default
         self.qsettings.setValue(_field, save)
 
+    def handle_thermopylae_resource_type(self):
+        self.qsettings.setValue(QKEYS.THER_TKT_RSC, self.ticket_resource.currentIndex())
+
     def dropdown_input(self, _input: str, _edit: QComboBox, _default: list, idx: int, _field: str) -> None:
         if _input == '':
             save = _default
@@ -424,6 +431,9 @@ class TabsSettings(SettingsTemplate):
         self.qsettings.setValue(_field, save)
 
     def on_reset(self) -> None:
+        self.ticket_auto.setChecked(True)
+        self.ticket_resource.setCurrentIndex(3)
+
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY, True)
         self.ther_boss_retry[0].setValue(_d[0])
         self.ther_boss_retry[1].setValue(_d[1])
@@ -442,7 +452,7 @@ class TabsSettings(SettingsTemplate):
         self.ther_repairs[4].setCurrentIndex(1)
         self.ther_repairs[5].setCurrentIndex(1)
 
-    def get_init_value(self, field: str, is_default: bool = False) -> list:
+    def get_init_value(self, field: str, is_default: bool = False) -> Union[list, int]:
         if (self.qsettings.contains(field) is True) and (is_default is False):
             d = self.qsettings.value(field)
         else:
@@ -452,9 +462,11 @@ class TabsSettings(SettingsTemplate):
                 d = [1, 2, 2]
             elif field == QKEYS.THER_REPAIRS:
                 d = [2, 2, 2, 2, 2, 2]
+            elif field == QKEYS.THER_TKT_RSC:
+                d = 3
             else:
                 logging.error(f"Unsupported QKEYS filed {field}")
-                d = 1
+                d = [1]
         return d
 
 # End of File
