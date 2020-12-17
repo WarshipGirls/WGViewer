@@ -10,6 +10,7 @@ from PyQt5.QtCore import QSettings
 from src.data import get_qsettings_file
 from src.func import qsettings_keys as QKEYS
 
+# TODO move qsettings related to wgv_qsettings
 qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
 
 
@@ -23,7 +24,7 @@ def get_app_version() -> str:
 
 
 def get_curr_time() -> str:
-    return datetime.now().strftime("%H:%M:%S")
+    return datetime.now().strftime('%H:%M:%S')
 
 
 def get_unixtime() -> int:

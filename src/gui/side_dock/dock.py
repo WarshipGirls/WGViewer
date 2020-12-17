@@ -22,8 +22,8 @@ from src import utils as wgv_utils
 from src.func import qsettings_keys as QKEYS
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
+from .constants import TASK_TYPE
 
-TASK_TYPE: dict = {'1': "SINGLE", '2': "DAILY", '3': "WEEKLY", '4': "LIMITED TIME"}
 
 # TODO: refactor
 

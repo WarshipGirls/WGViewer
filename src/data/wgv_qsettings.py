@@ -18,10 +18,12 @@ def del_key_file(key_file: str = '.wgr.key') -> None:
         pass
 
 
+def get_color_option() -> str:
+    return qsettings.value(QKEYS.STYLE) if qsettings.contains(QKEYS.STYLE) else "qdarkstyle"
+
+
 def get_color_scheme() -> str:
-    qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
-    s = qsettings.value(QKEYS.STYLE) if qsettings.contains(QKEYS.STYLE) else "qdarkstyle"
-    if s == "native":
+    if get_color_option() == "native":
         return ""
     else:
         qsettings.setValue(QKEYS.STYLE, "qdarkstyle")
@@ -66,7 +68,11 @@ def load_cookies() -> dict:
 
 if __name__ == "__main__":
     from src.data.wgv_path import get_data_dir
+
+    qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
 else:
     from .wgv_path import get_data_dir
+
+    qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
 
 # End of File
