@@ -25,9 +25,6 @@ from .align_list_view import BathListView, BuildListView, DevListView, ExpListVi
 from .constants import TASK_TYPE
 
 
-# TODO: refactor
-
-
 def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
@@ -36,6 +33,11 @@ def get_data_path(relative_path: str) -> str:
 
 
 class SideDock(QDockWidget):
+    """
+    Side Dock/Panel, named "Navy Base Overview", displays all important data of the user.
+        This is the first coded QWidget of WGViewer (even before LoginForm).
+    TODO: refactor
+    """
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
