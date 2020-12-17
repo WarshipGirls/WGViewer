@@ -15,7 +15,7 @@ LOGIN: str = 'LOGIN'  # bool
 LOGIN_AUTO: str = 'LOGIN/auto'  # bool
 LOGIN_SAVE: str = 'LOGIN/save'  # bool
 LOGIN_USER: str = 'LOGIN/username'  # str
-LOGIN_PSWD: str = 'LOGIN/password'  # str
+LOGIN_PSWD: str = 'LOGIN/password'  # byte
 LOGIN_SERVER: str = 'LOGIN/server_text'  # str
 LOGIN_PLATFORM: str = 'LOGIN/platform_text'  # str
 LOGIN_DISCLAIMER: str = 'LOGIN/disclaimer'  # bool
@@ -34,6 +34,7 @@ THER_TKT_RSC: str = 'THER/ticket_resource_type'  # str(int); use one F/A/S/B res
 THER_BOSS_RTY: str = 'THER/bosses_retries'  # list of int
 THER_BOSS_STD: str = 'THER/bosses_retry_standard'  # list of int
 THER_REPAIRS: str = 'THER/repair_levels'  # list of int
+THER_SHIP_STARS: str = 'THER/user_ship_stars'  # dict; ship-id (int) to star (int), to keep track of user ship stars
 
 UI_TAB_ADV: str = 'UI/TAB/advance'  # bool
 UI_TAB_EXP: str = 'UI/TAB/expedition'  # bool

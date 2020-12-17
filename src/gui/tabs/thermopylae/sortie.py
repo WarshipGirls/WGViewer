@@ -34,6 +34,8 @@ E63_A1_ID: str = '931802'
 
 class Sortie:
 
+    # TODO: change all list to specific type, e.g. List[int]
+
     def __init__(self, parent, api: API_SIX, fleet: list, final_fleet: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
@@ -45,9 +47,13 @@ class Sortie:
 
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         if self.qsettings.contains(QKEYS.THER_REPAIRS):
-            self.repair_levels = list(map(int, self.qsettings.value(QKEYS.THER_REPAIRS)))
+            self.repair_levels: list = list(map(int, self.qsettings.value(QKEYS.THER_REPAIRS)))
         else:
-            self.repair_levels = [2]
+            self.repair_levels: list = [2]
+        if self.qsettings.contains(QKEYS.THER_SHIP_STARS):
+            self.ship_star: dict = self.qsettings.value(QKEYS.THER_SHIP_STARS)
+        else:
+            self.ship_star: dict = {}
 
         # Used for pre-battle
         self.map_data: dict = {}
@@ -63,13 +69,13 @@ class Sortie:
         self.escort_CV: list = []
         self.tickets: int = 0
         self.user_ships: dict = wgv_data.get_processed_userShipVo()
-        self.ship_star: dict = {}
 
         self.pre_sortie = PreSortieCheck(self.api, is_realrun)
         self.logger.info("Init E6...")
 
     def _clean_memory(self) -> None:
         self.logger.info("Reset ship card pool, battle fleet and curr node")
+        self.ship_star = {}
         self.set_boat_pool([])
         self.set_fleet([])
 
@@ -183,7 +189,7 @@ class Sortie:
                 self.set_fleet(self.user_data['boatPool'])
             else:
                 self.logger.debug("[RESUME] Use new boat pool")
-                self.set_boat_pool(buy_res['boatPool'])
+                self.set_boat_pool(boat_pool=buy_res['boatPool'], is_new=True)
                 self.set_fleet(buy_res['boatPool'])
 
             node_status = self.get_node_status(self.curr_node)
@@ -235,7 +241,7 @@ class Sortie:
                     self.set_sub_map(T_CONST.SUB_MAP1_ID)
                 else:
                     pass
-            elif self.curr_node == "0" or self.curr_sub_map == "0":
+            elif self.curr_node == "0" or self.curr_sub_map == "0" or self.curr_sub_map == T_CONST.SUB_MAP1_ID:
                 self._clean_memory()
                 self.api.setChapterBoat(E6_ID, self.final_fleet)
                 self.curr_node = E61_0_ID
@@ -283,11 +289,30 @@ class Sortie:
         except StopIteration:
             return -1
 
-    def set_boat_pool(self, boat_pool: list) -> None:
+    def set_boat_pool(self, boat_pool: list, is_new: bool = False) -> None:
+        """
+        Set the user's boat pool.
+        @param boat_pool: current bought boats
+        @type boat_pool: list of int
+        @param is_new: check if the incoming list is from shop; to track the ship star
+        @type is_new: bool
+        @return: None
+        @rtype: None
+        """
         self.boat_pool = set(boat_pool)
         label_text = "BOAT POOL | "
         for s in self.boat_pool:
+            if is_new is True:
+                if s in self.ship_star:
+                    self.ship_star[str(s)] += 1
+                else:
+                    self.ship_star[str(s)] = 1
+                star_text = f"(+{self.ship_star[str(s)]}) "
+            else:
+                star_text = ""
             label_text += f"{self.user_ships[s]['Name']} "
+            label_text += star_text
+        self.qsettings.setValue(QKEYS.THER_SHIP_STARS, self.ship_star)
         self.parent.update_boat_pool_label(label_text)
 
     def set_sub_map(self, sub_map_id: str) -> None:
@@ -470,7 +495,7 @@ class Sortie:
         if buy_res is None:
             pass
         else:
-            self.set_boat_pool(buy_res['boatPool'])
+            self.set_boat_pool(boat_pool=buy_res['boatPool'], is_new=True)
             self.set_fleet(buy_res['boatPool'])
 
         if curr_node_id in [E61_A1_ID, E62_A1_ID]:
