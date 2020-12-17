@@ -83,7 +83,7 @@ class SettingsTemplate(QWidget):
 
     def init_dropdown(self, dropdown: QComboBox, key: str, default_idx: int) -> None:
         if self.qsettings.contains(key) is True:
-            dropdown.setCurrentIndex(int(self.qsettings.value(key)))
+            dropdown.setCurrentIndex(self.qsettings.value(key, type=int))
         else:
             dropdown.setCurrentIndex(default_idx)
 
@@ -300,13 +300,12 @@ class GameSettings(SettingsTemplate):
             _input = _default
             _edit.setPlaceholderText(str(_default))
         else:
-            # TODO; following seems redundant
-            _input = int(_input)
+            pass
         self.qsettings.setValue(_field, _input)
 
     def get_init_value(self, field: str, is_default: bool = False) -> int:
         if (self.qsettings.contains(field) is True) and (is_default is False):
-            d = int(self.qsettings.value(field))
+            d = self.qsettings.value(field, type=int)
         else:
             if field == QKEYS.GAME_RANDOM_SEED:
                 d = 42
@@ -332,7 +331,6 @@ class GameSettings(SettingsTemplate):
     def set_random_seed(self, _input: str) -> None:
         random_seed = time() if _input == '' else _input
         random.seed(int(random_seed))
-        # TODO: the int seems redundant
         self.qsettings.setValue(QKEYS.GAME_RANDOM_SEED, int(_input))
 
 
@@ -395,7 +393,7 @@ class TabsSettings(SettingsTemplate):
         self.layout.addWidget(create_qlabel(text='Bosses Retries'), row, 1)
         tbr_init = self.get_init_value(QKEYS.THER_BOSS_RTY)
         for i in range(3):
-            self.ther_boss_retry[i].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry[i], tbr_init, i, QKEYS.THER_BOSS_RTY))
+            self.ther_boss_retry[i].valueChanged.connect(lambda res, _i=i: self.create_input(res, self.ther_boss_retry[_i], tbr_init, _i, QKEYS.THER_BOSS_RTY))
             self.layout.addWidget(self.ther_boss_retry[i], row, i+2)
 
         row += 1
@@ -404,7 +402,7 @@ class TabsSettings(SettingsTemplate):
         self.layout.addWidget(ther_boss_retry_std_label, row, 1)
         tbs_init = self.get_init_value(QKEYS.THER_BOSS_STD)
         for i in range(3):
-            self.ther_boss_std[i].valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_std[i], tbs_init, i, QKEYS.THER_BOSS_STD))
+            self.ther_boss_std[i].valueChanged.connect(lambda res, _i=i: self.create_input(res, self.ther_boss_std[_i], tbs_init, _i, QKEYS.THER_BOSS_STD))
             self.layout.addWidget(self.ther_boss_std[i], row, i+2)
 
         row += 1
@@ -413,11 +411,11 @@ class TabsSettings(SettingsTemplate):
         self.layout.addWidget(ther_repair_levels_label, row, 1)
         tbp_init = self.get_init_value(QKEYS.THER_REPAIRS)
         for i in range(3):
-            self.ther_repairs[i].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[i], tbp_init, i, QKEYS.THER_REPAIRS))
+            self.ther_repairs[i].currentTextChanged.connect(lambda res, _i=i: self.dropdown_input(res, self.ther_repairs[_i], tbp_init, _i, QKEYS.THER_REPAIRS))
             self.layout.addWidget(self.ther_repairs[i], row, i+2)
         row += 1
         for i in range(3, 6):
-            self.ther_repairs[i].currentTextChanged.connect(lambda res: self.dropdown_input(res, self.ther_repairs[i], tbp_init, i, QKEYS.THER_REPAIRS))
+            self.ther_repairs[i].currentTextChanged.connect(lambda res, _i=i: self.dropdown_input(res, self.ther_repairs[_i], tbp_init, _i, QKEYS.THER_REPAIRS))
             self.layout.addWidget(self.ther_repairs[i], row, i-1)
 
         row += 1

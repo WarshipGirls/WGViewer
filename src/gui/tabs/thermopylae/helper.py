@@ -23,7 +23,7 @@ class SortieHelper:
 
         self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
         if self.qsettings.contains(QKEYS.CONN_THER_RTY):
-            self.reconnection_limit = int(self.qsettings.value(QKEYS.CONN_THER_RTY))
+            self.reconnection_limit = self.qsettings.value(QKEYS.CONN_THER_RTY, type=int)
         else:
             self.reconnection_limit = 3
         if self.qsettings.contains(QKEYS.THER_BOSS_RTY):
@@ -35,7 +35,7 @@ class SortieHelper:
         else:
             self.boss_retry_standard = [1, 2, 2]
 
-        self.boss_retry_count: list = [0] * 3
+        self.boss_retry_count: list = [0, 0, 0]
         self.points: int = 10
         self.adjutant_info: dict = {}  # level, curr_exp, exp_cap
 

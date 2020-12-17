@@ -17,11 +17,11 @@ class LoginSession:
         self.session = requests.sessions.Session()
         self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
         if self.qsettings.contains(QKEYS.CONN_SESS_RTY) is True:
-            self.max_retry = int(self.qsettings.value(QKEYS.CONN_SESS_RTY))
+            self.max_retry = self.qsettings.value(QKEYS.CONN_SESS_RTY, type=int)
         else:
             self.max_retry = 5
         if self.qsettings.contains(QKEYS.CONN_SESS_SLP) is True:
-            self.sleep_time = int(self.qsettings.value(QKEYS.CONN_SESS_SLP))
+            self.sleep_time = self.qsettings.value(QKEYS.CONN_SESS_SLP, type=int)
         else:
             self.sleep_time = 3
 
