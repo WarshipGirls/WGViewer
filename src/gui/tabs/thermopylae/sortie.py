@@ -14,7 +14,6 @@ from typing import Union
 from PyQt5.QtCore import QSettings
 
 from src import data as wgv_data
-from src.data import get_qsettings_file
 from src.func import qsettings_keys as QKEYS
 from src.exceptions.wgr_error import get_error
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume, ThermopylaeSortieDone
@@ -44,7 +43,7 @@ class Sortie:
         self.final_fleet = final_fleet  # fill up required number of boats
         self.logger = getLogger('TabThermopylae')
 
-        self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
+        self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         if self.qsettings.contains(QKEYS.THER_REPAIRS):
             self.repair_levels = self.qsettings.value(QKEYS.THER_REPAIRS)
         else:
@@ -98,11 +97,16 @@ class Sortie:
         self.user_data = self.pre_sortie.get_user_data()
         self.curr_node = str(self.user_data['nodeId'])
 
+        # Initialize SortieHelper
+        self.helper = SortieHelper(self.parent, self.api, self.user_ships, self.map_data)
+        self.helper.set_adjutant_info(self.user_data['adjutantData'])
+        self.helper.set_curr_points(self.user_data['strategic_point'])
+
         ticket_num = int(self.user_data['canChargeNum']) - int(self.user_data['chargeNum'])
         self.parent.button_purchase.setEnabled(ticket_num > 0)
         self.update_sortie_ticket(ticket=self.user_data['ticket'], num=ticket_num)
         if self.qsettings.contains(QKEYS.THER_TKT_AUTO):
-            if self.qsettings.value(QKEYS.THER_TKT_AUTO) == 'true':
+            if self.qsettings.value(QKEYS.THER_TKT_AUTO, type=bool) is True:
                 self.buy_all_tickets(ticket_num)
             else:
                 pass
@@ -115,11 +119,6 @@ class Sortie:
             self.final_fleet = self.pre_sortie.get_final_fleet()
         else:
             pass
-
-        # Initialize SortieHelper
-        self.helper = SortieHelper(self.parent, self.api, self.user_ships, self.map_data)
-        self.helper.set_adjutant_info(self.user_data['adjutantData'])
-        self.helper.set_curr_points(self.user_data['strategic_point'])
 
         self.logger.info("Setting final fleets:")
         for ship_id in self.final_fleet:
