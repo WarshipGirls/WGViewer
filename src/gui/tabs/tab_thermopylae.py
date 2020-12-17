@@ -48,43 +48,37 @@ class TabThermopylae(QWidget):
 
         self.api = API_SIX(wgv_data.load_cookies())
         self.fleets = [None] * 6
-        self.final_fleet = [None] * 14
-        # for testing
-        self.final_fleet = []
+        # self.final_fleet = [None] * 14
+        self.final_fleet = []  # for testing
 
         self.main_layout = QHBoxLayout(self)
         # TODO separate bar info
-        self.button_container = QWidget()
         self.left_layout = QVBoxLayout()
         self.right_layout = QVBoxLayout()
 
         self.ticket_label = QLabel("?")
         self.button_purchase = QPushButton("?")
-        self.set_ticket_display()
         self.adjutant_label = QLabel("?")
         self.adjutant_exp_label = QLabel("?/?")
         self.points_label = QLabel("?")
+        self.set_ticket_display()
         self.set_adjutant_display()
 
-        self.button_group = QButtonGroup()
+        self.ship_button_group = QButtonGroup()
         self.boat_pool_label = QLabel()
-        self.boat_pool_label.setFont(QFont('Consolas'))
         self.fleet_label = QLabel()
-        self.fleet_label.setFont(QFont('Consolas'))
-        self.boat_pool_label.setWordWrap(True)
         self.button_pre_battle = QPushButton('Pre-Battle &Check')
         self.button_fresh_sortie = QPushButton('Fresh Start')
         self.button_resume_sortie = QPushButton('Resume Combat')
         self.init_left_layout()
 
         self.right_text_box = QTextEdit()
+        self.logger = self.get_logger()  # after right_text_box creation
         self.init_right_layout()
 
-        self.logger = self.get_logger()
-
-        self.w = None
+        self.ship_select_window = None
         self.init_ui()
-        self.sortie = Sortie(self, self.api, [], [], self.is_realrun)
+        self.sortie = Sortie(self, self.api, [], self.final_fleet, self.is_realrun)
 
         self.bee_pre_battle = Worker(self.sortie.pre_battle, ())
         self.bee_pre_battle.finished.connect(self.pre_battle_finished)
@@ -150,6 +144,11 @@ class TabThermopylae(QWidget):
         t.setText(msg)
         t.setReadOnly(True)
 
+        self.boat_pool_label.setFont(QFont('Consolas'))
+        self.boat_pool_label.setWordWrap(True)
+        self.fleet_label.setFont(QFont('Consolas'))
+        self.fleet_label.setWordWrap(True)
+
         self.button_pre_battle.clicked.connect(self.on_pre_battle)
         self.button_pre_battle.setEnabled(True)
 
@@ -174,7 +173,6 @@ class TabThermopylae(QWidget):
 
     def add_ship(self) -> None:
         # TODO long term; not used right now; let user select boats here; now just use last fleets
-        # for ship_id in self.fleets:
         for i in range(len(self.fleets)):
             t = self.fleets[i]
             l = QPushButton()
@@ -183,14 +181,14 @@ class TabThermopylae(QWidget):
             else:
                 l.setText(str(t))
             l.clicked.connect(lambda _, _i=i: self.popup_select_window(_i))
-            self.button_group.addButton(l)
+            self.ship_button_group.addButton(l)
             self.left_layout.addWidget(l)
 
     def disable_sortie(self) -> None:
         raise NotImplementedError
 
     def handle_selection(self, ship_info: list, button_id: int) -> None:
-        b = self.button_group.buttons()[button_id]
+        b = self.ship_button_group.buttons()[button_id]
         ship_id = ship_info[1]
         if int(ship_id) in self.fleets:
             b.setText('! SHIP ALREADY EXISTS IN FLEET !')
@@ -201,15 +199,15 @@ class TabThermopylae(QWidget):
 
     def popup_select_window(self, btn_id: int) -> None:
         # TODO: delete obj after close
-        self.w = ShipSelectWindow(self, btn_id)
-        self.w.show()
+        self.ship_select_window = ShipSelectWindow(self, btn_id)
+        self.ship_select_window.show()
+
+    # ================================
+    # Signals
+    # ================================
 
     def on_purchase_clicked(self) -> None:
         self.sortie.buy_ticket()
-
-    # ================================
-    # On thread start
-    # ================================
 
     def on_pre_battle(self) -> None:
         self.button_pre_battle.setEnabled(True)
@@ -226,10 +224,6 @@ class TabThermopylae(QWidget):
         self.button_fresh_sortie.setEnabled(False)
         self.button_resume_sortie.setEnabled(False)
         self.bee_resume_sortie.start()
-
-    # ================================
-    # On thread finished
-    # ================================
 
     def sortie_finished(self, result: bool) -> None:
         self.logger.info('==== Sortie (dev) is done! ====')
