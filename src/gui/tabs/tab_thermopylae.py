@@ -15,14 +15,16 @@ from .thermopylae.ship_window import ShipSelectWindow
 from .thermopylae.sortie import Sortie
 
 
-# TODO: record consumption resources; and time
-# TODO: show ship +star in label
-# TODO: multiple consecutive run w/o interference
-# TODO: let user selected 2-star + 3-star escort DD and a escort CV
-# TODO: organize here
-
-
 class TabThermopylae(QWidget):
+    """
+    Thermopylae, JueZhan Mode, first introduced in Game v5.0.0 (CN server).
+    This tab is meant for automatically farming Thermopylae Ex-6 (the last chapter of the mode),
+        which was the primary reason that brings WGViewer into real world.
+    TODO: show ship +star in label
+    TODO: multiple consecutive run w/o interference
+    TODO: let user selected 2-star + 3-star escort DD and a escort CV
+    TODO: organize here
+    """
     sig_fuel = pyqtSignal(int)
     sig_ammo = pyqtSignal(int)
     sig_steel = pyqtSignal(int)
@@ -31,7 +33,6 @@ class TabThermopylae(QWidget):
     sig_exp = pyqtSignal(dict)
 
     def __init__(self, tab_name: str, side_dock: SideDock, is_realrun: bool):
-        # TODO reorganize
         super().__init__()
         self.setObjectName(tab_name)
         self.side_dock = side_dock
