@@ -68,8 +68,8 @@ class TabThermopylae(QWidget):
         self.boat_pool_label = QLabel()
         self.fleet_label = QLabel()
         self.button_pre_battle = QPushButton('Pre-Battle &Check')
-        self.button_fresh_sortie = QPushButton('Fresh Start')
-        self.button_resume_sortie = QPushButton('Resume Combat')
+        self.button_fresh_sortie = QPushButton('Fresh &Start')
+        self.button_resume_sortie = QPushButton('&Resume Combat (beta)')
         self.init_left_layout()
 
         self.right_text_box = QTextEdit()

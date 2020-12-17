@@ -32,7 +32,7 @@ def create_label(text: str) -> QLabel:
 
 class LoginForm(QWidget):
     sig_login = pyqtSignal()
-
+    # TODO: get a logger with LOGIN, and replace all of them in login module
     def __init__(self):
         super().__init__()
         WGViewerVersionCheck(self)
@@ -247,6 +247,7 @@ class LoginForm(QWidget):
                 raise InterruptExecution()
             else:
                 count += 1
+
         logging.info('LOGIN - Starting auto login')
         self.sig_login.emit()
 

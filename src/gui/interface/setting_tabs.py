@@ -101,7 +101,7 @@ class UISettings(SettingsTemplate):
 
     def __init__(self, qsettings):
         super().__init__(qsettings)
-        self.user_resolution = QCheckBox("Remember Main Window Size & Position", self)
+        self.user_resolution = QCheckBox("Remember Main Window Size + Position", self)
         self.side_dock = QCheckBox("Navy Base Overview", self)
         self.side_dock_pos = create_qcombobox(['Right', 'Left'])
 
