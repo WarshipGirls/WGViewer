@@ -1,3 +1,5 @@
+import logging
+
 from math import ceil
 
 
@@ -5,21 +7,16 @@ def get_repair_type(ship_info: dict) -> int:
     curr_hp = ship_info['battleProps']['hp']
     max_hp = ship_info['battlePropsMax']['hp']
     res = -1
-    if curr_hp == max_hp:
-        # full HP
-        res = 0
-    if curr_hp < max_hp:
-        # slightly damaged
-        res = 1
-    elif curr_hp < ceil(max_hp * 0.5):
-        # moderately damaged
-        res = 2
-    elif curr_hp < ceil(max_hp * 0.25):
-        # heavily damaged
-        res = 3
-    elif curr_hp < 0:
-        # sunken
+    if curr_hp == 0:
         res = 4
+    elif 0 < curr_hp < ceil(max_hp * 0.25):
+        res = 3
+    elif ceil(max_hp * 0.25) <= curr_hp < ceil(max_hp * 0.5):
+        res = 2
+    elif ceil(max_hp * 0.5) <= curr_hp < max_hp:
+        res = 1
+    elif curr_hp == max_hp:
+        res = 0
     else:
         pass
     return res
