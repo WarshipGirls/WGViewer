@@ -496,7 +496,7 @@ class SideDock(QDockWidget):
         box = QMessageBox(QMessageBox.Question, "INFO", "Do you want to close side dock?\n(Can re-open in View menu)",
                           QMessageBox.Yes | QMessageBox.No, self)
 
-        box.setStyleSheet(wgv_data.get_color_scheme())
+        box.setStyleSheet(wgv_utils.get_color_scheme())
         box.setDefaultButton(QMessageBox.No)
         box.setCheckBox(cb)
 

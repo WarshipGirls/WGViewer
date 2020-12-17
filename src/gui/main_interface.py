@@ -66,7 +66,7 @@ class MainInterface(QMainWindow):
     # ================================
 
     def set_color_scheme(self) -> None:
-        self.setStyleSheet(wgv_data.get_color_scheme())
+        self.setStyleSheet(wgv_utils.get_color_scheme())
 
     def init_ui(self) -> None:
         self.set_color_scheme()

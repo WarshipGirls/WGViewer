@@ -5,8 +5,8 @@ from PyQt5.QtWidgets import (
     QMainWindow, QStatusBar, QPushButton, QVBoxLayout, QLabel, QWidget, QGridLayout,
 )
 
-from src.data import get_qsettings_file, get_color_scheme
-from src.utils import get_user_resolution
+from src.data import get_qsettings_file
+from src.utils import get_color_scheme, get_user_resolution
 from .setting_tabs import UISettings, GameSettings, TabsSettings
 
 

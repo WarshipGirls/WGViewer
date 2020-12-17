@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgv_data
-from src.utils import get_user_resolution
+from src.utils import get_user_resolution, get_color_scheme
 
 
 def get_data_path(relative_path: str) -> str:
@@ -37,7 +37,7 @@ class ShipSelectWindow(QMainWindow):
         self.init_ui()
 
     def init_ui(self) -> None:
-        self.setStyleSheet(wgv_data.get_color_scheme())
+        self.setStyleSheet(get_color_scheme())
         self.setWindowTitle('WGViewer - Ship Selection')
         self.resize(self.width, self.height)
 

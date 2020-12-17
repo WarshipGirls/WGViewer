@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgv_data
-from src.utils import get_user_resolution
+from src.utils import get_user_resolution, get_color_scheme
 from . import constant as SCONST
 
 
@@ -46,7 +46,7 @@ class EquipPopup(QMainWindow):
             self.button.setEnabled(False)
 
     def init_ui(self) -> None:
-        self.setStyleSheet(wgv_data.get_color_scheme())
+        self.setStyleSheet(get_color_scheme())
         self.setWindowTitle('WGViewer - Equipment Selection')
         self.resize(self.width, self.height)
 

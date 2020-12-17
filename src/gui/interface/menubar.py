@@ -175,7 +175,7 @@ class MainInterfaceMenuBar(QMenuBar):
         msg_str += get_hyperlink(cn_ios_user_android_base_link, 'CN Android (iOS server) base package')
 
         msg = QMessageBox()
-        msg.setStyleSheet(wgv_data.get_color_scheme())
+        msg.setStyleSheet(wgv_utils.get_color_scheme())
         msg.setWindowTitle('Official Game App Download Links')
         msg.setText(msg_str)
         msg.exec_()
@@ -209,7 +209,7 @@ class MainInterfaceMenuBar(QMenuBar):
         with open(get_data_path("docs/version_log.md"), 'r') as f:
             text = f.read()
         self.version_log = ScrollBoxWindow(self, 'Version Logs', text)
-        self.version_log.setStyleSheet(wgv_data.get_color_scheme())
+        self.version_log.setStyleSheet(wgv_utils.get_color_scheme())
         self.version_log.show()
 
     @pyqtSlot()
@@ -232,7 +232,7 @@ class MainInterfaceMenuBar(QMenuBar):
         msg_str += f"<p style=\"text-align: center;\">WGViewer {wgv_utils.get_app_version()}</p>"
         msg_str += "<p style=\"text-align: center;\">&copy; GNU General Public License v3.0</p>"
         msg = QMessageBox()
-        msg.setStyleSheet(wgv_data.get_color_scheme())
+        msg.setStyleSheet(wgv_utils.get_color_scheme())
         msg.setWindowTitle('WGViewer')
         msg.setText(msg_str)
         msg.exec_()

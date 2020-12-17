@@ -26,7 +26,7 @@ from .wgv_process import (
 )
 from .wgv_qsettings import (
     del_key_file, 
-    get_color_option, get_color_scheme, get_key_path, get_qsettings_file, 
+    get_key_path, get_qsettings_file, 
     is_key_exists, 
     load_cookies, 
     save_cookies

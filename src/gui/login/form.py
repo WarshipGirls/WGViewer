@@ -131,7 +131,7 @@ class LoginForm(QWidget):
         user_w, user_h = wgv_utils.get_user_resolution()
         self.init_login_buttons(user_h)
         self.resize(int(0.26 * user_w), int(0.12 * user_h))
-        self.setStyleSheet(wgv_data.get_color_scheme())
+        self.setStyleSheet(wgv_utils.get_color_scheme())
         self.setWindowTitle(f'Warship Girls Viewer v{wgv_utils.get_app_version()} Login')
 
     def init_name_field(self, text: str = '') -> None:

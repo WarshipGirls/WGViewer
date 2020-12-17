@@ -7,8 +7,8 @@ import plotly.io as pio
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 
-from src.data import get_user_dir, get_color_scheme, get_color_option
-from src.utils import ts_to_date, get_user_resolution
+from src.data import get_user_dir
+from src.utils import ts_to_date, get_user_resolution, get_color_scheme, get_color_option
 from .constants import CSV_HEADER
 
 
