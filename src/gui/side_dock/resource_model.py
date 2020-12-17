@@ -40,7 +40,7 @@ class ResourceTableModel(QAbstractTableModel):
         return [i for l in nested_lists for i in l]
 
     def count_down(self) -> None:
-        self.counter -= (CSV_LOG_TIMER_INTERVAL / 1000)
+        self.counter -= int(CSV_LOG_TIMER_INTERVAL / 1000)
         if self.counter >= 0:
             pass
         else:
