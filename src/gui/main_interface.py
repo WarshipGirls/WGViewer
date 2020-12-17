@@ -2,7 +2,7 @@ import os
 import sys
 
 from PyQt5.QtCore import Qt, pyqtSlot, QThreadPool, QSettings
-from PyQt5.QtGui import QCloseEvent, QHideEvent
+from PyQt5.QtGui import QCloseEvent, QHideEvent, QResizeEvent, QMoveEvent
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
 
 from src import data as wgv_data
@@ -70,8 +70,15 @@ class MainInterface(QMainWindow):
 
     def init_ui(self) -> None:
         self.set_color_scheme()
-        user_w, user_h = wgv_utils.get_user_resolution()
-        self.resize(int(0.67 * user_w), int(0.67 * user_h))
+        if self.qsettings.contains(QKEYS.UI_MAIN) and self.qsettings.value(QKEYS.UI_MAIN, type=bool) is True:
+            new_w = self.qsettings.value(QKEYS.UI_MAIN_W, type=int)
+            new_h = self.qsettings.value(QKEYS.UI_MAIN_H, type=int)
+            new_pos = self.qsettings.value(QKEYS.UI_MAIN_POS)
+            self.resize(new_w, new_h)
+            self.move(new_pos)
+        else:
+            user_w, user_h = wgv_utils.get_user_resolution()
+            self.resize(int(0.67 * user_w), int(0.67 * user_h))
 
         self.setMenuBar(self.menu_bar)
         self.setCentralWidget(self.main_tabs)
@@ -128,6 +135,21 @@ class MainInterface(QMainWindow):
         self.hide()
         if self.tray is None:
             self.init_tray_icon()
+        else:
+            pass
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        if self.qsettings.contains(QKEYS.UI_MAIN) and self.qsettings.value(QKEYS.UI_MAIN, type=bool) is True:
+            # sets value
+            self.qsettings.setValue(QKEYS.UI_MAIN_W, self.width())
+            self.qsettings.setValue(QKEYS.UI_MAIN_H, self.height())
+        else:
+            pass
+
+    def moveEvent(self, event: QMoveEvent) -> None:
+        if self.qsettings.contains(QKEYS.UI_MAIN) and self.qsettings.value(QKEYS.UI_MAIN, type=bool) is True:
+            # sets value
+            self.qsettings.setValue(QKEYS.UI_MAIN_POS, self.pos())
         else:
             pass
 

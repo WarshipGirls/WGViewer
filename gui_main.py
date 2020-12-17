@@ -13,7 +13,6 @@ from src.utils import get_app_version, get_today
 from src.gui.login.form import LoginForm
 
 
-
 def get_data_path(relative_path: str) -> str:
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
@@ -67,7 +66,6 @@ def _realrun() -> None:
 
 
 def _testrun() -> None:
-
     dev_warning = "\n\n==== TEST WARNING ====\n"
     dev_warning += "In test run, api calls to server won't work!\n"
     dev_warning += "In order to test offline, one real run (to get server data sample) is required!\n"

@@ -1,9 +1,9 @@
+from typing import Tuple, Any
 
 
 # ================================
 # Not Exports
 # ================================
-from typing import Tuple, Any
 
 
 def _process_one_equip(equip: dict) -> dict:
@@ -35,11 +35,12 @@ def _process_shipItem() -> dict:
 # Exports
 # ================================
 
+
 def get_big_success_rate() -> Tuple[float, int, int]:
     t = get_userVo()
     n = int(t['detailInfo']['exploreBigSuccessNum'])
     d = int(t['detailInfo']['exploreNum'])
-    res = round(n/d, 4)
+    res = round(n / d, 4)
     return res, n, d
 
 

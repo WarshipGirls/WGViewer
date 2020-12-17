@@ -65,12 +65,15 @@ class SettingsTemplate(QWidget):
         # Lesson: without setLayout(), it only renders the last QWidget
         self.setLayout(self.layout)
 
-        # Lession: QWidget created in __init__ will be auto put in the layout
+        # Lesson: QWidget created in __init__ will be auto put in the layout
         #   - workaround: use addWidget() later to move it; or pre-set with None
-        self.h_line = None
+        # self.h_line = None
+        # Lesson2: (again), layout cannot add the same element twice!
+    # def set_h_line(self) -> None:
+    #     self.h_line = QHLine(parent=self, color=QColor(0, 0, 0), width=10)
 
-    def set_h_line(self) -> None:
-        self.h_line = QHLine(parent=self, color=QColor(0, 0, 0), width=10)
+    def get_h_line(self) -> QHLine:
+        return QHLine(parent=self, color=QColor(0, 0, 0), width=10)
 
     def init_hack(self, row: int) -> None:
         # following is a hack; TODO: setRowStretch is not working properly
@@ -98,6 +101,7 @@ class UISettings(SettingsTemplate):
 
     def __init__(self, qsettings):
         super().__init__(qsettings)
+        self.user_resolution = QCheckBox("Remember Main Window Size & Position", self)
         self.side_dock = QCheckBox("Navy Base Overview", self)
         self.side_dock_pos = create_qcombobox(['Right', 'Left'])
 
@@ -110,7 +114,6 @@ class UISettings(SettingsTemplate):
 
     def init_ui(self) -> None:
         row = 0
-        self.set_h_line()
         row = self.init_side_dock(row)
         row = self.init_tabs(row)
         self.init_hack(row)
@@ -120,12 +123,18 @@ class UISettings(SettingsTemplate):
         self.side_dock_pos.setEnabled(self.side_dock.isChecked())
 
     def init_side_dock(self, row: int) -> int:
-        self.layout.addWidget(create_qlabel(text="ON START", font_size=HEADER2), row, 0, 1, 4)
+        self.layout.addWidget(create_qlabel(text="UI", font_size=HEADER3), row, 0, 1, 4)
+        row += 1
+        self.layout.addWidget(self.get_h_line(), row, 0, 1, 4)
+        row += 1
+        self.set_checkbox_status(self.user_resolution, QKEYS.UI_MAIN)
+        self.user_resolution.stateChanged.connect(lambda _: self.qsettings.setValue(QKEYS.UI_MAIN, self.user_resolution.isChecked()))
+        self.layout.addWidget(self.user_resolution, row, 0, 1, 2)
 
         row += 1
         self.layout.addWidget(create_qlabel(text="SIDE DOCK", font_size=HEADER3), row, 0, 1, 4)
         row += 1
-        self.layout.addWidget(self.h_line, row, 0, 1, 4)
+        self.layout.addWidget(self.get_h_line(), row, 0, 1, 4)
         row += 1
         self.set_checkbox_status(self.side_dock, QKEYS.UI_SIDEDOCK)
         self.side_dock.stateChanged.connect(self.handle_sidedock)
@@ -139,9 +148,9 @@ class UISettings(SettingsTemplate):
 
     def init_tabs(self, row: int) -> int:
         row += 1
-        self.layout.addWidget(create_qlabel(text="TABS", font_size=12), row, 0, 1, 4)
+        self.layout.addWidget(create_qlabel(text="TABS (on start-up)", font_size=12), row, 0, 1, 4)
         row += 1
-        self.layout.addWidget(self.h_line, row, 0, 1, 4)
+        self.layout.addWidget(self.get_h_line(), row, 0, 1, 4)
         row += 1
 
         self.set_checkbox_status(self.tab_adv, QKEYS.UI_TAB_ADV)
@@ -194,7 +203,6 @@ class GameSettings(SettingsTemplate):
 
     def init_ui(self):
         row = 0
-        self.set_h_line()
         row = self.init_overall(row)
         row = self.init_connections(row)
         row = self.init_thermopylae(row)
@@ -203,7 +211,7 @@ class GameSettings(SettingsTemplate):
     def init_overall(self, row: int) -> int:
         self.layout.addWidget(create_qlabel(text='Overall', font_size=HEADER2), row, 0)
         row += 1
-        self.layout.addWidget(self.h_line, row, 0, 1, 5)
+        self.layout.addWidget(self.get_h_line(), row, 0, 1, 5)
 
         row += 1
         self.layout.addWidget(create_qlabel(text='Random Seed'), row, 0)
@@ -230,7 +238,7 @@ class GameSettings(SettingsTemplate):
         row += 1
         self.layout.addWidget(create_qlabel(text='Connection', font_size=HEADER2), row, 0)
         row += 1
-        self.layout.addWidget(self.h_line, row, 0, 1, 5)
+        self.layout.addWidget(self.get_h_line(), row, 0, 1, 5)
 
         row += 1
         self.layout.addWidget(create_qlabel(text='Retry Limit', font_size=HEADER3), row, 0)

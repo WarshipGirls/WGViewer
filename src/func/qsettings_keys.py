@@ -19,6 +19,10 @@ LOGIN_DISCLAIMER: str = 'LOGIN/disclaimer'
 
 STYLE: str = 'style'
 
+UI_MAIN: str = 'UI/remember_resolution'
+UI_MAIN_W: str = 'UI/main_window_width'
+UI_MAIN_H: str = 'UI/main_window_height'
+UI_MAIN_POS: str = 'UI/main_window_position'
 UI_SIDEDOCK: str = 'UI/init_side_dock'
 UI_SIDEDOCK_POS: str = 'UI/side_dock_pos'
 
