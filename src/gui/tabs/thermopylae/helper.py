@@ -27,11 +27,11 @@ class SortieHelper:
         else:
             self.reconnection_limit = 3
         if self.qsettings.contains(QKEYS.THER_BOSS_RTY):
-            self.boss_retry_limit = self.qsettings.value(QKEYS.THER_BOSS_RTY)
+            self.boss_retry_limit = list(map(int, self.qsettings.value(QKEYS.THER_BOSS_RTY)))
         else:
             self.boss_retry_limit = [3, 5, 10]
         if self.qsettings.contains(QKEYS.THER_BOSS_STD):
-            self.boss_retry_standard = self.qsettings.value(QKEYS.THER_BOSS_STD)
+            self.boss_retry_standard = list(map(int, self.qsettings.value(QKEYS.THER_BOSS_STD)))
         else:
             self.boss_retry_standard = [1, 2, 2]
 

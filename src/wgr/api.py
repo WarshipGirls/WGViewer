@@ -31,11 +31,11 @@ class WGR_API:
         self.hlp = LoginHelper()
         qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
         if qsettings.contains(QKEYS.CONN_API_RTY) is True:
-            self.max_retry = int(qsettings.value(QKEYS.CONN_API_RTY))
+            self.max_retry = qsettings.value(QKEYS.CONN_API_RTY, type=int)
         else:
             self.max_retry = 5
         if qsettings.contains(QKEYS.CONN_API_SLP) is True:
-            self.sleep_time = int(qsettings.value(QKEYS.CONN_API_SLP))
+            self.sleep_time = qsettings.value(QKEYS.CONN_API_SLP, type=int)
         else:
             self.sleep_time = 3
 

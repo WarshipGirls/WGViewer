@@ -57,11 +57,11 @@ def force_quit(code: int) -> None:
 def set_sleep(level: float = 1.0):
     # There must be some interval between Game API calls
     if _qsettings.contains(QKEYS.GAME_SPD_LO):
-        lo = int(_qsettings.value(QKEYS.GAME_SPD_LO))
+        lo = _qsettings.value(QKEYS.GAME_SPD_LO, type=int)
     else:
         lo = 5
     if _qsettings.contains(QKEYS.GAME_SPD_HI):
-        hi = int(_qsettings.value(QKEYS.GAME_SPD_HI))
+        hi = _qsettings.value(QKEYS.GAME_SPD_HI, type=int)
     else:
         hi = 10
     try:

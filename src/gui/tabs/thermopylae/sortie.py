@@ -45,7 +45,7 @@ class Sortie:
 
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         if self.qsettings.contains(QKEYS.THER_REPAIRS):
-            self.repair_levels = self.qsettings.value(QKEYS.THER_REPAIRS)
+            self.repair_levels = list(map(int, self.qsettings.value(QKEYS.THER_REPAIRS)))
         else:
             self.repair_levels = [2]
 
@@ -63,6 +63,7 @@ class Sortie:
         self.escort_CV: list = []
         self.tickets: int = 0
         self.user_ships: dict = wgv_data.get_processed_userShipVo()
+        self.ship_star: dict = {}
 
         self.pre_sortie = PreSortieCheck(self.api, is_realrun)
         self.logger.info("Init E6...")
