@@ -9,14 +9,21 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout
 
 from src.data import get_user_dir
 from src.utils import ts_to_date, get_user_resolution, get_color_scheme, get_color_option
-from .constants import CSV_HEADER
+from . import constants as CONST
 
 
 class UserDataGraph(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    """
+    This is instantiated along with the menu bar,
+        and logs user's data every 15 minutes with a QTimer's interval = 1 minute.
+    To prevent possible abuse of the data log system, we bar user from accessing the QTimer settings
+    TODO? remove the "wide" white margins
+    TODO? when data get large, show a loading animation
+    """
+    def __init__(self):
+        super().__init__()
         self.browser = QWebEngineView(self)
-        self.resource_data = [[]] * len(CSV_HEADER)
+        self.resource_data = [[]] * len(CONST.CSV_HEADER)
 
         self.init_ui()
 
@@ -40,10 +47,10 @@ class UserDataGraph(QWidget):
         self.show_graph(11, 16, 'Ship Cores')
 
     def _clean_data(self) -> None:
-        self.resource_data = [[]] * len(CSV_HEADER)
+        self.resource_data = [[]] * len(CONST.CSV_HEADER)
 
     def read_csv(self) -> None:
-        csv_file = os.path.join(get_user_dir(), 'resource_log.csv')
+        csv_file = os.path.join(get_user_dir(), CONST.CSV_FILENAME)
         with open(csv_file, 'r') as f:
             csv_input = csv.reader(f)
             next(csv_input)  # skip header
@@ -58,11 +65,10 @@ class UserDataGraph(QWidget):
             fig.add_trace(go.Scatter(
                 x=self.resource_data[0],
                 y=self.resource_data[i],
-                name=CSV_HEADER[i]
+                name=CONST.CSV_HEADER[i]
             ))
         fig.update_layout(title=title)
         if get_color_option() == "qdarkstyle":
-            # TODO? remove the "wide" white margins
             self.setStyleSheet(get_color_scheme())
             fig.layout.template = pio.templates["plotly_dark"]
         else:

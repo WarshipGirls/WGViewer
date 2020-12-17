@@ -127,12 +127,7 @@ class SideDock(QDockWidget):
         self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition)
 
     def _init_resource_info(self) -> None:
-        data = [
-            [1000000, 1000000, 1000000, 1000000, 200000],
-            [10000, 10000, 10000, 10000, 100],
-            [1000, 1000, 1000, 1000, 1000]
-        ]
-        self.table_model = ResourceTableModel(data)
+        self.table_model = ResourceTableModel()
         self.table_view = QTableView(self)
         self.table_view.setModel(self.table_model)
         x = 0.03 * self.user_screen_h
@@ -383,6 +378,8 @@ class SideDock(QDockWidget):
             self.table_model.update_CV(t)
             t = next((i for i in x if i["itemCid"] == 10541), {"num": 0})["num"]
             self.table_model.update_SS(t)
+
+            self.table_model.write_csv()  # first-save upon start-up
 
     @pyqtSlot(dict)
     def update_lvl_label(self, x: dict) -> None:
