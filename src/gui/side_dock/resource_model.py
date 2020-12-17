@@ -24,7 +24,8 @@ class ResourceTableModel(QAbstractTableModel):
     def __init__(self, data: list = None):
         super(ResourceTableModel, self).__init__()
         if data is None:
-            self._data = data = [[0] * 5] * 3
+            # No [[0]*5]*3, that would cause duplicate
+            self._data = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         else:
             self._data = data
 
