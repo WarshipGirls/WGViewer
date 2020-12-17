@@ -1,11 +1,12 @@
 import datetime
+import logging
 import os
 import qdarkstyle
 import re
 import time
 
 from random import randint
-from PyQt5.QtCore import QSettings
+from PyQt5.QtCore import QSettings, pyqtSlot
 
 from src.data import get_qsettings_file
 from src.func import qsettings_keys as QKEYS
@@ -54,21 +55,35 @@ def force_quit(code: int) -> None:
     os._exit(code)
 
 
+@pyqtSlot()
+def increase_sleep_interval() -> None:
+    logging.debug('!! received speed ticket !!')
+    lo = _qsettings.value(QKEYS.GAME_SPD_LO, type=int)
+    hi = _qsettings.value(QKEYS.GAME_SPD_HI, type=int)
+    _qsettings.setValue(QKEYS.GAME_SPD_LO, lo+2)
+    _qsettings.setValue(QKEYS.GAME_SPD_HI, hi+2)
+
+
 def set_sleep(level: float = 1.0):
+    # TODO: auto slow-down upon speed-warning
     # There must be some interval between Game API calls
     if _qsettings.contains(QKEYS.GAME_SPD_LO):
         lo = _qsettings.value(QKEYS.GAME_SPD_LO, type=int)
     else:
         lo = 5
+        _qsettings.setValue(QKEYS.GAME_SPD_LO, lo)
     if _qsettings.contains(QKEYS.GAME_SPD_HI):
         hi = _qsettings.value(QKEYS.GAME_SPD_HI, type=int)
     else:
         hi = 10
-    try:
-        assert (lo < hi)
-        time.sleep(randint(lo, hi) * level)
-    except AssertionError:
-        time.sleep(randint(5, 10) * level)
+        _qsettings.setValue(QKEYS.GAME_SPD_HI, hi)
+
+    if lo >= hi:
+        hi += lo
+        _qsettings.setValue(QKEYS.GAME_SPD_HI, hi)
+    else:
+        pass
+    time.sleep(randint(lo, hi) * level)
 
 
 def ts_to_countdown(seconds: int) -> str:
