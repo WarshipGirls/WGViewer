@@ -89,7 +89,7 @@ class SettingsTemplate(QWidget):
 
     def set_checkbox_status(self, ck: QCheckBox, key: str, default: bool = True) -> None:
         if self.qsettings.contains(key) is True:
-            ck.setChecked(self.qsettings.value(key) == 'true')
+            ck.setChecked(self.qsettings.value(key, type=bool) is True)
         else:
             ck.setChecked(default)
 
@@ -132,6 +132,7 @@ class UISettings(SettingsTemplate):
         self.layout.addWidget(self.side_dock, row, 0)
         self.init_dropdown(self.side_dock_pos, QKEYS.UI_SIDEDOCK_POS, 0)
         self.side_dock_pos.setToolTip("Set the default position of side dock")
+        self.side_dock_pos.setEnabled(self.side_dock.isChecked())
         self.side_dock_pos.currentIndexChanged.connect(lambda _: self.qsettings.setValue(QKEYS.UI_SIDEDOCK_POS, self.side_dock_pos.currentIndex()))
         self.layout.addWidget(self.side_dock_pos, row, 1)
         return row
@@ -299,6 +300,7 @@ class GameSettings(SettingsTemplate):
             _input = _default
             _edit.setPlaceholderText(str(_default))
         else:
+            # TODO; following seems redundant
             _input = int(_input)
         self.qsettings.setValue(_field, _input)
 
@@ -330,6 +332,7 @@ class GameSettings(SettingsTemplate):
     def set_random_seed(self, _input: str) -> None:
         random_seed = time() if _input == '' else _input
         random.seed(int(random_seed))
+        # TODO: the int seems redundant
         self.qsettings.setValue(QKEYS.GAME_RANDOM_SEED, int(_input))
 
 
@@ -385,6 +388,7 @@ class TabsSettings(SettingsTemplate):
         self.layout.addWidget(create_qlabel(text='With'), row, 3)
         self.init_dropdown(self.ther_ticket_resource, QKEYS.THER_TKT_RSC, 3)
         self.ther_ticket_resource.currentIndexChanged.connect(lambda _: self.qsettings.setValue(QKEYS.THER_TKT_RSC, self.ther_ticket_resource.currentIndex()))
+        self.ther_ticket_resource.setEnabled(self.ther_ticket_auto.isChecked())
         self.layout.addWidget(self.ther_ticket_resource, row, 4)
 
         row += 1

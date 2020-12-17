@@ -98,7 +98,7 @@ class MainInterface(QMainWindow):
     def init_side_dock(self) -> None:
         self.create_side_dock()
         if self.qsettings.contains(QKEYS.UI_SIDEDOCK) is True:
-            if self.qsettings.value(QKEYS.UI_SIDEDOCK) == "false":
+            if self.qsettings.value(QKEYS.UI_SIDEDOCK, type=bool) is False:
                 self.side_dock.hide()
             else:
                 pass

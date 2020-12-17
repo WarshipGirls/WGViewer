@@ -76,7 +76,7 @@ class LoginForm(QWidget):
         self.auto_start()
 
     def auto_start(self) -> None:
-        if self.qsettings.value(QKEYS.LOGIN_AUTO) == "true":
+        if self.qsettings.value(QKEYS.LOGIN_AUTO, type=bool) is True:
             # QThread cannot handle exceptions for this one
             try:
                 # In case user manually log-in
@@ -94,24 +94,24 @@ class LoginForm(QWidget):
     # ================================
 
     def init_ui(self) -> None:
-        if self.qsettings.value(QKEYS.LOGIN_SAVE) == 'true':
+        if self.qsettings.value(QKEYS.LOGIN_SAVE, type=bool) is True:
             name = self.qsettings.value(QKEYS.LOGIN_USER)
             server = self.qsettings.value(QKEYS.LOGIN_SERVER)
             platform = self.qsettings.value(QKEYS.LOGIN_PLATFORM)
-            disclaimer = self.qsettings.value(QKEYS.LOGIN_DISCLAIMER)
-            auto_login = self.qsettings.value(QKEYS.LOGIN_AUTO)
+            disclaimer = self.qsettings.value(QKEYS.LOGIN_DISCLAIMER, type=bool)
+            auto_login = self.qsettings.value(QKEYS.LOGIN_AUTO, type=bool)
 
             # Don't change the order
             self.init_name_field(name)
             self.init_password_field(self._get_password())
             self.init_server_field(server)
             self.init_platform_field(platform)
-            if disclaimer == "true":
+            if disclaimer is True:
                 self.init_check_disclaimer(True)
             else:
                 self.init_check_disclaimer(False)
             self.init_check_save(True)
-            if auto_login == "true":
+            if auto_login is True:
                 self.init_check_auto(True)
             else:
                 self.init_check_auto(False)
