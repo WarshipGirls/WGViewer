@@ -1,7 +1,6 @@
 from typing import Union
 
 import requests
-import logging
 
 from time import sleep
 
@@ -10,6 +9,10 @@ from requests import Response
 
 from src.data import get_qsettings_file
 from src.func import qsettings_keys as QKEYS
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
+
+logger = get_logger(QLOGS.LOGIN)
 
 
 class LoginSession:
@@ -42,7 +45,7 @@ class LoginSession:
                 r.close()
                 return r
             except self.accept_errors as e:
-                logging.warning(f"SESS - {e}")
+                logger.warning(f"SESS - {e}")
                 sleep(self.sleep_time)
                 if i == 4:
                     raise
@@ -55,7 +58,7 @@ class LoginSession:
                 r.close()
                 return r
             except self.accept_errors as e:
-                logging.warning(f"SESS - {e}")
+                logger.warning(f"SESS - {e}")
                 sleep(self.sleep_time)
                 if i == 4:
                     raise
@@ -63,10 +66,10 @@ class LoginSession:
     @staticmethod
     def wait_until_success(response: Response, timeout: float = 3.0, timewait: float = 1.0) -> None:
         # for session.get() / post()
-        logging.debug("session - waiting for aborted")
+        logger.debug("SESS - waiting for aborted")
         timer = 0
         while response.status_code != 200:
-            logging.debug(f"session - waiting for aborted {timer}")
+            logger.debug(f"SESS - waiting for aborted {timer}")
             sleep(timewait)
             timer += timewait
             if timer > timeout:

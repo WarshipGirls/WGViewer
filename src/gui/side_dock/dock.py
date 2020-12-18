@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import Tuple
 
@@ -20,9 +19,13 @@ from PyQt5.QtWidgets import (
 from src import data as wgv_data
 from src import utils as wgv_utils
 from src.func import qsettings_keys as QKEYS
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 from .constants import TASK_TYPE
+
+logger = get_logger(QLOGS.SIDE_DOCK)
 
 
 def get_data_path(relative_path: str) -> str:
@@ -291,7 +294,7 @@ class SideDock(QDockWidget):
 
     @staticmethod
     def _remove_widget(parent, widget: [QLayout, QWidget]) -> None:
-        logging.warning("Deleting widget")
+        logger.warning("Deleting widget")
         parent.removeWidget(widget)
         widget.deleteLater()
         widget = None

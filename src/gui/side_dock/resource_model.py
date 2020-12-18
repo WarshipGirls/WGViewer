@@ -1,5 +1,4 @@
 import csv
-import logging
 import os
 import sys
 
@@ -8,8 +7,12 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QAbstractTableModel
 
 from src.data import get_user_dir
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from src.utils import get_unixtime
 from . import constants as CONST
+
+logger = get_logger(QLOGS.SIDE_DOCK)
 
 
 def get_data_path(relative_path: str) -> str:
@@ -105,7 +108,7 @@ class ResourceTableModel(QAbstractTableModel):
             elif row == 2 and col == 4:
                 return QIcon(get_data_path('assets/items/SS.png'))
             else:
-                logging.error('incorrect indexes')
+                logger.error('incorrect indexes')
 
     def setData(self, index, value, role):
         if not index.isValid():

@@ -1,4 +1,3 @@
-import logging
 import os
 import sys
 
@@ -11,10 +10,14 @@ from PyQt5.QtWidgets import (
 
 from src import data as wgv_data
 from src.wgr.api import WGR_API
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from .ships.delegate import ShipTableDelegate
 from .ships.model import ShipModel
 from .ships.proxy_model import ShipSortFilterProxyModel
 from .ships.top_checkbox import TopCheckboxes
+
+logger = get_logger(QLOGS.TAB_SHIP)
 
 
 def get_data_path(relative_path: str) -> str:
@@ -27,7 +30,7 @@ def get_data_path(relative_path: str) -> str:
 class TabShips(QWidget):
     def __init__(self, tab_name: str, is_realrun: bool):
         super().__init__()
-        logging.info("SHIPS - Creating Ships Tab...")
+        logger.info("Creating Ships Tab...")
         self.api = WGR_API(wgv_data.load_cookies())
 
         self.setObjectName(tab_name)
@@ -53,9 +56,9 @@ class TabShips(QWidget):
         self.on_received_shiplist(data)
 
     def _testrun(self) -> None:
-        logging.debug("SHIPS - Starting tests...")
+        logger.debug("Starting tests...")
         data = wgv_data.get_api_getShipList()
-        # logging.error(len(data['userShipVO']))
+        # logger.error(len(data['userShipVO']))
         # data['userShipVO'] = data['userShipVO'][:5]
         self.on_received_shiplist(data)
 
@@ -108,12 +111,12 @@ class TabShips(QWidget):
     @pyqtSlot(dict)
     def on_received_shiplist(self, data) -> None:
         if data is None:
-            logging.error("SHIPS - Invalid ship list data.")
+            logger.error("Invalid ship list data.")
         else:
             # First sort by level, then sort by cid
             sorted_ships = sorted(data["userShipVO"], key=lambda x: (x['level'], x['shipCid']), reverse=True)
             self.table_model.set_data(sorted_ships)
             self.table_model.save_table_data()
-            logging.info("SHIPS - Success initialized table and saved table data.")
+            logger.info("Success initialized table and saved table data.")
 
 # End of File

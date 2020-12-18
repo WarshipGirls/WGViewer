@@ -1,4 +1,3 @@
-import logging
 import os
 import sys
 
@@ -9,10 +8,14 @@ from PyQt5.QtWidgets import (
 
 from src.data import get_qsettings_file
 from src.func import qsettings_keys as QKEYS
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from src.gui.tabs.advance_functions import TabAdvanceFunctions
 from src.gui.tabs.tab_thermopylae import TabThermopylae
 from src.gui.tabs.tab_ship import TabShips
 from src.gui.tabs.tab_expedition import TabExpedition
+
+logger = get_logger(QLOGS.TABS)
 
 
 def get_data_path(relative_path: str) -> str:
@@ -32,7 +35,7 @@ class TabBar(QTabBar):
 class MainInterfaceTabs(QWidget):
     def __init__(self, parent, threadpool: QThreadPool, is_realrun: bool):
         super().__init__()
-        logging.info("Creating Main Interface Tabs...")
+        logger.info("Creating Main Interface Tabs...")
         self.parent = parent
         self.threadpool = threadpool
         self.is_realrun = is_realrun
@@ -100,7 +103,7 @@ class MainInterfaceTabs(QWidget):
 
         self.has_tab = True
 
-        logging.info(f"TAB - Creating {tab_name}")
+        logger.debug(f"Creating {tab_name}")
         if tab_name == "tab_adv" and self.tab_adv is None:
             self.tab_adv = TabAdvanceFunctions(tab_name, self.parent.side_dock)
             self.tabs.addTab(self.tab_adv, "Advance (N/A)")
@@ -114,11 +117,11 @@ class MainInterfaceTabs(QWidget):
             self.tab_thermopylae = TabThermopylae(tab_name, self.parent.side_dock, self.is_realrun)
             self.tabs.addTab(self.tab_thermopylae, "Thermopylae (dev)")
         else:
-            logging.error(f"TAB - Invalid tab name {tab_name} for creation.")
+            logger.error(f"Invalid tab name {tab_name} for creation.")
 
     def close_tab(self, index: int) -> None:
         tab = self.tabs.widget(index)
-        logging.info(f'TAB - {tab.objectName()} is closed.')
+        logger.debug(f'{tab.objectName()} is closed.')
 
         # TODO reopen tab will create a new object
         #   should we save the old data, or let the user decide?
@@ -151,7 +154,7 @@ class MainInterfaceTabs(QWidget):
         elif tab_obj_name == "tab_thermopylae":
             self.tab_thermopylae = None
         else:
-            logging.error(f"TAB - Failed to reset {tab_obj_name} to None.")
+            logger.debug(f"Failed to reset {tab_obj_name} to None.")
 
 
 # End of File

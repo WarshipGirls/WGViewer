@@ -1,4 +1,3 @@
-from logging import getLogger
 from math import ceil
 from typing import Callable, Tuple
 
@@ -7,6 +6,8 @@ from PyQt5.QtCore import QSettings
 from src import utils as wgv_utils
 from src.data import get_qsettings_file
 from src.func import qsettings_keys as QKEYS
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieResume
 from src.wgr.six import API_SIX
@@ -17,7 +18,7 @@ class SortieHelper:
     def __init__(self, tab_thermopylae, api: API_SIX, user_ships: dict, map_data: dict):
         self.api = api
         self.tab_thermopylae = tab_thermopylae
-        self.logger = getLogger('TabThermopylae')
+        self.logger = get_logger(QLOGS.TAB_THER)
         self.user_ships = user_ships
         self.map_data = map_data
 

@@ -1,5 +1,4 @@
 import json
-import logging
 import zlib
 
 from ast import literal_eval
@@ -15,7 +14,11 @@ from http.client import HTTPResponse
 
 from src.data import get_qsettings_file
 from src.func import qsettings_keys as QKEYS
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from src.gui.login.helper import LoginHelper
+
+logger = get_logger(QLOGS.API)
 
 
 class WGR_API:
@@ -51,13 +54,13 @@ class WGR_API:
                 data = json.loads(raw_data)
                 res = True
             except (TimeoutError, exceptions.ReadTimeout) as e:
-                logging.error(e)
-                logging.warning('Trying reconnecting...')
+                logger.error(e)
+                logger.warning('Trying reconnecting...')
                 sleep(self.sleep_time)
 
             tries += 1
             if tries >= self.max_retry:
-                logging.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
+                logger.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
                 break
             else:
                 pass
@@ -91,13 +94,13 @@ class WGR_API:
                     data = {}
                 res = True
             except (TimeoutError, URLError, timeout) as e:
-                logging.error(e)
-                logging.warning('urlopen trying reconnecting...')
+                logger.error(e)
+                logger.warning('urlopen trying reconnecting...')
                 sleep(self.sleep_time)
 
             tries += 1
             if tries >= self.max_retry:
-                logging.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
+                logger.warning(f"Failed to connect to {link} after {self.max_retry} reconnections. Please try again later.")
                 break
             else:
                 pass
@@ -106,10 +109,10 @@ class WGR_API:
     @staticmethod
     def wait_until_success(response: HTTPResponse, _timeout: float = 3.0, _timewait: float = 1.0) -> None:
         # for urlopen
-        logging.debug("urlopen - waiting for aborted")
+        logger.debug("urlopen - waiting for aborted")
         timer = 0
         while response.status != 200:
-            logging.debug(f"urlopen - waiting for aborted {timer}")
+            logger.debug(f"urlopen - waiting for aborted {timer}")
             sleep(_timewait)
             timer += _timewait
             if timer > _timeout:

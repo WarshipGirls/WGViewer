@@ -1,12 +1,15 @@
-import logging
 import os
 import sys
 
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from .expedition.table import ExpTable
 from .expedition.summary import DailySummary
 from .expedition.fleets import ExpFleets
+
+logger = get_logger(QLOGS.TAB_EXP)
 
 
 def get_data_path(relative_path):
@@ -24,7 +27,7 @@ class TabExpedition(QWidget):
         self.table = ExpTable(csv_path)
         self.summary = DailySummary()
         self.fleet_table = ExpFleets()
-        logging.info("Creating Expedition Tab...")
+        logger.info("Creating Expedition Tab...")
         self.init_ui()
 
     def init_ui(self) -> None:

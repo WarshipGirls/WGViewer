@@ -1,4 +1,3 @@
-import logging
 from typing import Callable
 
 from PyQt5.QtCore import Qt

@@ -8,12 +8,13 @@ TODO: replace raise? this now creates a long series of frames
 TODO free up dock space if needed
 """
 
-from logging import getLogger
 from typing import Union
 
 from PyQt5.QtCore import QSettings
 
 from src import data as wgv_data
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from src.func import qsettings_keys as QKEYS
 from src.exceptions.wgr_error import get_error
 from src.exceptions import custom as wgv_error
@@ -43,7 +44,7 @@ class Sortie:
         self.main_fleet = fleet  # main fleets (6SS)
         self.battle_fleet = set()  # ships that on battle
         self.final_fleet = final_fleet  # fill up required number of boats
-        self.logger = getLogger('TabThermopylae')
+        self.logger = get_logger(QLOGS.TAB_THER)
 
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         if self.qsettings.contains(QKEYS.THER_REPAIRS):
