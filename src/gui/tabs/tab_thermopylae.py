@@ -2,11 +2,11 @@ import logging
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QButtonGroup
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QButtonGroup, QGridLayout, QSpinBox
 
-import src.data as wgv_data
+from src import data as wgv_data
+from src.utils import set_sleep
 from src.func.worker import Worker, CallbackWorker
-
 from src.wgr.six import API_SIX
 from src.func.log_handler import LogHandler
 from src.gui.side_dock.resource_model import ResourceTableModel
@@ -20,7 +20,8 @@ class TabThermopylae(QWidget):
     Thermopylae, JueZhan Mode, first introduced in Game v5.0.0 (CN server).
     This tab is meant for automatically farming Thermopylae Ex-6 (the last chapter of the mode),
         which was the primary reason that brings WGViewer into real world.
-    TODO: multiple consecutive run w/o interference
+    TODO: stop sortie from GUI (stop thread)
+    https://stackoverflow.com/a/51135636
     TODO: let user selected 2-star + 3-star escort DD and a escort CV
     TODO: organize here
     """
@@ -52,7 +53,7 @@ class TabThermopylae(QWidget):
 
         self.main_layout = QHBoxLayout(self)
         # TODO separate bar info
-        self.left_layout = QVBoxLayout()
+        self.left_layout = QGridLayout()
         self.right_layout = QVBoxLayout()
 
         self.ticket_label = QLabel("?")
@@ -66,9 +67,10 @@ class TabThermopylae(QWidget):
         self.ship_button_group = QButtonGroup()
         self.boat_pool_label = QLabel()
         self.fleet_label = QLabel()
-        self.button_pre_battle = QPushButton('Pre-Battle &Check')
-        self.button_fresh_sortie = QPushButton('Fresh &Start')
-        self.button_resume_sortie = QPushButton('&Resume Combat (beta)')
+        self.button_pre_battle = QPushButton('&Pre-Battle Check')
+        self.button_fresh_sortie = QPushButton('Fresh &Combat')
+        self.button_resume_sortie = QPushButton('&Resume Combat')
+        self.multi_runs = QSpinBox()
         self.init_left_layout()
 
         self.right_text_box = QTextEdit()
@@ -105,7 +107,7 @@ class TabThermopylae(QWidget):
         w.setLayout(layout)
         for i in range(4):
             layout.setStretch(i, 0)
-        self.left_layout.addWidget(w)
+        self.left_layout.addWidget(w, 0, 0, 1, 4)
 
     def set_adjutant_display(self) -> None:
         w = QWidget()
@@ -117,7 +119,7 @@ class TabThermopylae(QWidget):
         layout.addWidget(QLabel("Point"))
         layout.addWidget(self.points_label)
         w.setLayout(layout)
-        self.left_layout.addWidget(w)
+        self.left_layout.addWidget(w, 1, 0, 1, 4)
 
     def init_ui(self) -> None:
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -157,12 +159,16 @@ class TabThermopylae(QWidget):
         self.button_resume_sortie.clicked.connect(self.on_resume_sortie)
         self.button_resume_sortie.setEnabled(False)
 
-        self.left_layout.addWidget(t)
-        self.left_layout.addWidget(self.fleet_label)
-        self.left_layout.addWidget(self.boat_pool_label)
-        self.left_layout.addWidget(self.button_pre_battle)
-        self.left_layout.addWidget(self.button_fresh_sortie)
-        self.left_layout.addWidget(self.button_resume_sortie)
+        self.multi_runs.setEnabled(False)
+        self.multi_runs.setSuffix(" times")
+
+        self.left_layout.addWidget(t, 3, 0, 1, 4)
+        self.left_layout.addWidget(self.fleet_label, 4, 0, 1, 4)
+        self.left_layout.addWidget(self.boat_pool_label, 5, 0, 1, 4)
+        self.left_layout.addWidget(self.button_pre_battle, 6, 0)
+        self.left_layout.addWidget(self.button_fresh_sortie, 6, 1)
+        self.left_layout.addWidget(self.button_resume_sortie, 6, 2)
+        self.left_layout.addWidget(self.multi_runs, 6, 3)
 
     def init_right_layout(self) -> None:
         self.right_text_box.setFont(QFont('Consolas'))
@@ -201,6 +207,17 @@ class TabThermopylae(QWidget):
         self.ship_select_window = ShipSelectWindow(self, btn_id)
         self.ship_select_window.show()
 
+    def disable_sortie_widgets(self):
+        self.button_pre_battle.setEnabled(False)
+        self.button_fresh_sortie.setEnabled(False)
+        self.button_resume_sortie.setEnabled(False)
+        self.multi_runs.setEnabled(False)
+
+    def enable_sortie_widgets(self):
+        self.button_pre_battle.setEnabled(True)
+        self.button_fresh_sortie.setEnabled(True)
+        self.button_resume_sortie.setEnabled(True)
+        self.multi_runs.setEnabled(True)
     # ================================
     # Signals
     # ================================
@@ -209,32 +226,29 @@ class TabThermopylae(QWidget):
         self.sortie.buy_ticket()
 
     def on_pre_battle(self) -> None:
-        self.button_pre_battle.setEnabled(True)
-        self.button_fresh_sortie.setEnabled(False)
-        self.button_resume_sortie.setEnabled(False)
+        self.disable_sortie_widgets()
         self.bee_pre_battle.start()
 
     def on_fresh_sortie(self) -> None:
-        self.button_fresh_sortie.setEnabled(False)
-        self.button_resume_sortie.setEnabled(False)
+        self.disable_sortie_widgets()
         self.bee_fresh_sortie.start()
 
     def on_resume_sortie(self) -> None:
-        self.button_fresh_sortie.setEnabled(False)
-        self.button_resume_sortie.setEnabled(False)
+        self.disable_sortie_widgets()
         self.bee_resume_sortie.start()
 
     def sortie_finished(self, result: bool) -> None:
-        print(locals())
-        self.logger.info('==== Sortie (dev) is done! ====')
-        self.button_fresh_sortie.setEnabled(True)
-        self.button_resume_sortie.setEnabled(True)
-        # TODO: even when DONE, the result is still False
+        self.logger.info('==== Sortie is done! ====')
+        self.enable_sortie_widgets()
         if result is True:
-            # do next battle
             self.logger.debug('sortie success!')
+            self.multi_runs.stepDown()
+            while self.multi_runs.value() > 0:
+                set_sleep()
+                self.logger.info('Starting a new run')
+                # TODO: the process is not touching the next line?
+                self.bee_fresh_sortie.start()
         else:
-            # stop?
             self.logger.debug('sortie failed')
 
     def pre_battle_finished(self) -> None:

@@ -16,7 +16,7 @@ from PyQt5.QtCore import QSettings
 from src import data as wgv_data
 from src.func import qsettings_keys as QKEYS
 from src.exceptions.wgr_error import get_error
-from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume, ThermopylaeSortieDone
+from src.exceptions import custom as wgv_error
 from src.utils import process_spy_json, set_sleep
 from src.wgr.six import API_SIX
 from .helper import SortieHelper
@@ -78,7 +78,7 @@ class Sortie:
     def _reset_chapter(self) -> None:
         # chapter can only be reset after E6-3
         if self.tickets <= 0:
-            raise ThermopylaeSoriteExit("Insufficient sortie ticket. Cannot Reset Chapter")
+            raise wgv_error.ThermopylaeSoriteExit("Insufficient sortie ticket. Cannot Reset Chapter")
         reset_res = self.helper.reset_chapter(E6_ID)
         self._clean_memory()
         self.set_sub_map(T_CONST.SUB_MAP1_ID)
@@ -141,7 +141,17 @@ class Sortie:
             # Lesson: do not output various stuff at once, concat them together; otherwise TypeError
             self.logger.info(output_str)
 
+        self.parent.button_pre_battle.setEnabled(True)
         self.parent.button_fresh_sortie.setEnabled(True)
+        ticket_num = int(self.parent.ticket_label.text())
+        if ticket_num > 0:
+            self.parent.multi_runs.setMaximum(ticket_num)
+            self.parent.multi_runs.setMinimum(1)
+            self.parent.multi_runs.setValue(ticket_num)
+            self.parent.multi_runs.setEnabled(True)
+        else:
+            self.parent.multi_runs.setValue(0)
+            self.parent.multi_runs.setEnabled(False)
         if len(self.boat_pool) > 0 and self.curr_node[-2:] != "01":
             self.parent.button_resume_sortie.setEnabled(True)
             self.logger.info('Can choose a fresh start or resume existing battle')
@@ -211,19 +221,19 @@ class Sortie:
                 self.single_node_sortie(next_node)
             else:
                 self.logger.debug(self.curr_node)
-        except ThermopylaeSoriteExit as e:
+        except wgv_error.ThermopylaeSoriteExit as e:
             self.logger.warning(e)
             self.parent.button_fresh_sortie.setEnabled(True)
             return False
-        except ThermopylaeSortieRestart as e:
+        except wgv_error.ThermopylaeSortieRestart as e:
             set_sleep()
             self.logger.warning(e)
             return self.start_fresh_sortie()
-        except ThermopylaeSortieResume as e:
+        except wgv_error.ThermopylaeSortieResume as e:
             set_sleep()
             self.logger.warning(e)
             return self.resume_sortie()
-        except ThermopylaeSortieDone as e:
+        except wgv_error.ThermopylaeSortieDone as e:
             self.logger.info(e)
             self._reset_chapter()
             return True
@@ -250,19 +260,19 @@ class Sortie:
                 next_id = self.single_node_sortie(next_id)
             self.logger.info("[FRESH] Reaching Boss Node")
             self.single_node_sortie(next_id)
-        except ThermopylaeSoriteExit as e:
+        except wgv_error.ThermopylaeSoriteExit as e:
             self.logger.warning(e)
             self.parent.button_fresh_sortie.setEnabled(True)
             return False
-        except ThermopylaeSortieRestart as e:
+        except wgv_error.ThermopylaeSortieRestart as e:
             set_sleep()
             self.logger.warning(e)
             return self.start_fresh_sortie()
-        except ThermopylaeSortieResume as e:
+        except wgv_error.ThermopylaeSortieResume as e:
             set_sleep()
             self.logger.warning(e)
             return self.resume_sortie()
-        except ThermopylaeSortieDone as e:
+        except wgv_error.ThermopylaeSortieDone as e:
             self.logger.info(e)
             self._reset_chapter()
             return True
@@ -393,9 +403,9 @@ class Sortie:
             self.user_data = self.pre_sortie.fetch_user_data()
             self.set_sub_map(self.user_data['levelId'])
             if self.curr_sub_map == T_CONST.SUB_MAP3_ID and curr_node == T_CONST.BOSS_NODES[2]:
-                raise ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
+                raise wgv_error.ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
             else:
-                raise ThermopylaeSortieRestart("Redo Final Boss Fight")
+                raise wgv_error.ThermopylaeSortieRestart("Redo Final Boss Fight")
         else:
             pass
 
@@ -425,7 +435,7 @@ class Sortie:
         if self.curr_node == E61_C1_ID:
             if len(ss) == 0:
                 # endless-restarting loop; here appear inf times
-                raise ThermopylaeSortieRestart("No SS for E61 C1. Restarting")
+                raise wgv_error.ThermopylaeSortieRestart("No SS for E61 C1. Restarting")
             else:
                 self.battle_fleet = set(list(map(int, ss)))
         else:
@@ -472,7 +482,7 @@ class Sortie:
                 shop_res = self.helper.get_ship_store('1')
                 ss_list = self.find_SS(shop_res['boats'])
                 if len(ss_list) == 0 and self.curr_node in [E61_C1_ID, E62_A1_ID, E63_A1_ID]:
-                    raise ThermopylaeSortieRestart("SL to get SS on starting node of submaps")
+                    raise wgv_error.ThermopylaeSortieRestart("SL to get SS on starting node of submaps")
                 else:
                     pass
             else:
@@ -493,10 +503,14 @@ class Sortie:
             self.api.changeAdjutant(T_CONST.ADJUTANT_IDS[2])  # Need to change everytime
             skill_res = self.helper.cast_skill()
             new_boat = skill_res['boat_add']
-            if len(set(new_boat).intersection(set(self.main_fleet))) >= 2:
+            if self.qsettings.contains(QKEYS.THER_HABA_REROLL):
+                reroll_standard = self.qsettings.value(QKEYS.THER_HABA_REROLL, type=int)
+            else:
+                reroll_standard = 2
+            if len(set(new_boat).intersection(set(self.main_fleet))) >= reroll_standard:
                 self.boat_pool.union(new_boat)
             else:
-                raise ThermopylaeSortieRestart("Bad luck with Habakkuk. Restarting")
+                raise wgv_error.ThermopylaeSortieRestart("Bad luck with Habakkuk. Restarting")
         else:
             pass
 
@@ -508,7 +522,7 @@ class Sortie:
             self.helper.set_war_fleets(list(self.battle_fleet))
 
         if self.helper.bump_level() == -1:
-            raise ThermopylaeSortieRestart("Adjutant level bumping failed. Restarting")
+            raise wgv_error.ThermopylaeSortieRestart("Adjutant level bumping failed. Restarting")
         else:
             pass
 
@@ -563,7 +577,7 @@ class Sortie:
                 self.logger.error(f'Unexpected next node id: {next_id}')
         else:
             node_name = self.helper.get_map_node_by_id(self.curr_node)['flag']
-            raise ThermopylaeSortieRestart(f"Failed to clean {node_name}. Restarting...")
+            raise wgv_error.ThermopylaeSortieRestart(f"Failed to clean {node_name}. Restarting...")
 
         self.check_sub_map_done()
         return next_id
