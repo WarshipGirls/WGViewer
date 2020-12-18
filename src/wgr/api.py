@@ -104,10 +104,12 @@ class WGR_API:
         return data
 
     @staticmethod
-    def wait_until_success(response: HTTPResponse, _timeout: float = 2.0, _timewait: float = 0.5) -> None:
+    def wait_until_success(response: HTTPResponse, _timeout: float = 3.0, _timewait: float = 1.0) -> None:
         # for urlopen
+        logging.debug("urlopen - waiting for aborted")
         timer = 0
-        while response.status == 204:
+        while response.status != 200:
+            logging.debug(f"urlopen - waiting for aborted {timer}")
             sleep(_timewait)
             timer += _timewait
             if timer > _timeout:

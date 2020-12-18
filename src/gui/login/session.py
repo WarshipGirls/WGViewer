@@ -38,6 +38,7 @@ class LoginSession:
         for i in range(self.max_retry):
             try:
                 r = self.session.get(url=url, **kwargs)
+                self.wait_until_success(r)
                 r.close()
                 return r
             except self.accept_errors as e:
@@ -60,10 +61,12 @@ class LoginSession:
                     raise
 
     @staticmethod
-    def wait_until_success(response: Response, timeout: float = 2.0, timewait: float = 0.5) -> None:
+    def wait_until_success(response: Response, timeout: float = 3.0, timewait: float = 1.0) -> None:
         # for session.get() / post()
+        logging.debug("session - waiting for aborted")
         timer = 0
-        while response.status_code == 204:
+        while response.status_code != 200:
+            logging.debug(f"session - waiting for aborted {timer}")
             sleep(timewait)
             timer += timewait
             if timer > timeout:

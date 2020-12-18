@@ -20,7 +20,6 @@ class TabThermopylae(QWidget):
     Thermopylae, JueZhan Mode, first introduced in Game v5.0.0 (CN server).
     This tab is meant for automatically farming Thermopylae Ex-6 (the last chapter of the mode),
         which was the primary reason that brings WGViewer into real world.
-    TODO: show ship +star in label
     TODO: multiple consecutive run w/o interference
     TODO: let user selected 2-star + 3-star escort DD and a escort CV
     TODO: organize here
@@ -226,15 +225,17 @@ class TabThermopylae(QWidget):
         self.bee_resume_sortie.start()
 
     def sortie_finished(self, result: bool) -> None:
+        print(locals())
         self.logger.info('==== Sortie (dev) is done! ====')
         self.button_fresh_sortie.setEnabled(True)
         self.button_resume_sortie.setEnabled(True)
+        # TODO: even when DONE, the result is still False
         if result is True:
             # do next battle
-            pass
+            self.logger.debug('sortie success!')
         else:
             # stop?
-            pass
+            self.logger.debug('sortie failed')
 
     def pre_battle_finished(self) -> None:
         self.logger.info('==== Pre battle checking is done! ====')

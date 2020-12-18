@@ -4,7 +4,7 @@
 2. This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
     RIGHT NOW everything pre-battle is fixed
 3. This file hosts high-level battle decisions; low-level pre/post processing code is host in ./helper.py
-TODO: replace raise?
+TODO: replace raise? this now creates a long series of frames
 TODO free up dock space if needed
 """
 
@@ -50,10 +50,6 @@ class Sortie:
             self.repair_levels: list = list(map(int, self.qsettings.value(QKEYS.THER_REPAIRS)))
         else:
             self.repair_levels: list = [2]
-        if self.qsettings.contains(QKEYS.THER_SHIP_STARS):
-            self.ship_star: dict = self.qsettings.value(QKEYS.THER_SHIP_STARS)
-        else:
-            self.ship_star: dict = {}
 
         # Used for pre-battle
         self.map_data: dict = {}
@@ -75,7 +71,7 @@ class Sortie:
 
     def _clean_memory(self) -> None:
         self.logger.info("Reset ship card pool, battle fleet and curr node")
-        self.ship_star = {}
+        self.helper.reset_ship_star()
         self.set_boat_pool([])
         self.set_fleet([])
 
@@ -189,7 +185,7 @@ class Sortie:
                 self.set_fleet(self.user_data['boatPool'])
             else:
                 self.logger.debug("[RESUME] Use new boat pool")
-                self.set_boat_pool(boat_pool=buy_res['boatPool'], is_new=True)
+                self.set_boat_pool(boat_pool=buy_res['boatPool'])
                 self.set_fleet(buy_res['boatPool'])
 
             node_status = self.get_node_status(self.curr_node)
@@ -216,17 +212,17 @@ class Sortie:
             else:
                 self.logger.debug(self.curr_node)
         except ThermopylaeSoriteExit as e:
-            self.logger.debug(e)
+            self.logger.warning(e)
             self.parent.button_fresh_sortie.setEnabled(True)
             return False
         except ThermopylaeSortieRestart as e:
             set_sleep()
-            self.logger.debug(e)
-            self.start_fresh_sortie()
+            self.logger.warning(e)
+            return self.start_fresh_sortie()
         except ThermopylaeSortieResume as e:
             set_sleep()
-            self.logger.debug(e)
-            self.resume_sortie()
+            self.logger.warning(e)
+            return self.resume_sortie()
         except ThermopylaeSortieDone as e:
             self.logger.info(e)
             self._reset_chapter()
@@ -242,10 +238,10 @@ class Sortie:
                 else:
                     pass
             elif self.curr_node == "0" or self.curr_sub_map == "0" or self.curr_sub_map == T_CONST.SUB_MAP1_ID:
-                self._clean_memory()
-                self.api.setChapterBoat(E6_ID, self.final_fleet)
                 self.curr_node = E61_0_ID
                 self.set_sub_map(T_CONST.SUB_MAP1_ID)
+                self._clean_memory()
+                self.api.setChapterBoat(E6_ID, self.final_fleet)
             else:
                 pass
             next_id = self.starting_node()
@@ -255,17 +251,17 @@ class Sortie:
             self.logger.info("[FRESH] Reaching Boss Node")
             self.single_node_sortie(next_id)
         except ThermopylaeSoriteExit as e:
-            self.logger.debug(e)
+            self.logger.warning(e)
             self.parent.button_fresh_sortie.setEnabled(True)
             return False
         except ThermopylaeSortieRestart as e:
             set_sleep()
-            self.logger.debug(e)
-            self.start_fresh_sortie()
+            self.logger.warning(e)
+            return self.start_fresh_sortie()
         except ThermopylaeSortieResume as e:
             set_sleep()
-            self.logger.debug(e)
-            self.resume_sortie()
+            self.logger.warning(e)
+            return self.resume_sortie()
         except ThermopylaeSortieDone as e:
             self.logger.info(e)
             self._reset_chapter()
@@ -289,30 +285,21 @@ class Sortie:
         except StopIteration:
             return -1
 
-    def set_boat_pool(self, boat_pool: list, is_new: bool = False) -> None:
+    def set_boat_pool(self, boat_pool: list) -> None:
         """
         Set the user's boat pool.
         @param boat_pool: current bought boats
         @type boat_pool: list of int
-        @param is_new: check if the incoming list is from shop; to track the ship star
-        @type is_new: bool
         @return: None
         @rtype: None
         """
         self.boat_pool = set(boat_pool)
         label_text = "BOAT POOL | "
+        ship_star = self.helper.get_ship_star()
         for s in self.boat_pool:
-            if is_new is True:
-                if s in self.ship_star:
-                    self.ship_star[str(s)] += 1
-                else:
-                    self.ship_star[str(s)] = 1
-                star_text = f"(+{self.ship_star[str(s)]}) "
-            else:
-                star_text = ""
+            star_text = f"+{ship_star[str(s)]} " if str(s) in ship_star else ""
             label_text += f"{self.user_ships[s]['Name']} "
             label_text += star_text
-        self.qsettings.setValue(QKEYS.THER_SHIP_STARS, self.ship_star)
         self.parent.update_boat_pool_label(label_text)
 
     def set_sub_map(self, sub_map_id: str) -> None:
@@ -437,6 +424,7 @@ class Sortie:
 
         if self.curr_node == E61_C1_ID:
             if len(ss) == 0:
+                # endless-restarting loop; here appear inf times
                 raise ThermopylaeSortieRestart("No SS for E61 C1. Restarting")
             else:
                 self.battle_fleet = set(list(map(int, ss)))
@@ -495,7 +483,7 @@ class Sortie:
         if buy_res is None:
             pass
         else:
-            self.set_boat_pool(boat_pool=buy_res['boatPool'], is_new=True)
+            self.set_boat_pool(boat_pool=buy_res['boatPool'])
             self.set_fleet(buy_res['boatPool'])
 
         if curr_node_id in [E61_A1_ID, E62_A1_ID]:
