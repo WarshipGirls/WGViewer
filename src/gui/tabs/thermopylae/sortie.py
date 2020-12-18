@@ -146,7 +146,7 @@ class Sortie:
         ticket_num = int(self.parent.ticket_label.text())
         if ticket_num > 0:
             self.parent.multi_runs.setMaximum(ticket_num)
-            self.parent.multi_runs.setMinimum(1)
+            self.parent.multi_runs.setMinimum(0)
             self.parent.multi_runs.setValue(ticket_num)
             self.parent.multi_runs.setEnabled(True)
         else:

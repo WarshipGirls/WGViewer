@@ -243,11 +243,12 @@ class TabThermopylae(QWidget):
         if result is True:
             self.logger.debug('sortie success!')
             self.multi_runs.stepDown()
-            while self.multi_runs.value() > 0:
+            if self.multi_runs.value() > 0:
                 set_sleep()
                 self.logger.info('Starting a new run')
-                # TODO: the process is not touching the next line?
                 self.bee_fresh_sortie.start()
+            else:
+                self.logger.info("Completed sortie plan!")
         else:
             self.logger.debug('sortie failed')
 
