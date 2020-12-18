@@ -44,12 +44,16 @@ def create_qlineedit(default: int, max_len: int) -> QLineEdit:
     return q
 
 
-def create_qspinbox(default: int, min_val: int, max_val: int, step: int = 1) -> QSpinBox:
+def create_qspinbox(default: int, min_val: int, max_val: int, step: int = 1, prefix: str = "", suffix: str = "") -> QSpinBox:
     q = QSpinBox()
     q.setValue(default)
     q.setMinimum(min_val)
     q.setMaximum(max_val)
     q.setSingleStep(step)
+    if prefix != "":
+        q.setPrefix(prefix)
+    if suffix != "":
+        q.setSuffix(suffix)
     return q
 
 
@@ -219,17 +223,17 @@ class GameSettings(SettingsTemplate):
         self.layout.addWidget(self.seed_input, row, 1)
 
         row += 1
-        speed_label = create_qlabel(text='Game Speed (sec)')
+        speed_label = create_qlabel(text='Process Sleep Interval')
         speed_label.setToolTip("Set server request intervals.\nInvalid inputs will be ignored (such as low > high)")
         self.layout.addWidget(speed_label, row, 0)
         self.layout.addWidget(create_qlabel('Lower Bound'), row, 1)
         _d = self.get_init_value(QKEYS.GAME_SPD_LO)
-        self.speed_lo_input = create_qspinbox(_d, 5, 999)
+        self.speed_lo_input = create_qspinbox(default=_d, min_val=5, max_val=999, suffix=" sec")
         self.speed_lo_input.valueChanged.connect(lambda res: self.create_input(res, self.speed_lo_input, _d, QKEYS.GAME_SPD_LO))
         self.layout.addWidget(self.speed_lo_input, row, 2)
         self.layout.addWidget(create_qlabel('Upper Bound'), row, 3)
         _d = self.get_init_value(QKEYS.GAME_SPD_HI)
-        self.speed_hi_input = create_qspinbox(_d, 10, 999)
+        self.speed_hi_input = create_qspinbox(default=_d, min_val=10, max_val=999, suffix=" sec")
         self.speed_hi_input.valueChanged.connect(lambda res: self.create_input(res, self.speed_hi_input, _d, QKEYS.GAME_SPD_HI))
         self.layout.addWidget(self.speed_hi_input, row, 4)
         return row
@@ -244,24 +248,24 @@ class GameSettings(SettingsTemplate):
         self.layout.addWidget(create_qlabel(text='Retry Limit', font_size=HEADER3), row, 0)
         self.layout.addWidget(create_qlabel(text='session'), row, 1)
         _d = self.get_init_value(QKEYS.CONN_SESS_RTY)
-        self.session_retries = create_qspinbox(_d, 1, 99)
+        self.session_retries = create_qspinbox(default=_d, min_val=1, max_val=99, suffix=" time(s)")
         self.session_retries.valueChanged.connect(lambda res: self.create_input(res, self.session_retries, _d, QKEYS.CONN_SESS_RTY))
         self.layout.addWidget(self.session_retries, row, 2)
-        self.layout.addWidget(create_qlabel(text='sleep (sec)'), row, 3)
+        self.layout.addWidget(create_qlabel(text='sleep'), row, 3)
         _d = self.get_init_value(QKEYS.CONN_SESS_SLP)
-        self.session_sleep = create_qspinbox(_d, 1, 99)
+        self.session_sleep = create_qspinbox(default=_d, min_val=1, max_val=99, suffix=" sec")
         self.session_sleep.valueChanged.connect(lambda res: self.create_input(res, self.session_sleep, _d, QKEYS.CONN_SESS_SLP))
         self.layout.addWidget(self.session_sleep, row, 4)
 
         row += 1
         self.layout.addWidget(create_qlabel(text='WGR API'), row, 1)
         _d = self.get_init_value(QKEYS.CONN_API_RTY)
-        self.api_retries = create_qspinbox(_d, 1, 99)
+        self.api_retries = create_qspinbox(default=_d, min_val=1, max_val=99, suffix=" time(s)")
         self.api_retries.valueChanged.connect(lambda res: self.create_input(res, self.api_retries, _d, QKEYS.CONN_API_RTY))
         self.layout.addWidget(self.api_retries, row, 2)
-        self.layout.addWidget(create_qlabel(text='sleep (sec)'), row, 3)
+        self.layout.addWidget(create_qlabel(text='sleep'), row, 3)
         _d = self.get_init_value(QKEYS.CONN_API_SLP)
-        self.api_sleep = create_qspinbox(_d, 1, 99)
+        self.api_sleep = create_qspinbox(default=_d, min_val=1, max_val=99, suffix=" time(s)")
         self.api_sleep.valueChanged.connect(lambda res: self.create_input(res, self.api_sleep, _d, QKEYS.CONN_API_SLP))
         self.layout.addWidget(self.api_sleep, row, 4)
         return row
@@ -270,7 +274,7 @@ class GameSettings(SettingsTemplate):
         row += 1
         self.layout.addWidget(create_qlabel(text='Thermopylae'), row, 1)
         _d = self.get_init_value(QKEYS.CONN_THER_RTY)
-        self.ther_boss_retry = create_qspinbox(_d, 1, 9)
+        self.ther_boss_retry = create_qspinbox(default=_d, min_val=1, max_val=9, suffix=" time(s)")
         self.ther_boss_retry.valueChanged.connect(lambda res: self.create_input(res, self.ther_boss_retry, _d, QKEYS.CONN_THER_RTY))
         self.layout.addWidget(self.ther_boss_retry, row, 2)
         row += 1
@@ -350,18 +354,19 @@ class TabsSettings(SettingsTemplate):
 
         self.ther_ticket_auto = QCheckBox("Auto Purchase", self)
         self.ther_ticket_resource = create_qcombobox(['Fuel', 'Ammunition', 'Steel', 'Bauxite'])
-
+        _d = self.get_init_value(QKEYS.THER_HABA_REROLL)
+        self.haba_reroll = create_qspinbox(default=int(_d), min_val=1, max_val=4, suffix=" match(es)")
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY)
         self.ther_boss_retry: List[QSpinBox] = [
-            create_qspinbox(int(_d[0]), 0, 9),
-            create_qspinbox(int(_d[1]), 0, 9),
-            create_qspinbox(int(_d[2]), 0, 9)
+            create_qspinbox(default=int(_d[0]), min_val=0, max_val=9, suffix=" time(s)"),
+            create_qspinbox(default=int(_d[1]), min_val=0, max_val=9, suffix=" time(s)"),
+            create_qspinbox(default=int(_d[2]), min_val=0, max_val=9, suffix=" time(s)")
         ]
         _d = self.get_init_value(QKEYS.THER_BOSS_STD)
         self.ther_boss_std: List[QSpinBox] = [
-            create_qspinbox(int(_d[0]), 0, 6),
-            create_qspinbox(int(_d[1]), 0, 6),
-            create_qspinbox(int(_d[2]), 0, 6)
+            create_qspinbox(default=int(_d[0]), min_val=0, max_val=6, suffix=" target(s)"),
+            create_qspinbox(default=int(_d[1]), min_val=0, max_val=6, suffix=" target(s)"),
+            create_qspinbox(default=int(_d[2]), min_val=0, max_val=6, suffix=" target(s)")
         ]
         repair_choices = ['Slightly Damaged', 'Moderately Damaged', 'Heavily Damaged']
         # Lesson: cannot use list = [func()] * 6, that would duplicate instance rather make six calls
@@ -396,6 +401,12 @@ class TabsSettings(SettingsTemplate):
         self.ther_ticket_resource.currentIndexChanged.connect(lambda _: self.qsettings.setValue(QKEYS.THER_TKT_RSC, self.ther_ticket_resource.currentIndex()))
         self.ther_ticket_resource.setEnabled(self.ther_ticket_auto.isChecked())
         self.layout.addWidget(self.ther_ticket_resource, row, 4)
+
+        row += 1
+        self.layout.addWidget(create_qlabel(text='Habakkuk Skill'), row, 1)
+        self.haba_reroll.setToolTip("SL Habakkuk skills until matching number is met")
+        self.haba_reroll.valueChanged.connect(lambda _: self.qsettings.setValue(QKEYS.THER_HABA_REROLL, self.haba_reroll.value()))
+        self.layout.addWidget(self.haba_reroll, row, 2)
 
         row += 1
         self.layout.addWidget(create_qlabel(text='Bosses Retries'), row, 1)
@@ -453,16 +464,18 @@ class TabsSettings(SettingsTemplate):
         self.qsettings.setValue(QKEYS.THER_TKT_AUTO, True)
         self.ther_ticket_resource.setCurrentIndex(3)
         self.qsettings.setValue(QKEYS.THER_TKT_RSC, 3)
+        self.haba_reroll.setValue(2)
+        self.qsettings.setValue(QKEYS.THER_HABA_REROLL, 2)
 
         _d = self.get_init_value(QKEYS.THER_BOSS_RTY, True)
         self.qsettings.setValue(QKEYS.THER_BOSS_RTY, _d)
         for i in range(3):
-            self.ther_boss_retry[i].setValue(_d[i])
+            self.ther_boss_retry[i].setValue(int(_d[i]))
 
         _d = self.get_init_value(QKEYS.THER_BOSS_STD, True)
         self.qsettings.setValue(QKEYS.THER_BOSS_STD, _d)
         for i in range(3):
-            self.ther_boss_std[i].setValue(_d[i])
+            self.ther_boss_std[i].setValue(int(_d[i]))
 
         _d = self.get_init_value(QKEYS.THER_REPAIRS, True)
         self.qsettings.setValue(QKEYS.THER_REPAIRS, _d)
@@ -481,6 +494,8 @@ class TabsSettings(SettingsTemplate):
                 d = [2, 2, 2, 2, 2, 2]
             elif field == QKEYS.THER_TKT_RSC:
                 d = 3
+            elif field == QKEYS.THER_HABA_REROLL:
+                d = 2
             else:
                 logging.error(f"Unsupported QKEYS filed {field}")
                 d = [1]

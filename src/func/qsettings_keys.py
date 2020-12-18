@@ -29,11 +29,12 @@ UI_MAIN_POS: str = 'UI/main_window_position'  # QPoint
 UI_SIDEDOCK: str = 'UI/init_side_dock'  # bool
 UI_SIDEDOCK_POS: str = 'UI/side_dock_pos'  # int
 
-THER_TKT_AUTO: str = 'THER/ticket_auto_buy'  # bool
-THER_TKT_RSC: str = 'THER/ticket_resource_type'  # str(int); use one F/A/S/B resource to buy
 THER_BOSS_RTY: str = 'THER/bosses_retries'  # list of int
 THER_BOSS_STD: str = 'THER/bosses_retry_standard'  # list of int
+THER_TKT_AUTO: str = 'THER/ticket_auto_buy'  # bool
+THER_TKT_RSC: str = 'THER/ticket_resource_type'  # str(int); use one F/A/S/B resource to buy
 THER_REPAIRS: str = 'THER/repair_levels'  # list of int
+THER_HABA_REROLL: str = 'THER/habakkuk_reroll'  # int; in Ex6-3-A1, use Habakkuk skill until desired amount of SS is achieved
 THER_SHIP_STARS: str = 'THER/user_ship_stars'  # dict; ship-id (int) to star (int), to keep track of user ship stars
 
 UI_TAB_ADV: str = 'UI/TAB/advance'  # bool
