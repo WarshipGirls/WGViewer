@@ -95,32 +95,6 @@ class TabThermopylae(QWidget):
         log_handler.setLevel(level=logging.INFO)
         return logger
 
-    def set_ticket_display(self) -> None:
-        w = QWidget()
-        layout = QHBoxLayout(w)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self.button_purchase.clicked.connect(self.on_purchase_clicked)
-        layout.addWidget(QLabel("Remaining Sortie Tickets"))
-        layout.addWidget(self.ticket_label)
-        layout.addWidget(QLabel("Purchasable Tickets"))
-        layout.addWidget(self.button_purchase)
-        w.setLayout(layout)
-        for i in range(4):
-            layout.setStretch(i, 0)
-        self.left_layout.addWidget(w, 0, 0, 1, 4)
-
-    def set_adjutant_display(self) -> None:
-        w = QWidget()
-        layout = QHBoxLayout(w)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(QLabel("Adjutant"))
-        layout.addWidget(self.adjutant_label)
-        layout.addWidget(self.adjutant_exp_label)
-        layout.addWidget(QLabel("Point"))
-        layout.addWidget(self.points_label)
-        w.setLayout(layout)
-        self.left_layout.addWidget(w, 1, 0, 1, 4)
-
     def init_ui(self) -> None:
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.addLayout(self.left_layout)
@@ -140,7 +114,7 @@ class TabThermopylae(QWidget):
         msg += "    - DD 'Glowworm' and 'Amethyst', and CV 'Indomitable' are required\n"
         msg += "    - 6 high level SS are required\n"
         msg += "3. Adjutant 紫貂 (default) and Habakkuk (purchased in shop) are required;\n"
-        msg += "4. Buff cards are not selected;\n"
+        msg += "4. Buff cards are not selected.\n"
         t.setFontPointSize(10)
         t.setText(msg)
         t.setReadOnly(True)
@@ -176,36 +150,31 @@ class TabThermopylae(QWidget):
         self.right_text_box.setReadOnly(True)
         self.right_layout.addWidget(self.right_text_box)
 
-    def add_ship(self) -> None:
-        # TODO long term; not used right now; let user select boats here; now just use last fleets
-        for i in range(len(self.fleets)):
-            t = self.fleets[i]
-            l = QPushButton()
-            if t is None:
-                l.setText('+')
-            else:
-                l.setText(str(t))
-            l.clicked.connect(lambda _, _i=i: self.popup_select_window(_i))
-            self.ship_button_group.addButton(l)
-            self.left_layout.addWidget(l)
+    def set_ticket_display(self) -> None:
+        w = QWidget()
+        layout = QHBoxLayout(w)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.button_purchase.clicked.connect(self.on_purchase_clicked)
+        layout.addWidget(QLabel("Remaining Sortie Tickets"))
+        layout.addWidget(self.ticket_label)
+        layout.addWidget(QLabel("Purchasable Tickets"))
+        layout.addWidget(self.button_purchase)
+        w.setLayout(layout)
+        for i in range(4):
+            layout.setStretch(i, 0)
+        self.left_layout.addWidget(w, 0, 0, 1, 4)
 
-    def disable_sortie(self) -> None:
-        raise NotImplementedError
-
-    def handle_selection(self, ship_info: list, button_id: int) -> None:
-        b = self.ship_button_group.buttons()[button_id]
-        ship_id = ship_info[1]
-        if int(ship_id) in self.fleets:
-            b.setText('! SHIP ALREADY EXISTS IN FLEET !')
-        else:
-            self.fleets[button_id] = int(ship_id)
-            s = ", ".join(ship_info)
-            b.setText(s)
-
-    def popup_select_window(self, btn_id: int) -> None:
-        # TODO: delete obj after close
-        self.ship_select_window = ShipSelectWindow(self, btn_id)
-        self.ship_select_window.show()
+    def set_adjutant_display(self) -> None:
+        w = QWidget()
+        layout = QHBoxLayout(w)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(QLabel("Adjutant"))
+        layout.addWidget(self.adjutant_label)
+        layout.addWidget(self.adjutant_exp_label)
+        layout.addWidget(QLabel("Point"))
+        layout.addWidget(self.points_label)
+        w.setLayout(layout)
+        self.left_layout.addWidget(w, 1, 0, 1, 4)
 
     def disable_sortie_widgets(self):
         self.button_pre_battle.setEnabled(False)
@@ -218,6 +187,7 @@ class TabThermopylae(QWidget):
         self.button_fresh_sortie.setEnabled(True)
         self.button_resume_sortie.setEnabled(True)
         self.multi_runs.setEnabled(True)
+
     # ================================
     # Signals
     # ================================
@@ -300,5 +270,40 @@ class TabThermopylae(QWidget):
 
     def update_fleet_label(self, data: str) -> None:
         self.fleet_label.setText(data)
+
+    # ================================
+    # WIP
+    # ================================
+
+    def add_ship(self) -> None:
+        # TODO long term; not used right now; let user select boats here; now just use last fleets
+        for i in range(len(self.fleets)):
+            t = self.fleets[i]
+            l = QPushButton()
+            if t is None:
+                l.setText('+')
+            else:
+                l.setText(str(t))
+            l.clicked.connect(lambda _, _i=i: self.popup_select_window(_i))
+            self.ship_button_group.addButton(l)
+            self.left_layout.addWidget(l)
+
+    def disable_sortie(self) -> None:
+        raise NotImplementedError
+
+    def handle_selection(self, ship_info: list, button_id: int) -> None:
+        b = self.ship_button_group.buttons()[button_id]
+        ship_id = ship_info[1]
+        if int(ship_id) in self.fleets:
+            b.setText('! SHIP ALREADY EXISTS IN FLEET !')
+        else:
+            self.fleets[button_id] = int(ship_id)
+            s = ", ".join(ship_info)
+            b.setText(s)
+
+    def popup_select_window(self, btn_id: int) -> None:
+        # TODO: delete obj after close
+        self.ship_select_window = ShipSelectWindow(self, btn_id)
+        self.ship_select_window.show()
 
 # End of File
