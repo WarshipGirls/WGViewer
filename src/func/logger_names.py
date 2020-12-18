@@ -1,0 +1,17 @@
+API: str = 'WGR-API'
+
+DATA: str = 'DATA'
+
+FUNC: str = 'FUNC'
+
+LOGIN: str = 'LOGIN'
+
+SETTINGS: str = 'SETTINGS'
+SIDE_DOCK: str = 'SIDEDOCK'
+
+TABS: str = 'TABS'
+TAB_EXP: str = 'TABS-EXPEDITION'
+TAB_SHIP: str = 'TABS-SHIP'
+TAB_THER: str = 'TABS-THERMOPYLAE'
+
+UTILS: str = 'UTILS'
