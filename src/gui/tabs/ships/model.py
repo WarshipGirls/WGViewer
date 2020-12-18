@@ -1,4 +1,3 @@
-import logging
 import os
 import sys
 
@@ -8,8 +7,12 @@ from PyQt5.QtWidgets import QTableView
 
 from src import data as wgv_data
 from src import utils as wgv_utils
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from src.wgr.boat import API_BOAT
 from . import constant as SCONST
+
+logger = get_logger(QLOGS.TAB_SHIP)
 
 
 def get_data_path(relative_path: str) -> str:
@@ -86,7 +89,7 @@ class ShipModel(QStandardItemModel):
                     self.add_ship(self.rowCount() - 1, ship)
 
     def add_ship(self, row: int, d: dict) -> None:
-        logging.info(f"SHIP - Populating {row}")
+        logger.info(f"Populating {row}")
         self.set_thumbnail(row, str(d["shipCid"]))
         self.set_name(row, d["title"], d["married"], d["create_time"], d["marry_time"])
         self.set_id(row, d["id"], d["isLocked"])
@@ -114,7 +117,7 @@ class ShipModel(QStandardItemModel):
             mid = mid.rjust(4, '0')[1:]
         else:
             err = "Unrecognized ship cid pattern: " + cid
-            logging.warning(err)
+            logger.warning(err)
             return None
 
         # QTableWidgetItem requires unique assignment; thus, same pic cannot assign twice. Differ from QIcon
@@ -135,7 +138,7 @@ class ShipModel(QStandardItemModel):
             tmp2.setData(cid, Qt.UserRole)
             self.setItem(row, 0, tmp2)
             err = "Image path does not exist: " + img_path
-            logging.warning(err)
+            logger.warning(err)
 
     def set_name(self, *args) -> None:
         wig = QStandardItem(args[1])
@@ -309,7 +312,7 @@ class ShipModel(QStandardItemModel):
                 thumbnail.setData(e, Qt.UserRole)  # hide Equipment cid
                 self.setItem(args[0], col, thumbnail)
             else:
-                logging.warning(f'Image for equipment {e} is absent.')
+                logger.warning(f'Image for equipment {e} is absent.')
             col += 1
 
         rest = 4 - len(args[1])
@@ -341,7 +344,7 @@ class ShipModel(QStandardItemModel):
             # success
             wgv_data.update_equipment_amount(int(equip_id), unequip_id)
         else:
-            logging.error('Equipment change is failed.')
+            logger.error('Equipment change is failed.')
             return
 
         raw_path = "E/equip_L_" + str(int(equip_id[3:6])) + ".png"
@@ -354,7 +357,7 @@ class ShipModel(QStandardItemModel):
             thumbnail.setData(equip_id, Qt.UserRole)
             self.setItem(row, col, thumbnail)
         else:
-            logging.warning(f'Image for equipment {equip_id} is absent.')
+            logger.warning(f'Image for equipment {equip_id} is absent.')
 
     def set_tactics(self, *args) -> None:
         # stupid MoeFantasy makes it inefficient; can't access tactics LV by ship data

@@ -1,11 +1,13 @@
-import logging
-
 import urllib.request
 
 from PyQt5.QtWidgets import QMessageBox
 from packaging import version
 
 from src import utils as wgv_utils
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
+
+logger = get_logger(QLOGS.LOGIN)
 
 
 class WGViewerVersionCheck:
@@ -16,7 +18,7 @@ class WGViewerVersionCheck:
         try:
             self.check_version()
         except urllib.error.HTTPError as e:
-            logging.error(e)
+            logger.error(e)
 
     def check_version(self) -> None:
         url = 'https://raw.githubusercontent.com/WarshipGirls/WGViewer/master/version'
@@ -27,24 +29,24 @@ class WGViewerVersionCheck:
             latest_ver = version.parse(self.latest_ver)
 
             if user_ver == latest_ver:
-                logging.info('LOGIN - User has latest version installed.')
+                logger.info('User has latest version installed.')
                 res = 0
             elif user_ver < latest_ver:
                 res = self.detail_version_check(user_ver, latest_ver)
             elif user_ver > latest_ver:
-                logging.error(f'LOGIN - Version check has unexpected outcome user: {user_ver}, cloud: {latest_ver}')
+                logger.error(f'Version check has unexpected outcome user: {user_ver}, cloud: {latest_ver}')
                 res = -1
             else:
-                logging.error(f'LOGIN - Version check has unexpected outcome user: {user_ver}, cloud: {latest_ver}')
+                logger.error(f'Version check has unexpected outcome user: {user_ver}, cloud: {latest_ver}')
                 res = -1
         else:
             wgv_utils.popup_msg('Latest app version check failed due to bad Internet connection.')
             res = 1
 
         if res == 0:
-            logging.info('LOGIN - Version check succeed.')
+            logger.info('Version check succeed.')
         elif res == 1:
-            logging.info('LOGIN - Version check succeed. User skips the latest download.')
+            logger.info('Version check succeed. User skips the latest download.')
         elif res == -1:
             wgv_utils.popup_msg('Version check failed. Please re-download the application.', 'Info')
             wgv_utils.force_quit(0)
@@ -60,7 +62,7 @@ class WGViewerVersionCheck:
         elif user_ver.micro < latest_ver.micro:
             res = self.is_update('Micro Update', 'an optional')
         else:
-            logging.error(f'LOGIN - Version check has unexpected outcome user: {user_ver}, cloud: {latest_ver}')
+            logger.error(f'Version check has unexpected outcome user: {user_ver}, cloud: {latest_ver}')
             res = self.is_update('Update', 'an optional')
         if res is True:
             r = self.download_update()
@@ -82,7 +84,7 @@ class WGViewerVersionCheck:
     @staticmethod
     def download_update() -> int:
         # TODO long-term: auto start download?
-        logging.info('LOGIN - Link to latest version of WGViewer')
+        logger.info('Link to latest version of WGViewer')
         wgv_utils.open_url('https://github.com/WarshipGirls/WGViewer/releases')
         return 0
 

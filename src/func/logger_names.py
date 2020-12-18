@@ -5,6 +5,12 @@ DATA: str = 'DATA'
 FUNC: str = 'FUNC'
 
 LOGIN: str = 'LOGIN'
+LVL_CRITICAL: int = 50
+LVL_ERROR: int = 40
+LVL_WARNING: int = 30
+LVL_INFO: int = 20
+LVL_DEBUG: int = 10
+LVL_NOTSET: int = 0
 
 SETTINGS: str = 'SETTINGS'
 SIDE_DOCK: str = 'SIDEDOCK'

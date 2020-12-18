@@ -19,7 +19,7 @@ class LogHandler(logging.Handler, QObject):
         self.sig_log.emit(msg)
 
 
-def get_logger(name: str, level: int, signal: Callable = None) -> logging.Logger:
+def get_new_logger(name: str, level: int, signal: Callable = None) -> logging.Logger:
     logger = logging.getLogger(name)
     log_handler = LogHandler()
     if signal is not None:
@@ -29,5 +29,9 @@ def get_logger(name: str, level: int, signal: Callable = None) -> logging.Logger
     logger.addHandler(log_handler)
     log_handler.setLevel(level=level)
     return logger
+
+
+def get_logger(name: str) -> logging.Logger:
+    return logging.getLogger(name)
 
 # End of File

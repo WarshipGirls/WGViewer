@@ -3,7 +3,6 @@ import pickle
 
 from ast import literal_eval
 
-from src.func.encryptor import Encryptor
 
 
 def del_key_file(key_file: str = '.wgr.key') -> None:
@@ -26,6 +25,7 @@ def is_key_exists(key_file: str = '.wgr.key') -> bool:
 
 
 def save_cookies(cookie: dict) -> None:
+    from src.func.encryptor import Encryptor
     encryptor = Encryptor()
     key = encryptor.load_key(get_key_path())
     data = encryptor.encrypt_str(key, str(cookie))
@@ -38,6 +38,7 @@ def load_cookies() -> dict:
         encrypted_cookie = pickle.load(f)
     if is_key_exists():
         try:
+            from src.func.encryptor import Encryptor
             encryptor = Encryptor()
             key = encryptor.load_key(get_key_path())
             string = encryptor.decrypt_data(key, encrypted_cookie).decode('utf-8')

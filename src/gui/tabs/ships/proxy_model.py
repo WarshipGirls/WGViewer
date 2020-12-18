@@ -1,5 +1,4 @@
 import ast
-import logging
 import re
 from typing import Callable
 
@@ -8,7 +7,11 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QCheckBox
 
 from src import data as wgv_data
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from . import constant as SCONST
+
+logger = get_logger(QLOGS.DATA)
 
 
 class ShipSortFilterProxyModel(QSortFilterProxyModel):
@@ -36,19 +39,19 @@ class ShipSortFilterProxyModel(QSortFilterProxyModel):
 
         # TODO? multi-processing following command
         self._info = wgv_data.init_ships_temp()
-        logging.debug('SHIP - Proxy Model init done.')
+        logger.debug('Proxy Model init done.')
 
     def ship_id_to_rarity(self, cid: int) -> int:
         try:
             return self._info[str(cid)]['rarity']
         except KeyError:
-            logging.error(f'proxy {cid} not exist!')
+            logger.error(f'proxy {cid} not exist!')
 
     def ship_id_to_country(self, cid: int) -> int:
         try:
             return self._info[str(cid)]['country']
         except KeyError:
-            logging.error(f'proxy {cid} not exist!')
+            logger.error(f'proxy {cid} not exist!')
 
     def set_name_filter(self, regex: str) -> None:
         """

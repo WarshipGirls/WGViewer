@@ -1,8 +1,8 @@
 import json
 
-from logging import getLogger
-
 from src.exceptions.wgr_error import get_error
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from src.utils import set_sleep
 from src.wgr.six import API_SIX
 from . import constants as T_CONST
@@ -18,7 +18,7 @@ class PreSortieCheck:
         self.api: API_SIX = api
         self.is_realrun = is_realrun
 
-        self.logger = getLogger('TabThermopylae')
+        self.logger = get_logger(QLOGS.TAB_THER)
         self.final_fleet: list = []
         self.sub_map_id: str = ""
         self.map_data: dict = {}

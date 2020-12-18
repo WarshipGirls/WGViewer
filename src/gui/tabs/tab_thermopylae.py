@@ -1,5 +1,3 @@
-import logging
-
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QButtonGroup, QGridLayout, QSpinBox
@@ -8,7 +6,8 @@ from src import data as wgv_data
 from src.utils import set_sleep
 from src.func.worker import Worker, CallbackWorker
 from src.wgr.six import API_SIX
-from src.func.log_handler import LogHandler
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_new_logger
 from src.gui.side_dock.resource_model import ResourceTableModel
 from src.gui.side_dock.dock import SideDock
 from .thermopylae.ship_window import ShipSelectWindow
@@ -74,7 +73,8 @@ class TabThermopylae(QWidget):
         self.init_left_layout()
 
         self.right_text_box = QTextEdit()
-        self.logger = self.get_logger()  # after right_text_box creation
+        # after right_text_box creation
+        self.logger = get_new_logger(name=QLOGS.TAB_THER, level=QLOGS.LVL_INFO, signal=self.right_text_box.append)
         self.init_right_layout()
 
         self.ship_select_window = None
@@ -86,14 +86,6 @@ class TabThermopylae(QWidget):
         self.bee_pre_battle.terminate()
         self.bee_fresh_sortie = None
         self.bee_resume_sortie = None
-
-    def get_logger(self) -> logging.Logger:
-        logger = logging.getLogger('TabThermopylae')
-        log_handler = LogHandler()
-        log_handler.sig_log.connect(self.right_text_box.append)
-        logger.addHandler(log_handler)
-        log_handler.setLevel(level=logging.INFO)
-        return logger
 
     def init_ui(self) -> None:
         self.main_layout.setContentsMargins(0, 0, 0, 0)

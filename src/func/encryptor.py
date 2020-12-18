@@ -1,7 +1,11 @@
-import logging
 from typing import Union
 
 from cryptography.fernet import Fernet
+
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
+
+logger = get_logger(QLOGS.FUNC)
 
 
 class Encryptor:
@@ -32,8 +36,7 @@ class Encryptor:
         try:
             return Fernet(key).decrypt(data)
         except TypeError:
-            logging.error('Key file or config file corrupted.')
+            logger.error('Key file or config file corrupted.')
             return None
-
 
 # End of File

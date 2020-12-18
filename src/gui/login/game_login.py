@@ -3,7 +3,6 @@ import datetime
 import hashlib
 import hmac
 import json
-import logging
 import random
 import time
 import urllib
@@ -12,10 +11,14 @@ import zlib
 from PyQt5.QtWidgets import QPushButton
 
 from src.data import save_cookies
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from src.utils import get_app_version
 from src.exceptions.wgr_error import get_error
 from .helper import LoginHelper
 from .session import LoginSession
+
+logger = get_logger(QLOGS.LOGIN)
 
 HEADER = {
     'Accept-Encoding': 'identity',
@@ -86,7 +89,7 @@ class GameLogin:
         self.hlp = LoginHelper(self.session)
 
     def first_login(self, username: str, password: str) -> bool:
-        logging.info("LOGIN - first server fetching...")
+        logger.info("first server fetching...")
         url_version = f"http://version.jr.moefantasy.com/index/checkVer/{self.version}/{self.channel}/2&version={self.version}&channel={self.channel}&market=2"
         # Pull version Info
         response_version = self.session.get(url=url_version, headers=HEADER, timeout=10)
@@ -120,7 +123,7 @@ class GameLogin:
         self.session.get(url=url_cheat, headers=HEADER, cookies=self.cookies, timeout=10)
 
     def second_login(self, host: str) -> bool:
-        logging.info("LOGIN - second data fetching...")
+        logger.info("second data fetching...")
         # Generate random device number
         now_time = str(int(round(time.time() * 1000)))
         try:
@@ -205,7 +208,7 @@ class GameLogin:
         try:
             login_text = json.loads(zlib.decompress(login_response.content))
         except zlib.error as e:
-            logging.error(e)    # incorrect header check
+            logger.error(e)    # incorrect header check
             return {}
 
         self.cookies = login_response.cookies.get_dict()

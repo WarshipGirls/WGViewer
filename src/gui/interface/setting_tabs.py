@@ -1,4 +1,3 @@
-import logging
 import random
 
 from time import time
@@ -10,11 +9,15 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QCheckBox, QComboBox, QLabel, 
 
 from src.utils import repair_id_to_text, repair_text_to_id
 from src.func import qsettings_keys as QKEYS
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from src.gui.custom_widgets import QHLine
 
 HEADER1: int = 20
 HEADER2: int = 15
 HEADER3: int = 12
+
+logger = get_logger(QLOGS.SETTINGS)
 
 
 def create_qcombobox(choices: list, idx: int = 0) -> QComboBox:
@@ -73,6 +76,7 @@ class SettingsTemplate(QWidget):
         #   - workaround: use addWidget() later to move it; or pre-set with None
         # self.h_line = None
         # Lesson2: (again), layout cannot add the same element twice!
+
     # def set_h_line(self) -> None:
     #     self.h_line = QHLine(parent=self, color=QColor(0, 0, 0), width=10)
 
@@ -337,7 +341,7 @@ class GameSettings(SettingsTemplate):
                 d = 3
             else:
                 d = 5
-                logging.error(f"Unsupported QKEYS filed {field}")
+                logger.error(f"Unsupported QKEYS filed {field}")
         return d
 
     def set_random_seed(self, _input: str) -> None:
@@ -413,7 +417,7 @@ class TabsSettings(SettingsTemplate):
         tbr_init = self.get_init_value(QKEYS.THER_BOSS_RTY)
         for i in range(3):
             self.ther_boss_retry[i].valueChanged.connect(lambda res, _i=i: self.create_input(res, self.ther_boss_retry[_i], tbr_init, _i, QKEYS.THER_BOSS_RTY))
-            self.layout.addWidget(self.ther_boss_retry[i], row, i+2)
+            self.layout.addWidget(self.ther_boss_retry[i], row, i + 2)
 
         row += 1
         ther_boss_retry_std_label = create_qlabel(text='On Sunken')
@@ -422,7 +426,7 @@ class TabsSettings(SettingsTemplate):
         tbs_init = self.get_init_value(QKEYS.THER_BOSS_STD)
         for i in range(3):
             self.ther_boss_std[i].valueChanged.connect(lambda res, _i=i: self.create_input(res, self.ther_boss_std[_i], tbs_init, _i, QKEYS.THER_BOSS_STD))
-            self.layout.addWidget(self.ther_boss_std[i], row, i+2)
+            self.layout.addWidget(self.ther_boss_std[i], row, i + 2)
 
         row += 1
         ther_repair_levels_label = create_qlabel(text='Fleet Repair Levels')
@@ -431,11 +435,11 @@ class TabsSettings(SettingsTemplate):
         tbp_init = self.get_init_value(QKEYS.THER_REPAIRS)
         for i in range(3):
             self.ther_repairs[i].currentTextChanged.connect(lambda res, _i=i: self.dropdown_input(res, self.ther_repairs[_i], tbp_init, _i, QKEYS.THER_REPAIRS))
-            self.layout.addWidget(self.ther_repairs[i], row, i+2)
+            self.layout.addWidget(self.ther_repairs[i], row, i + 2)
         row += 1
         for i in range(3, 6):
             self.ther_repairs[i].currentTextChanged.connect(lambda res, _i=i: self.dropdown_input(res, self.ther_repairs[_i], tbp_init, _i, QKEYS.THER_REPAIRS))
-            self.layout.addWidget(self.ther_repairs[i], row, i-1)
+            self.layout.addWidget(self.ther_repairs[i], row, i - 1)
 
         row += 1
         return row
@@ -497,7 +501,7 @@ class TabsSettings(SettingsTemplate):
             elif field == QKEYS.THER_HABA_REROLL:
                 d = 2
             else:
-                logging.error(f"Unsupported QKEYS filed {field}")
+                logger.error(f"Unsupported QKEYS filed {field}")
                 d = [1]
         return d
 

@@ -1,4 +1,3 @@
-import logging
 from typing import Tuple
 
 import requests
@@ -14,6 +13,8 @@ from PyQt5.QtWidgets import (
 from src import data as wgv_data
 from src import utils as wgv_utils
 from src.func import qsettings_keys as QKEYS
+from src.func import logger_names as QLOGS
+from src.func.log_handler import get_logger
 from src.exceptions.custom import InterruptExecution
 from src.exceptions.wgr_error import WarshipGirlsExceptions
 from src.func.encryptor import Encryptor
@@ -22,6 +23,8 @@ from src.gui.main_interface import MainInterface
 from .game_login import GameLogin
 from .session import LoginSession
 from .version_check import WGViewerVersionCheck
+
+logger = get_logger(QLOGS.LOGIN)
 
 
 def create_label(text: str) -> QLabel:
@@ -240,7 +243,6 @@ class LoginForm(QWidget):
         # It's ugly, but it works. QThread approach won't work
         count = 0
         while True:
-            # logging.debug(count)
             time.sleep(0.01)
             if count == 500:
                 break
@@ -249,7 +251,7 @@ class LoginForm(QWidget):
             else:
                 count += 1
 
-        logging.info('LOGIN - Starting auto login')
+        logger.info('Starting auto login')
         self.sig_login.emit()
 
     def _get_password(self) -> str:
@@ -315,7 +317,7 @@ class LoginForm(QWidget):
         #     self.channel = "100024"
         else:
             servers = ["N/A"]
-            logging.warning("Login server is not chosen.")
+            logger.warning("Login server is not chosen.")
         self.combo_server.addItems(servers)
 
     def update_server(self, text: str) -> None:
@@ -332,9 +334,9 @@ class LoginForm(QWidget):
         elif text == "长春":
             self.server = "http://s14.jr.moefantasy.com/"
         elif text == "":
-            logging.warning("Server is not manually chosen.")
+            logger.warning("Server is not manually chosen.")
         else:
-            logging.error(f"Invalid server name: {text}")
+            logger.error(f"Invalid server name: {text}")
 
     @pyqtSlot()
     def start_login(self) -> None:
@@ -364,7 +366,7 @@ class LoginForm(QWidget):
             wgv_utils.popup_msg("Your cookies is invalid. Please use Login")
 
     def handle_result1(self, result: Tuple[bool, str]) -> None:
-        logging.debug(f'LOGIN - First fetch result {result}')
+        logger.debug(f'First fetch result {result}')
         self.res1 = result[0]
         if self.res1 is True:
             self.bee2.start()
@@ -374,7 +376,7 @@ class LoginForm(QWidget):
             wgv_utils.popup_msg(err_msg)
 
     def handle_result2(self, result: Tuple[bool, str]) -> None:
-        logging.debug(f'LOGIN - Second fetch result {result}')
+        logger.debug(f'Second fetch result {result}')
         self.res2 = result[0]
 
         if self.res2 is True:
@@ -386,7 +388,7 @@ class LoginForm(QWidget):
 
         if self.res1 == True and self.res2 == True:
             self.button_login.setText('Loading and Initializing... (rendering time varies with dock size)')
-            logging.info("LOGIN - SUCCESS!")
+            logger.info("SUCCESS!")
             # No popup msg on Login Success
             # if self.check_auto.isChecked() is True:
             #     pass
@@ -403,10 +405,10 @@ class LoginForm(QWidget):
             res1 = login_account.first_login(username, password)
         except WarshipGirlsExceptions as e:
             # Lesson: Handle GUI actions (e.g. popup_msg) outside the thread; otherwise, the GUI is blocked
-            logging.error(f"LOGIN - {e}")
+            logger.error(f"{e}")
             return False, str(e)
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
-            logging.error(f"LOGIN - {e}")
+            logger.error(f"{e}")
             msg = "Login Failed (1): Wrong authentication information"
             return False, msg
         return res1, ""
@@ -416,7 +418,7 @@ class LoginForm(QWidget):
         try:
             res2 = login_account.second_login(server)
         except (KeyError, requests.exceptions.ReadTimeout, AttributeError) as e:
-            logging.error(f"LOGIN - {e}")
+            logger.error(f"{e}")
             msg = "Login Failed (2): Probably due to bad server connection"
             return False, msg
         return res2, ""
