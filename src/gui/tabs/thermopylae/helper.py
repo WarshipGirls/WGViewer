@@ -23,11 +23,23 @@ class SortieHelper:
 
         self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
         if self.qsettings.contains(QKEYS.CONN_THER_RTY):
-            self.reconnection_limit = int(self.qsettings.value(QKEYS.CONN_THER_RTY))
+            self.reconnection_limit = self.qsettings.value(QKEYS.CONN_THER_RTY, type=int)
         else:
             self.reconnection_limit = 3
+        if self.qsettings.contains(QKEYS.THER_BOSS_RTY):
+            self.boss_retry_limit = list(map(int, self.qsettings.value(QKEYS.THER_BOSS_RTY)))
+        else:
+            self.boss_retry_limit = [3, 5, 10]
+        if self.qsettings.contains(QKEYS.THER_BOSS_STD):
+            self.boss_retry_standard = list(map(int, self.qsettings.value(QKEYS.THER_BOSS_STD)))
+        else:
+            self.boss_retry_standard = [1, 2, 2]
+        if self.qsettings.contains(QKEYS.THER_SHIP_STARS):
+            self.ship_star: dict = self.qsettings.value(QKEYS.THER_SHIP_STARS)
+        else:
+            self.ship_star: dict = {}
 
-        self.boss_retry_count: list = [0] * 3
+        self.boss_retry_count: list = [0, 0, 0]
         self.points: int = 10
         self.adjutant_info: dict = {}  # level, curr_exp, exp_cap
 
@@ -39,7 +51,7 @@ class SortieHelper:
         tries = 0
         while not res:
             try:
-                self.logger.info(f"{func_info}...")
+                self.logger.debug(f"{func_info}...")
                 res, data = func()
             except WarshipGirlsExceptions as e:
                 self.logger.warning(f"Failed to {func_info} due to {e}. Trying reconnecting...")
@@ -96,7 +108,12 @@ class SortieHelper:
         if 'strategic_point' in buy_data and shop_data is not None:
             self.set_curr_points(buy_data['strategic_point'])
             for s in purchase_list:
+                if str(s) in self.ship_star:
+                    self.ship_star[str(s)] += 1
+                else:
+                    self.ship_star[str(s)] = 0
                 self.logger.info(f'bought {self.user_ships[str(s)]["Name"]}')
+            self.qsettings.setValue(QKEYS.THER_SHIP_STARS, self.ship_star)
         else:
             pass
 
@@ -140,6 +157,20 @@ class SortieHelper:
 
         return self._reconnecting_calls(_challenge, 'Combat')
 
+    def charge_ticket(self, resource_typd_id: str) -> dict:
+        def _buy() -> Tuple[bool, dict]:
+            data = self.api.chargeTicket(resource=resource_typd_id)
+            res = False
+            if 'eid' in data:
+                get_error(data['eid'])
+            elif 'userResVO' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+            return res, data
+
+        return self._reconnecting_calls(_buy, 'buy ticket')
+
     def enter_next_node(self, next_node: str) -> dict:
         def _newNext() -> Tuple[bool, dict]:
             data = self.api.newNext(next_node)
@@ -181,7 +212,7 @@ class SortieHelper:
         for ship in store_data['$ssss']:
             star = int(ship[0])
             cost = int(ship[2]) * (2 ** (star - 1))
-            output_str = "{:15s}\tSTAR{:3s} COST{:4s}".format(self.user_ships[str(ship[1])]["Name"], str(star), str(cost))
+            output_str = "{:15s}\tSTAR{:3s} COST{:4s}".format(self.user_ships[str(ship[1])]["Name"], str(star-1), str(cost))
             self.logger.info(output_str)
         return store_data
 
@@ -457,10 +488,10 @@ class SortieHelper:
         elif curr_id in T_CONST.BOSS_NODES:
             self.logger.info('---- BOSS BATTLE ----')
             node_idx = T_CONST.BOSS_NODES.index(curr_id)
-            if e_list.count(0) >= T_CONST.BOSS_RETRY_STANDARDS[node_idx]:
+            if e_list.count(0) >= self.boss_retry_standard[node_idx]:
                 res = '1'
             else:
-                if self.boss_retry_count[node_idx] == T_CONST.BOSS_RETRY_LIMITS[node_idx]:
+                if self.boss_retry_count[node_idx] == self.boss_retry_limit[node_idx]:
                     res = '1'
                 else:
                     self.boss_retry_count[node_idx] += 1
@@ -508,6 +539,9 @@ class SortieHelper:
         else:
             pass
         return res, buff_id
+
+    def get_ship_star(self) -> dict:
+        return self.ship_star
 
     @staticmethod
     def is_buy_buff(node_id: str) -> bool:
@@ -563,7 +597,11 @@ class SortieHelper:
         ships = battle_res['warResult']['selfShipResults']
         for i in range(len(ships)):
             ship_id = fleet[i]
-            shipname = next((j for j in battle_res['shipVO'] if j['id'] == ship_id))['title']
+            try:
+                shipname = next((j for j in battle_res['shipVO'] if j['id'] == ship_id))['title']
+            except StopIteration:
+                self.logger.debug("Discrpency in battle result shipVO")
+                break
             ship = ships[i]
             ship_str = "{:12s}\tLv.{:4s}\t+{}Exp".format(shipname, str(ship['level']), str(ship['expAdd']))
             ship_str += " MVP" if ship['isMvp'] == 1 else ""
@@ -604,6 +642,9 @@ class SortieHelper:
             if len(res) == len(unorder):
                 break
         return res
+
+    def reset_ship_star(self) -> None:
+        self.ship_star = {}
 
     def update_adjutant_info(self, adj_data: dict, strategic_point: int) -> None:
         # TODO: use signal? and manage signals globally?

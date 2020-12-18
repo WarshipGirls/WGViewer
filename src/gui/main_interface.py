@@ -2,7 +2,7 @@ import os
 import sys
 
 from PyQt5.QtCore import Qt, pyqtSlot, QThreadPool, QSettings
-from PyQt5.QtGui import QCloseEvent, QHideEvent
+from PyQt5.QtGui import QCloseEvent, QHideEvent, QResizeEvent, QMoveEvent
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
 
 from src import data as wgv_data
@@ -66,12 +66,19 @@ class MainInterface(QMainWindow):
     # ================================
 
     def set_color_scheme(self) -> None:
-        self.setStyleSheet(wgv_data.get_color_scheme())
+        self.setStyleSheet(wgv_utils.get_color_scheme())
 
     def init_ui(self) -> None:
         self.set_color_scheme()
-        user_w, user_h = wgv_utils.get_user_resolution()
-        self.resize(int(0.67 * user_w), int(0.67 * user_h))
+        if self.qsettings.contains(QKEYS.UI_MAIN) and self.qsettings.value(QKEYS.UI_MAIN, type=bool) is True:
+            new_w = self.qsettings.value(QKEYS.UI_MAIN_W, type=int)
+            new_h = self.qsettings.value(QKEYS.UI_MAIN_H, type=int)
+            new_pos = self.qsettings.value(QKEYS.UI_MAIN_POS)
+            self.resize(new_w, new_h)
+            self.move(new_pos)
+        else:
+            user_w, user_h = wgv_utils.get_user_resolution()
+            self.resize(int(0.67 * user_w), int(0.67 * user_h))
 
         self.setMenuBar(self.menu_bar)
         self.setCentralWidget(self.main_tabs)
@@ -79,39 +86,15 @@ class MainInterface(QMainWindow):
         self.setLayout(QHBoxLayout())
         self.setWindowTitle(f"Warship Girls Viewer v{wgv_utils.get_app_version()}")
 
-    '''
-    # Original design is to let user freely open/close side-dock.
-    # Due to the need of hidden pyqt signals connect to the side-dock,
-    # we changed the visibility instead of delete it.
-    def create_side_dock(self):
-        if (self.side_dock_on is False) and (self.side_dock is None):
-            self.side_dock = SideDock(self)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.side_dock)
-            self.side_dock_on = True
-        else:
-            pass
-
-    def init_side_dock(self) -> None:
-        # Following only checks on log-in
-        if self.qsettings.contains(QKEYS.UI_SIDEDOCK) is True:
-            if self.qsettings.value(QKEYS.UI_SIDEDOCK) == "true":
-                pass
-            else:
-                self.create_side_dock()
-        else:
-            self.qsettings.setValue(QKEYS.UI_SIDEDOCK, False)
-            self.create_side_dock()
-    '''
-
     def create_side_dock(self) -> None:
         if self.side_dock is None:
             self.side_dock = SideDock(self)
         else:
             self.side_dock.show()
         if self.qsettings.contains(QKEYS.UI_SIDEDOCK_POS) is True:
-            if self.qsettings.value(QKEYS.UI_SIDEDOCK_POS) == 'right':
+            if self.qsettings.value(QKEYS.UI_SIDEDOCK_POS, type=int) == 0:
                 pos = Qt.RightDockWidgetArea
-            elif self.qsettings.value(QKEYS.UI_SIDEDOCK_POS) == 'left':
+            elif self.qsettings.value(QKEYS.UI_SIDEDOCK_POS, type=int) == 1:
                 pos = Qt.LeftDockWidgetArea
             else:
                 pos = Qt.RightDockWidgetArea
@@ -122,12 +105,12 @@ class MainInterface(QMainWindow):
     def init_side_dock(self) -> None:
         self.create_side_dock()
         if self.qsettings.contains(QKEYS.UI_SIDEDOCK) is True:
-            if self.qsettings.value(QKEYS.UI_SIDEDOCK) == "true":
+            if self.qsettings.value(QKEYS.UI_SIDEDOCK, type=bool) is False:
                 self.side_dock.hide()
             else:
                 pass
         else:
-            self.qsettings.setValue(QKEYS.UI_SIDEDOCK, False)
+            self.qsettings.setValue(QKEYS.UI_SIDEDOCK, True)
 
     def init_tray_icon(self) -> None:
         self.tray = TrayIcon(self, get_data_path('assets/favicon.ico'))
@@ -152,6 +135,21 @@ class MainInterface(QMainWindow):
         self.hide()
         if self.tray is None:
             self.init_tray_icon()
+        else:
+            pass
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        if self.qsettings.contains(QKEYS.UI_MAIN) and self.qsettings.value(QKEYS.UI_MAIN, type=bool) is True:
+            # sets value
+            self.qsettings.setValue(QKEYS.UI_MAIN_W, self.width())
+            self.qsettings.setValue(QKEYS.UI_MAIN_H, self.height())
+        else:
+            pass
+
+    def moveEvent(self, event: QMoveEvent) -> None:
+        if self.qsettings.contains(QKEYS.UI_MAIN) and self.qsettings.value(QKEYS.UI_MAIN, type=bool) is True:
+            # sets value
+            self.qsettings.setValue(QKEYS.UI_MAIN_POS, self.pos())
         else:
             pass
 

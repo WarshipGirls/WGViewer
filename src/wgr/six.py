@@ -40,8 +40,9 @@ class API_SIX(WGR_API):
         link = 'six/cha11enge/' + formation
         return self._api_call(link)
 
-    def chargeTicket(self):
-        link = 'six/chargeTicket/3'
+    def chargeTicket(self, resource: str):
+        # 0: fuel, 1: ammo, 2: steel, 3: bauxite
+        link = 'six/chargeTicket/' + resource
         return self._api_call(link)
 
     def getUserData(self):

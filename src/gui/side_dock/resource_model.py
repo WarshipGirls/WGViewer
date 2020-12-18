@@ -1,10 +1,15 @@
+import csv
 import logging
 import os
 import sys
 
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot, QTimer
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QAbstractTableModel
+
+from src.data import get_user_dir
+from src.utils import get_unixtime
+from . import constants as CONST
 
 
 def get_data_path(relative_path: str) -> str:
@@ -16,9 +21,46 @@ def get_data_path(relative_path: str) -> str:
 
 class ResourceTableModel(QAbstractTableModel):
     # https://www.learnpyqt.com/courses/model-views/qtableview-modelviews-numpy-pandas/
-    def __init__(self, data):
+    def __init__(self, data: list = None):
         super(ResourceTableModel, self).__init__()
-        self._data = data
+        if data is None:
+            # No [[0]*5]*3, that would cause duplicate
+            self._data = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        else:
+            self._data = data
+
+        self.csv_filename = os.path.join(get_user_dir(), CONST.CSV_FILENAME)
+        self.counter = CONST.CSV_LOG_COUNTDOWN
+        self.timer = QTimer()
+        self.timer.setInterval(CONST.CSV_LOG_TIMER_INTERVAL)
+        self.timer.timeout.connect(self.count_down)
+        self.timer.start()
+
+    def get_data(self) -> list:
+        return self._data
+
+    @staticmethod
+    def flatten_list(nested_lists: list) -> list:
+        return [i for l in nested_lists for i in l]
+
+    def count_down(self) -> None:
+        self.counter -= int(CONST.CSV_LOG_TIMER_INTERVAL / 1000)
+        if self.counter >= 0:
+            pass
+        else:
+            self.counter = CONST.CSV_LOG_COUNTDOWN
+            self.write_csv()
+
+    def write_csv(self) -> None:
+        with open(self.csv_filename, 'a', newline='') as f:
+            write = csv.writer(f)
+            if os.path.getsize(self.csv_filename) == 0:
+                write.writerow(CONST.CSV_HEADER)
+            else:
+                pass
+            d = [get_unixtime()]
+            d += self.flatten_list(self._data)
+            write.writerow(d)
 
     # ================================
     # Virtual methods
@@ -84,7 +126,7 @@ class ResourceTableModel(QAbstractTableModel):
         return len(self._data[0])
 
     # ================================
-    # Self Implemented methods
+    # Signals
     # ================================
     # TODO: add fade effect
     #  fade a label is quite easy; fade a table cell is not straightforward (maybe need a QThread)

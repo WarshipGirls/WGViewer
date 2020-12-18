@@ -4,16 +4,19 @@
 2. This is only meant for who passed E6 with 6SS; will not considering doing E1-E5 in the near future
     RIGHT NOW everything pre-battle is fixed
 3. This file hosts high-level battle decisions; low-level pre/post processing code is host in ./helper.py
-TODO: replace raise?
+TODO: replace raise? this now creates a long series of frames
 TODO free up dock space if needed
 """
 
 from logging import getLogger
 from typing import Union
 
+from PyQt5.QtCore import QSettings
+
 from src import data as wgv_data
+from src.func import qsettings_keys as QKEYS
 from src.exceptions.wgr_error import get_error
-from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieRestart, ThermopylaeSortieResume, ThermopylaeSortieDone
+from src.exceptions import custom as wgv_error
 from src.utils import process_spy_json, set_sleep
 from src.wgr.six import API_SIX
 from .helper import SortieHelper
@@ -31,6 +34,8 @@ E63_A1_ID: str = '931802'
 
 class Sortie:
 
+    # TODO: change all list to specific type, e.g. List[int]
+
     def __init__(self, parent, api: API_SIX, fleet: list, final_fleet: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
@@ -39,6 +44,12 @@ class Sortie:
         self.battle_fleet = set()  # ships that on battle
         self.final_fleet = final_fleet  # fill up required number of boats
         self.logger = getLogger('TabThermopylae')
+
+        self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
+        if self.qsettings.contains(QKEYS.THER_REPAIRS):
+            self.repair_levels: list = list(map(int, self.qsettings.value(QKEYS.THER_REPAIRS)))
+        else:
+            self.repair_levels: list = [2]
 
         # Used for pre-battle
         self.map_data: dict = {}
@@ -60,18 +71,19 @@ class Sortie:
 
     def _clean_memory(self) -> None:
         self.logger.info("Reset ship card pool, battle fleet and curr node")
+        self.helper.reset_ship_star()
         self.set_boat_pool([])
         self.set_fleet([])
 
     def _reset_chapter(self) -> None:
         # chapter can only be reset after E6-3
         if self.tickets <= 0:
-            raise ThermopylaeSoriteExit("Insufficient sortie ticket. Cannot Reset Chapter")
+            raise wgv_error.ThermopylaeSoriteExit("Insufficient sortie ticket. Cannot Reset Chapter")
         reset_res = self.helper.reset_chapter(E6_ID)
         self._clean_memory()
         self.set_sub_map(T_CONST.SUB_MAP1_ID)
         self.helper.set_adjutant_info(reset_res['adjutantData'])
-        self.set_sortie_tickets(ticket=reset_res['ticket'])
+        self.update_sortie_ticket(ticket=reset_res['ticket'])
 
     # ================================
     # Entry points
@@ -88,7 +100,21 @@ class Sortie:
         self.user_data = self.pre_sortie.get_user_data()
         self.curr_node = str(self.user_data['nodeId'])
 
-        self.set_sortie_tickets(ticket=self.user_data['ticket'], num=self.user_data['canChargeNum'])
+        # Initialize SortieHelper
+        self.helper = SortieHelper(self.parent, self.api, self.user_ships, self.map_data)
+        self.helper.set_adjutant_info(self.user_data['adjutantData'])
+        self.helper.set_curr_points(self.user_data['strategic_point'])
+
+        ticket_num = int(self.user_data['canChargeNum']) - int(self.user_data['chargeNum'])
+        self.parent.button_purchase.setEnabled(ticket_num > 0)
+        self.update_sortie_ticket(ticket=self.user_data['ticket'], num=ticket_num)
+        if self.qsettings.contains(QKEYS.THER_TKT_AUTO):
+            if self.qsettings.value(QKEYS.THER_TKT_AUTO, type=bool) is True:
+                self.buy_all_tickets(ticket_num)
+            else:
+                pass
+        else:
+            self.buy_all_tickets(ticket_num)
         self.update_adjutant_label(self.user_data['adjutantData'])
         self.set_boat_pool(self.user_data['boatPool'])
         self.set_sub_map(self.pre_sortie.get_sub_map_id())
@@ -96,11 +122,6 @@ class Sortie:
             self.final_fleet = self.pre_sortie.get_final_fleet()
         else:
             pass
-
-        # Initialize SortieHelper
-        self.helper = SortieHelper(self.parent, self.api, self.user_ships, self.map_data)
-        self.helper.set_adjutant_info(self.user_data['adjutantData'])
-        self.helper.set_curr_points(self.user_data['strategic_point'])
 
         self.logger.info("Setting final fleets:")
         for ship_id in self.final_fleet:
@@ -120,14 +141,24 @@ class Sortie:
             # Lesson: do not output various stuff at once, concat them together; otherwise TypeError
             self.logger.info(output_str)
 
+        self.parent.button_pre_battle.setEnabled(True)
         self.parent.button_fresh_sortie.setEnabled(True)
+        ticket_num = int(self.parent.ticket_label.text())
+        if ticket_num > 0:
+            self.parent.multi_runs.setMaximum(ticket_num)
+            self.parent.multi_runs.setMinimum(0)
+            self.parent.multi_runs.setValue(ticket_num)
+            self.parent.multi_runs.setEnabled(True)
+        else:
+            self.parent.multi_runs.setValue(0)
+            self.parent.multi_runs.setEnabled(False)
         if len(self.boat_pool) > 0 and self.curr_node[-2:] != "01":
             self.parent.button_resume_sortie.setEnabled(True)
             self.logger.info('Can choose a fresh start or resume existing battle')
         else:
             self.logger.info('Can choose a fresh start')
 
-    def resume_sortie(self) -> None:
+    def resume_sortie(self) -> bool:
         # TODO: may still have some corner cases to catch
 
         self.logger.info(f"[RESUME] Sortie {self.curr_node}")
@@ -164,7 +195,7 @@ class Sortie:
                 self.set_fleet(self.user_data['boatPool'])
             else:
                 self.logger.debug("[RESUME] Use new boat pool")
-                self.set_boat_pool(buy_res['boatPool'])
+                self.set_boat_pool(boat_pool=buy_res['boatPool'])
                 self.set_fleet(buy_res['boatPool'])
 
             node_status = self.get_node_status(self.curr_node)
@@ -190,23 +221,24 @@ class Sortie:
                 self.single_node_sortie(next_node)
             else:
                 self.logger.debug(self.curr_node)
-        except ThermopylaeSoriteExit as e:
-            self.logger.debug(e)
+        except wgv_error.ThermopylaeSoriteExit as e:
+            self.logger.warning(e)
             self.parent.button_fresh_sortie.setEnabled(True)
-            return
-        except ThermopylaeSortieRestart as e:
+            return False
+        except wgv_error.ThermopylaeSortieRestart as e:
             set_sleep()
-            self.logger.debug(e)
-            self.start_fresh_sortie()
-        except ThermopylaeSortieResume as e:
+            self.logger.warning(e)
+            return self.start_fresh_sortie()
+        except wgv_error.ThermopylaeSortieResume as e:
             set_sleep()
-            self.logger.debug(e)
-            self.resume_sortie()
-        except ThermopylaeSortieDone as e:
+            self.logger.warning(e)
+            return self.resume_sortie()
+        except wgv_error.ThermopylaeSortieDone as e:
             self.logger.info(e)
             self._reset_chapter()
+            return True
 
-    def start_fresh_sortie(self) -> None:
+    def start_fresh_sortie(self) -> bool:
         try:
             if self.curr_node == T_CONST.BOSS_NODES[2] and self.curr_sub_map == T_CONST.SUB_MAP3_ID:
                 chapter_status = self.get_chapter_status(E6_ID)
@@ -215,11 +247,11 @@ class Sortie:
                     self.set_sub_map(T_CONST.SUB_MAP1_ID)
                 else:
                     pass
-            elif self.curr_node == "0" or self.curr_sub_map == "0":
-                self._clean_memory()
-                self.api.setChapterBoat(E6_ID, self.final_fleet)
+            elif self.curr_node == "0" or self.curr_sub_map == "0" or self.curr_sub_map == T_CONST.SUB_MAP1_ID:
                 self.curr_node = E61_0_ID
                 self.set_sub_map(T_CONST.SUB_MAP1_ID)
+                self._clean_memory()
+                self.api.setChapterBoat(E6_ID, self.final_fleet)
             else:
                 pass
             next_id = self.starting_node()
@@ -228,21 +260,22 @@ class Sortie:
                 next_id = self.single_node_sortie(next_id)
             self.logger.info("[FRESH] Reaching Boss Node")
             self.single_node_sortie(next_id)
-        except ThermopylaeSoriteExit as e:
-            self.logger.debug(e)
+        except wgv_error.ThermopylaeSoriteExit as e:
+            self.logger.warning(e)
             self.parent.button_fresh_sortie.setEnabled(True)
-            return
-        except ThermopylaeSortieRestart as e:
+            return False
+        except wgv_error.ThermopylaeSortieRestart as e:
             set_sleep()
-            self.logger.debug(e)
-            self.start_fresh_sortie()
-        except ThermopylaeSortieResume as e:
+            self.logger.warning(e)
+            return self.start_fresh_sortie()
+        except wgv_error.ThermopylaeSortieResume as e:
             set_sleep()
-            self.logger.debug(e)
-            self.resume_sortie()
-        except ThermopylaeSortieDone as e:
+            self.logger.warning(e)
+            return self.resume_sortie()
+        except wgv_error.ThermopylaeSortieDone as e:
             self.logger.info(e)
             self._reset_chapter()
+            return True
 
     # ================================
     # Getter / Setter (incl. UI)
@@ -263,24 +296,21 @@ class Sortie:
             return -1
 
     def set_boat_pool(self, boat_pool: list) -> None:
+        """
+        Set the user's boat pool.
+        @param boat_pool: current bought boats
+        @type boat_pool: list of int
+        @return: None
+        @rtype: None
+        """
         self.boat_pool = set(boat_pool)
         label_text = "BOAT POOL | "
+        ship_star = self.helper.get_ship_star()
         for s in self.boat_pool:
+            star_text = f"+{ship_star[str(s)]} " if str(s) in ship_star else ""
             label_text += f"{self.user_ships[s]['Name']} "
+            label_text += star_text
         self.parent.update_boat_pool_label(label_text)
-
-    def set_sortie_tickets(self, ticket: int = None, num: int = None) -> None:
-        if ticket is None:
-            self.parent.update_ticket(self.user_data['ticket'])
-            self.tickets = int(self.user_data['ticket'])
-        else:
-            self.parent.update_ticket(str(ticket))
-            self.tickets = ticket
-
-        if num is None:
-            self.parent.update_purchasable(self.user_data['canChargeNum'])
-        else:
-            self.parent.update_purchasable(str(num))
 
     def set_sub_map(self, sub_map_id: str) -> None:
         self.curr_sub_map = sub_map_id
@@ -303,9 +333,40 @@ class Sortie:
     def update_side_dock_resources(self, x) -> None:
         self.parent.update_resources(x['oil'], x['ammo'], x['steel'], x['aluminium'])
 
+    def update_sortie_ticket(self, ticket: int = None, num: int = None) -> None:
+        if ticket is None:
+            self.parent.update_ticket(self.user_data['ticket'])
+            self.tickets = int(self.user_data['ticket'])
+        else:
+            self.parent.update_ticket(str(ticket))
+            self.tickets = ticket
+
+        if num is None:
+            self.parent.update_purchasable(self.user_data['canChargeNum'])
+        else:
+            self.parent.update_purchasable(str(num))
+
     # ================================
     # Helpers
     # ================================
+
+    def buy_all_tickets(self, ticket_num):
+        while ticket_num > 0:
+            ticket_num = self.buy_ticket()
+            set_sleep()
+
+    def buy_ticket(self) -> int:
+        if self.qsettings.contains(QKEYS.THER_TKT_RSC) is True:
+            rsc = str(self.qsettings.value(QKEYS.THER_TKT_RSC))
+        else:
+            rsc = '3'
+        buy_res = self.helper.charge_ticket(rsc)
+        self.update_side_dock_resources(buy_res['userResVO'])
+        # Weekly purchase quota is 3
+        can_buy = 3 - buy_res['chargeNum']
+        self.update_sortie_ticket(ticket=buy_res['ticket'], num=can_buy)
+        self.parent.button_purchase.setEnabled(can_buy > 0)
+        return can_buy
 
     def buy_wanted_ships(self, purchase_list: list, shop_data: dict, is_buff: bool) -> Union[None, dict]:
         """
@@ -342,9 +403,9 @@ class Sortie:
             self.user_data = self.pre_sortie.fetch_user_data()
             self.set_sub_map(self.user_data['levelId'])
             if self.curr_sub_map == T_CONST.SUB_MAP3_ID and curr_node == T_CONST.BOSS_NODES[2]:
-                raise ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
+                raise wgv_error.ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
             else:
-                raise ThermopylaeSortieRestart("Redo Final Boss Fight")
+                raise wgv_error.ThermopylaeSortieRestart("Redo Final Boss Fight")
         else:
             pass
 
@@ -369,13 +430,14 @@ class Sortie:
             temp = set([int(j) for j in ss])
             self.battle_fleet = self.helper.reorder_battle_list(list(temp))
         else:
-            self.battle_fleet = set([int(j) for j in fleet])
+            self.battle_fleet = set(list(map(int, fleet)))
 
         if self.curr_node == E61_C1_ID:
             if len(ss) == 0:
-                raise ThermopylaeSortieRestart("No SS for E61 C1. Restarting")
+                # endless-restarting loop; here appear inf times
+                raise wgv_error.ThermopylaeSortieRestart("No SS for E61 C1. Restarting")
             else:
-                self.battle_fleet = set([int(j) for j in ss])
+                self.battle_fleet = set(list(map(int, ss)))
         else:
             pass
 
@@ -420,7 +482,7 @@ class Sortie:
                 shop_res = self.helper.get_ship_store('1')
                 ss_list = self.find_SS(shop_res['boats'])
                 if len(ss_list) == 0 and self.curr_node in [E61_C1_ID, E62_A1_ID, E63_A1_ID]:
-                    raise ThermopylaeSortieRestart("SL to get SS on starting node of submaps")
+                    raise wgv_error.ThermopylaeSortieRestart("SL to get SS on starting node of submaps")
                 else:
                     pass
             else:
@@ -431,7 +493,7 @@ class Sortie:
         if buy_res is None:
             pass
         else:
-            self.set_boat_pool(buy_res['boatPool'])
+            self.set_boat_pool(boat_pool=buy_res['boatPool'])
             self.set_fleet(buy_res['boatPool'])
 
         if curr_node_id in [E61_A1_ID, E62_A1_ID]:
@@ -441,10 +503,14 @@ class Sortie:
             self.api.changeAdjutant(T_CONST.ADJUTANT_IDS[2])  # Need to change everytime
             skill_res = self.helper.cast_skill()
             new_boat = skill_res['boat_add']
-            if len(set(new_boat).intersection(set(self.main_fleet))) >= 2:
+            if self.qsettings.contains(QKEYS.THER_HABA_REROLL):
+                reroll_standard = self.qsettings.value(QKEYS.THER_HABA_REROLL, type=int)
+            else:
+                reroll_standard = 2
+            if len(set(new_boat).intersection(set(self.main_fleet))) >= reroll_standard:
                 self.boat_pool.union(new_boat)
             else:
-                raise ThermopylaeSortieRestart("Bad luck with Habakkuk. Restarting")
+                raise wgv_error.ThermopylaeSortieRestart("Bad luck with Habakkuk. Restarting")
         else:
             pass
 
@@ -456,7 +522,7 @@ class Sortie:
             self.helper.set_war_fleets(list(self.battle_fleet))
 
         if self.helper.bump_level() == -1:
-            raise ThermopylaeSortieRestart("Adjutant level bumping failed. Restarting")
+            raise wgv_error.ThermopylaeSortieRestart("Adjutant level bumping failed. Restarting")
         else:
             pass
 
@@ -478,7 +544,12 @@ class Sortie:
         supply_res = self.helper.supply_boats(list(self.battle_fleet))
         self.update_side_dock_resources(supply_res['userVo'])
 
-        repair_res = self.helper.process_repair(supply_res['shipVO'], T_CONST.SHIP_REPAIR_LEVELS)  # pre-battle repair
+        # pre-battle repair
+        if (curr_node_id not in T_CONST.BOSS_NODES) and (curr_node_id not in T_CONST.REWARD_NODES):
+            repair_res = self.helper.process_repair(supply_res['shipVO'], self.repair_levels)
+        else:
+            # repairs to full HP
+            repair_res = self.helper.process_repair(supply_res['shipVO'], [1])
         if 'userVo' in repair_res:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
@@ -506,7 +577,7 @@ class Sortie:
                 self.logger.error(f'Unexpected next node id: {next_id}')
         else:
             node_name = self.helper.get_map_node_by_id(self.curr_node)['flag']
-            raise ThermopylaeSortieRestart(f"Failed to clean {node_name}. Restarting...")
+            raise wgv_error.ThermopylaeSortieRestart(f"Failed to clean {node_name}. Restarting...")
 
         self.check_sub_map_done()
         return next_id

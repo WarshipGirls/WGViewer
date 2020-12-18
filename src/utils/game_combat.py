@@ -1,3 +1,5 @@
+import logging
+
 from math import ceil
 
 
@@ -5,24 +7,30 @@ def get_repair_type(ship_info: dict) -> int:
     curr_hp = ship_info['battleProps']['hp']
     max_hp = ship_info['battlePropsMax']['hp']
     res = -1
-    if curr_hp == max_hp:
-        # full HP
-        res = 0
-    if curr_hp < max_hp:
-        # slightly damaged
-        res = 1
-    elif curr_hp < ceil(max_hp * 0.5):
-        # moderately damaged
-        res = 2
-    elif curr_hp < ceil(max_hp * 0.25):
-        # heavily damaged
-        res = 3
-    elif curr_hp < 0:
-        # sunken
+    if curr_hp == 0:
         res = 4
+    elif 0 < curr_hp < ceil(max_hp * 0.25):
+        res = 3
+    elif ceil(max_hp * 0.25) <= curr_hp < ceil(max_hp * 0.5):
+        res = 2
+    elif ceil(max_hp * 0.5) <= curr_hp < max_hp:
+        res = 1
+    elif curr_hp == max_hp:
+        res = 0
     else:
         pass
     return res
+
+
+def repair_id_to_text(repair_level: int) -> str:
+    x = {0: 'Full HP', 1: 'Slightly Damaged', 2: 'Moderately Damaged', 3: 'Heavily Damaged', 4: 'Sunken'}
+    return x[repair_level]
+
+
+def repair_text_to_id(repair_text: str) -> int:
+    # {v: k for k, v in my_map.items()}
+    x = {'Full HP': 0, 'Slightly Damaged': 1, 'Moderately Damaged': 2, 'Heavily Damaged': 3, 'Sunken': 4}
+    return x[repair_text]
 
 
 def process_spy_json(spy_json: dict, all_equipment: [dict, None] = None) -> str:

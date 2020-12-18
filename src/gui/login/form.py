@@ -33,6 +33,7 @@ def create_label(text: str) -> QLabel:
 class LoginForm(QWidget):
     sig_login = pyqtSignal()
 
+    # TODO: get a logger with LOGIN, and replace all of them in login module
     def __init__(self):
         super().__init__()
         WGViewerVersionCheck(self)
@@ -76,7 +77,7 @@ class LoginForm(QWidget):
         self.auto_start()
 
     def auto_start(self) -> None:
-        if self.qsettings.value(QKEYS.LOGIN_AUTO) == "true":
+        if self.qsettings.value(QKEYS.LOGIN_AUTO, type=bool) is True:
             # QThread cannot handle exceptions for this one
             try:
                 # In case user manually log-in
@@ -94,24 +95,24 @@ class LoginForm(QWidget):
     # ================================
 
     def init_ui(self) -> None:
-        if self.qsettings.value(QKEYS.LOGIN_SAVE) == 'true':
+        if self.qsettings.value(QKEYS.LOGIN_SAVE, type=bool) is True:
             name = self.qsettings.value(QKEYS.LOGIN_USER)
             server = self.qsettings.value(QKEYS.LOGIN_SERVER)
             platform = self.qsettings.value(QKEYS.LOGIN_PLATFORM)
-            disclaimer = self.qsettings.value(QKEYS.LOGIN_DISCLAIMER)
-            auto_login = self.qsettings.value(QKEYS.LOGIN_AUTO)
+            disclaimer = self.qsettings.value(QKEYS.LOGIN_DISCLAIMER, type=bool)
+            auto_login = self.qsettings.value(QKEYS.LOGIN_AUTO, type=bool)
 
             # Don't change the order
             self.init_name_field(name)
             self.init_password_field(self._get_password())
             self.init_server_field(server)
             self.init_platform_field(platform)
-            if disclaimer == "true":
+            if disclaimer is True:
                 self.init_check_disclaimer(True)
             else:
                 self.init_check_disclaimer(False)
             self.init_check_save(True)
-            if auto_login == "true":
+            if auto_login is True:
                 self.init_check_auto(True)
             else:
                 self.init_check_auto(False)
@@ -131,7 +132,7 @@ class LoginForm(QWidget):
         user_w, user_h = wgv_utils.get_user_resolution()
         self.init_login_buttons(user_h)
         self.resize(int(0.26 * user_w), int(0.12 * user_h))
-        self.setStyleSheet(wgv_data.get_color_scheme())
+        self.setStyleSheet(wgv_utils.get_color_scheme())
         self.setWindowTitle(f'Warship Girls Viewer v{wgv_utils.get_app_version()} Login')
 
     def init_name_field(self, text: str = '') -> None:
@@ -247,6 +248,7 @@ class LoginForm(QWidget):
                 raise InterruptExecution()
             else:
                 count += 1
+
         logging.info('LOGIN - Starting auto login')
         self.sig_login.emit()
 

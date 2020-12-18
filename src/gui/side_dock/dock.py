@@ -22,8 +22,7 @@ from src import utils as wgv_utils
 from src.func import qsettings_keys as QKEYS
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
-
-TASK_TYPE: dict = {'1': "SINGLE", '2': "DAILY", '3': "WEEKLY", '4': "LIMITED TIME"}
+from .constants import TASK_TYPE
 
 
 def get_data_path(relative_path: str) -> str:
@@ -34,6 +33,11 @@ def get_data_path(relative_path: str) -> str:
 
 
 class SideDock(QDockWidget):
+    """
+    Side Dock/Panel, named "Navy Base Overview", displays all important data of the user.
+        This is the first coded QWidget of WGViewer (even before LoginForm).
+    TODO: refactor
+    """
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
@@ -125,12 +129,7 @@ class SideDock(QDockWidget):
         self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition)
 
     def _init_resource_info(self) -> None:
-        data = [
-            [1000000, 1000000, 1000000, 1000000, 200000],
-            [10000, 10000, 10000, 10000, 100],
-            [1000, 1000, 1000, 1000, 1000]
-        ]
-        self.table_model = ResourceTableModel(data)
+        self.table_model = ResourceTableModel()
         self.table_view = QTableView(self)
         self.table_view.setModel(self.table_model)
         x = 0.03 * self.user_screen_h
@@ -382,6 +381,8 @@ class SideDock(QDockWidget):
             t = next((i for i in x if i["itemCid"] == 10541), {"num": 0})["num"]
             self.table_model.update_SS(t)
 
+            self.table_model.write_csv()  # first-save upon start-up
+
     @pyqtSlot(dict)
     def update_lvl_label(self, x: dict) -> None:
         if x is not None:
@@ -486,11 +487,15 @@ class SideDock(QDockWidget):
         return super(SideDock, self).resizeEvent(event)
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        cb = QCheckBox('Do not show on start-up.')
+        cb = QCheckBox('show on start-up')
+        if self.qsettings.contains(QKEYS.UI_SIDEDOCK) is True:
+            cb.setChecked(self.qsettings.value(QKEYS.UI_SIDEDOCK, type=bool) is True)
+        else:
+            pass
         box = QMessageBox(QMessageBox.Question, "INFO", "Do you want to close side dock?\n(Can re-open in View menu)",
                           QMessageBox.Yes | QMessageBox.No, self)
 
-        box.setStyleSheet(wgv_data.get_color_scheme())
+        box.setStyleSheet(wgv_utils.get_color_scheme())
         box.setDefaultButton(QMessageBox.No)
         box.setCheckBox(cb)
 

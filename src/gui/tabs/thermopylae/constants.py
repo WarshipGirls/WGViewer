@@ -1,8 +1,3 @@
-# TODO: add these settings to GUI
-# User Settings
-BOSS_RETRY_LIMITS: list = [3, 5, 10]
-BOSS_RETRY_STANDARDS: list = [1, 2, 2]
-SHIP_REPAIR_LEVELS: list = [1]
 # CONSTANTS
 ADJUTANT_IDS: list = ['10082', '10181', '10282']
 ADJUTANT_ID_TO_NAME: dict = {'10082': "紫貂", '10182': "Kearsarge", '10282': "Habakkuk"}

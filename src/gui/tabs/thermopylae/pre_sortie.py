@@ -61,7 +61,18 @@ class PreSortieCheck:
 
     def pre_battle_validation(self, user_data: dict) -> bool:
         # Insepect the validity for user to use this function
-        user_e6 = next(i for i in user_data['chapterList'] if i['id'] == "10006")
+
+        if 10282 not in self.user_data['adjutantList']:
+            self.logger.warning("Cannot find Habakkuk in your adjutant list. Existing")
+            return False
+        else:
+            pass
+
+        try:
+            user_e6 = next(i for i in user_data['chapterList'] if i['id'] == "10006")
+        except StopIteration:
+            self.logger.warning("Cannot find evidence of Ex-6 in your records. Exiting")
+            return False
         if user_data['chapterId'] != '10006':
             self.logger.warning("You are in the middle of a battle other than E6. Exiting")
             return False

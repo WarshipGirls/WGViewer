@@ -31,11 +31,11 @@ class WGR_API:
         self.hlp = LoginHelper()
         qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
         if qsettings.contains(QKEYS.CONN_API_RTY) is True:
-            self.max_retry = int(qsettings.value(QKEYS.CONN_API_RTY))
+            self.max_retry = qsettings.value(QKEYS.CONN_API_RTY, type=int)
         else:
             self.max_retry = 5
         if qsettings.contains(QKEYS.CONN_API_SLP) is True:
-            self.sleep_time = int(qsettings.value(QKEYS.CONN_API_SLP))
+            self.sleep_time = qsettings.value(QKEYS.CONN_API_SLP, type=int)
         else:
             self.sleep_time = 3
 
@@ -104,10 +104,12 @@ class WGR_API:
         return data
 
     @staticmethod
-    def wait_until_success(response: HTTPResponse, _timeout: float = 2.0, _timewait: float = 0.5) -> None:
+    def wait_until_success(response: HTTPResponse, _timeout: float = 3.0, _timewait: float = 1.0) -> None:
         # for urlopen
+        logging.debug("urlopen - waiting for aborted")
         timer = 0
-        while response.status == 204:
+        while response.status != 200:
+            logging.debug(f"urlopen - waiting for aborted {timer}")
             sleep(_timewait)
             timer += _timewait
             if timer > _timeout:

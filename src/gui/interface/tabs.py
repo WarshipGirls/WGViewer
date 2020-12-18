@@ -79,7 +79,7 @@ class MainInterfaceTabs(QWidget):
 
     def init_tab(self, key: str, obj_name: str) -> None:
         if self.qsettings.contains(key):
-            if self.qsettings.value(key) == 'true':
+            if self.qsettings.value(key, type=bool) is True:
                 self.add_tab(obj_name)
             else:
                 pass
