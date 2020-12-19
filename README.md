@@ -33,7 +33,7 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 | OS          | WGViewer version | Download Links        | Size   | Comment |
 |:-----------:|:----------------:|:---------------------:|:------:|:-------:|
-| Windows x64 | 0.2.1dev         | [GH release][d-win]   | ~42 MB |         |
+| Windows x64 | 0.2.2dev         | [GH release][d-win]   | ~92 MB |         |
 | Linux x64   | 0.2.1dev         | [GH release][d-linux] | ~70 MB | unzip it and run on CLI |
 
 ## Development
@@ -93,5 +93,5 @@ The copyright of the shipgirl art resources used in the WGViewer belong to Moefa
 [JP]: http://ssr.moefantasy.co.jp/
 [Intl]: http://www.warshipgirls.com/en/
 
-[d-win]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1-dev/WGViewer-win64.zip
+[d-win]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.2-dev/WGViewer-win64.zip
 [d-linux]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1-dev/WGViewer-linux64.zip
