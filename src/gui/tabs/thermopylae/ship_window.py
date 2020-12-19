@@ -26,9 +26,6 @@ class ShipSelectWindow(QMainWindow):
         self.parent = parent
         self.button_id = button_id
 
-        user_w, user_h = get_user_resolution()
-        self.width = int(0.16 * user_w)
-        self.height = int(0.55 * user_h)
         self.id_list = []
         self.ships_info = None
         self.lock_icon = QIcon(get_data_path("assets/icons/lock_64.png"))
@@ -39,20 +36,19 @@ class ShipSelectWindow(QMainWindow):
     def init_ui(self) -> None:
         self.setStyleSheet(get_color_scheme())
         self.setWindowTitle('WGViewer - Ship Selection')
-        self.resize(self.width, self.height)
+        user_w, user_h = get_user_resolution()
+        width = int(0.2 * user_w)
+        height = int(0.55 * user_h)
+        self.resize(width, height)
 
         self.tab.setColumnCount(4)
-        # TODO remove Lv. 1 ships; add a label to inform user this
         self.ships_info = wgv_data.get_processed_userShipVo()
         for ship_id, ship in self.ships_info.items():
             self.add_table_row(self.tab, ship_id, ship)
 
-        # self.tab.horizontalHeader().setStretchLastSection(True)
-        self.tab.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.tab.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.tab.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.tab.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        self.tab.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
 
         self.tab.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.tab.setHorizontalHeaderLabels(['Type', 'ID', 'Name', 'Level'])
@@ -71,6 +67,8 @@ class ShipSelectWindow(QMainWindow):
 
     @staticmethod
     def add_table_row(table: QTableWidget, ship_id: int, ship: dict) -> None:
+        if int(ship['Lv.']) < 90:
+            return
         ship_name = ship['Name']
         ship_type = ship['Class']
         ship_lvl = "Lv." + ship['Lv.']

@@ -1,6 +1,6 @@
 from PyQt5.QtCore import pyqtSignal, QTimer
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QButtonGroup, QGridLayout, QSpinBox
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QButtonGroup, QGridLayout, QSpinBox, QSizePolicy
 
 from src import data as wgv_data
 from src.utils import stop_sleep_event, reset_sleep_event
@@ -106,8 +106,6 @@ class TabThermopylae(QWidget):
         self.main_layout.setStretch(1, 1)
         self.setLayout(self.main_layout)
 
-        # self.add_ship()
-
     def init_left_layout(self) -> None:
         self.button_purchase.setEnabled(False)
         t = QTextEdit()
@@ -118,14 +116,17 @@ class TabThermopylae(QWidget):
         msg += "    - 6 high level SS are required\n"
         msg += "3. Adjutant 紫貂 (default) and Habakkuk (purchased in shop) are required;\n"
         msg += "4. Buff cards are not selected.\n"
+        msg += "5. Ships under Lv. 90 cannot be selected.\n"
         t.setFontPointSize(10)
         t.setText(msg)
         t.setReadOnly(True)
 
         self.boat_pool_label.setFont(QFont('Consolas'))
         self.boat_pool_label.setWordWrap(True)
+        self.boat_pool_label.setText('ON BATTLE |')
         self.fleet_label.setFont(QFont('Consolas'))
         self.fleet_label.setWordWrap(True)
+        self.fleet_label.setText('BOAT POOL |')
 
         self.button_pre_battle.clicked.connect(self.on_pre_battle)
         self.button_pre_battle.setEnabled(True)
@@ -143,13 +144,17 @@ class TabThermopylae(QWidget):
         self.button_stop_sortie.setEnabled(False)
 
         self.left_layout.addWidget(t, 3, 0, 1, 4)
-        self.left_layout.addWidget(self.fleet_label, 4, 0, 1, 4)
-        self.left_layout.addWidget(self.boat_pool_label, 5, 0, 1, 4)
-        self.left_layout.addWidget(self.button_pre_battle, 6, 0)
-        self.left_layout.addWidget(self.button_fresh_sortie, 6, 1)
-        self.left_layout.addWidget(self.button_resume_sortie, 6, 2)
-        self.left_layout.addWidget(self.multi_runs, 6, 3)
-        self.left_layout.addWidget(self.button_stop_sortie, 7, 0, 1, 4)
+        self.left_layout.addWidget(self.ship_selection_group(), 4, 0, 2, 4)
+        self.left_layout.addWidget(self.fleet_label, 6, 0, 1, 4)
+        self.left_layout.addWidget(self.boat_pool_label, 7, 0, 1, 4)
+        self.left_layout.addWidget(self.button_pre_battle, 8, 0)
+        self.left_layout.addWidget(self.button_fresh_sortie, 8, 1)
+        self.left_layout.addWidget(self.button_resume_sortie, 8, 2)
+        self.left_layout.addWidget(self.multi_runs, 8, 3)
+        self.left_layout.addWidget(self.button_stop_sortie, 9, 0, 1, 4)
+
+        self.left_layout.setRowStretch(3, 3)
+        self.left_layout.setRowStretch(4, 1)
 
     def init_right_layout(self) -> None:
         self.right_text_box.setFont(QFont('Consolas'))
@@ -340,18 +345,23 @@ class TabThermopylae(QWidget):
     # WIP
     # ================================
 
-    def add_ship(self) -> None:
-        # TODO long term; not used right now; let user select boats here; now just use last fleets
+    def ship_selection_group(self) -> QWidget:
+        w = QWidget()
+        layout = QHBoxLayout(w)
+        layout.setContentsMargins(0, 0, 0, 0)
+
         for i in range(len(self.fleets)):
             t = self.fleets[i]
-            l = QPushButton()
+            b = QPushButton()
+            b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             if t is None:
-                l.setText('+')
+                b.setText('+')
             else:
-                l.setText(str(t))
-            l.clicked.connect(lambda _, _i=i: self.popup_select_window(_i))
-            self.ship_button_group.addButton(l)
-            self.left_layout.addWidget(l)
+                b.setText(str(t))
+            b.clicked.connect(lambda _, _i=i: self.popup_select_window(_i))
+            self.ship_button_group.addButton(b)
+            layout.addWidget(b)
+        return w
 
     def handle_selection(self, ship_info: list, button_id: int) -> None:
         b = self.ship_button_group.buttons()[button_id]
@@ -360,7 +370,8 @@ class TabThermopylae(QWidget):
             b.setText('! SHIP ALREADY EXISTS IN FLEET !')
         else:
             self.fleets[button_id] = int(ship_id)
-            s = ", ".join(ship_info)
+            s = "\n".join(ship_info)
+            print(s)
             b.setText(s)
 
     def popup_select_window(self, btn_id: int) -> None:
