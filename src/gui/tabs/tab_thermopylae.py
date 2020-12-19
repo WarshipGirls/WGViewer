@@ -117,12 +117,14 @@ class TabThermopylae(QWidget):
         t = QTextEdit()
         msg = "Notes\n"
         msg += "1. As of now, this auto sortie function is ONLY for players who passed E6 manually;\n"
-        msg += "2. There are limitations on what ship cards should be set:\n"
-        msg += "    - DD 'Glowworm' and 'Amethyst', and CV 'Indomitable' are required\n"
-        msg += "    - 6 high level SS are required\n"
-        msg += "3. Adjutant 紫貂 (default) and Habakkuk (purchased in shop) are required;\n"
-        msg += "4. Buff cards are not selected.\n"
-        msg += "5. Ships under Lv. 80 are not selected.\n"
+        msg += "2. Adjutant 紫貂 (default) and Habakkuk (purchased in shop) are required;\n"
+        msg += "3. Ships under Lv. 80 cannot be selected.\n"
+        msg += "\nHow to Use\n"
+        msg += "1. Select ships, then press 'Set fleet'\n"
+        msg += "2. Press 'Pre-Battle Check'\n"
+        msg += "3. Adjust your desired sortie times\n"
+        msg += "4. Press 'Fresh Combat' or 'Resume Comba'\n"
+        msg += "?. Now just wait or find an easter egg to boost sortie speed"
         t.setFontPointSize(10)
         t.setText(msg)
         t.setReadOnly(True)
