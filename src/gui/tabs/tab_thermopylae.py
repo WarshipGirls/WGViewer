@@ -25,8 +25,6 @@ class TabThermopylae(QWidget):
     Thermopylae, JueZhan Mode, first introduced in Game v5.0.0 (CN server).
     This tab is meant for automatically farming Thermopylae Ex-6 (the last chapter of the mode),
         which was the primary reason that brings WGViewer into real world.
-
-    TODO: let user selected 2-star + 3-star escort DD and a escort CV
     """
     sig_fuel = pyqtSignal(int)
     sig_ammo = pyqtSignal(int)
@@ -42,6 +40,7 @@ class TabThermopylae(QWidget):
         self.resource_info: ResourceTableModel = self.side_dock.table_model
         self.is_realrun = is_realrun
 
+        # Signals
         self.sig_fuel.connect(self.resource_info.update_fuel)
         self.sig_ammo.connect(self.resource_info.update_ammo)
         self.sig_steel.connect(self.resource_info.update_steel)
@@ -49,15 +48,23 @@ class TabThermopylae(QWidget):
         self.sig_repair.connect(self.resource_info.update_repair)
         self.sig_exp.connect(self.side_dock.update_lvl_label)
 
+        # Members
         self.api = API_SIX(wgv_data.load_cookies())
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         self.user_ships = wgv_data.get_processed_userShipVo()
-        self.battle_fleets: list = [None] * 6
+        self.battle_fleet: list = [None] * 6
         self.escort_DD: list = [None] * 2
         self.escort_CV: list = [None]
         self.user_chosen_cid: list = [None] * 9
-        self.final_fleet = []  # for testing
+        self.ship_select_window = None
 
+        self.sortie = None
+        # Threads
+        self.bee_pre_battle = None
+        self.bee_fresh_sortie = None
+        self.bee_resume_sortie = None
+
+        # UI members
         self.main_layout = QHBoxLayout(self)
         self.left_layout = QGridLayout()
         self.right_layout = QVBoxLayout()
@@ -95,8 +102,6 @@ class TabThermopylae(QWidget):
         # after right_text_box creation
         self.logger = get_new_logger(name=QLOGS.TAB_THER, level=QLOGS.LVL_INFO, signal=self.right_text_box.append)
         self.init_right_layout()
-
-        self.ship_select_window = None
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -153,10 +158,10 @@ class TabThermopylae(QWidget):
 
         self.left_layout.addWidget(t, 3, 0, 1, 4)
         if self.qsettings.contains(QKEYS.THER_DD) and self.qsettings.contains(QKEYS.THER_CV) and self.qsettings.contains(QKEYS.THER_SS):
-            _dd: list = list(map(int, self.qsettings.value(QKEYS.THER_DD)))
-            _cv: list = list(map(int, self.qsettings.value(QKEYS.THER_CV)))
-            _ss: list = list(map(int, self.qsettings.value(QKEYS.THER_SS)))
-            ssb = self.set_ship_selection_buttons(dd=_dd, cv=_cv, ss=_ss)
+            self.escort_DD: list = list(map(int, self.qsettings.value(QKEYS.THER_DD)))
+            self.escort_CV: list = list(map(int, self.qsettings.value(QKEYS.THER_CV)))
+            self.battle_fleet: list = list(map(int, self.qsettings.value(QKEYS.THER_SS)))
+            ssb = self.set_ship_selection_buttons(dd=self.escort_DD, cv=self.escort_CV, ss=self.battle_fleet)
         else:
             ssb = self.set_ship_selection_buttons()
         self.left_layout.addWidget(ssb, 4, 0, 2, 4)
@@ -276,17 +281,18 @@ class TabThermopylae(QWidget):
         self.disable_sortie_widgets()
         self.qsettings.setValue(QKEYS.THER_DD, self.escort_DD)
         self.qsettings.setValue(QKEYS.THER_CV, self.escort_CV)
-        self.qsettings.setValue(QKEYS.THER_SS, self.battle_fleets)
-        # self.sortie = Sortie(self, self.api, [], self.final_fleet, self.is_realrun)
-        #
-        # self.bee_pre_battle = CallbackWorker(self.sortie.pre_battle, (), self.pre_battle_finished)
-        # self.bee_pre_battle.terminate()
-        # self.bee_fresh_sortie = CallbackWorker(self.sortie.start_fresh_sortie, (), self.sortie_finished)
-        # self.bee_fresh_sortie.terminate()
-        # self.bee_resume_sortie = CallbackWorker(self.sortie.resume_sortie, (), self.sortie_finished)
-        # self.bee_resume_sortie.terminate()
-        #
-        # self.bee_pre_battle.start()
+        self.qsettings.setValue(QKEYS.THER_SS, self.battle_fleet)
+
+        self.sortie = Sortie(self, self.api, self.escort_DD, self.escort_CV, self.battle_fleet, self.is_realrun)
+
+        self.bee_pre_battle = CallbackWorker(self.sortie.pre_battle, (), self.pre_battle_finished)
+        self.bee_pre_battle.terminate()
+        self.bee_fresh_sortie = CallbackWorker(self.sortie.start_fresh_sortie, (), self.sortie_finished)
+        self.bee_fresh_sortie.terminate()
+        self.bee_resume_sortie = CallbackWorker(self.sortie.resume_sortie, (), self.sortie_finished)
+        self.bee_resume_sortie.terminate()
+
+        self.bee_pre_battle.start()
 
     def on_fresh_sortie(self) -> None:
         reset_sleep_event()
@@ -435,7 +441,7 @@ class TabThermopylae(QWidget):
             elif button_id == 2:
                 self.escort_CV[0] = int(ship_id)
             else:
-                self.battle_fleets[button_id - 3] = int(ship_id)
+                self.battle_fleet[button_id - 3] = int(ship_id)
             s = f'{ship_info[0]}\n{ship_info[2]}\n{ship_info[3]}'
             b.setText(s)
 
@@ -455,7 +461,7 @@ class TabThermopylae(QWidget):
             self.logger.warning('CV are not set')
             return
         try:
-            assert (None not in self.battle_fleets)
+            assert (None not in self.battle_fleet)
         except AssertionError:
             self.logger.warning('SS are not set')
             return

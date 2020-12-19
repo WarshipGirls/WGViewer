@@ -76,7 +76,7 @@ class PreSortieCheck:
         if user_data['chapterId'] != '10006':
             self.logger.warning("You are in the middle of a battle other than E6. Exiting")
             return False
-        elif len(user_e6['boats']) != 22:
+        elif len(user_e6['boats']) != T_CONST.CHAP_FLEET_LEN[-1]:
             self.logger.warning("You have not passed E6 manually. Exiting")
             return False
         else:
@@ -91,11 +91,11 @@ class PreSortieCheck:
 
         b = fleet_info['chapterInfo']['boats']
         if len(b) == 0:
-            self.logger.info('User has not entered E6. Select from old settings')
+            self.logger.info('User has not entered E6. Select from previous settings')
             self.sub_map_id = fleet_info['chapterInfo']['level_id']
             last_fleets = user_e6['boats']
             self.api.setChapterBoat('10006', last_fleets)
-        elif len(b) == 22 and fleet_info['chapterInfo']['level_id'] in T_CONST.SUB_MAP_IDS:
+        elif len(b) == T_CONST.CHAP_FLEET_LEN[-1] and fleet_info['chapterInfo']['level_id'] in T_CONST.SUB_MAP_IDS:
             self.logger.info('User has entered E6.')
             self.sub_map_id = fleet_info['chapterInfo']['level_id']
             last_fleets = b
@@ -104,7 +104,7 @@ class PreSortieCheck:
             self.logger.info('1. Ensure you have cleared E6-3; 2. You are not in a battle OR in E6')
             return False
 
-        if len(last_fleets) != 22:
+        if len(last_fleets) != T_CONST.CHAP_FLEET_LEN[-1]:
             self.logger.warning("Invalid last boats settings.")
             res = False
         else:

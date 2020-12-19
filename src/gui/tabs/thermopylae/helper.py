@@ -266,7 +266,7 @@ class SortieHelper:
 
         return self._reconnecting_calls(_spy, 'Detection')
 
-    def set_war_fleets(self, fleet: list) -> dict:
+    def set_war_fleet(self, fleet: list) -> dict:
         def _set_fleets() -> Tuple[bool, dict]:
             data = self.api.setWarFleet(fleet)
             res = False
@@ -280,9 +280,9 @@ class SortieHelper:
 
         return self._reconnecting_calls(_set_fleets, 'set battle fleet')
 
-    def supply_boats(self, fleets: list) -> dict:
+    def supply_boats(self, fleet: list) -> dict:
         def _supply_boats() -> Tuple[bool, dict]:
-            data = self.api.supplyBoats(fleets)
+            data = self.api.supplyBoats(fleet)
             res = False
             if 'eid' in data:
                 get_error(data['eid'])

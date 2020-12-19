@@ -37,13 +37,14 @@ class Sortie:
 
     # TODO: change all list to specific type, e.g. List[int]
 
-    def __init__(self, parent, api: API_SIX, fleet: list, final_fleet: list, is_realrun: bool):
+    def __init__(self, parent, api: API_SIX, dd: list, cv: list, main_fleet: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
         self.api = api
-        self.main_fleet = fleet  # main fleets (6SS)
+        self.escort_DD = dd
+        self.escort_CV = cv
+        self.main_fleet = main_fleet  # main fleet (6SS)
         self.battle_fleet = set()  # ships that on battle
-        self.final_fleet = final_fleet  # fill up required number of boats
         self.logger = get_logger(QLOGS.TAB_THER)
 
         self.is_running: bool = True
@@ -62,10 +63,7 @@ class Sortie:
         self.boat_pool: set = set()  # host existing boats
         self.curr_node: str = '0'
         self.curr_sub_map: str = '0'
-        self.escort_DD_cids: list = [11008211, 11009211]  # For 2DD to pass first few levels only, 萤火虫，布雷恩
-        self.escort_DD: list = []
-        self.escort_CV_cids: list = [10031913]  # For 1CV to pass first few levels only, 不挠
-        self.escort_CV: list = []
+        self.final_fleet: list = []  # fill up required number of boats
         self.tickets: int = 0
         self.user_ships: dict = wgv_data.get_processed_userShipVo()
 
@@ -124,10 +122,6 @@ class Sortie:
         self.update_adjutant_label(self.user_data['adjutantData'])
         self.set_boat_pool(self.user_data['boatPool'])
         self.set_sub_map(self.pre_sortie.get_sub_map_id())
-        if len(self.final_fleet) == 0:
-            self.final_fleet = self.pre_sortie.get_final_fleet()
-        else:
-            pass
 
         self.pre_battle_set_fleet()
 
@@ -156,18 +150,27 @@ class Sortie:
         return True
 
     def pre_battle_set_fleet(self):
-        self.logger.info("Setting final fleets:")
+        # TODO: long long term: investigate the impact of selected ship costs on the random shop
+        # this returned list length shall guarantee to meet the requirements
+        prev_fleet = self.pre_sortie.get_final_fleet()
+        user_selected = set(self.escort_DD + self.escort_CV + self.main_fleet)
+        # Fill up the final fleet with arbitrary ships until the amount requirement is met
+        if len(user_selected.difference(set(prev_fleet))) == 0:
+            user_selected = prev_fleet
+        else:
+            while len(user_selected) <= T_CONST.CHAP_FLEET_LEN[-1]:  # HARDCODING for now (only supports E6)
+                user_selected.add(prev_fleet.pop())
+        self.final_fleet = list(user_selected)
+
+        self.logger.info("Setting final fleet:")
         for ship_id in self.final_fleet:
             ship = self.user_ships[str(ship_id)]
             output_str = "{:8s}{:17s}".format(str(ship_id), ship['Name'])
-            if ship['Class'] == "SS":
-                self.main_fleet.append(ship_id)
+            if ship_id in self.main_fleet:
                 output_str += "\tMAIN FORCE"
-            elif ship['cid'] in self.escort_DD_cids:
-                self.escort_DD.append(ship_id)
+            elif ship_id in self.escort_DD:
                 output_str += "\tESCORT DD"
-            elif ship['cid'] in self.escort_CV_cids:
-                self.escort_CV.append(ship_id)
+            elif ship_id in self.escort_CV:
                 output_str += "\tESCORT CV"
             else:
                 pass
@@ -562,7 +565,7 @@ class Sortie:
             self.logger.debug("Final fleet is set already. Skipping set")
         else:
             self.set_fleet(list(self.boat_pool))
-            self.helper.set_war_fleets(list(self.battle_fleet))
+            self.helper.set_war_fleet(list(self.battle_fleet))
 
         if self.helper.bump_level() == -1:
             raise wgv_error.ThermopylaeSortieRestart("Adjutant level bumping failed. Restarting")
