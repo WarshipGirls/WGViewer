@@ -17,7 +17,7 @@ verlt $version 3.6.0 && echo $yes && exit 1 || echo $no
 rm -rf ./build/ ./dist/ ./wgv_venv
 python3 -m virtualenv --python=python3 wgv_venv
 source wgv_venv/bin/activate
-pip install -r ./requirements.txt
+pip install -r ./linux_requirements.txt
 cd tools
 python3 fix_pyinstaller.py > ../gui_main.spec
 cd ..

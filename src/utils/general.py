@@ -22,7 +22,7 @@ def clear_desc(text: str) -> str:
 
 
 def get_app_version() -> str:
-    return '0.2.1dev'
+    return '0.2.2dev'
 
 
 def get_color_scheme() -> str:
