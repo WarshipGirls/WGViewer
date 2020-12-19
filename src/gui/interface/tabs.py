@@ -59,9 +59,9 @@ class MainInterfaceTabs(QWidget):
         # TODO loading speed is really slow
         # The init order cannot be changed right now
         self.init_tab(QKEYS.UI_TAB_SHIP, 'tab_dock')
-        self.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
+        # self.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
         self.init_tab(QKEYS.UI_TAB_THER, 'tab_thermopylae')
-        self.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
+        # self.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
 
         self.layout.addWidget(self.tabs, 0, 0)
         if self.has_tab is True:
@@ -115,7 +115,7 @@ class MainInterfaceTabs(QWidget):
             self.tabs.addTab(self.tab_exp, "Expedition (dev)")
         elif tab_name == "tab_thermopylae" and self.tab_thermopylae is None:
             self.tab_thermopylae = TabThermopylae(tab_name, self.parent.side_dock, self.is_realrun)
-            self.tabs.addTab(self.tab_thermopylae, "Thermopylae (dev)")
+            self.tabs.addTab(self.tab_thermopylae, "Thermopylae")
         else:
             logger.error(f"Invalid tab name {tab_name} for creation.")
 
