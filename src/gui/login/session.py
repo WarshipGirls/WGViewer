@@ -68,13 +68,14 @@ class LoginSession:
         # for session.get() / post()
         logger.debug("SESS - waiting for aborted")
         timer = 0
+        # while response.status_code == 204:
         while response.status_code != 200:
             logger.debug(f"SESS - waiting for aborted {timer}")
             sleep(timewait)
             timer += timewait
             if timer > timeout:
                 break
-            if response.status_code == 200:
-                break
+            # if response.status_code == 200:
+            #     break
 
 # End of File
