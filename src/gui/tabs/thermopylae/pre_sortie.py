@@ -1,6 +1,6 @@
 import json
 
-from src.exceptions.wgr_error import get_error
+from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.func import logger_names as QLOGS
 from src.func.log_handler import get_logger
 from src.utils import set_sleep
@@ -83,7 +83,12 @@ class PreSortieCheck:
             pass
 
         # check if the sortie "final fleet" is set or not
-        fleet_info = self.fetch_fleet_info()
+        try:
+            fleet_info = self.fetch_fleet_info()
+        except WarshipGirlsExceptions as e:
+            self.logger.warning(e)
+            return False
+
         b = fleet_info['chapterInfo']['boats']
         if len(b) == 0:
             self.logger.info('User has not entered E6. Select from old settings')
@@ -108,10 +113,14 @@ class PreSortieCheck:
         return res
 
     def pre_battle_calls(self) -> bool:
-        self.map_data = self.fetch_map_data()
-        set_sleep()
-        self.user_data = self.fetch_user_data()
-        set_sleep()
+        try:
+            self.map_data = self.fetch_map_data()
+            set_sleep()
+            self.user_data = self.fetch_user_data()
+            set_sleep()
+        except WarshipGirlsExceptions as e:
+            self.logger.warning(e)
+            return False
 
         if self.pre_battle_validation(self.user_data) is False:
             self.logger.warning("Failed to pre-battle checking due to above reason.")

@@ -23,7 +23,8 @@ from .general import (
     force_quit, 
     get_app_version, get_color_option, get_color_scheme, get_curr_time, get_game_version, get_today, get_unixtime, 
     increase_sleep_interval, 
-    set_sleep, 
+    reset_sleep_event, 
+    set_sleep, stop_sleep_event, 
     ts_to_countdown, ts_to_date
 )
 from .shipname import (
