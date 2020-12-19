@@ -41,30 +41,38 @@ def get_game_version() -> str:
     return '5.1.0'
 
 
+def force_quit(code: int) -> None:
+    os._exit(code)
+
+
+# ================================
+# Timer
+# ================================
+
+
 def get_curr_time() -> str:
     return datetime.datetime.now().strftime('%H:%M:%S')
-
-
-def get_unixtime() -> int:
-    return int(time.time())
-
-
-def stop_sleep_event() -> None:
-    # This is meant to interrupt the sleep event from outside,
-    _sleep_event.set()
-
-
-def reset_sleep_event() -> None:
-    _sleep_event.clear()
 
 
 def get_today() -> str:
     return datetime.date.today().strftime('%Y-%m-%d')
 
 
-def force_quit(code: int) -> None:
-    os._exit(code)
+def get_unixtime() -> int:
+    return int(time.time())
 
+
+def ts_to_countdown(seconds: int) -> str:
+    return str(datetime.timedelta(seconds=seconds))
+
+
+def ts_to_date(ts: int) -> str:
+    return datetime.datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
+
+# ================================
+# Sleep Event
+# ================================
 
 @pyqtSlot()
 def increase_sleep_interval() -> None:
@@ -73,6 +81,15 @@ def increase_sleep_interval() -> None:
     hi = _qsettings.value(QKEYS.GAME_SPD_HI, type=int)
     _qsettings.setValue(QKEYS.GAME_SPD_LO, lo + 2)
     _qsettings.setValue(QKEYS.GAME_SPD_HI, hi + 2)
+
+
+def reset_sleep_event() -> None:
+    _sleep_event.clear()
+
+
+def stop_sleep_event() -> None:
+    # This is meant to interrupt the sleep event from outside,
+    _sleep_event.set()
 
 
 def set_sleep(level: float = 1.0):
@@ -95,13 +112,5 @@ def set_sleep(level: float = 1.0):
         pass
     sleep_time = randint(lo, hi) * level
     _sleep_event.wait(sleep_time)
-
-
-def ts_to_countdown(seconds: int) -> str:
-    return str(datetime.timedelta(seconds=seconds))
-
-
-def ts_to_date(ts: int) -> str:
-    return datetime.datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 # End of File

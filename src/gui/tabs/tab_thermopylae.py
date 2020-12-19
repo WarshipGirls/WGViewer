@@ -21,10 +21,8 @@ class TabThermopylae(QWidget):
     Thermopylae, JueZhan Mode, first introduced in Game v5.0.0 (CN server).
     This tab is meant for automatically farming Thermopylae Ex-6 (the last chapter of the mode),
         which was the primary reason that brings WGViewer into real world.
-    TODO: stop sortie from GUI (stop thread)
-    https://stackoverflow.com/a/51135636
+
     TODO: let user selected 2-star + 3-star escort DD and a escort CV
-    TODO: organize here
     """
     sig_fuel = pyqtSignal(int)
     sig_ammo = pyqtSignal(int)
@@ -207,6 +205,46 @@ class TabThermopylae(QWidget):
     # Signals
     # ================================
 
+    def _label_clicked(self) -> None:
+        if self._is_speed_mode:
+            return
+        if self._is_timer_start:
+            self._clicks += 1
+        else:
+            if self._is_first_timer:
+                self._timer.start(2000)
+                self._is_timer_start = True
+                self._is_first_timer = False
+            else:
+                pass
+
+    def _check_label(self) -> None:
+        self._timer.stop()
+        if self._clicks > 10:
+            self._is_speed_mode = True
+            self.logger.warning("WGViewer boost is ON!")
+            stop_sleep_event()
+        else:
+            self._is_speed_mode = False
+            self._is_timer_start = False
+            self._is_first_timer = True
+        self._clicks = 0
+
+    def disable_sortie(self) -> None:
+        stop_sleep_event()
+        self.button_stop_sortie.setEnabled(False)
+        if self.bee_fresh_sortie.isRunning():
+            self.logger.debug('fresh-sortie thread is running...')
+            self.sortie.stop()
+        elif self.bee_resume_sortie.isRunning():
+            self.logger.debug('resume-sortie thread is running...')
+            self.sortie.stop()
+        # elif self.bee_pre_battle.isRunning():
+        #     self.logger.debug('pre-battle checking thread is running...')
+        #     self.sortie.stop()
+        else:
+            self.logger.debug('No thread to disable')
+
     def on_purchase_clicked(self) -> None:
         self.sortie.buy_ticket()
 
@@ -315,21 +353,6 @@ class TabThermopylae(QWidget):
             self.ship_button_group.addButton(l)
             self.left_layout.addWidget(l)
 
-    def disable_sortie(self) -> None:
-        stop_sleep_event()
-        self.button_stop_sortie.setEnabled(False)
-        if self.bee_fresh_sortie.isRunning():
-            self.logger.debug('fresh-sortie thread is running...')
-            self.sortie.stop()
-        elif self.bee_resume_sortie.isRunning():
-            self.logger.debug('resume-sortie thread is running...')
-            self.sortie.stop()
-        # elif self.bee_pre_battle.isRunning():
-        #     self.logger.debug('pre-battle checking thread is running...')
-        #     self.sortie.stop()
-        else:
-            self.logger.debug('No thread to disable')
-
     def handle_selection(self, ship_info: list, button_id: int) -> None:
         b = self.ship_button_group.buttons()[button_id]
         ship_id = ship_info[1]
@@ -344,30 +367,5 @@ class TabThermopylae(QWidget):
         # TODO: delete obj after close
         self.ship_select_window = ShipSelectWindow(self, btn_id)
         self.ship_select_window.show()
-
-    def _label_clicked(self) -> None:
-        if self._is_speed_mode:
-            return
-        if self._is_timer_start:
-            self._clicks += 1
-        else:
-            if self._is_first_timer:
-                self._timer.start(2000)
-                self._is_timer_start = True
-                self._is_first_timer = False
-            else:
-                pass
-
-    def _check_label(self) -> None:
-        self._timer.stop()
-        if self._clicks > 10:
-            self._is_speed_mode = True
-            self.logger.warning("WGViewer boost is ON!")
-            stop_sleep_event()
-        else:
-            self._is_speed_mode = False
-            self._is_timer_start = False
-            self._is_first_timer = True
-        self._clicks = 0
 
 # End of File
