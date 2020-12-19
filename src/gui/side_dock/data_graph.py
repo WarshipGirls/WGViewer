@@ -4,11 +4,13 @@ import os
 import plotly.graph_objects as go
 import plotly.io as pio
 
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+# from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWidgets import QWidget
+# from PyQt5.QtWidgets import QVBoxLayout
 
 from src.data import get_user_dir
-from src.utils import ts_to_date, get_user_resolution, get_color_scheme, get_color_option
+from src.utils import ts_to_date, get_color_option
+# from src.utils import get_user_resolution, get_color_scheme
 from . import constants as CONST
 
 
@@ -16,26 +18,30 @@ class UserDataGraph(QWidget):
     """
     This is instantiated along with the menu bar,
         and logs user's data every 15 minutes with a QTimer's interval = 1 minute.
-    To prevent possible abuse of the data log system, we bar user from accessing the QTimer settings
-    TODO? remove the "wide" white margins
+    - To prevent possible abuse of the data log system, we bar users from accessing the QTimer settings
+    - QWebEngine is not used right now due to its massize size; instead, open the data graph in users' browser
+
+    # to-do: remove the "wide" white margins (removed since abandon QWebEngine)
     TODO? when data get large, show a loading animation
     """
     def __init__(self):
         super().__init__()
-        self.browser = QWebEngineView(self)
+        # self.browser = QWebEngineView(self)
         self.resource_data = [[]] * len(CONST.CSV_HEADER)
 
-        self.init_ui()
+        # self.init_ui()
 
+    '''
     def init_ui(self) -> None:
         vertical_layout = QVBoxLayout(self)
         vertical_layout.setContentsMargins(0, 0, 0, 0)
-        vertical_layout.addWidget(self.browser)
+        # vertical_layout.addWidget(self.browser)
         user_w, user_h = get_user_resolution()
         w = int(user_w * 0.52)
         h = int(user_h * 0.74)
         self.resize(w, h)
         self.setLayout(vertical_layout)
+    '''
 
     def show_data_graph(self) -> None:
         self.show_graph(1, 5, 'Resources')
@@ -69,11 +75,12 @@ class UserDataGraph(QWidget):
             ))
         fig.update_layout(title=title)
         if get_color_option() == "qdarkstyle":
-            self.setStyleSheet(get_color_scheme())
+            # self.setStyleSheet(get_color_scheme())
             fig.layout.template = pio.templates["plotly_dark"]
         else:
             pass
-        self.browser.setHtml(fig.to_html(include_plotlyjs='cdn'))
-        self.show()
+        # self.browser.setHtml(fig.to_html(include_plotlyjs='cdn'))
+        # self.show()
+        fig.show()
 
 # End of File
