@@ -5,6 +5,16 @@ from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QScrollArea, QMainWind
 from src.utils import get_user_resolution
 
 
+class ClickableLabel(QLabel):
+    clicked = pyqtSignal()
+
+    def __init__(self, parent=None):
+        QLabel.__init__(self, parent)
+
+    def mousePressEvent(self, ev):
+        self.clicked.emit()
+
+
 class ScrollLabel(QScrollArea):
     def __init__(self, *args, **kwargs):
         QScrollArea.__init__(self, *args, **kwargs)
