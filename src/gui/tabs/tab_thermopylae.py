@@ -46,12 +46,17 @@ class TabThermopylae(QWidget):
         self.sig_exp.connect(self.side_dock.update_lvl_label)
 
         self.api = API_SIX(wgv_data.load_cookies())
-        self.fleets = [None] * 6
+        # self.fleets = [None] * 6
+        self.battle_fleets = [None] * 6
+        self.escort_DD: list = []
+        self.escort_CV: list = []
+        self.user_chosen_cid: list = []
         # self.final_fleet = [None] * 14
         self.final_fleet = []  # for testing
 
         self.main_layout = QHBoxLayout(self)
-        # TODO separate bar info
+        # self.left_container = QWidget(self)
+        # self.left_layout = QGridLayout(self.left_container)
         self.left_layout = QGridLayout()
         self.right_layout = QVBoxLayout()
 
@@ -89,6 +94,7 @@ class TabThermopylae(QWidget):
 
         self.ship_select_window = None
         self.init_ui()
+        # TODO: let user choose escort DD, escort CV and SS, rest filled cross-check old fleet?
         self.sortie = Sortie(self, self.api, [], self.final_fleet, self.is_realrun)
 
         self.bee_pre_battle = CallbackWorker(self.sortie.pre_battle, (), self.pre_battle_finished)
@@ -109,14 +115,14 @@ class TabThermopylae(QWidget):
     def init_left_layout(self) -> None:
         self.button_purchase.setEnabled(False)
         t = QTextEdit()
-        msg = "Notes (dev)\n"
+        msg = "Notes\n"
         msg += "1. As of now, this auto sortie function is ONLY for players who passed E6 manually;\n"
         msg += "2. There are limitations on what ship cards should be set:\n"
         msg += "    - DD 'Glowworm' and 'Amethyst', and CV 'Indomitable' are required\n"
         msg += "    - 6 high level SS are required\n"
         msg += "3. Adjutant 紫貂 (default) and Habakkuk (purchased in shop) are required;\n"
         msg += "4. Buff cards are not selected.\n"
-        msg += "5. Ships under Lv. 90 cannot be selected.\n"
+        msg += "5. Ships under Lv. 80 are not selected.\n"
         t.setFontPointSize(10)
         t.setText(msg)
         t.setReadOnly(True)
@@ -144,7 +150,7 @@ class TabThermopylae(QWidget):
         self.button_stop_sortie.setEnabled(False)
 
         self.left_layout.addWidget(t, 3, 0, 1, 4)
-        self.left_layout.addWidget(self.ship_selection_group(), 4, 0, 2, 4)
+        self.left_layout.addWidget(self.set_ship_selections(), 4, 0, 2, 4)
         self.left_layout.addWidget(self.fleet_label, 6, 0, 1, 4)
         self.left_layout.addWidget(self.boat_pool_label, 7, 0, 1, 4)
         self.left_layout.addWidget(self.button_pre_battle, 8, 0)
@@ -153,7 +159,7 @@ class TabThermopylae(QWidget):
         self.left_layout.addWidget(self.multi_runs, 8, 3)
         self.left_layout.addWidget(self.button_stop_sortie, 9, 0, 1, 4)
 
-        self.left_layout.setRowStretch(3, 3)
+        self.left_layout.setRowStretch(3, 5)
         self.left_layout.setRowStretch(4, 1)
 
     def init_right_layout(self) -> None:
@@ -345,38 +351,54 @@ class TabThermopylae(QWidget):
     # WIP
     # ================================
 
-    def ship_selection_group(self) -> QWidget:
-        w = QWidget()
-        layout = QHBoxLayout(w)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        for i in range(len(self.fleets)):
-            t = self.fleets[i]
+    def set_ship_selections(self) -> QWidget:
+        def _create_button(t1, t2, idx, lay, lim=None) -> QPushButton:
             b = QPushButton()
             b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            if t is None:
-                b.setText('+')
-            else:
-                b.setText(str(t))
-            b.clicked.connect(lambda _, _i=i: self.popup_select_window(_i))
+            b.setText(f'+\n{t1}')
+            b.clicked.connect(lambda _, _i=idx: self.popup_select_window(_i, t2, lim))
+            lay.addWidget(b)
             self.ship_button_group.addButton(b)
-            layout.addWidget(b)
+            return b
+
+        w = QWidget()
+        v_layout = QVBoxLayout(w)
+
+        row_1 = QHBoxLayout()
+        row_1.setContentsMargins(0, 0, 0, 0)
+        _create_button('LOW COST DD', ['DD'], 0, row_1, [1, 2])
+        _create_button('LOW COST DD', ['DD'], 1, row_1, [1, 2, 3])
+        _create_button('LOW COST CV/AV', ['CV', 'AV'], 2, row_1, [1, 2, 3])
+
+        row_2 = QHBoxLayout()
+        row_2.setContentsMargins(0, 0, 0, 0)
+        for i in range(3, 9):
+            _create_button('SS', ['SS'], i, row_2)
+
+        v_layout.addLayout(row_1)
+        v_layout.addLayout(row_2)
         return w
 
     def handle_selection(self, ship_info: list, button_id: int) -> None:
         b = self.ship_button_group.buttons()[button_id]
         ship_id = ship_info[1]
-        if int(ship_id) in self.fleets:
-            b.setText('! SHIP ALREADY EXISTS IN FLEET !')
+        if ship_info[-1] in self.user_chosen_cid:
+            b.setText("SHIP EXISTS\nPLEASE CHANGE")
         else:
-            self.fleets[button_id] = int(ship_id)
-            s = "\n".join(ship_info)
-            print(s)
+            self.user_chosen_cid.append(ship_info[-1])
+            self.ship_select_window.close()
+            if button_id in [0, 1]:
+                self.escort_DD.append(int(ship_id))
+            elif button_id == 2:
+                self.escort_CV.append(int(ship_id))
+            else:
+                self.battle_fleets.append(int(ship_id))
+            s = f'{ship_info[0]}\n{ship_info[2]}\n{ship_info[3]}'
             b.setText(s)
 
-    def popup_select_window(self, btn_id: int) -> None:
+    def popup_select_window(self, btn_id: int, ship_class: list, cost_lim: list = None) -> None:
         # TODO: delete obj after close
-        self.ship_select_window = ShipSelectWindow(self, btn_id)
+        self.ship_select_window = ShipSelectWindow(self, btn_id, ship_class, cost_lim)
         self.ship_select_window.show()
 
 # End of File

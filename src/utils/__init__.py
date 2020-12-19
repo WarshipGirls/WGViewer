@@ -31,7 +31,7 @@ from .shipname import (
     get_name
 )
 from .wgv_pyqt import (
-    get_user_resolution, 
+    get_screen_center, get_user_resolution, 
     open_disclaimer, open_url, 
     popup_msg, 
     quit_application

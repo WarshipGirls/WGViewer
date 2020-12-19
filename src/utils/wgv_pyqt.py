@@ -2,7 +2,7 @@ from typing import Tuple
 
 from PyQt5.QtCore import QUrl, QCoreApplication
 from PyQt5.QtGui import QDesktopServices
-from PyQt5.QtWidgets import QMessageBox, QDesktopWidget
+from PyQt5.QtWidgets import QMessageBox, QDesktopWidget, QApplication
 
 from src.utils import get_color_scheme
 
@@ -12,6 +12,10 @@ def get_user_resolution() -> Tuple[int, int]:
     user_w = QDesktopWidget().screenGeometry(-1).width()
     user_h = QDesktopWidget().screenGeometry(-1).height()
     return user_w, user_h
+
+
+def get_screen_center():
+    return QApplication.desktop().screen().rect().center()
 
 
 def open_disclaimer() -> None:

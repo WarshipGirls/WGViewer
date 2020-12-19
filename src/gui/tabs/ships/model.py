@@ -50,7 +50,7 @@ class ShipModel(QStandardItemModel):
             # Qt.DisplayRole (default), Qt.UserRole (hidden), Qt.DecorationRole (icon)
             s = {'cid': int(self.index(row, 0).data(Qt.UserRole)), 'Name': self.index(row, 1).data()}
             # Lesson: JSON keys have to be strings; json.dump() will convert int-key to str type
-            all_ships[self.index(row, 2).data()] = s
+            all_ships[self.index(row, 2).data()] = s  # reference this dict
             for col in range(3, 21):  # str and str representation of int, float, list of int, int/int
                 s[SCONST.header[col]] = self.index(row, col).data()
             equips = []  # equips cid (int), may contain None
