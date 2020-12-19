@@ -348,7 +348,7 @@ class TabThermopylae(QWidget):
         self.fleet_label.setText(data)
 
     # ================================
-    # WIP
+    # Left Panel - Ship Selection
     # ================================
 
     def set_ship_selections(self) -> QWidget:
@@ -385,8 +385,11 @@ class TabThermopylae(QWidget):
         if ship_info[-1] in self.user_chosen_cid:
             b.setText("SHIP EXISTS\nPLEASE CHANGE")
         else:
-            self.user_chosen_cid.append(ship_info[-1])
             self.ship_select_window.close()
+            self.ship_select_window.deleteLater()
+            self.ship_select_window = None
+
+            self.user_chosen_cid.append(ship_info[-1])
             if button_id in [0, 1]:
                 self.escort_DD.append(int(ship_id))
             elif button_id == 2:
@@ -397,7 +400,6 @@ class TabThermopylae(QWidget):
             b.setText(s)
 
     def popup_select_window(self, btn_id: int, ship_class: list, cost_lim: list = None) -> None:
-        # TODO: delete obj after close
         self.ship_select_window = ShipSelectWindow(self, btn_id, ship_class, cost_lim)
         self.ship_select_window.show()
 
