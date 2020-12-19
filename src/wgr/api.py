@@ -111,14 +111,15 @@ class WGR_API:
         # for urlopen
         logger.debug("urlopen - waiting for aborted")
         timer = 0
+        # while response.status == 204:
         while response.status != 200:
             logger.debug(f"urlopen - waiting for aborted {timer}")
             sleep(_timewait)
             timer += _timewait
             if timer > _timeout:
                 break
-            if response.status == 200:
-                break
+            # if response.status == 200:
+            #     break
 
     @staticmethod
     def _int_list_to_str(int_list: list) -> str:

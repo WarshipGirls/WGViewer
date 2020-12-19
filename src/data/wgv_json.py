@@ -125,10 +125,13 @@ def init_ships_temp() -> dict:
     else:
         cards = get_shipCard()
         for c in cards:
-            # Due to json.dump, key will be convert to str type anyway
-            data[str(c['cid'])] = {}
-            data[str(c['cid'])]['rarity'] = c['star']
-            data[str(c['cid'])]['country'] = c['country']
+            if 'cost' in c:
+                # card without 'cost' is enemy cards
+                # Due to json.dump, key will be convert to str type anyway
+                data[str(c['cid'])] = {}
+                data[str(c['cid'])]['rarity'] = c['star']
+                data[str(c['cid'])]['country'] = c['country']
+                data[str(c['cid'])]['cost'] = c['cost']
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 

@@ -62,8 +62,8 @@ class API_BOAT(WGR_API):
         link = 'boat/skillLevelUp/' + ship_id + '/'
         return self._api_call(link)
 
-    def supplyBoats(self, fleets: list):
-        link = 'boat/supplyBoats/' + self._int_list_to_str(fleets) + '/0/0/'
+    def supplyBoats(self, fleet: list):
+        link = 'boat/supplyBoats/' + self._int_list_to_str(fleet) + '/0/0/'
         return self._api_urlopen(link)
 
 # End of File

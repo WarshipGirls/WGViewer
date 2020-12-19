@@ -11,11 +11,11 @@ class API_SIX(WGR_API):
     # SIX
     # ================================
 
-    def supplyBoats(self, fleets: list):
-        return self.boats_api.supplyBoats(fleets)
+    def supplyBoats(self, fleet: list):
+        return self.boats_api.supplyBoats(fleet)
 
-    def instantRepairShips(self, fleets: list):
-        return self.boats_api.instantRepairShips(fleets)
+    def instantRepairShips(self, fleet: list):
+        return self.boats_api.instantRepairShips(fleet)
 
     # ================================
     # SIX
@@ -83,13 +83,13 @@ class API_SIX(WGR_API):
         link = 'six/selectBoat/' + self._int_list_to_str(selected_boats) + '/' + skill_card
         return self._api_urlopen(link)
 
-    def setChapterBoat(self, sortie_map: str, fleets: list):
+    def setChapterBoat(self, sortie_map: str, fleet: list):
         # chapter id: 10001 (E1) to 10006 (E6)
-        link = 'six/setChapterBoat/' + sortie_map + '/' + self._int_list_to_str(fleets)
+        link = 'six/setChapterBoat/' + sortie_map + '/' + self._int_list_to_str(fleet)
         return self._api_urlopen(link)
 
-    def setWarFleet(self, fleets: list):
-        link = 'six/setWarFleet/' + self._int_list_to_str(fleets)
+    def setWarFleet(self, fleet: list):
+        link = 'six/setWarFleet/' + self._int_list_to_str(fleet)
         return self._api_urlopen(link)
 
     def spy(self):
