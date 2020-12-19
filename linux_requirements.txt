@@ -22,7 +22,6 @@ pyinstaller-hooks-contrib==2020.10
 pyparsing==2.4.7
 PyQt5==5.15.1
 PyQt5-sip==12.8.1
-PyQtWebEngine==5.15.2
 pytest==6.1.2
 pytest-qt==3.3.0
 pytz==2020.1
