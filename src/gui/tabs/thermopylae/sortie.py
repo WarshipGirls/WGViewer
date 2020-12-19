@@ -129,23 +129,7 @@ class Sortie:
         else:
             pass
 
-        self.logger.info("Setting final fleets:")
-        for ship_id in self.final_fleet:
-            ship = self.user_ships[str(ship_id)]
-            output_str = "{:8s}{:17s}".format(str(ship_id), ship['Name'])
-            if ship['Class'] == "SS":
-                self.main_fleet.append(ship_id)
-                output_str += "\tMAIN FORCE"
-            elif ship['cid'] in self.escort_DD_cids:
-                self.escort_DD.append(ship_id)
-                output_str += "\tESCORT DD"
-            elif ship['cid'] in self.escort_CV_cids:
-                self.escort_CV.append(ship_id)
-                output_str += "\tESCORT CV"
-            else:
-                pass
-            # Lesson: do not output various stuff at once, concat them together; otherwise TypeError
-            self.logger.info(output_str)
+        self.pre_battle_set_fleet()
 
         self.parent.button_stop_sortie.setEnabled(False)
         ticket_num = int(self.parent.ticket_label.text())
@@ -170,6 +154,25 @@ class Sortie:
         else:
             self.logger.info('Can choose a fresh start')
         return True
+
+    def pre_battle_set_fleet(self):
+        self.logger.info("Setting final fleets:")
+        for ship_id in self.final_fleet:
+            ship = self.user_ships[str(ship_id)]
+            output_str = "{:8s}{:17s}".format(str(ship_id), ship['Name'])
+            if ship['Class'] == "SS":
+                self.main_fleet.append(ship_id)
+                output_str += "\tMAIN FORCE"
+            elif ship['cid'] in self.escort_DD_cids:
+                self.escort_DD.append(ship_id)
+                output_str += "\tESCORT DD"
+            elif ship['cid'] in self.escort_CV_cids:
+                self.escort_CV.append(ship_id)
+                output_str += "\tESCORT CV"
+            else:
+                pass
+            # Lesson: do not output various stuff at once, concat them together; otherwise TypeError
+            self.logger.info(output_str)
 
     def resume_sortie(self) -> bool:
         # TODO: may still have some corner cases to catch

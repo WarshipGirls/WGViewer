@@ -36,6 +36,9 @@ THER_TKT_RSC: str = 'THER/ticket_resource_type'  # str(int); use one F/A/S/B res
 THER_REPAIRS: str = 'THER/repair_levels'  # list of int
 THER_HABA_REROLL: str = 'THER/habakkuk_reroll'  # int; in Ex6-3-A1, use Habakkuk skill until desired amount of SS is achieved
 THER_SHIP_STARS: str = 'THER/user_ship_stars'  # dict; ship-id (int) to star (int), to keep track of user ship stars
+THER_DD: str = 'THER/escort_destroyer_list'  # list of int; len=2 ship ids
+THER_CV: str = 'THER/escort_carrier_list'  # list of int; len=1, ship ids
+THER_SS: str = 'THER/battle_submarines'  # list of int; len=6, ship ids
 
 UI_TAB_ADV: str = 'UI/TAB/advance'  # bool
 UI_TAB_EXP: str = 'UI/TAB/expedition'  # bool

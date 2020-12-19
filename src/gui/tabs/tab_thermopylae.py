@@ -1,11 +1,15 @@
-from PyQt5.QtCore import pyqtSignal, QTimer
+from PyQt5.QtCore import pyqtSignal, QTimer, QSettings
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QTextEdit, QPushButton, QButtonGroup, QGridLayout, QSpinBox, QSizePolicy
+from PyQt5.QtWidgets import (
+    QHBoxLayout, QVBoxLayout, QGridLayout, QSizePolicy,
+    QWidget, QLabel, QTextEdit, QPushButton, QButtonGroup, QSpinBox
+)
 
 from src import data as wgv_data
 from src.utils import stop_sleep_event, reset_sleep_event
 from src.func.worker import CallbackWorker
 from src.func import logger_names as QLOGS
+from src.func import qsettings_keys as QKEYS
 from src.func.log_handler import get_new_logger
 from src.gui.custom_widgets import ClickableLabel
 from src.gui.side_dock.resource_model import ResourceTableModel
@@ -46,17 +50,15 @@ class TabThermopylae(QWidget):
         self.sig_exp.connect(self.side_dock.update_lvl_label)
 
         self.api = API_SIX(wgv_data.load_cookies())
-        # self.fleets = [None] * 6
-        self.battle_fleets = [None] * 6
-        self.escort_DD: list = []
-        self.escort_CV: list = []
-        self.user_chosen_cid: list = []
-        # self.final_fleet = [None] * 14
+        self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
+        self.user_ships = wgv_data.get_processed_userShipVo()
+        self.battle_fleets: list = [None] * 6
+        self.escort_DD: list = [None] * 2
+        self.escort_CV: list = [None]
+        self.user_chosen_cid: list = [None] * 9
         self.final_fleet = []  # for testing
 
         self.main_layout = QHBoxLayout(self)
-        # self.left_container = QWidget(self)
-        # self.left_layout = QGridLayout(self.left_container)
         self.left_layout = QGridLayout()
         self.right_layout = QVBoxLayout()
 
@@ -80,6 +82,8 @@ class TabThermopylae(QWidget):
         self.ship_button_group = QButtonGroup()
         self.boat_pool_label = QLabel()
         self.fleet_label = QLabel()
+        self.ui_buttons = QButtonGroup()
+        self.button_set_ships = QPushButton('&Set fleet')
         self.button_pre_battle = QPushButton('&Pre-Battle Check')
         self.button_fresh_sortie = QPushButton('Fresh &Combat')
         self.button_resume_sortie = QPushButton('&Resume Combat')
@@ -94,15 +98,6 @@ class TabThermopylae(QWidget):
 
         self.ship_select_window = None
         self.init_ui()
-        # TODO: let user choose escort DD, escort CV and SS, rest filled cross-check old fleet?
-        self.sortie = Sortie(self, self.api, [], self.final_fleet, self.is_realrun)
-
-        self.bee_pre_battle = CallbackWorker(self.sortie.pre_battle, (), self.pre_battle_finished)
-        self.bee_pre_battle.terminate()
-        self.bee_fresh_sortie = CallbackWorker(self.sortie.start_fresh_sortie, (), self.sortie_finished)
-        self.bee_fresh_sortie.terminate()
-        self.bee_resume_sortie = CallbackWorker(self.sortie.resume_sortie, (), self.sortie_finished)
-        self.bee_resume_sortie.terminate()
 
     def init_ui(self) -> None:
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -129,35 +124,51 @@ class TabThermopylae(QWidget):
 
         self.boat_pool_label.setFont(QFont('Consolas'))
         self.boat_pool_label.setWordWrap(True)
-        self.boat_pool_label.setText('ON BATTLE |')
+        self.boat_pool_label.setText('BOAT POOL |')
         self.fleet_label.setFont(QFont('Consolas'))
         self.fleet_label.setWordWrap(True)
-        self.fleet_label.setText('BOAT POOL |')
+        self.fleet_label.setText('ON BATTLE |')
+
+        self.button_set_ships.clicked.connect(self.check_selections)
+        self.ui_buttons.addButton(self.button_set_ships)
 
         self.button_pre_battle.clicked.connect(self.on_pre_battle)
-        self.button_pre_battle.setEnabled(True)
+        self.ui_buttons.addButton(self.button_pre_battle)
 
         self.button_fresh_sortie.clicked.connect(self.on_fresh_sortie)
-        self.button_fresh_sortie.setEnabled(False)
+        self.ui_buttons.addButton(self.button_fresh_sortie)
 
         self.button_resume_sortie.clicked.connect(self.on_resume_sortie)
-        self.button_resume_sortie.setEnabled(False)
+        self.ui_buttons.addButton(self.button_resume_sortie)
 
         self.multi_runs.setEnabled(False)
         self.multi_runs.setSuffix(" times")
 
         self.button_stop_sortie.clicked.connect(self.disable_sortie)
-        self.button_stop_sortie.setEnabled(False)
+        self.ui_buttons.addButton(self.button_stop_sortie)
+
+        for b in self.ui_buttons.buttons():
+            b.setEnabled(False)
+        self.button_set_ships.setEnabled(True)
 
         self.left_layout.addWidget(t, 3, 0, 1, 4)
-        self.left_layout.addWidget(self.set_ship_selections(), 4, 0, 2, 4)
-        self.left_layout.addWidget(self.fleet_label, 6, 0, 1, 4)
-        self.left_layout.addWidget(self.boat_pool_label, 7, 0, 1, 4)
-        self.left_layout.addWidget(self.button_pre_battle, 8, 0)
-        self.left_layout.addWidget(self.button_fresh_sortie, 8, 1)
-        self.left_layout.addWidget(self.button_resume_sortie, 8, 2)
-        self.left_layout.addWidget(self.multi_runs, 8, 3)
-        self.left_layout.addWidget(self.button_stop_sortie, 9, 0, 1, 4)
+        if self.qsettings.contains(QKEYS.THER_DD) and self.qsettings.contains(QKEYS.THER_CV) and self.qsettings.contains(QKEYS.THER_SS):
+            _dd: list = list(map(int, self.qsettings.value(QKEYS.THER_DD)))
+            _cv: list = list(map(int, self.qsettings.value(QKEYS.THER_CV)))
+            _ss: list = list(map(int, self.qsettings.value(QKEYS.THER_SS)))
+            ssb = self.set_ship_selection_buttons(dd=_dd, cv=_cv, ss=_ss)
+        else:
+            ssb = self.set_ship_selection_buttons()
+        self.left_layout.addWidget(ssb, 4, 0, 2, 4)
+        self.left_layout.addWidget(self.button_set_ships, 6, 0, 1, 2)
+        self.left_layout.addWidget(self.button_pre_battle, 6, 2, 1, 2)
+
+        self.left_layout.addWidget(self.fleet_label, 7, 0, 1, 4)
+        self.left_layout.addWidget(self.boat_pool_label, 8, 0, 1, 4)
+        self.left_layout.addWidget(self.button_fresh_sortie, 9, 0)
+        self.left_layout.addWidget(self.button_resume_sortie, 9, 1)
+        self.left_layout.addWidget(self.multi_runs, 9, 2)
+        self.left_layout.addWidget(self.button_stop_sortie, 9, 3)
 
         self.left_layout.setRowStretch(3, 5)
         self.left_layout.setRowStretch(4, 1)
@@ -201,15 +212,17 @@ class TabThermopylae(QWidget):
         self.left_layout.addWidget(w, 1, 0, 1, 4)
 
     def disable_sortie_widgets(self):
-        self.button_pre_battle.setEnabled(False)
-        self.button_fresh_sortie.setEnabled(False)
-        self.button_resume_sortie.setEnabled(False)
+        for b in self.ship_button_group.buttons():
+            b.setEnabled(False)
+        for b in self.ui_buttons.buttons():
+            b.setEnabled(False)
         self.multi_runs.setEnabled(False)
 
     def enable_sortie_widgets(self):
-        self.button_pre_battle.setEnabled(True)
-        self.button_fresh_sortie.setEnabled(True)
-        self.button_resume_sortie.setEnabled(True)
+        for b in self.ship_button_group.buttons():
+            b.setEnabled(True)
+        for b in self.ui_buttons.buttons():
+            b.setEnabled(True)
         self.multi_runs.setEnabled(True)
 
     # ================================
@@ -261,7 +274,19 @@ class TabThermopylae(QWidget):
 
     def on_pre_battle(self) -> None:
         self.disable_sortie_widgets()
-        self.bee_pre_battle.start()
+        self.qsettings.setValue(QKEYS.THER_DD, self.escort_DD)
+        self.qsettings.setValue(QKEYS.THER_CV, self.escort_CV)
+        self.qsettings.setValue(QKEYS.THER_SS, self.battle_fleets)
+        # self.sortie = Sortie(self, self.api, [], self.final_fleet, self.is_realrun)
+        #
+        # self.bee_pre_battle = CallbackWorker(self.sortie.pre_battle, (), self.pre_battle_finished)
+        # self.bee_pre_battle.terminate()
+        # self.bee_fresh_sortie = CallbackWorker(self.sortie.start_fresh_sortie, (), self.sortie_finished)
+        # self.bee_fresh_sortie.terminate()
+        # self.bee_resume_sortie = CallbackWorker(self.sortie.resume_sortie, (), self.sortie_finished)
+        # self.bee_resume_sortie.terminate()
+        #
+        # self.bee_pre_battle.start()
 
     def on_fresh_sortie(self) -> None:
         reset_sleep_event()
@@ -351,12 +376,16 @@ class TabThermopylae(QWidget):
     # Left Panel - Ship Selection
     # ================================
 
-    def set_ship_selections(self) -> QWidget:
-        def _create_button(t1, t2, idx, lay, lim=None) -> QPushButton:
+    def set_ship_selection_buttons(self, dd: list = None, cv: list = None, ss: list = None) -> QWidget:
+        def _create_button(t, l, idx, lay, lim=None, cid=None) -> QPushButton:
             b = QPushButton()
             b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            b.setText(f'+\n{t1}')
-            b.clicked.connect(lambda _, _i=idx: self.popup_select_window(_i, t2, lim))
+            if cid is None:
+                b.setText(f'+\n{t}')
+            else:
+                ship = self.user_ships[str(cid)]
+                b.setText(f"{ship['Class']}\n{ship['Name']}\nLv.{ship['Lv.']}")
+            b.clicked.connect(lambda _, _i=idx: self.popup_select_window(_i, l, lim))
             lay.addWidget(b)
             self.ship_button_group.addButton(b)
             return b
@@ -366,14 +395,25 @@ class TabThermopylae(QWidget):
 
         row_1 = QHBoxLayout()
         row_1.setContentsMargins(0, 0, 0, 0)
-        _create_button('LOW COST DD', ['DD'], 0, row_1, [1, 2])
-        _create_button('LOW COST DD', ['DD'], 1, row_1, [1, 2, 3])
-        _create_button('LOW COST CV/AV', ['CV', 'AV'], 2, row_1, [1, 2, 3])
+        if dd is not None:
+            _create_button(t='LOW COST DD', l=['DD'], idx=0, lay=row_1, lim=[1, 2], cid=dd[0])
+            _create_button(t='LOW COST DD', l=['DD'], idx=1, lay=row_1, lim=[1, 2, 3], cid=dd[1])
+        else:
+            _create_button(t='LOW COST DD', l=['DD'], idx=0, lay=row_1, lim=[1, 2])
+            _create_button(t='LOW COST DD', l=['DD'], idx=1, lay=row_1, lim=[1, 2, 3])
+
+        if cv is not None:
+            _create_button(t='LOW COST CV/AV', l=['CV', 'AV'], idx=2, lay=row_1, lim=[1, 2, 3], cid=cv[0])
+        else:
+            _create_button(t='LOW COST CV/AV', l=['CV', 'AV'], idx=2, lay=row_1, lim=[1, 2, 3])
 
         row_2 = QHBoxLayout()
         row_2.setContentsMargins(0, 0, 0, 0)
         for i in range(3, 9):
-            _create_button('SS', ['SS'], i, row_2)
+            if ss is not None:
+                _create_button(t='SS', l=['SS'], idx=i, lay=row_2, cid=ss[i - 3])
+            else:
+                _create_button(t='SS', l=['SS'], idx=i, lay=row_2)
 
         v_layout.addLayout(row_1)
         v_layout.addLayout(row_2)
@@ -389,18 +429,37 @@ class TabThermopylae(QWidget):
             self.ship_select_window.deleteLater()
             self.ship_select_window = None
 
-            self.user_chosen_cid.append(ship_info[-1])
+            self.user_chosen_cid[button_id] = ship_info[-1]
             if button_id in [0, 1]:
-                self.escort_DD.append(int(ship_id))
+                self.escort_DD[button_id] = int(ship_id)
             elif button_id == 2:
-                self.escort_CV.append(int(ship_id))
+                self.escort_CV[0] = int(ship_id)
             else:
-                self.battle_fleets.append(int(ship_id))
+                self.battle_fleets[button_id - 3] = int(ship_id)
             s = f'{ship_info[0]}\n{ship_info[2]}\n{ship_info[3]}'
             b.setText(s)
 
     def popup_select_window(self, btn_id: int, ship_class: list, cost_lim: list = None) -> None:
         self.ship_select_window = ShipSelectWindow(self, btn_id, ship_class, cost_lim)
         self.ship_select_window.show()
+
+    def check_selections(self) -> None:
+        try:
+            assert (None not in self.escort_DD)
+        except AssertionError:
+            self.logger.warning('DD are not set')
+            return
+        try:
+            assert (None not in self.escort_CV)
+        except AssertionError:
+            self.logger.warning('CV are not set')
+            return
+        try:
+            assert (None not in self.battle_fleets)
+        except AssertionError:
+            self.logger.warning('SS are not set')
+            return
+
+        self.button_pre_battle.setEnabled(True)
 
 # End of File
