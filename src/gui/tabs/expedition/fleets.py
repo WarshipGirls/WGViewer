@@ -13,10 +13,10 @@ from src import data as wgv_data
 # TODO TODO
 '''
 class PopupFleets(QMainWindow):
-    def __init__(self, curr_fleet: list, ships_info: object):
+    def __init__(self, curr_fleet: list, user_ships: object):
         super().__init__()
         self.curr_fleet = curr_fleet
-        self.info = ships_info
+        self.info = user_ships
         self.width = 400
         self.height = 200
 
@@ -54,9 +54,8 @@ class ExpFleets(QWidget):
         self.maps = wgv_data.get_exp_list()
 
         self.fleets = wgv_data.get_exp_fleets()
-        self.ships_info = wgv_data.get_processed_userShipVo()
+        self.user_ships = wgv_data.get_processed_userShipVo()
         self.set_table()
-        # self.expedition_buttons = []
 
     def init_ui(self) -> None:
         self.tab.resizeColumnsToContents()
@@ -103,7 +102,7 @@ class ExpFleets(QWidget):
         row += 1
 
         for ship_id in self.fleets[fleet_id]:
-            info = self.ships_info[str(ship_id)]
+            info = self.user_ships[str(ship_id)]
             self.set_one_ship(row, col, ship_id, info)
             row += 2
 
