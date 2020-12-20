@@ -270,7 +270,7 @@ if __name__ == "__main__":
         save_equipmentVo, get_pveExploreVo
     )
 else:
-    from .wgv_json import (
+    from src.data.wgv_json import (
         get_user_fleets, get_shipItem, get_userVo,
         get_shipCard, get_shipEquipmnt, get_equipmentVo,
         save_equipmentVo, get_pveExploreVo

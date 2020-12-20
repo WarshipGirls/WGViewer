@@ -19,12 +19,6 @@ from .wgv_path import (
     clear_cache_folder, 
     get_data_dir, get_init_dir, get_log_dir, get_temp_dir, get_user_dir, get_zip_dir
 )
-from .wgv_process import (
-    find_all_indices, find_index, 
-    get_big_success_rate, get_exp_fleets, get_exp_list, get_exp_map, get_love_list, get_ship_equips, 
-    is_exp_done, 
-    update_equipment_amount
-)
 from .wgv_qsettings import (
     del_key_file, 
     get_key_path, get_qsettings_file, 
