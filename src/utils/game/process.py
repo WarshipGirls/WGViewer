@@ -1,9 +1,11 @@
-"""
-TODO: refactor this into utils
-"""
 from typing import Tuple, Any
 from time import time
 
+from src.data.wgv_json import (
+    get_user_fleets, get_shipItem, get_userVo,
+    get_shipCard, get_shipEquipmnt, get_equipmentVo,
+    save_equipmentVo, get_pveExploreVo
+)
 
 # ================================
 # Not Exports
@@ -263,17 +265,5 @@ def get_ship_equips(cid):
     return _type_to_equips(types)
 """
 
-if __name__ == "__main__":
-    from src.data.wgv_json import (
-        get_user_fleets, get_shipItem, get_userVo,
-        get_shipCard, get_shipEquipmnt, get_equipmentVo,
-        save_equipmentVo, get_pveExploreVo
-    )
-else:
-    from src.data.wgv_json import (
-        get_user_fleets, get_shipItem, get_userVo,
-        get_shipCard, get_shipEquipmnt, get_equipmentVo,
-        save_equipmentVo, get_pveExploreVo
-    )
 
 # End of File
