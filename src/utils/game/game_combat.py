@@ -1,5 +1,3 @@
-import logging
-
 from math import ceil
 
 
@@ -67,11 +65,11 @@ def process_spy_json(spy_json: dict, all_equipment: [dict, None] = None) -> str:
 
 
 if __name__ == "__main__":
-    from src.utils.game_info import (
+    from src.utils.game.game_info import (
         get_combat_formation, get_ship_type, get_ship_los
     )
 else:
-    from .game_info import (
+    from src.utils.game.game_info import (
         get_combat_formation, get_ship_type, get_ship_los
     )
 
