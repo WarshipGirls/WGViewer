@@ -8,7 +8,8 @@ from PyQt5.QtWidgets import (
     QTableView, QHeaderView, QAbstractScrollArea, QComboBox, QMainWindow
 )
 
-from src import data as wgv_data
+from src import utils as wgv_utils
+from src.data import get_processed_userShipVo
 
 # TODO TODO
 '''
@@ -20,7 +21,7 @@ class PopupFleets(QMainWindow):
         self.width = 400
         self.height = 200
 
-        self.setStyleSheet(wgv_data.get_color_scheme())
+        self.setStyleSheet(wgv_utils.get_color_scheme())
         self.setWindowTitle('WGViewer - Expedition Fleet Selection')
         self.resize(self.width, self.height)
 
@@ -51,10 +52,10 @@ class ExpFleets(QWidget):
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.tab)
         self.setLayout(self.layout)
-        self.maps = wgv_data.get_exp_list()
+        self.maps = wgv_utils.get_exp_list()
 
-        self.fleets = wgv_data.get_exp_fleets()
-        self.user_ships = wgv_data.get_processed_userShipVo()
+        self.fleets = wgv_utils.get_exp_fleets()
+        self.user_ships = get_processed_userShipVo()
         self.set_table()
 
     def init_ui(self) -> None:
@@ -90,7 +91,7 @@ class ExpFleets(QWidget):
         item_fleet = QTableWidgetItem(fleet_name)
         item_fleet.setBackground(QColor(0, 0, 0))
         self.tab.setItem(row, col, item_fleet)
-        map_name = wgv_data.get_exp_map(fleet_id)
+        map_name = wgv_utils.get_exp_map(fleet_id)
         item_map = QTableWidgetItem(map_name)
         item_map.setBackground(QColor(0, 0, 0))
         self.tab.setItem(row, col + 1, item_map)

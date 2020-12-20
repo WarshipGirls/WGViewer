@@ -9,6 +9,10 @@ ship_zip_url = "https://github.com/WarshipGirls/WGViewer/raw/master/zip/S.zip"
 init_zip_url = "https://github.com/WarshipGirls/WGViewer/raw/master/zip/init.zip"
 my_urls = [equip_zip_url, ship_zip_url, init_zip_url]
 
+# ================================
+# Exports
+# ================================
+
 
 def _download(url: str) -> str:
     # download from Github
@@ -48,6 +52,10 @@ def _unzip_file(filename: str) -> None:
 def _unzip_all(filenames: list) -> None:
     for filename in filenames:
         _unzip_file(filename)
+
+# ================================
+# Exports
+# ================================
 
 
 def init_resources() -> None:
