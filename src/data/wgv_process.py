@@ -1,4 +1,8 @@
+"""
+TODO: refactor this into utils
+"""
 from typing import Tuple, Any
+from time import time
 
 
 # ================================
@@ -97,6 +101,13 @@ def get_ship_equips(cid: int) -> list:
 
 
 def get_exp_map(fleet_id: str) -> str:
+    """
+    Given a fleet id, return expedition-able maps
+    @param fleet_id: fleet id, str form of int, ranging from 4 to 8
+    @type fleet_id: str
+    @return: Normally accepted representation of str
+    @rtype: str
+    """
     _json = get_pveExploreVo()['levels']
     try:
         fleet = next(i for i in _json if i['fleetId'] == fleet_id)
@@ -113,6 +124,23 @@ def get_exp_list() -> list:
         end_idx = 5 if i != 8 else 3
         _list = [str(i) + "000" + str(j) for j in range(1, end_idx)]
         res += _list
+    return res
+
+
+def is_exp_done(fleet_id: str) -> bool:
+    """
+    Given a fleet id, return the status of current fleet
+    @param fleet_id: fleet id, str form of int, ranging from 4 to 8
+    @type fleet_id: str
+    @return: return True if the expedition is done; otherwise False
+    @rtype: bool
+    """
+    _json = get_pveExploreVo()['levels']
+    try:
+        fleet = next(i for i in _json if i['fleetId'] == fleet_id)
+        res = fleet['endTime'] > int(time())
+    except StopIteration:
+        res = False
     return res
 
 

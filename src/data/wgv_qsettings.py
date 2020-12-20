@@ -4,7 +4,6 @@ import pickle
 from ast import literal_eval
 
 
-
 def del_key_file(key_file: str = '.wgr.key') -> None:
     if is_key_exists(key_file):
         os.remove(os.path.join(get_data_dir(), key_file))
