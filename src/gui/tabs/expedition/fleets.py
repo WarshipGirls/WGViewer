@@ -1,6 +1,7 @@
 from typing import Callable
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QWidget, QTableWidget, QTableWidgetItem, QPushButton,
     QHBoxLayout, QVBoxLayout,
@@ -8,7 +9,6 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgv_data
-
 
 # TODO TODO
 '''
@@ -43,7 +43,7 @@ class ExpFleets(QWidget):
         super().__init__()
 
         self.tab = QTableWidget()
-        self.tab.setRowCount(30)
+        self.tab.setRowCount(28)
         self.tab.setColumnCount(4)
 
         self.init_ui()
@@ -56,8 +56,11 @@ class ExpFleets(QWidget):
         self.fleets = wgv_data.get_exp_fleets()
         self.ships_info = wgv_data.get_processed_userShipVo()
         self.set_table()
+        # self.expedition_buttons = []
 
     def init_ui(self) -> None:
+        self.tab.resizeColumnsToContents()
+        self.tab.resizeRowsToContents()
         self.tab.setShowGrid(False)
         self.tab.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.tab.horizontalHeader().hide()
@@ -80,14 +83,18 @@ class ExpFleets(QWidget):
 
         self.set_one_fleet(0, 0, '5')
         self.set_one_fleet(0, 2, '6')
-        self.set_one_fleet(16, 0, '7')
-        self.set_one_fleet(16, 2, '8')
+        self.set_one_fleet(14, 0, '7')
+        self.set_one_fleet(14, 2, '8')
 
     def set_one_fleet(self, row: int, col: int, fleet_id: str) -> None:
         fleet_name = "Fleet #" + fleet_id
-        self.tab.setItem(row, col, QTableWidgetItem(fleet_name))
+        item_fleet = QTableWidgetItem(fleet_name)
+        item_fleet.setBackground(QColor(0, 0, 0))
+        self.tab.setItem(row, col, item_fleet)
         map_name = wgv_data.get_exp_map(fleet_id)
-        self.tab.setItem(row, col + 1, QTableWidgetItem(map_name))
+        item_map = QTableWidgetItem(map_name)
+        item_map.setBackground(QColor(0, 0, 0))
+        self.tab.setItem(row, col + 1, item_map)
         row += 1
 
         # self.add_button(row, col, 'START', self.start_exp, fleet_id)
@@ -113,7 +120,6 @@ class ExpFleets(QWidget):
         self.tab.setCellWidget(row, col, w)
 
     def add_map_dropdown(self, row: int, col: int) -> None:
-        # print(self.maps)
         w = QWidget()
         b = QComboBox()
         b.addItems(self.maps)
@@ -135,9 +141,9 @@ class ExpFleets(QWidget):
         self.tab.setItem(row + 1, col, QTableWidgetItem(lvl))
         self.tab.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
 
-    def start_exp(self, fleet_id: str) -> None:
-        print(f'{fleet_id} start exp')
-        print(self.maps)
+    # def start_exp(self, fleet_id: str) -> None:
+    #     print(f'{fleet_id} start exp')
+    #     print(self.maps)
 
     def stop_exp(self, fleet_id: str) -> None:
         print(f'{fleet_id} stop exp')

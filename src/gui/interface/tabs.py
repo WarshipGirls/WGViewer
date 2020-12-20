@@ -59,9 +59,9 @@ class MainInterfaceTabs(QWidget):
         # TODO loading speed is really slow
         # The init order cannot be changed right now
         self.init_tab(QKEYS.UI_TAB_SHIP, 'tab_dock')
-        # self.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
+        self.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
         self.init_tab(QKEYS.UI_TAB_THER, 'tab_thermopylae')
-        # self.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
+        self.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
 
         self.layout.addWidget(self.tabs, 0, 0)
         if self.has_tab is True:
