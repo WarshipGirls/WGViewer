@@ -28,7 +28,7 @@ class ShipSelectWindow(QMainWindow):
         self.cost_lim = cost_lim
 
         self.id_list: list = []
-        self.ships_info = wgv_data.get_processed_userShipVo()
+        self.user_ships = wgv_data.get_processed_userShipVo()
         self.id_to_cost = wgv_data.init_ships_temp()
 
         self.tab = QTableWidget()
@@ -39,7 +39,7 @@ class ShipSelectWindow(QMainWindow):
         self.setWindowTitle('WGViewer - Ship Selection')
 
         self.tab.setColumnCount(4)
-        for ship_id, ship in self.ships_info.items():
+        for ship_id, ship in self.user_ships.items():
             self.add_table_row(self.tab, ship_id, ship, self.ship_class, self.cost_lim)
 
         # self.tab.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)

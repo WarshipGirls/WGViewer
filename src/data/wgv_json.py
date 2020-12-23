@@ -53,6 +53,7 @@ def save_equipmentVo(data: list) -> None:
 
 
 def get_processed_userShipVo() -> dict:
+    # when calling this member, use self.user_ships
     return _load_json(get_user_dir(), 'proc_userShipVo.json')
 
 

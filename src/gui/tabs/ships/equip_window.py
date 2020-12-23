@@ -9,8 +9,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QHeaderView
 )
 
-from src import data as wgv_data
-from src.utils import get_user_resolution, get_color_scheme
+from src.utils import get_user_resolution, get_color_scheme, get_ship_equips
 from . import constant as SCONST
 
 
@@ -53,7 +52,7 @@ class EquipPopup(QMainWindow):
         self.button.clicked.connect(self.unequip)
 
         self.tab.setColumnCount(4)
-        equips = wgv_data.get_ship_equips(self.cid)
+        equips = get_ship_equips(self.cid)
 
         for e in equips:
             self.addTableRow(self.tab, e)

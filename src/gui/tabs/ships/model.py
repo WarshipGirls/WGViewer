@@ -333,7 +333,7 @@ class ShipModel(QStandardItemModel):
             item = QStandardItem()
             item.setData(-1, Qt.UserRole)
             self.setItem(row, col, item)
-            wgv_data.update_equipment_amount(-1, unequip_id)
+            wgv_utils.update_equipment_amount(-1, unequip_id)
             self.api_boat.removeEquipment(str(ship_id), str(equip_slot))
             return
         else:
@@ -342,7 +342,7 @@ class ShipModel(QStandardItemModel):
         res = self.api_boat.changeEquipment(str(ship_id), equip_id, str(equip_slot))
         if 'eid' not in res:
             # success
-            wgv_data.update_equipment_amount(int(equip_id), unequip_id)
+            wgv_utils.update_equipment_amount(int(equip_id), unequip_id)
         else:
             logger.error('Equipment change is failed.')
             return
@@ -364,7 +364,7 @@ class ShipModel(QStandardItemModel):
         # TODO: switch tactics like equip
         col = 25
         ship_id = self.index(args[0], 2).data()
-        indices = wgv_data.find_all_indices(self.user_tactics, 'boat_id', ship_id)
+        indices = wgv_utils.find_all_indices(self.user_tactics, 'boat_id', ship_id)
         if len(indices) == 0:
             return
         else:
@@ -377,7 +377,7 @@ class ShipModel(QStandardItemModel):
             else:
                 for idx in indices:
                     if str(t_id) == str(self.user_tactics[idx]['cid'])[:-1]:
-                        i = wgv_data.find_index(self.tactics_json, 'cid', self.user_tactics[idx]['cid'])
+                        i = wgv_utils.find_index(self.tactics_json, 'cid', self.user_tactics[idx]['cid'])
                         t = self.tactics_json[i]
                         title = t['title'] + " " + str(t['level'])
                         d1 = wgv_utils.clear_desc(t["desc"])

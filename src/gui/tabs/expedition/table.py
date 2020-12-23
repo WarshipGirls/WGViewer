@@ -8,8 +8,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout
 )
 
-from src import data as wgv_data
-from src.utils import get_user_resolution
+from src.utils import get_user_resolution, get_big_success_rate
 
 
 class ExpTable(QWidget):
@@ -115,13 +114,13 @@ class ExpTable(QWidget):
                 self.table_model.appendRow(items)
 
     def set_success_rate(self) -> None:
-        raw, n, d = wgv_data.get_big_success_rate()
+        raw, n, d = get_big_success_rate()
         item = QStandardItem(str(raw))
         item.setToolTip(f'Expedition Detail\nSuccess\t\t{n}\nGrate Success\t{d}')
         self.table_model.setItem(0, self.get_col_count() - 1, item)
 
     def set_expectation_income(self) -> None:
-        rate, _, _ = wgv_data.get_big_success_rate()
+        rate, _, _ = get_big_success_rate()
         for row in range(2, self.get_row_count()):
             for col in [11, 12, 13, 14]:
                 d = self.table_model.index(row, col - 4).data()

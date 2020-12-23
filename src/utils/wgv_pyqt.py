@@ -4,7 +4,7 @@ from PyQt5.QtCore import QUrl, QCoreApplication
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QMessageBox, QDesktopWidget, QApplication
 
-from src.utils import get_color_scheme
+from .general import get_color_scheme
 
 
 def get_user_resolution() -> Tuple[int, int]:
