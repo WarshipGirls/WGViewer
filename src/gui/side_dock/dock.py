@@ -420,10 +420,11 @@ class SideDock(QDockWidget):
     @pyqtSlot(dict)
     def on_received_lists(self, data: dict) -> None:
         if data is not None:
-            def calc_left_time(t):
-                return 0 if int(time.time()) < t else (t - int(time.time()))
+            def calc_left_time(t) -> int:
+                _diff = t - int(time.time())
+                return 0 if _diff <= 0 else _diff
 
-            def process_data(_data, view, func, item_id, counters, labels, timers):
+            def process_data(_data, view, func, item_id, counters, labels, timers) -> None:
                 for i, v in enumerate(_data):
                     if v["locked"] == 0:
                         if "endTime" in v:
