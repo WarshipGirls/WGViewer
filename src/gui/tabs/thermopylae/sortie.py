@@ -231,7 +231,7 @@ class Sortie:
                 next_node = self.helper.get_next_node_by_id(self.curr_node)
                 while next_node not in T_CONST.BOSS_NODES:
                     if next_node == "-1":
-                        raise wgv_error.ThermopylaeSoriteExit("Quit on -1")
+                        raise wgv_error.ThermopylaeSortieExit("Quit on -1")
                     next_node = self.single_node_sortie(next_node)
                 # boss fight
                 self.single_node_sortie(next_node)
@@ -241,14 +241,14 @@ class Sortie:
                     next_node = self.resume_node_sortie(self.curr_node)
                 while next_node not in T_CONST.BOSS_NODES:
                     if next_node == "-1":
-                        raise wgv_error.ThermopylaeSoriteExit("Quit on -1")
+                        raise wgv_error.ThermopylaeSortieExit("Quit on -1")
                     next_node = self.single_node_sortie(self.curr_node)
                 # boss fight
                 self.logger.info("[RESUME] Reaching Boss Node")
                 self.single_node_sortie(next_node)
             else:
                 self.logger.debug(self.curr_node)
-        except wgv_error.ThermopylaeSoriteExit as e:
+        except wgv_error.ThermopylaeSortieExit as e:
             self.logger.warning(e)
             self.parent.button_fresh_sortie.setEnabled(True)
             return False
@@ -289,11 +289,11 @@ class Sortie:
 
             while next_id not in T_CONST.BOSS_NODES:
                 if next_id == "-1":
-                    raise wgv_error.ThermopylaeSoriteExit("Quit on -1")
+                    raise wgv_error.ThermopylaeSortieExit("Quit on -1")
                 next_id = self.single_node_sortie(next_id)
             self.logger.info("[FRESH] Reaching Boss Node")
             self.single_node_sortie(next_id)
-        except wgv_error.ThermopylaeSoriteExit as e:
+        except wgv_error.ThermopylaeSortieExit as e:
             self.logger.warning(e)
             self.parent.button_fresh_sortie.setEnabled(True)
             return False

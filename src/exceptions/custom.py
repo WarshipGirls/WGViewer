@@ -2,7 +2,7 @@ class InterruptExecution(Exception):
     pass
 
 
-class ThermopylaeSoriteExit(Exception):
+class ThermopylaeSortieExit(Exception):
     pass
 
 

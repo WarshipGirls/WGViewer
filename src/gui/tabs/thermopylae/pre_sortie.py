@@ -60,7 +60,7 @@ class PreSortieCheck:
     # ================================
 
     def pre_battle_validation(self, user_data: dict) -> bool:
-        # Insepect the validity for user to use this function
+        # Inspect the validity for user to use this function
 
         if 10282 not in self.user_data['adjutantList']:
             self.logger.warning("Cannot find Habakkuk in your adjutant list. Existing")

@@ -1,6 +1,6 @@
 # README
 
-Documents the meaning of json fileds from server response
+Documents the meaning of json fields from server response
 
 ```
     getuserdata
