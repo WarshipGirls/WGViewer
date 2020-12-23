@@ -7,7 +7,7 @@ This markdown is created to document those bugs, hopefully which they will fix s
 
 Data version: 2020112002
 
-If looking from `shipCard->equipmentType` route, light crusier can equip battleships' main battery
+If looking from `shipCard->equipmentType` route, light cruiser can equip battleships' main battery
 workaround: check on `shipEquimnt->shipType` (By the way, they spell equipment wrong)
 
 suggestion to MF: delete `equipmentType` in your `getInitConfigs->shipCard`
@@ -16,7 +16,7 @@ suggestion to MF: delete `equipmentType` in your `getInitConfigs->shipCard`
 
 Data version: 2020112002
 
-In getInitConfigs, `shipCardWu` seems idential to `shipCard`. Why wasting time and bandwidth to transmit these?
+In getInitConfigs, `shipCardWu` seems identical to `shipCard`. Why wasting time and bandwidth to transmit these?
 
 suggestion to MF: delete `shipCardWu` in your `getInitConfigs`
 
@@ -61,3 +61,19 @@ In the response body of `six/passLevel` call, the json is invalid with boolean `
    ],
    ...
 ```
+
+5. Exceeding dock limit
+
+During Thermopylae Ex-6 sortie, if you stay in the mode without exiting, you can actually exceed the dock limit indefinitely.
+
+
+![alt text](pics/bug/excess_dock.PNG)
+
+
+6. Exceeding Thermopylae Ex-6 sortie ticket limit
+
+You can stockpiling Thermopylae Ex-6 sortie tickets
+
+
+![alt text](pics/bug/excess_sortie_ticket.png)
+
