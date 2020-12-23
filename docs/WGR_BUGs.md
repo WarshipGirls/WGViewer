@@ -67,7 +67,7 @@ In the response body of `six/passLevel` call, the json is invalid with boolean `
 During Thermopylae Ex-6 sortie, if you stay in the mode without exiting, you can actually exceed the dock limit indefinitely.
 
 
-![alt text](pics/bug/excess_dock.PNG)
+![alt text](pics/bug/excess_dock.png)
 
 
 6. Exceeding Thermopylae Ex-6 sortie ticket limit
