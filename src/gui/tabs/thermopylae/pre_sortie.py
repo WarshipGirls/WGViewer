@@ -69,11 +69,11 @@ class PreSortieCheck:
             pass
 
         try:
-            user_e6 = next(i for i in user_data['chapterList'] if i['id'] == "10006")
+            user_e6 = next(i for i in user_data['chapterList'] if i['id'] == T_CONST.E6_ID)
         except StopIteration:
             self.logger.warning("Cannot find evidence of Ex-6 in your records. Exiting")
             return False
-        if user_data['chapterId'] != '10006':
+        if user_data['chapterId'] != T_CONST.E6_ID:
             self.logger.warning("You are in the middle of a battle other than E6. Exiting")
             return False
         elif len(user_e6['boats']) != T_CONST.CHAP_FLEET_LEN[-1]:
@@ -94,7 +94,7 @@ class PreSortieCheck:
             self.logger.info('User has not entered E6. Select from previous settings')
             self.sub_map_id = fleet_info['chapterInfo']['level_id']
             last_fleets = user_e6['boats']
-            self.api.setChapterBoat('10006', last_fleets)
+            self.api.setChapterBoat(T_CONST.E6_ID, last_fleets)
         elif len(b) == T_CONST.CHAP_FLEET_LEN[-1] and fleet_info['chapterInfo']['level_id'] in T_CONST.SUB_MAP_IDS:
             self.logger.info('User has entered E6.')
             self.sub_map_id = fleet_info['chapterInfo']['level_id']

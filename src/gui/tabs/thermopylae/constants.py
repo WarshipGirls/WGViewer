@@ -9,6 +9,7 @@ SUB_MAP1_ID: str = '9316'
 SUB_MAP2_ID: str = '9317'
 SUB_MAP3_ID: str = '9318'
 SUB_MAP_IDS: list = [SUB_MAP1_ID, SUB_MAP2_ID, SUB_MAP3_ID]
+E6_ID: str = '10006'
 
 # Cost can be found in six/getPveData['combatBuff']; to save iteration time, copied only id-to-cost here
 BUFF_BASE_COST: dict = {

@@ -6,6 +6,7 @@
 3. This file hosts high-level battle decisions; low-level pre/post processing code is host in ./helper.py
 TODO: replace raise? this now creates a long series of frames
 TODO free up dock space if needed
+TODO: change all list to specific type, e.g. List[int]
 """
 
 from typing import Union
@@ -24,7 +25,6 @@ from .helper import SortieHelper
 from .pre_sortie import PreSortieCheck
 from . import constants as T_CONST
 
-E6_ID: str = '10006'
 E61_0_ID: str = '931601'
 E61_A1_ID: str = '931602'
 E61_B1_ID: str = '931604'
@@ -34,9 +34,6 @@ E63_A1_ID: str = '931802'
 
 
 class Sortie:
-
-    # TODO: change all list to specific type, e.g. List[int]
-
     def __init__(self, parent, api: API_SIX, dd: list, cv: list, main_fleet: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
@@ -81,7 +78,7 @@ class Sortie:
         if self.tickets <= 0:
             self.logger.warning("Insufficient sortie ticket. Cannot Reset Chapter")
             return
-        reset_res = self.helper.reset_chapter(E6_ID)
+        reset_res = self.helper.reset_chapter(T_CONST.E6_ID)
         self._clean_memory()
         self.set_sub_map(T_CONST.SUB_MAP1_ID)
         self.helper.set_adjutant_info(reset_res['adjutantData'])
@@ -272,17 +269,20 @@ class Sortie:
         self.is_running = True
         try:
             if self.curr_node == T_CONST.BOSS_NODES[2] and self.curr_sub_map == T_CONST.SUB_MAP3_ID:
-                chapter_status = self.get_chapter_status(E6_ID)
+                chapter_status = self.get_chapter_status(T_CONST.E6_ID)
                 if chapter_status == 1:
                     self.curr_node = E61_0_ID
                     self.set_sub_map(T_CONST.SUB_MAP1_ID)
+                elif chapter_status == 3:
+                    self._reset_chapter()
+                    pass
                 else:
                     pass
             elif self.curr_node == "0" or self.curr_sub_map == "0" or self.curr_sub_map == T_CONST.SUB_MAP1_ID:
                 self.curr_node = E61_0_ID
                 self.set_sub_map(T_CONST.SUB_MAP1_ID)
                 self._clean_memory()
-                self.api.setChapterBoat(E6_ID, self.final_fleet)
+                self.api.setChapterBoat(T_CONST.E6_ID, self.final_fleet)
             else:
                 pass
             next_id = self.starting_node()
@@ -424,6 +424,11 @@ class Sortie:
         return buy_res
 
     def check_sub_map_done(self) -> None:
+        """
+        Collects current sub map rewards if the sub map is done
+        @return: Nothing
+        @rtype: None
+        """
         self.user_data = self.pre_sortie.fetch_user_data()
         curr_node = self.user_data['nodeId']
         self.helper.enter_sub_map(curr_node[:4])
