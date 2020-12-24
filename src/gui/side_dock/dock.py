@@ -52,16 +52,12 @@ class SideDock(QDockWidget):
         self.task_counter_labels = []
         self.task_counter_timers = []
         self.task_counters = []
-        self.bath_counter_labels = [None] * 4
         self.bath_counter_timers = [None] * 4
         self.bath_counters = [None] * 4
-        self.build_counter_labels = [None] * 4
         self.build_counter_timers = [None] * 4
         self.build_counters = [None] * 4
-        self.dev_counter_labels = [None] * 4
         self.dev_counter_timers = [None] * 4
         self.dev_counters = [None] * 4
-        self.exp_counter_labels = [None] * 4
         self.exp_counter_timers = [None] * 4
         self.exp_counters = [None] * 4
 
@@ -76,15 +72,15 @@ class SideDock(QDockWidget):
         self.sign_widget = QLineEdit(self)
         self.table_model = None
         self.table_view = None
-        self.bath_list_view = None
+        self.bath_list_view = BathListView()
         self.bath_list_view_widget = None
         self.bath_list_view_layout = None
         self.triple_list_view_widget = None
         self.triple_list_view = None
-        self.build_list_view = None
-        self.dev_list_view = None
-        self.exp_list_view = None
-        self.task_list_view = None
+        self.build_list_view = BuildListView()
+        self.dev_list_view = DevListView()
+        self.exp_list_view = ExpListView()
+        self.task_list_view = TaskListView()
         self.task_panel_view = None
         self.task_panel_widget = None
         self.countdowns_layout = None
@@ -150,49 +146,24 @@ class SideDock(QDockWidget):
         self.bath_list_view_widget = QWidget(self)
         self.bath_list_view_layout = QVBoxLayout(self.bath_list_view_widget)
         self.bath_list_view_layout.setContentsMargins(0, 0, 0, 0)
-        self.bath_list_view = BathListView()
-        for i in range(4):
-            _, self.bath_counter_labels[i] = self.bath_list_view.add_item("Repairing Dock Locked", "")
+
         self.bath_list_view_layout.addWidget(self.bath_list_view)
 
     def _init_triple_list(self) -> None:
         self.triple_list_view_widget = QWidget(self)
         self.triple_list_view = QHBoxLayout(self.triple_list_view_widget)
         self.triple_list_view.setContentsMargins(0, 0, 0, 0)
-        self._init_construction_info()
-        self._init_development_info()
-        self._init_expedition_info()
         self.triple_list_view.addWidget(self.build_list_view)
         self.triple_list_view.addWidget(self.dev_list_view)
         self.triple_list_view.addWidget(self.exp_list_view)
-
-    def _init_construction_info(self) -> None:
-        self.build_list_view = BuildListView()
-        for i in range(4):
-            _, self.build_counter_labels[i] = self.build_list_view.add_item("Constr. Slot", "Locked")
-
-    def _init_development_info(self) -> None:
-        self.dev_list_view = DevListView()
-        for i in range(4):
-            _, self.dev_counter_labels[i] = self.dev_list_view.add_item("Dev. Slot", "Locked")
-
-    def _init_expedition_info(self) -> None:
-        self.exp_list_view = ExpListView()
-        for i in range(4):
-            _, self.exp_counter_labels[i] = self.exp_list_view.add_item("Exped. Fleet", "Idling")
 
     def _init_task_panel(self) -> None:
         self.task_panel_widget = QWidget(self)
         self.task_panel_view = QHBoxLayout(self.task_panel_widget)
         self.task_panel_view.setContentsMargins(0, 0, 0, 0)
-        self._init_task_info()
         self._init_countdowns()
         self.task_panel_view.addWidget(self.task_list_view)
         self.task_panel_view.addWidget(self.countdowns_layout_widget)
-
-    def _init_task_info(self) -> None:
-        # Tasks view can be scrolled
-        self.task_list_view = TaskListView()
 
     def _init_countdowns(self) -> None:
         # TODO? design problem now the most suitable count is 4, 5 would be max
@@ -413,7 +384,7 @@ class SideDock(QDockWidget):
             for idx, val in enumerate(p):
                 left_time = _calc_left_time(val["endTime"])
                 self.exp_counters[idx] = left_time
-                self.start_new_timer(self.exp_counters, self.exp_counter_labels, self.exp_counter_timers, idx)
+                self.start_new_timer(self.exp_counters, self.exp_list_view.get_counter_labels(), self.exp_counter_timers, idx)
                 n = "Fleet #" + val["fleetId"] + "   " + val["exploreId"].replace("000", "-")
                 self.exp_list_view.update_item(idx, 0, n)
 
@@ -421,13 +392,13 @@ class SideDock(QDockWidget):
     def on_received_lists(self, data: dict) -> None:
         if data is not None:
             self._process_timer_data(data["repairDockVo"], self.bath_list_view, self.get_ship_name, "shipId",
-                                     self.bath_counters, self.bath_counter_labels, self.bath_counter_timers)
+                                     self.bath_counters, self.bath_list_view.get_counter_labels(), self.bath_counter_timers)
 
             self._process_timer_data(data["dockVo"], self.build_list_view, self.get_ship_type, "shipType",
-                                     self.build_counters, self.build_counter_labels, self.build_counter_timers)
+                                     self.build_counters, self.build_list_view.get_counter_labels(), self.build_counter_timers)
 
             self._process_timer_data(data["equipmentDockVo"], self.dev_list_view, self.get_equip_name, "equipmentCid",
-                                     self.dev_counters, self.dev_counter_labels, self.dev_counter_timers)
+                                     self.dev_counters, self.bath_list_view.get_counter_labels(), self.dev_counter_timers)
 
             self.update_expedition(data["pveExploreVo"])
 

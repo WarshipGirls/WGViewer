@@ -30,6 +30,12 @@ class AlignListView(QTreeView):
 
         self.doubleClicked.connect(self.on_click)
 
+        # WIP: refactoring
+        self.counter_labels = [None] * 4
+
+    def get_counter_labels(self):
+        return self.counter_labels
+
     def on_click(self, index: int) -> None:
         pass
 
@@ -58,6 +64,8 @@ class AlignListView(QTreeView):
 class BathListView(AlignListView):
     def __init__(self):
         super().__init__()
+        for i in range(4):
+            _, self.counter_labels[i] = self.add_item("Repairing Dock Locked", "")
 
     def on_click(self, index) -> None:
         pass
@@ -68,6 +76,8 @@ class BathListView(AlignListView):
 class BuildListView(AlignListView):
     def __init__(self):
         super().__init__()
+        for i in range(4):
+            _, self.counter_labels[i] = self.add_item("Constr. Slot", "Locked")
 
     def on_click(self, index) -> None:
         pass
@@ -80,6 +90,8 @@ class BuildListView(AlignListView):
 class DevListView(AlignListView):
     def __init__(self):
         super().__init__()
+        for i in range(4):
+            _, self.counter_labels[i] = self.add_item("Dev. Slot", "Locked")
 
     def on_click(self, index) -> None:
         pass
@@ -93,6 +105,8 @@ class DevListView(AlignListView):
 class ExpListView(AlignListView):
     def __init__(self):
         super().__init__()
+        for i in range(4):
+            _, self.counter_labels[i] = self.add_item("Exped. Fleet", "Idling")
 
     def on_click(self, index) -> None:
         # print('exp')
