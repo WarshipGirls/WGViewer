@@ -5,11 +5,6 @@ import time
 
 from datetime import datetime, timedelta
 
-from src.func import logger_names as QLOGS
-from src.func.log_handler import get_logger
-
-logger = get_logger(QLOGS.SIDE_DOCK)
-
 
 def get_tasks_countdowns() -> Tuple[datetime, datetime, float, float]:
     """

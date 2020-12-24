@@ -217,15 +217,15 @@ class SideDock(QDockWidget):
         widget = None
         return
 
-    def get_exp_counters(self) -> list:
-        return self.exp_list_view.get_counters()
+    def get_exp_list_view(self) -> ExpListView:
+        return self.exp_list_view
 
     # ================================
     # Timer Related
     # ================================
 
     def count_down(self, counters: list, labels: list, timers: list, idx: int) -> None:
-        # TODO? refactor
+        # TODO? refactor; each list view has its own countdown method?
         counters[idx] -= 1
         if counters[idx] > 0:
             pass
@@ -319,6 +319,7 @@ class SideDock(QDockWidget):
 
     @pyqtSlot(dict)
     def update_lvl_label(self, x: dict) -> None:
+        # userLevelVo
         if x is not None:
             self.lvl_label.setText("Lv. " + str(x["level"]))
             lvl_tooltip = str(x["exp"]) + " / " + str(x["nextLevelExpNeed"])
@@ -349,16 +350,21 @@ class SideDock(QDockWidget):
             self.sign_widget.setText(data["friendVo"]["sign"])
 
     @pyqtSlot(dict)
-    def update_expedition(self, data: dict) -> None:
+    def update_one_expedition(self, data: dict) -> None:
+        # Input = pveExploreVo['levels'][_idx]
+        _idx = int(data['fleetId'])-5
+        _exp_counters = self.exp_list_view.get_counters()
+        _exp_counters[_idx] = _calc_left_time(data["endTime"])
+        self.start_new_timer(_exp_counters, self.exp_list_view.get_counter_labels(), self.exp_list_view.get_counter_timers(), _idx)
+        n = "Fleet #" + data["fleetId"] + "   " + data["exploreId"].replace("000", "-")
+        self.exp_list_view.update_item(_idx, 0, n)
+
+    @pyqtSlot(dict)
+    def update_expeditions(self, data: dict) -> None:
         if data is not None:
             p = sorted(data["levels"], key=lambda x: int(x['fleetId']), reverse=False)
-            for idx, val in enumerate(p):
-                left_time = _calc_left_time(val["endTime"])
-                exp_counters = self.exp_list_view.get_counters()
-                exp_counters[idx] = left_time
-                self.start_new_timer(exp_counters, self.exp_list_view.get_counter_labels(), self.exp_list_view.get_counter_timers(), idx)
-                n = "Fleet #" + val["fleetId"] + "   " + val["exploreId"].replace("000", "-")
-                self.exp_list_view.update_item(idx, 0, n)
+            for _, val in enumerate(p):
+                self.update_one_expedition(val)
 
     @pyqtSlot(dict)
     def on_received_lists(self, data: dict) -> None:
@@ -372,7 +378,7 @@ class SideDock(QDockWidget):
             self._process_timer_data(data["equipmentDockVo"], self.dev_list_view, self.get_equip_name, "equipmentCid",
                                      self.dev_list_view.get_counters(), self.bath_list_view.get_counter_labels(), self.dev_list_view.get_counter_timers())
 
-            self.update_expedition(data["pveExploreVo"])
+            self.update_expeditions(data["pveExploreVo"])
 
     @pyqtSlot(dict)
     def on_received_tasks(self, data: dict) -> None:

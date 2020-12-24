@@ -1,28 +1,22 @@
-from typing import Callable, List, Tuple
+from typing import Callable, List
 from logging import Logger
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QWidget, QTableWidget, QTableWidgetItem, QPushButton,
     QHBoxLayout, QVBoxLayout,
-    QTableView, QHeaderView, QAbstractScrollArea, QComboBox, QMainWindow, QButtonGroup
+    QTableView, QHeaderView, QAbstractScrollArea, QComboBox, QButtonGroup
 )
 
 from src import utils as wgv_utils
-from src.data import get_processed_userShipVo, load_cookies
-from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
+from src.data import get_processed_userShipVo
 from src.gui.side_dock.dock import SideDock
-from src.wgr import API_EXPLORE
+from src.gui.side_dock.resource_model import ResourceTableModel
 
 BTN_TEXT_START: str = 'START'
 BTN_TEXT_STOP: str = 'STOP'
 
-# TODO: manually start expedition
-# TODO: manually get result
-# TODO: update side dock based on manual call response
-# TODO: From side dock call the tab?
-#    - but how? chicken vs egg?
 # TODO: auto start expedition
 # TODO: auto get result
 # TODO: user select fleet
@@ -56,33 +50,54 @@ class PopupFleets(QMainWindow):
 
 
 class ExpFleets(QWidget):
-    def __init__(self, side_dock: SideDock, logger: Logger):
+    sig_fuel = pyqtSignal(int)
+    sig_ammo = pyqtSignal(int)
+    sig_steel = pyqtSignal(int)
+    sig_baux = pyqtSignal(int)
+    sig_repair = pyqtSignal(int)
+    sig_build = pyqtSignal(int)
+    sig_bp_construct = pyqtSignal(int)
+    sig_bp_dev = pyqtSignal(int)
+    sig_exp = pyqtSignal(dict)
+
+    def __init__(self, side_dock: SideDock, summary, logger: Logger):
         super().__init__()
         self.side_dock = side_dock
+        self.summary = summary
         self.logger = logger
+        self.resource_info: ResourceTableModel = self.side_dock.table_model
+
+        # Signals
+        self.sig_fuel.connect(self.resource_info.update_fuel)
+        self.sig_ammo.connect(self.resource_info.update_ammo)
+        self.sig_steel.connect(self.resource_info.update_steel)
+        self.sig_baux.connect(self.resource_info.update_bauxite)
+        self.sig_repair.connect(self.resource_info.update_repair)
+        self.sig_build.connect(self.resource_info.update_build)
+        self.sig_bp_construct.connect(self.resource_info.update_bp_construct)
+        self.sig_bp_dev.connect(self.resource_info.update_bp_dev)
+        self.sig_exp.connect(self.side_dock.update_lvl_label)
 
         self.tab = QTableWidget()
-        self.tab.setRowCount(28)
-        self.tab.setColumnCount(4)
-
-        self.api = API_EXPLORE(load_cookies())
-
+        self.layout = QVBoxLayout(self)
         self.init_ui()
 
-        self.layout = QVBoxLayout(self)
-        self.layout.addWidget(self.tab)
-        self.setLayout(self.layout)
-        self.maps = wgv_utils.get_exp_list()
-        self.curr_exp_maps: List[str] = ['', '', '', '']
-        self.next_exp_maps: List[str] = ['', '', '', '']
         self.exp_buttons = QButtonGroup()
-
-        self.reconnection_limit = 3
+        self.maps = wgv_utils.get_exp_list()
         self.fleets = wgv_utils.get_exp_fleets()
         self.user_ships = get_processed_userShipVo()
+        self.curr_exp_maps: List[str] = ['1-1'] * 4
+        self.next_exp_maps: List[str] = ['1-1'] * 4
+
         self.set_table()
 
+    # ================================
+    # UI
+    # ================================
+
     def init_ui(self) -> None:
+        self.tab.setRowCount(28)
+        self.tab.setColumnCount(4)
         self.tab.resizeColumnsToContents()
         self.tab.resizeRowsToContents()
         self.tab.setShowGrid(False)
@@ -95,6 +110,9 @@ class ExpFleets(QWidget):
         self.tab.setFocusPolicy(Qt.NoFocus)
         self.tab.setSelectionMode(QTableView.NoSelection)
         self.tab.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+
+        self.layout.addWidget(self.tab)
+        self.setLayout(self.layout)
 
     def get_row_count(self) -> int:
         return self.tab.rowCount()
@@ -123,11 +141,14 @@ class ExpFleets(QWidget):
         self.next_exp_maps[fleet_idx] = map_name
         self.curr_exp_maps[fleet_idx] = map_name
         self.add_map_dropdown(row, col, fleet_idx, map_name)
-        if self.get_left_time(fleet_idx) > 0:
-            button_text = BTN_TEXT_STOP
-        else:
-            # TODO: if not collected collects the reward, then start
+        left_time = self.get_left_time(fleet_idx)
+        if left_time is None:
             button_text = BTN_TEXT_START
+        else:
+            if left_time > 0:
+                button_text = BTN_TEXT_STOP
+            else:
+                button_text = BTN_TEXT_START
         self.add_button(row, col + 1, button_text, self.on_button_clicked, fleet_idx)
         row += 1
 
@@ -166,8 +187,8 @@ class ExpFleets(QWidget):
         self.tab.setCellWidget(row, col, w)
 
     def on_dropdown_change(self, fleet: int, next_map: str) -> None:
-        self.logger.debug(f"Next expedition map changed: {self.next_exp_maps}")
         self.next_exp_maps[fleet] = next_map
+        self.logger.debug(f"Next expedition map changed: {self.next_exp_maps}")
 
     def set_one_ship(self, row: int, col: int, ship_id: int, info: dict) -> None:
         self.tab.setItem(row, col, QTableWidgetItem(info['Name']))
@@ -178,72 +199,85 @@ class ExpFleets(QWidget):
         self.tab.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
 
     def on_button_clicked(self, fleet_idx: int) -> None:
-        self.logger.debug(f'fleet #{fleet_idx + 5} shall start{self.next_exp_maps[fleet_idx]}')
         # TODO: check if fleet class requirement met
-        b = self.exp_buttons.buttons()[fleet_idx]
-        if b.text() == BTN_TEXT_START:
+        btn = self.exp_buttons.buttons()[fleet_idx]
+        if btn.text() == BTN_TEXT_START:
+            self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
             curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
             next_map = self.next_exp_maps[fleet_idx].replace('-', '000')
             fleet_id = str(fleet_idx + 5)
+            if self.get_counter_label(fleet_idx) == "Idling":  # HARDCODING TODO
+                pass
+            else:
+                self._get_exp_result(curr_map)
+            start_res = self._start_exp(next_map, fleet_id)
+            d = next((i for i in start_res['pveExploreVo']['levels'] if i['fleetId'] == fleet_id))
+            self._update_one_expedition(d)
 
-            res_res = self.get_exp_result(curr_map)
-            start_res = self.start_exp(next_map, fleet_id)
-            self.logger.debug(res_res)
-            self.logger.debug(start_res)
-        elif b.text() == BTN_TEXT_STOP:
+            btn.setText(BTN_TEXT_STOP)
+        elif btn.text() == BTN_TEXT_STOP:
             self.logger.debug('stop expedition')
+            btn.setText(BTN_TEXT_START)
         else:
             pass
 
+    # ================================
+    # Signals
+    # ================================
+
+    def update_resources(self, user_res_vo: dict) -> None:
+        # signals has to be emitted from a QObject
+        f = user_res_vo['oil']
+        a = user_res_vo['ammo']
+        s = user_res_vo['steel']
+        b = user_res_vo['aluminium']
+        self.sig_fuel.emit(f)
+        self.sig_ammo.emit(a)
+        self.sig_steel.emit(s)
+        self.sig_baux.emit(b)
+
+    # ================================
+    # SideDock methods
+    # ================================
+
     def get_left_time(self, fleet_idx: int) -> int:
-        return self.side_dock.get_exp_counters()[fleet_idx]
+        return self.side_dock.exp_list_view.get_counters()[fleet_idx]
 
-    def _reconnecting_calls(self, func: Callable, func_info: str) -> [dict, object]:
-        # This redundancy while-loop (compared to api.py's while-loop) deals with WarshipGirlsExceptions;
-        #   while the other one deals with URLError etc
-        res = False  # status
-        data = None
-        tries = 0
-        while not res:
-            try:
-                self.logger.debug(f"{func_info}...")
-                res, data = func()
-            except WarshipGirlsExceptions as e:
-                self.logger.warning(f"Failed to {func_info} due to {e}. Trying reconnecting...")
-                wgv_utils.set_sleep()
-            tries += 1
-            if tries >= self.reconnection_limit:
-                break
-            else:
-                pass
-        return data
+    def get_counter_label(self, fleet_idx: int) -> str:
+        l = [i.text() for i in self.side_dock.exp_list_view.get_counter_labels()]
+        return l[fleet_idx]
 
-    def get_exp_result(self, exp_map: str) -> dict:
-        def _get_res() -> Tuple[bool, dict]:
-            data = self.api.getResult(exp_map)
-            res = False
-            if 'eid' in data:
-                get_error(data['eid'])
-            elif 'pveExploreVo' in data:
-                res = True
-            else:
-                self.logger.debug(data)
-            return res, data
+    def _get_exp_result(self, curr_map: str) -> None:
+        # TODO: updateTaskVo
+        res = self.side_dock.exp_list_view.get_exp_result(curr_map)
+        self.sig_exp.emit(res['userLevelVo'])
+        success_str = "big success" if res['bigSuccess'] == 1 else "success"
+        self.logger.info(success_str)
 
-        return self._reconnecting_calls(_get_res, 'collect expedition')
+        # update reward items
+        if 'packageVo' not in res:
+            pass
+        else:
+            for item in res['packageVo']:
+                if item['itemCid'] == 541:
+                    self.sig_repair.emit(item['num'])
+                elif item['itemCid'] == 141:
+                    self.sig_build.emit(item['num'])
+                elif item['itemCid'] == 241:
+                    self.sig_bp_construct.emit(item['num'])
+                elif item['itemCid'] == 741:
+                    self.sig_bp_dev.emit(item['num'])
+                else:
+                    self.logger.debug('unprocessed item cid')
+        # update resources
+        self.update_resources(res['userResVo'])
+        # update summary table
+        self.summary.on_newAward(res['newAward'])
 
-    def start_exp(self, exp_map: str, fleet_id: str) -> dict:
-        def _start() -> Tuple[bool, dict]:
-            data = self.api.start(exp_map, fleet_id)
-            res = False
-            if 'eid' in data:
-                get_error(data['eid'])
-            elif 'pveExploreVo' in data:
-                res = True
-            else:
-                self.logger.debug(data)
-            return res, data
+    def _start_exp(self, next_map: str, fleet_id: str) -> dict:
+        return self.side_dock.exp_list_view.start_exp(next_map, fleet_id)
 
-        return self._reconnecting_calls(_start, 'start expedition')
+    def _update_one_expedition(self, data: dict) -> None:
+        self.side_dock.update_one_expedition(data)
 
 # End of FIle
