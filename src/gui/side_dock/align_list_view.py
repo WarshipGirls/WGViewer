@@ -96,7 +96,7 @@ class DevListView(AlignListView):
     def on_click(self, index) -> None:
         pass
         # dock/buildEquipment/{slot}/{fuel}/{ammo}/{steel}/{baux}
-        # dock/dismantleEquipment       # I'm surprised, how do we know which to dismantle?
+        # dock/dismantleEquipment       # TODO: #103
         # dock/getEquipment/2/
         # TODO: build 10 equips
         # TODO: cancel dev

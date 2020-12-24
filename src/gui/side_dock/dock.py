@@ -70,21 +70,21 @@ class SideDock(QDockWidget):
         self.collect_count_label = QLabel(self.name_layout_widget)
 
         self.sign_widget = QLineEdit(self)
-        self.table_model = None
-        self.table_view = None
+        self.table_model = ResourceTableModel()
+        self.table_view = QTableView(self)
         self.bath_list_view = BathListView()
-        self.bath_list_view_widget = None
-        self.bath_list_view_layout = None
-        self.triple_list_view_widget = None
-        self.triple_list_view = None
+        self.bath_list_view_widget = QWidget(self)
+        self.bath_list_view_layout = QVBoxLayout(self.bath_list_view_widget)
+        self.triple_list_view_widget = QWidget(self)
+        self.triple_list_view = QHBoxLayout(self.triple_list_view_widget)
         self.build_list_view = BuildListView()
         self.dev_list_view = DevListView()
         self.exp_list_view = ExpListView()
         self.task_list_view = TaskListView()
-        self.task_panel_view = None
-        self.task_panel_widget = None
-        self.countdowns_layout = None
-        self.countdowns_layout_widget = None
+        self.task_panel_widget = QWidget(self)
+        self.task_panel_view = QHBoxLayout(self.task_panel_widget)
+        self.countdowns_layout_widget = QWidget(self)
+        self.countdowns_layout = QVBoxLayout(self.countdowns_layout_widget)
 
         self.sig_resized.connect(self.update_geometry)
         self.sig_closed.connect(parent.on_dock_closed)
@@ -126,8 +126,6 @@ class SideDock(QDockWidget):
         self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition)
 
     def _init_resource_info(self) -> None:
-        self.table_model = ResourceTableModel()
-        self.table_view = QTableView(self)
         self.table_view.setModel(self.table_model)
         x = 0.03 * self.user_screen_h
         self.table_view.setIconSize(QSize(x, x))
@@ -143,23 +141,16 @@ class SideDock(QDockWidget):
         self.table_view.verticalScrollBar().setEnabled(False)
 
     def _init_bath_info(self) -> None:
-        self.bath_list_view_widget = QWidget(self)
-        self.bath_list_view_layout = QVBoxLayout(self.bath_list_view_widget)
         self.bath_list_view_layout.setContentsMargins(0, 0, 0, 0)
-
         self.bath_list_view_layout.addWidget(self.bath_list_view)
 
     def _init_triple_list(self) -> None:
-        self.triple_list_view_widget = QWidget(self)
-        self.triple_list_view = QHBoxLayout(self.triple_list_view_widget)
         self.triple_list_view.setContentsMargins(0, 0, 0, 0)
         self.triple_list_view.addWidget(self.build_list_view)
         self.triple_list_view.addWidget(self.dev_list_view)
         self.triple_list_view.addWidget(self.exp_list_view)
 
     def _init_task_panel(self) -> None:
-        self.task_panel_widget = QWidget(self)
-        self.task_panel_view = QHBoxLayout(self.task_panel_widget)
         self.task_panel_view.setContentsMargins(0, 0, 0, 0)
         self._init_countdowns()
         self.task_panel_view.addWidget(self.task_list_view)
@@ -167,9 +158,7 @@ class SideDock(QDockWidget):
 
     def _init_countdowns(self) -> None:
         # TODO? design problem now the most suitable count is 4, 5 would be max
-        # although MoeFantasy opens mostly 1 event at a time, rarely 2.
-        self.countdowns_layout_widget = QWidget(self)
-        self.countdowns_layout = QVBoxLayout(self.countdowns_layout_widget)
+        #   although MoeFantasy opens mostly 1 event at a time, rarely 2.
         self.countdowns_layout.setContentsMargins(0, 0, 0, 0)
 
         l1 = QLabel(self.countdowns_layout_widget)
@@ -457,15 +446,15 @@ class SideDock(QDockWidget):
         self.qsettings.setValue(QKEYS.UI_SIDEDOCK, cb.isChecked())
 
     def update_geometry(self) -> None:
-        y = 0.03 * self.user_screen_h
-        h = 0.05 * self.user_screen_h
-        gap = 0.01 * self.user_screen_h
+        y = int(0.03 * self.user_screen_h)
+        h = int(0.05 * self.user_screen_h)
+        gap = int(0.01 * self.user_screen_h)
 
         self.name_layout_widget.setGeometry(0, y, self.geometry().width(), h)
         self.sign_widget.setGeometry(0, y + h, self.geometry().width(), y)
 
-        y = 2 * y + h + gap
-        h = 0.09 * self.user_screen_h
+        y = int(2 * y + h + gap)
+        h = int(0.09 * self.user_screen_h)
         self.table_view.setGeometry(0, y, self.geometry().width(), h)
         for i in range(5):
             self.table_view.setColumnWidth(i, self.geometry().width() / 5)
@@ -479,7 +468,7 @@ class SideDock(QDockWidget):
         self.triple_list_view_widget.setGeometry(0, y, self.geometry().width(), h)
 
         y = y + h + gap
-        h = 0.19 * self.user_screen_h
+        h = int(0.19 * self.user_screen_h)
         self.task_panel_widget.setGeometry(0, y, self.geometry().width(), h)
 
 # End of File
