@@ -32,6 +32,7 @@ class AlignListView(QTreeView):
 
         # WIP: refactoring
         self.counter_labels = [None] * 4
+        self.counter_timers = [None] * 4
         self.counters = [None] * 4
 
     def get_counter_labels(self):
@@ -39,6 +40,9 @@ class AlignListView(QTreeView):
 
     def get_counters(self):
         return self.counters
+
+    def get_counter_timers(self):
+        return self.counter_timers
 
     def on_click(self, index: int) -> None:
         pass

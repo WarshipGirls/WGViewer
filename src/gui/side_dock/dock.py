@@ -52,10 +52,6 @@ class SideDock(QDockWidget):
         self.task_counter_labels = []
         self.task_counter_timers = []
         self.task_counters = []
-        self.bath_counter_timers = [None] * 4
-        self.build_counter_timers = [None] * 4
-        self.dev_counter_timers = [None] * 4
-        self.exp_counter_timers = [None] * 4
 
         self.name_layout_widget = QWidget(self)
         self.name_layout = QHBoxLayout(self.name_layout_widget)
@@ -370,7 +366,7 @@ class SideDock(QDockWidget):
                 left_time = _calc_left_time(val["endTime"])
                 exp_counters = self.exp_list_view.get_counters()
                 exp_counters[idx] = left_time
-                self.start_new_timer(exp_counters, self.exp_list_view.get_counter_labels(), self.exp_counter_timers, idx)
+                self.start_new_timer(exp_counters, self.exp_list_view.get_counter_labels(), self.exp_list_view.get_counter_timers(), idx)
                 n = "Fleet #" + val["fleetId"] + "   " + val["exploreId"].replace("000", "-")
                 self.exp_list_view.update_item(idx, 0, n)
 
@@ -378,13 +374,13 @@ class SideDock(QDockWidget):
     def on_received_lists(self, data: dict) -> None:
         if data is not None:
             self._process_timer_data(data["repairDockVo"], self.bath_list_view, self.get_ship_name, "shipId",
-                                     self.bath_list_view.get_counters(), self.bath_list_view.get_counter_labels(), self.bath_counter_timers)
+                                     self.bath_list_view.get_counters(), self.bath_list_view.get_counter_labels(), self.bath_list_view.get_counter_timers())
 
             self._process_timer_data(data["dockVo"], self.build_list_view, self.get_ship_type, "shipType",
-                                     self.build_list_view.get_counters(), self.build_list_view.get_counter_labels(), self.build_counter_timers)
+                                     self.build_list_view.get_counters(), self.build_list_view.get_counter_labels(), self.build_list_view.get_counter_timers())
 
             self._process_timer_data(data["equipmentDockVo"], self.dev_list_view, self.get_equip_name, "equipmentCid",
-                                     self.dev_list_view.get_counters(), self.bath_list_view.get_counter_labels(), self.dev_counter_timers)
+                                     self.dev_list_view.get_counters(), self.bath_list_view.get_counter_labels(), self.dev_list_view.get_counter_timers())
 
             self.update_expedition(data["pveExploreVo"])
 
