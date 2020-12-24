@@ -13,7 +13,8 @@ from .expedition.summary import DailySummary
 from .expedition.fleets import ExpFleets
 
 
-# TODO: this tab show be init, but hide if user not start
+# TODO: this tab show be init, but hide if user not start; OR make this tab unclosable
+# TODO: get real-time data
 
 def get_data_path(relative_path):
     # This needs to be in current file
@@ -28,14 +29,16 @@ class TabExpedition(QWidget):
         self.setObjectName(tab_name)
         self.side_dock = side_dock
 
+        # Lesson: to append to the textedit, logger must be passed down to child widget; using same name doesn't help
+        self.right_text_box = QTextEdit()
+        self.logger = get_new_logger(name=QLOGS.TAB_EXP, level=QLOGS.LVL_INFO, signal=self.right_text_box.append)
+
         self.button_table = QPushButton("Open &Expedition Table")
         csv_path = get_data_path('assets/data/exp_data.csv')
         self.table = ExpTable(self, csv_path)
         self.summary = DailySummary()
-        self.fleet_table = ExpFleets(self.side_dock)
+        self.fleet_table = ExpFleets(self.side_dock, self.logger)
 
-        self.right_text_box = QTextEdit()
-        self.logger = get_new_logger(name=QLOGS.TAB_EXP, level=QLOGS.LVL_INFO, signal=self.right_text_box.append)
         self.init_ui()
 
     def init_ui(self) -> None:

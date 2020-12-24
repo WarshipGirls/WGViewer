@@ -1,4 +1,5 @@
 from typing import Callable, List, Tuple
+from logging import Logger
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
@@ -10,28 +11,22 @@ from PyQt5.QtWidgets import (
 
 from src import utils as wgv_utils
 from src.data import get_processed_userShipVo, load_cookies
-from src.func import logger_names as QLOGS
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
-from src.func.log_handler import get_logger
 from src.gui.side_dock.dock import SideDock
 from src.wgr import API_EXPLORE
 
 BTN_TEXT_START: str = 'START'
 BTN_TEXT_STOP: str = 'STOP'
 
-logger = get_logger(QLOGS.TAB_EXP)
-
-"""
-TODO: manually start expedition
-TODO: manually get result
-TODO: update side dock based on manual call response
-TODO: From side dock call the tab?
-    - but how? chicken vs egg?
-TODO: auto start expedition
-TODO: auto get result
-TODO: user select fleet
-TODO: auto switch exp map
-"""
+# TODO: manually start expedition
+# TODO: manually get result
+# TODO: update side dock based on manual call response
+# TODO: From side dock call the tab?
+#    - but how? chicken vs egg?
+# TODO: auto start expedition
+# TODO: auto get result
+# TODO: user select fleet
+# TODO: auto switch exp map
 
 '''
 class PopupFleets(QMainWindow):
@@ -61,9 +56,11 @@ class PopupFleets(QMainWindow):
 
 
 class ExpFleets(QWidget):
-    def __init__(self, side_dock: SideDock):
+    def __init__(self, side_dock: SideDock, logger: Logger):
         super().__init__()
         self.side_dock = side_dock
+        self.logger = logger
+
         self.tab = QTableWidget()
         self.tab.setRowCount(28)
         self.tab.setColumnCount(4)
@@ -169,7 +166,7 @@ class ExpFleets(QWidget):
         self.tab.setCellWidget(row, col, w)
 
     def on_dropdown_change(self, fleet: int, next_map: str) -> None:
-        logger.debug(f"Next expedition map changed: {self.next_exp_maps}")
+        self.logger.debug(f"Next expedition map changed: {self.next_exp_maps}")
         self.next_exp_maps[fleet] = next_map
 
     def set_one_ship(self, row: int, col: int, ship_id: int, info: dict) -> None:
@@ -180,8 +177,8 @@ class ExpFleets(QWidget):
         self.tab.setItem(row + 1, col, QTableWidgetItem(lvl))
         self.tab.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
 
-    def on_button_clicked(self, fleet_idx: int) -> None:
-        logger.debug(f'fleet #{fleet_idx + 5} shall start{self.next_exp_maps[fleet_idx]}')
+    def on_button_clicked(self, fleet_idx: int) -> None
+        self.logger.debug(f'fleet #{fleet_idx + 5} shall start{self.next_exp_maps[fleet_idx]}')
         # TODO: check if fleet class requirement met
         b = self.exp_buttons.buttons()[fleet_idx]
         if b.text() == BTN_TEXT_START:
@@ -191,10 +188,10 @@ class ExpFleets(QWidget):
 
             res_res = self.get_exp_result(curr_map)
             start_res = self.start_exp(next_map, fleet_id)
-            logger.debug(res_res)
-            logger.debug(start_res)
+            self.logger.debug(res_res)
+            self.logger.debug(start_res)
         elif b.text() == BTN_TEXT_STOP:
-            logger.debug('stop expedition')
+            self.logger.debug('stop expedition')
         else:
             pass
 
@@ -209,10 +206,10 @@ class ExpFleets(QWidget):
         tries = 0
         while not res:
             try:
-                logger.debug(f"{func_info}...")
+                self.logger.debug(f"{func_info}...")
                 res, data = func()
             except WarshipGirlsExceptions as e:
-                logger.warning(f"Failed to {func_info} due to {e}. Trying reconnecting...")
+                self.logger.warning(f"Failed to {func_info} due to {e}. Trying reconnecting...")
                 wgv_utils.set_sleep()
             tries += 1
             if tries >= self.reconnection_limit:
@@ -227,12 +224,10 @@ class ExpFleets(QWidget):
             res = False
             if 'eid' in data:
                 get_error(data['eid'])
-            # elif 'adjutantData' in data:
-            #     res = True
-            # TODO: elif
-            else:
-                logger.debug(data)
+            elif 'pveExploreVo' in data:
                 res = True
+            else:
+                self.logger.debug(data)
             return res, data
 
         return self._reconnecting_calls(_get_res, 'collect expedition')
@@ -246,7 +241,7 @@ class ExpFleets(QWidget):
             elif 'pveExploreVo' in data:
                 res = True
             else:
-                logger.debug(data)
+                self.logger.debug(data)
             return res, data
 
         return self._reconnecting_calls(_start, 'start expedition')
