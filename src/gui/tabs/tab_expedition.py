@@ -1,16 +1,16 @@
 import os
 import sys
 
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QTextEdit
 
 from src.func import logger_names as QLOGS
-from src.func.log_handler import get_logger
+from src.func.log_handler import get_new_logger
 from src.gui.side_dock.dock import SideDock
 from .expedition.table import ExpTable
 from .expedition.summary import DailySummary
 from .expedition.fleets import ExpFleets
-
-logger = get_logger(QLOGS.TAB_EXP)
 
 
 def get_data_path(relative_path):
@@ -26,28 +26,42 @@ class TabExpedition(QWidget):
         self.setObjectName(tab_name)
         self.side_dock = side_dock
 
+        self.button_table = QPushButton("Open &Expedition Table")
         csv_path = get_data_path('assets/data/exp_data.csv')
-        self.table = ExpTable(csv_path)
+        self.table = ExpTable(self, csv_path)
         self.summary = DailySummary()
         self.fleet_table = ExpFleets(self.side_dock)
-        logger.info("Creating Expedition Tab...")
+
+        self.right_text_box = QTextEdit()
+        self.logger = get_new_logger(name=QLOGS.TAB_EXP, level=QLOGS.LVL_INFO, signal=self.right_text_box.append)
         self.init_ui()
 
     def init_ui(self) -> None:
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        left_layout = QVBoxLayout()
-        left_layout.addWidget(self.table)
-        left_layout.addWidget(self.summary)
-        left_layout.setStretch(0, 1)
-        left_layout.setStretch(1, 0)
+        self.button_table.clicked.connect(self.on_button_table_clicked)
 
-        main_layout.addLayout(left_layout)
+        right_layout = QVBoxLayout()
+        self.right_text_box.setFont(QFont('Consolas'))
+        self.right_text_box.setFontPointSize(10)
+        self.right_text_box.setReadOnly(True)
+        right_layout.addWidget(self.right_text_box)
+        right_layout.addWidget(self.summary)
+        right_layout.addWidget(self.button_table)
+
         main_layout.addWidget(self.fleet_table)
-        main_layout.setStretch(0, 1)
-        main_layout.setStretch(1, 0)
+        main_layout.addLayout(right_layout)
+        main_layout.setStretch(0, 0)
+        main_layout.setStretch(1, 1)
 
         self.setLayout(main_layout)
+
+    def on_button_table_clicked(self) -> None:
+        self.table.show()
+
+    @pyqtSlot()
+    def on_table_close(self):
+        self.table.hide()
 
 # End of File

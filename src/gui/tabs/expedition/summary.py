@@ -19,20 +19,18 @@ class DailySummary(QWidget):
         self.setLayout(self.layout)
 
     def init_table(self) -> None:
-        self.tab.setColumnCount(8)
-        self.tab.setRowCount(5)
+        self.tab.setColumnCount(4)
+        self.tab.setRowCount(10)
 
         self.tab.setItem(0, 0, QTableWidgetItem("DAILY SUMMARY"))
-        self.tab.setItem(0, 4, QTableWidgetItem("WEEKLY SUMMARY"))
+        self.tab.setItem(5, 0, QTableWidgetItem("WEEKLY SUMMARY"))
         self.tab.setSpan(0, 0, 1, 4)
-        self.tab.setSpan(0, 4, 1, 4)
+        self.tab.setSpan(5, 0, 1, 4)
 
         labels_col1 = ["Fuel", "Ammo.", "Steel", "Bauxite"]
         labels_col2 = ["Inst. Repair", "Inst. Build.", "Ship Blueprint", "Equip. Blueprint"]
         self.set_labels(labels_col1, 0)
         self.set_labels(labels_col2, 2)
-        self.set_labels(labels_col1, 4)
-        self.set_labels(labels_col2, 6)
 
     def init_ui(self) -> None:
         self.tab.setShowGrid(False)
@@ -49,6 +47,8 @@ class DailySummary(QWidget):
     def set_labels(self, labels: list, col: int) -> None:
         for row in range(1, 5):
             self.tab.setItem(row, col, QTableWidgetItem(labels[row - 1]))
+        for row in range(6, 10):
+            self.tab.setItem(row, col, QTableWidgetItem(labels[row - 6]))
 
     def update_val(self, data: int, row: int, col: int) -> None:
         self.tab.setItem(row, col, QTableWidgetItem(str(data)))
