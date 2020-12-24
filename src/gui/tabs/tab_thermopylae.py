@@ -15,7 +15,7 @@ from src.gui.custom_widgets import ClickableLabel
 from src.gui.side_dock.resource_model import ResourceTableModel
 from src.gui.side_dock.dock import SideDock
 from src.utils import set_sleep
-from src.wgr.six import API_SIX
+from src.wgr import API_SIX
 from .thermopylae.ship_window import ShipSelectWindow
 from .thermopylae.sortie import Sortie
 

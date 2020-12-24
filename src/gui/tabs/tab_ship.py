@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src import data as wgv_data
-from src.wgr.api import WGR_API
+from src.wgr import WGR_API
 from src.func import logger_names as QLOGS
 from src.func.log_handler import get_logger
 from .ships.delegate import ShipTableDelegate

@@ -10,7 +10,7 @@ from src.func import logger_names as QLOGS
 from src.func.log_handler import get_logger
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.exceptions.custom import ThermopylaeSortieExit, ThermopylaeSortieResume
-from src.wgr.six import API_SIX
+from src.wgr import API_SIX
 from . import constants as T_CONST
 
 

@@ -12,7 +12,7 @@ from src.gui.side_dock.dock import SideDock
 from src.gui.interface.tabs import MainInterfaceTabs
 from src.gui.interface.menubar import MainInterfaceMenuBar
 from src.gui.system_tray import TrayIcon
-from src.wgr.api import WGR_API
+from src.wgr import WGR_API
 
 
 def init_zip_files() -> None:

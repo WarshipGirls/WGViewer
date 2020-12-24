@@ -20,7 +20,7 @@ from src.func import qsettings_keys as QKEYS
 from src.exceptions.wgr_error import get_error
 from src.exceptions import custom as wgv_error
 from src.utils import process_spy_json, set_sleep
-from src.wgr.six import API_SIX
+from src.wgr import API_SIX
 from .helper import SortieHelper
 from .pre_sortie import PreSortieCheck
 from . import constants as T_CONST
