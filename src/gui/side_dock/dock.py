@@ -53,13 +53,9 @@ class SideDock(QDockWidget):
         self.task_counter_timers = []
         self.task_counters = []
         self.bath_counter_timers = [None] * 4
-        self.bath_counters = [None] * 4
         self.build_counter_timers = [None] * 4
-        self.build_counters = [None] * 4
         self.dev_counter_timers = [None] * 4
-        self.dev_counters = [None] * 4
         self.exp_counter_timers = [None] * 4
-        self.exp_counters = [None] * 4
 
         self.name_layout_widget = QWidget(self)
         self.name_layout = QHBoxLayout(self.name_layout_widget)
@@ -227,7 +223,7 @@ class SideDock(QDockWidget):
         return
 
     def get_exp_counters(self) -> list:
-        return self.exp_counters
+        return self.exp_list_view.get_counters()
 
     # ================================
     # Timer Related
@@ -251,12 +247,12 @@ class SideDock(QDockWidget):
                     self._remove_widget(self.countdowns_layout, labels[idx])
                     self._remove_widget(self.countdowns_layout, self.task_counter_desc_labels[idx])
                     return
-            elif counters == self.bath_counters:
+            elif counters == self.bath_list_view.get_counters():
                 counters[idx] = 0
                 timers[idx].stop()
                 self.bath_list_view.update_item(idx, 0, "Repairing Dock Unused")
                 self.bath_list_view.update_item(idx, 1, "--:--:--")
-            elif counters == self.exp_counters:
+            elif counters == self.exp_list_view.get_counters():
                 # TODO: exp counter signals to restart
                 counters[idx] = 0
                 timers[idx].stop()
@@ -372,8 +368,9 @@ class SideDock(QDockWidget):
             p = sorted(data["levels"], key=lambda x: int(x['fleetId']), reverse=False)
             for idx, val in enumerate(p):
                 left_time = _calc_left_time(val["endTime"])
-                self.exp_counters[idx] = left_time
-                self.start_new_timer(self.exp_counters, self.exp_list_view.get_counter_labels(), self.exp_counter_timers, idx)
+                exp_counters = self.exp_list_view.get_counters()
+                exp_counters[idx] = left_time
+                self.start_new_timer(exp_counters, self.exp_list_view.get_counter_labels(), self.exp_counter_timers, idx)
                 n = "Fleet #" + val["fleetId"] + "   " + val["exploreId"].replace("000", "-")
                 self.exp_list_view.update_item(idx, 0, n)
 
@@ -381,13 +378,13 @@ class SideDock(QDockWidget):
     def on_received_lists(self, data: dict) -> None:
         if data is not None:
             self._process_timer_data(data["repairDockVo"], self.bath_list_view, self.get_ship_name, "shipId",
-                                     self.bath_counters, self.bath_list_view.get_counter_labels(), self.bath_counter_timers)
+                                     self.bath_list_view.get_counters(), self.bath_list_view.get_counter_labels(), self.bath_counter_timers)
 
             self._process_timer_data(data["dockVo"], self.build_list_view, self.get_ship_type, "shipType",
-                                     self.build_counters, self.build_list_view.get_counter_labels(), self.build_counter_timers)
+                                     self.build_list_view.get_counters(), self.build_list_view.get_counter_labels(), self.build_counter_timers)
 
             self._process_timer_data(data["equipmentDockVo"], self.dev_list_view, self.get_equip_name, "equipmentCid",
-                                     self.dev_counters, self.bath_list_view.get_counter_labels(), self.dev_counter_timers)
+                                     self.dev_list_view.get_counters(), self.bath_list_view.get_counter_labels(), self.dev_counter_timers)
 
             self.update_expedition(data["pveExploreVo"])
 
