@@ -357,6 +357,26 @@ class SideDock(QDockWidget):
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, 0)
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, 1)
 
+    @staticmethod
+    def _calc_left_time(t) -> int:
+        _diff = t - int(time.time())
+        return 0 if _diff <= 0 else _diff
+
+    def _process_timer_data(self, _data, view, func, item_id, counters, labels, timers) -> None:
+        for i, v in enumerate(_data):
+            if v["locked"] == 0:
+                if "endTime" in v:
+                    _left_time = self._calc_left_time(v["endTime"])
+                    counters[i] = _left_time
+                    self.start_new_timer(counters, labels, timers, i)
+                    val1 = func(v[item_id])
+                    view.update_item(i, 0, val1)
+                else:
+                    view.update_item(i, 0, "Unused")
+                    view.update_item(i, 1, "--:--:--")
+            else:
+                pass
+
     # ================================
     # Signals
     # ================================
@@ -426,43 +446,29 @@ class SideDock(QDockWidget):
             self.sign_widget.setText(data["friendVo"]["sign"])
 
     @pyqtSlot(dict)
-    def on_received_lists(self, data: dict) -> None:
+    def update_expedition(self, data: dict) -> None:
         if data is not None:
-            def calc_left_time(t) -> int:
-                _diff = t - int(time.time())
-                return 0 if _diff <= 0 else _diff
-
-            def process_data(_data, view, func, item_id, counters, labels, timers) -> None:
-                for i, v in enumerate(_data):
-                    if v["locked"] == 0:
-                        if "endTime" in v:
-                            _left_time = calc_left_time(v["endTime"])
-                            counters[i] = _left_time
-                            self.start_new_timer(counters, labels, timers, i)
-                            val1 = func(v[item_id])
-                            view.update_item(i, 0, val1)
-                        else:
-                            view.update_item(i, 0, "Unused")
-                            view.update_item(i, 1, "--:--:--")
-                    else:
-                        pass
-
-            process_data(data["repairDockVo"], self.bath_list_view, self.get_ship_name, "shipId",
-                         self.bath_counters, self.bath_counter_labels, self.bath_counter_timers)
-
-            process_data(data["dockVo"], self.build_list_view, self.get_ship_type, "shipType",
-                         self.build_counters, self.build_counter_labels, self.build_counter_timers)
-
-            process_data(data["equipmentDockVo"], self.dev_list_view, self.get_equip_name, "equipmentCid",
-                         self.dev_counters, self.dev_counter_labels, self.dev_counter_timers)
-
-            p = sorted(data["pveExploreVo"]["levels"], key=lambda x: int(x['fleetId']), reverse=False)
+            p = sorted(data["levels"], key=lambda x: int(x['fleetId']), reverse=False)
             for idx, val in enumerate(p):
-                left_time = calc_left_time(val["endTime"])
+                left_time = self._calc_left_time(val["endTime"])
                 self.exp_counters[idx] = left_time
                 self.start_new_timer(self.exp_counters, self.exp_counter_labels, self.exp_counter_timers, idx)
                 n = "Fleet #" + val["fleetId"] + "   " + val["exploreId"].replace("000", "-")
                 self.exp_list_view.update_item(idx, 0, n)
+
+    @pyqtSlot(dict)
+    def on_received_lists(self, data: dict) -> None:
+        if data is not None:
+            self._process_timer_data(data["repairDockVo"], self.bath_list_view, self.get_ship_name, "shipId",
+                                     self.bath_counters, self.bath_counter_labels, self.bath_counter_timers)
+
+            self._process_timer_data(data["dockVo"], self.build_list_view, self.get_ship_type, "shipType",
+                                     self.build_counters, self.build_counter_labels, self.build_counter_timers)
+
+            self._process_timer_data(data["equipmentDockVo"], self.dev_list_view, self.get_equip_name, "equipmentCid",
+                                     self.dev_counters, self.dev_counter_labels, self.dev_counter_timers)
+
+            self.update_expedition(data["pveExploreVo"])
 
     @pyqtSlot(dict)
     def on_received_tasks(self, data: dict) -> None:
