@@ -5,7 +5,7 @@ import sys
 from typing import NoReturn  # Differ than None; NoReturn for abnormally end a function
 
 from PyQt5.QtCore import pyqtSignal, QObject
-from src.utils import increase_sleep_interval
+from src.utils import increase_sleep_interval, popup_msg
 
 
 def get_data_path(relative_path: str) -> str:
@@ -34,13 +34,17 @@ class SpeedTicket(QObject):
 class WarshipGirlsExceptions(Exception):
     def __init__(self, error_id, error_msg):
         super().__init__(error_id, error_msg)
-        self.error_id = error_id
+        self.error_id = str(error_id)
         self.error_msg = error_msg
 
     def __str__(self) -> str:
-        if self.error_id == "-1":
+        if self.error_id == "-1":  # Too fast
             s = SpeedTicket()
             s.emit()
+        # elif self.error_id == "-9999":  # game server under maintenance
+        # TODO: this lead to weird behavior
+        #     popup_msg(self.error_msg)
+        #     quit_application()
         else:
             pass
         return f"WGR-ERROR: {self.error_msg}"

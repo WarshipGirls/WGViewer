@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
 from src.func import logger_names as QLOGS
 from src.func.log_handler import get_logger
+from src.gui.side_dock.dock import SideDock
 from .expedition.table import ExpTable
 from .expedition.summary import DailySummary
 from .expedition.fleets import ExpFleets
@@ -20,13 +21,15 @@ def get_data_path(relative_path):
 
 
 class TabExpedition(QWidget):
-    def __init__(self, tab_name: str):
+    def __init__(self, tab_name: str, side_dock: SideDock):
         super().__init__()
         self.setObjectName(tab_name)
+        self.side_dock = side_dock
+
         csv_path = get_data_path('assets/data/exp_data.csv')
         self.table = ExpTable(csv_path)
         self.summary = DailySummary()
-        self.fleet_table = ExpFleets()
+        self.fleet_table = ExpFleets(self.side_dock)
         logger.info("Creating Expedition Tab...")
         self.init_ui()
 

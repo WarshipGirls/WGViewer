@@ -19,7 +19,7 @@ class UserDataGraph(QWidget):
     This is instantiated along with the menu bar,
         and logs user's data every 15 minutes with a QTimer's interval = 1 minute.
     - To prevent possible abuse of the data log system, we bar users from accessing the QTimer settings
-    - QWebEngine is not used right now due to its massize size; instead, open the data graph in users' browser
+    - QWebEngine is not used right now due to its massive size; instead, open the data graph in users' browser
 
     # to-do: remove the "wide" white margins (removed since abandon QWebEngine)
     TODO? when data get large, show a loading animation

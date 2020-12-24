@@ -4,7 +4,7 @@ from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
 from src.func import logger_names as QLOGS
 from src.func.log_handler import get_logger
 from src.utils import set_sleep
-from src.wgr.six import API_SIX
+from src.wgr import API_SIX
 from . import constants as T_CONST
 
 
@@ -60,7 +60,7 @@ class PreSortieCheck:
     # ================================
 
     def pre_battle_validation(self, user_data: dict) -> bool:
-        # Insepect the validity for user to use this function
+        # Inspect the validity for user to use this function
 
         if 10282 not in self.user_data['adjutantList']:
             self.logger.warning("Cannot find Habakkuk in your adjutant list. Existing")

@@ -9,8 +9,8 @@ from src.func import qsettings_keys as QKEYS
 from src.func import logger_names as QLOGS
 from src.func.log_handler import get_logger
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
-from src.exceptions.custom import ThermopylaeSoriteExit, ThermopylaeSortieResume
-from src.wgr.six import API_SIX
+from src.exceptions.custom import ThermopylaeSortieExit, ThermopylaeSortieResume
+from src.wgr import API_SIX
 from . import constants as T_CONST
 
 
@@ -59,7 +59,7 @@ class SortieHelper:
                 wgv_utils.set_sleep()
             tries += 1
             if tries >= self.reconnection_limit:
-                raise ThermopylaeSoriteExit(f"Failed to {func_info} after {self.reconnection_limit} reconnections")
+                raise ThermopylaeSortieExit(f"Failed to {func_info} after {self.reconnection_limit} reconnections")
             else:
                 pass
         return data
@@ -601,7 +601,7 @@ class SortieHelper:
             try:
                 shipname = next((j for j in battle_res['shipVO'] if j['id'] == ship_id))['title']
             except StopIteration:
-                self.logger.debug("Discrpency in battle result shipVO")
+                self.logger.debug("Discrepancy in battle result shipVO")
                 break
             ship = ships[i]
             ship_str = "{:12s}\tLv.{:4s}\t+{}Exp".format(shipname, str(ship['level']), str(ship['expAdd']))

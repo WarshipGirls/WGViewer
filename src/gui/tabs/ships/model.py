@@ -9,7 +9,7 @@ from src import data as wgv_data
 from src import utils as wgv_utils
 from src.func import logger_names as QLOGS
 from src.func.log_handler import get_logger
-from src.wgr.boat import API_BOAT
+from src.wgr import API_BOAT
 from . import constant as SCONST
 
 logger = get_logger(QLOGS.TAB_SHIP)

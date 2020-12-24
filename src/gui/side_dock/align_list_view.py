@@ -59,7 +59,7 @@ class BathListView(AlignListView):
     def __init__(self):
         super().__init__()
 
-    def on_click(self, index):
+    def on_click(self, index) -> None:
         pass
         # boat/repair/{ship cid}/{slot}
         # boat/rubdown/{ship cid}
@@ -69,7 +69,7 @@ class BuildListView(AlignListView):
     def __init__(self):
         super().__init__()
 
-    def on_click(self, index):
+    def on_click(self, index) -> None:
         pass
         # dock/buildBoat/{slot}/{fuel}/{ammo}/{steel}/{baux}
         # dock/getBoat/{slot}
@@ -81,7 +81,7 @@ class DevListView(AlignListView):
     def __init__(self):
         super().__init__()
 
-    def on_click(self, index):
+    def on_click(self, index) -> None:
         pass
         # dock/buildEquipment/{slot}/{fuel}/{ammo}/{steel}/{baux}
         # dock/dismantleEquipment       # I'm surprised, how do we know which to dismantle?
@@ -94,7 +94,7 @@ class ExpListView(AlignListView):
     def __init__(self):
         super().__init__()
 
-    def on_click(self, index):
+    def on_click(self, index) -> None:
         # print('exp')
         pass
         # explore/getResult/{exp_map}
@@ -106,7 +106,7 @@ class TaskListView(AlignListView):
     def __init__(self):
         super().__init__()
 
-    def on_click(self, index):
+    def on_click(self, index) -> None:
         pass
         # task/getAward/{task_cid}
 

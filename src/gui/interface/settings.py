@@ -17,7 +17,7 @@ class TabBar(QTabBar):
         self.offset = QSize(int(0.01 * user_w), int(0.01 * user_w))
 
     def tabSizeHint(self, index):
-        # Here defines the rendering size of tab-laber
+        # Here defines the rendering size of tab-label
         s = QTabBar.tabSizeHint(self, index)
         s.transpose()
         s += self.offset

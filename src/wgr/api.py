@@ -67,7 +67,6 @@ class WGR_API:
         return data
 
     def _api_urlopen(self, link: str) -> dict:
-        # TODO: use this minimally! Currently the returned data is unreadable
         # This uses urllib.request.urlopen
         data = None
         url = self.server + link + self.hlp.get_url_end(self.channel)
