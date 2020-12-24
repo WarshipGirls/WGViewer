@@ -297,6 +297,9 @@ class SideDock(QDockWidget):
     @pyqtSlot(dict)
     def on_received_resource(self, data: dict) -> None:
         if data is not None:
+            def _get_item_by_id(item_id: int) -> int:
+                return next((i for i in x if i["itemCid"] == item_id), {"num": 0})["num"]
+
             u = data["userVo"]
             x = data["packageVo"]
             self.table_model.update_fuel(u["oil"])
@@ -304,26 +307,16 @@ class SideDock(QDockWidget):
             self.table_model.update_steel(u["steel"])
             self.table_model.update_bauxite(u["aluminium"])
             self.table_model.update_gold(u["gold"])
-            t = next((i for i in x if i["itemCid"] == 541), {"num": 0})["num"]
-            self.table_model.update_repair(t)
-            t = next((i for i in x if i["itemCid"] == 141), {"num": 0})["num"]
-            self.table_model.update_build(t)
-            t = next((i for i in x if i["itemCid"] == 241), {"num": 0})["num"]
-            self.table_model.update_bp_construct(t)
-            t = next((i for i in x if i["itemCid"] == 741), {"num": 0})["num"]
-            self.table_model.update_bp_dev(t)
-            t = next((i for i in x if i["itemCid"] == 66641), {"num": 0})["num"]
-            self.table_model.update_revive(t)
-            t = next((i for i in x if i["itemCid"] == 10441), {"num": 0})["num"]
-            self.table_model.update_DD(t)
-            t = next((i for i in x if i["itemCid"] == 10341), {"num": 0})["num"]
-            self.table_model.update_CA(t)
-            t = next((i for i in x if i["itemCid"] == 10241), {"num": 0})["num"]
-            self.table_model.update_BB(t)
-            t = next((i for i in x if i["itemCid"] == 10141), {"num": 0})["num"]
-            self.table_model.update_CV(t)
-            t = next((i for i in x if i["itemCid"] == 10541), {"num": 0})["num"]
-            self.table_model.update_SS(t)
+            self.table_model.update_repair(_get_item_by_id(541))
+            self.table_model.update_build(_get_item_by_id(141))
+            self.table_model.update_bp_construct(_get_item_by_id(241))
+            self.table_model.update_bp_dev(_get_item_by_id(741))
+            self.table_model.update_revive(_get_item_by_id(66641))
+            self.table_model.update_DD(_get_item_by_id(10441))
+            self.table_model.update_CA(_get_item_by_id(10341))
+            self.table_model.update_BB(_get_item_by_id(10241))
+            self.table_model.update_CV(_get_item_by_id(10141))
+            self.table_model.update_SS(_get_item_by_id(10541))
 
             self.table_model.write_csv()  # first-save upon start-up
 
