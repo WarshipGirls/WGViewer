@@ -13,6 +13,8 @@ from .expedition.summary import DailySummary
 from .expedition.fleets import ExpFleets
 
 
+# TODO: this tab show be init, but hide if user not start
+
 def get_data_path(relative_path):
     # This needs to be in current file
     bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
@@ -46,10 +48,19 @@ class TabExpedition(QWidget):
         self.right_text_box.setFont(QFont('Consolas'))
         self.right_text_box.setFontPointSize(10)
         self.right_text_box.setReadOnly(True)
-        right_layout.addWidget(self.right_text_box)
-        right_layout.addWidget(self.summary)
-        right_layout.addWidget(self.button_table)
 
+        bottom_right_layout = QHBoxLayout()
+        bottom_right_layout.addWidget(self.summary)
+        bottom_right_buttons_layout = QVBoxLayout()
+        bottom_right_buttons_layout.addWidget(self.button_table)
+        bottom_right_layout.addLayout(bottom_right_buttons_layout)
+        bottom_right_layout.setStretch(0, 0)
+        bottom_right_layout.setStretch(1, 1)
+
+        right_layout.addWidget(self.right_text_box)
+        right_layout.addLayout(bottom_right_layout)
+        right_layout.setStretch(0, 1)
+        right_layout.setStretch(1, 0)
         main_layout.addWidget(self.fleet_table)
         main_layout.addLayout(right_layout)
         main_layout.setStretch(0, 0)

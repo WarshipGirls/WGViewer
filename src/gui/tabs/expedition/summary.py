@@ -1,31 +1,24 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
-    QWidget, QTableWidget, QTableWidgetItem,
-    QHBoxLayout,
+    QTableWidget, QTableWidgetItem,
     QTableView, QHeaderView, QAbstractScrollArea
 )
 
 
-class DailySummary(QWidget):
+class DailySummary(QTableWidget):
     def __init__(self):
         super().__init__()
-
-        self.tab = QTableWidget()
         self.init_table()
         self.init_ui()
 
-        self.layout = QHBoxLayout()
-        self.layout.addWidget(self.tab)
-        self.setLayout(self.layout)
-
     def init_table(self) -> None:
-        self.tab.setColumnCount(4)
-        self.tab.setRowCount(10)
+        self.setColumnCount(4)
+        self.setRowCount(10)
 
-        self.tab.setItem(0, 0, QTableWidgetItem("DAILY SUMMARY"))
-        self.tab.setItem(5, 0, QTableWidgetItem("WEEKLY SUMMARY"))
-        self.tab.setSpan(0, 0, 1, 4)
-        self.tab.setSpan(5, 0, 1, 4)
+        self.setItem(0, 0, QTableWidgetItem("DAILY SUMMARY"))
+        self.setItem(5, 0, QTableWidgetItem("WEEKLY SUMMARY"))
+        self.setSpan(0, 0, 1, 4)
+        self.setSpan(5, 0, 1, 4)
 
         labels_col1 = ["Fuel", "Ammo.", "Steel", "Bauxite"]
         labels_col2 = ["Inst. Repair", "Inst. Build.", "Ship Blueprint", "Equip. Blueprint"]
@@ -33,24 +26,25 @@ class DailySummary(QWidget):
         self.set_labels(labels_col2, 2)
 
     def init_ui(self) -> None:
-        self.tab.setShowGrid(False)
-        self.tab.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.tab.horizontalHeader().hide()
-        self.tab.verticalHeader().hide()
-        self.tab.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tab.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tab.setEditTriggers(QTableView.NoEditTriggers)
-        self.tab.setFocusPolicy(Qt.NoFocus)
-        self.tab.setSelectionMode(QTableView.NoSelection)
-        self.tab.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.setShowGrid(False)
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.horizontalHeader().hide()
+        self.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.verticalHeader().hide()
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setEditTriggers(QTableView.NoEditTriggers)
+        self.setFocusPolicy(Qt.NoFocus)
+        self.setSelectionMode(QTableView.NoSelection)
+        self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
     def set_labels(self, labels: list, col: int) -> None:
         for row in range(1, 5):
-            self.tab.setItem(row, col, QTableWidgetItem(labels[row - 1]))
+            self.setItem(row, col, QTableWidgetItem(labels[row - 1]))
         for row in range(6, 10):
-            self.tab.setItem(row, col, QTableWidgetItem(labels[row - 6]))
+            self.setItem(row, col, QTableWidgetItem(labels[row - 6]))
 
     def update_val(self, data: int, row: int, col: int) -> None:
-        self.tab.setItem(row, col, QTableWidgetItem(str(data)))
+        self.setItem(row, col, QTableWidgetItem(str(data)))
 
 # End of File
