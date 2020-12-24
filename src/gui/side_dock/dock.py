@@ -47,6 +47,9 @@ class SideDock(QDockWidget):
         _, self.user_screen_h = wgv_utils.get_user_resolution()
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
 
+        self.equipment_names = wgv_data.get_shipEquipmnt()
+        # self.ship_names = wgv_data.get_processed_userShipVo()
+
         # index 0 for daily, 1 for weekly, 2+ for tasks/events
         self.task_counter_desc_labels = []
         self.task_counter_labels = []
@@ -201,10 +204,8 @@ class SideDock(QDockWidget):
         # TODO TODO
         return _id
 
-    @staticmethod
-    def get_equip_name(cid):
-        # TODO TODO
-        return cid
+    def get_equip_name(self, cid: int) -> str:
+        return next((i for i in self.equipment_names if i['cid'] == cid), {'title': '?'})['title']
 
     @staticmethod
     def get_ship_type(_id: int) -> str:
@@ -317,8 +318,6 @@ class SideDock(QDockWidget):
             self.table_model.update_BB(_get_item_by_id(10241))
             self.table_model.update_CV(_get_item_by_id(10141))
             self.table_model.update_SS(_get_item_by_id(10541))
-
-            self.table_model.write_csv()  # first-save upon start-up
 
     @pyqtSlot(dict)
     def update_lvl_label(self, x: dict) -> None:
