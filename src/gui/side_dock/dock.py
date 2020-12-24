@@ -1,12 +1,9 @@
 import os
-from typing import Tuple
 
-import pytz
 import re
 import sys
-import time
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QSize, QTimer, QSettings
 from PyQt5.QtGui import QIcon, QCloseEvent, QResizeEvent
@@ -24,6 +21,7 @@ from src.func.log_handler import get_logger
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 from .constants import TASK_TYPE
+from .timer_helper import get_tasks_countdowns, _calc_left_time
 
 logger = get_logger(QLOGS.SIDE_DOCK)
 
@@ -223,7 +221,7 @@ class SideDock(QDockWidget):
         self.countdowns_layout.addWidget(l2)
         self.countdowns_layout.addWidget(self.task_counter_labels[1])
 
-        _, _, d_counter, w_counter = self.get_tasks_countdowns()
+        _, _, d_counter, w_counter = get_tasks_countdowns()
         self.task_counters.append(d_counter)
         self.task_counters.append(w_counter)
 
@@ -245,38 +243,6 @@ class SideDock(QDockWidget):
         self.task_counters.append(_time)
         self.countdowns_layout.addWidget(l2)
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, idx)
-
-    @staticmethod
-    def get_tasks_countdowns() -> Tuple[datetime, datetime, float, float]:
-        """
-        returns [UTC+8 Time (in format), Local Time (in format), next daily (in sec), next weekly (in sec)]
-        """
-        utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
-        cn_time = utc_time.astimezone(pytz.timezone('Asia/Shanghai'))
-        local_time = utc_time.astimezone()
-
-        def datetime_to_unixtime(t: datetime) -> float:
-            return time.mktime(t.timetuple())
-
-        if cn_time.hour < 3:
-            next_daily = datetime(cn_time.year, cn_time.month, cn_time.day, 3, 0, 0, 0, tzinfo=pytz.timezone('Asia/Shanghai'))
-        else:
-            tmr = cn_time + timedelta(days=1)
-            next_daily = datetime(tmr.year, tmr.month, tmr.day, 3, 0, 0, 0, tzinfo=pytz.timezone('Asia/Shanghai'))
-        next_daily_diff = datetime_to_unixtime(next_daily) - datetime_to_unixtime(cn_time)
-
-        if cn_time.hour < 4:
-            next_weekly = datetime(cn_time.year, cn_time.month, cn_time.day, 4, 0, 0, 0, tzinfo=pytz.timezone('Asia/Shanghai'))
-        else:
-            next_weekly = datetime(cn_time.year, cn_time.month, cn_time.day, 4, 0, 0, 0,
-                                   tzinfo=pytz.timezone('Asia/Shanghai'))
-            days_diff = timedelta(days=-cn_time.weekday(), weeks=1).days
-            next_weekly += timedelta(days=days_diff)
-        next_year = datetime(year=cn_time.year + 1, month=1, day=1, tzinfo=pytz.timezone('Asia/Shanghai'))
-        diff1 = datetime_to_unixtime(next_weekly) - datetime_to_unixtime(cn_time)
-        diff2 = datetime_to_unixtime(next_year) - datetime_to_unixtime(cn_time)
-        next_weekly_diff = min(diff1, diff2)
-        return cn_time, local_time, next_daily_diff, next_weekly_diff
 
     @staticmethod
     def get_ship_name(_id):
@@ -316,7 +282,7 @@ class SideDock(QDockWidget):
             if counters == self.task_counters:
                 if idx < 2:
                     # refreshing daily/weekly timers
-                    _, _, d, w = self.get_tasks_countdowns()
+                    _, _, d, w = get_tasks_countdowns()
                     counters[0] = d
                     counters[1] = w
                 else:
@@ -357,16 +323,11 @@ class SideDock(QDockWidget):
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, 0)
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, 1)
 
-    @staticmethod
-    def _calc_left_time(t) -> int:
-        _diff = t - int(time.time())
-        return 0 if _diff <= 0 else _diff
-
     def _process_timer_data(self, _data, view, func, item_id, counters, labels, timers) -> None:
         for i, v in enumerate(_data):
             if v["locked"] == 0:
                 if "endTime" in v:
-                    _left_time = self._calc_left_time(v["endTime"])
+                    _left_time = _calc_left_time(v["endTime"])
                     counters[i] = _left_time
                     self.start_new_timer(counters, labels, timers, i)
                     val1 = func(v[item_id])
@@ -450,7 +411,7 @@ class SideDock(QDockWidget):
         if data is not None:
             p = sorted(data["levels"], key=lambda x: int(x['fleetId']), reverse=False)
             for idx, val in enumerate(p):
-                left_time = self._calc_left_time(val["endTime"])
+                left_time = _calc_left_time(val["endTime"])
                 self.exp_counters[idx] = left_time
                 self.start_new_timer(self.exp_counters, self.exp_counter_labels, self.exp_counter_timers, idx)
                 n = "Fleet #" + val["fleetId"] + "   " + val["exploreId"].replace("000", "-")

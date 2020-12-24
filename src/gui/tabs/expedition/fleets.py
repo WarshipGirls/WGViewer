@@ -177,7 +177,7 @@ class ExpFleets(QWidget):
         self.tab.setItem(row + 1, col, QTableWidgetItem(lvl))
         self.tab.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
 
-    def on_button_clicked(self, fleet_idx: int) -> None
+    def on_button_clicked(self, fleet_idx: int) -> None:
         self.logger.debug(f'fleet #{fleet_idx + 5} shall start{self.next_exp_maps[fleet_idx]}')
         # TODO: check if fleet class requirement met
         b = self.exp_buttons.buttons()[fleet_idx]
