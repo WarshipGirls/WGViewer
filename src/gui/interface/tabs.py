@@ -111,7 +111,7 @@ class MainInterfaceTabs(QWidget):
             self.tab_ships = TabShips(tab_name, self.is_realrun)
             self.tabs.addTab(self.tab_ships, "Dock")
         elif tab_name == "tab_exp" and self.tab_exp is None:
-            self.tab_exp = TabExpedition(tab_name)
+            self.tab_exp = TabExpedition(tab_name, self.parent.side_dock)
             self.tabs.addTab(self.tab_exp, "Expedition (dev)")
         elif tab_name == "tab_thermopylae" and self.tab_thermopylae is None:
             self.tab_thermopylae = TabThermopylae(tab_name, self.parent.side_dock, self.is_realrun)

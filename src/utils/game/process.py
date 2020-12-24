@@ -125,7 +125,7 @@ def get_exp_list() -> list:
     res = []
     for i in exp_list:
         end_idx = 5 if i != 8 else 3
-        _list = [str(i) + "000" + str(j) for j in range(1, end_idx)]
+        _list = [str(i) + '-' + str(j) for j in range(1, end_idx)]
         res += _list
     return res
 
