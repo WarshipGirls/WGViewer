@@ -48,7 +48,7 @@ class SideDock(QDockWidget):
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
 
         self.equipment_names = wgv_data.get_shipEquipmnt()
-        # self.ship_names = wgv_data.get_processed_userShipVo()
+        self.ship_names = wgv_data.get_processed_userShipVo()
 
         # index 0 for daily, 1 for weekly, 2+ for tasks/events
         self.task_counter_desc_labels = []
@@ -199,10 +199,8 @@ class SideDock(QDockWidget):
         self.countdowns_layout.addWidget(l2)
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, idx)
 
-    @staticmethod
-    def get_ship_name(_id):
-        # TODO TODO
-        return _id
+    def get_ship_name(self, _id):
+        return self.ship_names[str(_id)]['Name']
 
     def get_equip_name(self, cid: int) -> str:
         return next((i for i in self.equipment_names if i['cid'] == cid), {'title': '?'})['title']
