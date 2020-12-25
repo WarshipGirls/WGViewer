@@ -16,10 +16,11 @@ class DailySummary(QTableWidget):
         super().__init__()
         self.logger = logger
 
+        self.day_values: list = [0] * 8
+        self.week_values: list = [0] * 8
+
         self.init_table()
         self.init_ui()
-        self.day_values: list = []
-        self.week_values: list = []
 
     def init_table(self) -> None:
         self.setColumnCount(4)
@@ -59,8 +60,7 @@ class DailySummary(QTableWidget):
                 data = next(csv.reader(f))
                 self.day_values = list(map(int, data))
         else:
-            self.day_values = [0] * 8
-            self.week_values = [0] * 8
+            pass
 
         for row in range(1, 5):
             self.setItem(row, col, QTableWidgetItem(labels[row - 1]))
@@ -74,7 +74,7 @@ class DailySummary(QTableWidget):
         new_val = int(old_val) + data
         self.setItem(row, col, QTableWidgetItem(str(new_val)))
 
-    def update_day_val(self, row: int, col: int, data: int, path: str):
+    def update_day_val(self, row: int, col: int, data: int):
         self.update_val(row, col, data)
         if col == 1:
             self.day_values[row-1] += data
@@ -82,11 +82,8 @@ class DailySummary(QTableWidget):
             self.day_values[row+3] += data
         else:
             self.logger.debug('unexpected case at update_day_val')
-        with open(path, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(self.day_values)
 
-    def update_week_val(self, row: int, col: int, data: int, path: str):
+    def update_week_val(self, row: int, col: int, data: int):
         self.update_val(row, col, data)
         if col == 1:
             self.week_values[row-6] += data
@@ -94,39 +91,42 @@ class DailySummary(QTableWidget):
             self.week_values[row-2] += data
         else:
             self.logger.debug('unexpected case at update_week_val')
-        with open(path, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(self.week_values)
 
     def on_newAward(self, data: dict) -> None:
         # 2: fuel, 3: ammo, 4: steel, 9: bauxite, 141: instant_build, 241: bp_build, 541, instant_repair, 741: bp_equip
         w_path, d_path = get_expedition_log()
         for key in data:
             if key == "2":
-                self.update_day_val(1, 1, data[key], d_path)
-                self.update_week_val(6, 1, data[key], w_path)
+                self.update_day_val(1, 1, data[key])
+                self.update_week_val(6, 1, data[key])
             elif key == "3":
-                self.update_day_val(2, 1, data[key], d_path)
-                self.update_week_val(7, 1, data[key], w_path)
+                self.update_day_val(2, 1, data[key])
+                self.update_week_val(7, 1, data[key])
             elif key == "4":
-                self.update_day_val(3, 1, data[key], d_path)
-                self.update_week_val(8, 1, data[key], w_path)
+                self.update_day_val(3, 1, data[key])
+                self.update_week_val(8, 1, data[key])
             elif key == "9":
-                self.update_day_val(4, 1, data[key], d_path)
-                self.update_week_val(9, 1, data[key], w_path)
+                self.update_day_val(4, 1, data[key])
+                self.update_week_val(9, 1, data[key])
             elif key == "541":
-                self.update_day_val(1, 3, data[key], d_path)
-                self.update_week_val(6, 3, data[key], w_path)
+                self.update_day_val(1, 3, data[key])
+                self.update_week_val(6, 3, data[key])
             elif key == "141":
-                self.update_day_val(2, 3, data[key], d_path)
-                self.update_week_val(7, 3, data[key], w_path)
+                self.update_day_val(2, 3, data[key])
+                self.update_week_val(7, 3, data[key])
             elif key == "241":
-                self.update_day_val(3, 3, data[key], d_path)
-                self.update_week_val(8, 3, data[key], w_path)
+                self.update_day_val(3, 3, data[key])
+                self.update_week_val(8, 3, data[key])
             elif key == "741":
-                self.update_day_val(4, 3, data[key], d_path)
-                self.update_week_val(9, 3, data[key], w_path)
+                self.update_day_val(4, 3, data[key])
+                self.update_week_val(9, 3, data[key])
             else:
                 self.logger.debug('unprocessed newAward')
+        with open(d_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(self.day_values)
+        with open(w_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(self.week_values)
 
 # End of File
