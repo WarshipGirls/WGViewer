@@ -135,7 +135,7 @@ class UISettings(SettingsTemplate):
         row += 1
         self.layout.addWidget(self.get_h_line(), row, 0, 1, 4)
         row += 1
-        self.set_checkbox_status(self.user_resolution, QKEYS.UI_MAIN)
+        self.set_checkbox_status(self.user_resolution, QKEYS.UI_MAIN, default=False)
         self.user_resolution.stateChanged.connect(lambda _: self.qsettings.setValue(QKEYS.UI_MAIN, self.user_resolution.isChecked()))
         self.layout.addWidget(self.user_resolution, row, 0, 1, 2)
 
