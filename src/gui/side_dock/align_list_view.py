@@ -132,7 +132,6 @@ class BuildListView(AlignListView):
         pass
         # dock/buildBoat/{slot}/{fuel}/{ammo}/{steel}/{baux}
         # dock/getBoat/{slot}
-        # TODO: cancel build
 
 
 class DevListView(AlignListView):
@@ -146,7 +145,6 @@ class DevListView(AlignListView):
         # dock/buildEquipment/{slot}/{fuel}/{ammo}/{steel}/{baux}
         # dock/dismantleEquipment       # TODO: #103
         # dock/getEquipment/2/
-        # TODO: cancel dev
 
 
 class ExpListView(AlignListView):
@@ -199,6 +197,7 @@ class ExpListView(AlignListView):
             else:
                 self.logger.debug(data)
             return res, data
+
         return self._reconnecting_calls(_cancel, 'cancel expedition')
 
 

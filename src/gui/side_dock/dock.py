@@ -38,7 +38,6 @@ class SideDock(QDockWidget):
     """
     Side Dock/Panel, named "Navy Base Overview", displays all important data of the user.
         This is the first coded QWidget of WGViewer (even before LoginForm).
-    TODO: refactor
     """
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
@@ -350,7 +349,6 @@ class SideDock(QDockWidget):
 
             self.sign_widget.setText(data["friendVo"]["sign"])
 
-    @pyqtSlot(dict)
     def update_one_expedition(self, data: dict) -> None:
         # Input = pveExploreVo['levels'][_idx]
         _idx = int(data['fleetId'])-5
@@ -366,7 +364,6 @@ class SideDock(QDockWidget):
         self.exp_list_view.get_counters()[fleet_idx] = 0
         self.exp_list_view.get_counter_timers()[fleet_idx].stop()
 
-    @pyqtSlot(dict)
     def update_expeditions(self, data: dict) -> None:
         if data is not None:
             p = sorted(data["levels"], key=lambda x: int(x['fleetId']), reverse=False)
