@@ -106,7 +106,6 @@ class ExpFleets(QWidget):
         self.init_ui()
 
         self.exp_buttons = QButtonGroup()
-        self.maps = wgv_utils.get_exp_list()
         self.fleets = wgv_utils.get_exp_fleets()
         self.user_ships = get_processed_userShipVo()
         self.curr_exp_maps: List[str] = ['1-1'] * 4

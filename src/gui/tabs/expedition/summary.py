@@ -43,6 +43,17 @@ class DailySummary(QTableWidget):
 
         labels_col1 = ["Fuel", "Ammo.", "Steel", "Bauxite"]
         labels_col2 = ["Inst. Repair", "Inst. Build.", "Ship Blueprint", "Equip. Blueprint"]
+        w_path, d_path = get_expedition_log()
+        if os.path.exists(w_path) and os.path.exists(d_path):
+            with open(w_path, 'r') as f:
+                data = next(csv.reader(f))
+                self.week_values = list(map(int, data))
+            with open(d_path, 'r') as f:
+                # the csv will be only one line
+                data = next(csv.reader(f))
+                self.day_values = list(map(int, data))
+        else:
+            pass
         self.set_labels(labels_col1, 0)
         self.set_labels(labels_col2, 2)
 
@@ -60,24 +71,24 @@ class DailySummary(QTableWidget):
         self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
     def set_labels(self, labels: list, col: int) -> None:
-        w_path, d_path = get_expedition_log()
-        if os.path.exists(w_path) and os.path.exists(d_path):
-            with open(w_path, 'r') as f:
-                data = next(csv.reader(f))
-                self.week_values = list(map(int, data))
-            with open(d_path, 'r') as f:
-                # the csv will be only one line
-                data = next(csv.reader(f))
-                self.day_values = list(map(int, data))
+        if col == 0:
+            offset = -1
+        elif col == 2:
+            offset = 3
         else:
-            pass
-
+            offset = 0
         for row in range(1, 5):
             self.setItem(row, col, QTableWidgetItem(labels[row - 1]))
-            self.setItem(row, col + 1, QTableWidgetItem(str(self.day_values[row - 1])))
+            self.setItem(row, col + 1, QTableWidgetItem(str(self.day_values[row + offset])))
+        if col == 0:
+            offset = -6
+        elif col == 2:
+            offset = -2
+        else:
+            offset = 0
         for row in range(6, 10):
             self.setItem(row, col, QTableWidgetItem(labels[row - 6]))
-            self.setItem(row, col + 1, QTableWidgetItem(str(self.week_values[row - 6])))
+            self.setItem(row, col + 1, QTableWidgetItem(str(self.week_values[row + offset])))
 
     # ================================
     # Data
