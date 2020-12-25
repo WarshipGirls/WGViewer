@@ -10,6 +10,7 @@ from src.func import logger_names as QLOGS
 from src.func.log_handler import get_new_logger
 from src import utils as wgv_utils
 from src.wgr import API_EXPLORE
+from . import constants as CONST
 
 
 class AlignListView(QTreeView):
@@ -113,7 +114,7 @@ class BathListView(AlignListView):
     def __init__(self):
         super().__init__()
         for i in range(4):
-            _, self.counter_labels[i] = self.add_item("Repairing Dock Locked", "")
+            _, self.counter_labels[i] = self.add_item(CONST.BATH_LABEL_L, CONST.BATH_LABEL_R)
 
     def on_click(self, index) -> None:
         pass
@@ -125,7 +126,7 @@ class BuildListView(AlignListView):
     def __init__(self):
         super().__init__()
         for i in range(4):
-            _, self.counter_labels[i] = self.add_item("Constr. Slot", "Locked")
+            _, self.counter_labels[i] = self.add_item(CONST.BLD_LABEL_L, CONST.BLD_LABEL_R)
 
     def on_click(self, index) -> None:
         pass
@@ -138,7 +139,7 @@ class DevListView(AlignListView):
     def __init__(self):
         super().__init__()
         for i in range(4):
-            _, self.counter_labels[i] = self.add_item("Dev. Slot", "Locked")
+            _, self.counter_labels[i] = self.add_item(CONST.DEV_LABEL_L, CONST.DEV_LABEL_R)
 
     def on_click(self, index) -> None:
         pass
@@ -154,7 +155,7 @@ class ExpListView(AlignListView):
         self.api = API_EXPLORE(load_cookies())
         self.reconnection_limit = 3
         for i in range(4):
-            _, self.counter_labels[i] = self.add_item("Exped. Fleet", "Idling")  # HARDCODING
+            _, self.counter_labels[i] = self.add_item(CONST.EXP_LABEL_L, CONST.EXP_LABEL_R)
 
     def on_click(self, index) -> None:
         pass

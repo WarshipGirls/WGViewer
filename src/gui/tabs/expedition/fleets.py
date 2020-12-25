@@ -13,6 +13,7 @@ from src import utils as wgv_utils
 from src.data import get_processed_userShipVo
 from src.gui.side_dock.dock import SideDock
 from src.gui.side_dock.resource_model import ResourceTableModel
+from src.gui.side_dock.constants import EXP_LABEL_R
 
 BTN_TEXT_START: str = 'START'
 BTN_TEXT_STOP: str = 'STOP'
@@ -225,7 +226,7 @@ class ExpFleets(QWidget):
             self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
             next_map = self.next_exp_maps[fleet_idx].replace('-', '000')
             fleet_id = str(fleet_idx + 5)
-            if self.get_counter_label(fleet_idx) == "Idling":  # HARDCODING TODO
+            if self.get_counter_label(fleet_idx) == EXP_LABEL_R:  # if idling
                 pass
             else:
                 self._get_exp_result(curr_map)
