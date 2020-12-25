@@ -17,13 +17,15 @@ The idea is to hack the game and use its native APIs to mimic an official client
 
 The official sites of the mobile game, Warship Girls (R), are [here (CN)][CN], [here (JP)][JP] and [here (International)][Intl].
 
-## Features
+## Main Features
 
-As of `v0.2.1dev`,
+As of `v0.2.2dev+` ([commit 4a366e7c][commit-url]),
 
-- Auto sortie on Thermopylae Ex-6
+- Auto sortie on Thermopylae Ex-6, with user customized fleet
+- Auto (& Manual) perform expedition tasks
 - Display all warships' statistics, with sorting & filtering
 - Display all user's docking/constructing/developing/tasking info on side panel
+- Logs user's resources, with interactive data graphs
 
 ## Screenshots
 
@@ -92,6 +94,7 @@ The copyright of the shipgirl art resources used in the WGViewer belong to Moefa
 [CN]: http://www.jianniang.com/
 [JP]: http://ssr.moefantasy.co.jp/
 [Intl]: http://www.warshipgirls.com/en/
+[commit-url]: https://github.com/WarshipGirls/WGViewer/tree/4a366e7c45a6e0e9e2116e04f94980b7e88b821f
 
 [d-win]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.2-dev/WGViewer-win64.zip
 [d-linux]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1-dev/WGViewer-linux64.zip

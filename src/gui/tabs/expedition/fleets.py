@@ -1,12 +1,12 @@
 from typing import Callable, List, Tuple
 from logging import Logger
 
-from PyQt5.QtCore import Qt, pyqtSignal, QEvent
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QWidget, QTableWidget, QTableWidgetItem, QPushButton,
-    QHBoxLayout, QVBoxLayout,
-    QTableView, QHeaderView, QAbstractScrollArea, QComboBox, QButtonGroup, QMainWindow, QLabel
+    QHBoxLayout,
+    QTableView, QHeaderView, QAbstractScrollArea, QButtonGroup
 )
 
 from src import utils as wgv_utils
@@ -15,15 +15,12 @@ from src.func.worker import CallbackWorker
 from src.gui.side_dock.dock import SideDock
 from src.gui.side_dock.resource_model import ResourceTableModel
 from src.gui.side_dock.constants import EXP_LABEL_R
+from .ui_widgets import CustomComboBox
 
 BTN_TEXT_START: str = 'START'
 BTN_TEXT_STOP: str = 'STOP'
 
 # TODO: user select fleet
-# TODO: refactor
-# TODO: use a worker thread for api calls
-# TODO: if auto-on, the original start_expedition not working, triple start calls
-#   correct procedure is get result then start; manual works
 
 """
 fleet_id, str, represents '5', '6', '7', '8'
@@ -32,84 +29,6 @@ fleet_idx, int, represents 0, 1, 2, 3
 Lesson: "Basic rule of Qt and PyQt, the GUI is never modified from another thread other than the main thread,
     the main thread is called the GUI thread!!!!" – eyllanesc
 """
-
-
-class PopupFleets(QMainWindow):
-    def __init__(self, fleet_id: str):
-        super().__init__()
-        self.fleet = wgv_utils.get_exp_fleets()[fleet_id]
-        self.user_ships = get_processed_userShipVo()
-
-        self.setStyleSheet(wgv_utils.get_color_scheme())
-        self.setWindowTitle('WGViewer - Expedition Fleet Selection')
-        self.width = 200
-        self.height = 500
-        self.resize(self.width, self.height)
-
-        self.curr_tab = QTableWidget()
-        self.next_buttons = QButtonGroup()
-        self.set_curr_table(0)
-
-        content_layout_widget = QWidget(self)
-        content_layout = QVBoxLayout(content_layout_widget)
-        content_layout.addWidget(QLabel(f'Current Fleet {fleet_id}'))
-        content_layout.addWidget(self.curr_tab)
-        content_layout.addWidget(QLabel(f'Expedition Fleet for Next Map'))
-        for b in self.next_buttons.buttons():
-            content_layout.addWidget(b)
-        self.setCentralWidget(content_layout_widget)
-
-        self.show()
-
-    def set_curr_table(self, row: int) -> None:
-        self.curr_tab.setRowCount(6)
-        self.curr_tab.setColumnCount(3)
-        for ship_id in self.fleet:
-            info = self.user_ships[str(ship_id)]
-            self.curr_tab.setItem(row, 0, QTableWidgetItem(info['Class']))
-            self.curr_tab.setItem(row, 1, QTableWidgetItem(info['Lv.']))
-            self.curr_tab.setItem(row, 2, QTableWidgetItem(info['Name']))
-            row += 1
-        self.curr_tab.resizeColumnsToContents()
-        self.curr_tab.resizeRowsToContents()
-        self.curr_tab.setShowGrid(False)
-        self.curr_tab.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.curr_tab.horizontalHeader().hide()
-        self.curr_tab.verticalHeader().hide()
-        self.curr_tab.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.curr_tab.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.curr_tab.setEditTriggers(QTableView.NoEditTriggers)
-        self.curr_tab.setFocusPolicy(Qt.NoFocus)
-        self.curr_tab.setSelectionMode(QTableView.NoSelection)
-        self.curr_tab.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-
-    def set_next_table(self) -> None:
-        # TODO: like ship_window.py
-        pass
-
-
-class CustomComboBox(QComboBox):
-    """
-    QComboBox that can enable/disable certain items.
-        Rendering dropdown items upon clicking
-    """
-
-    def __init__(self, parent):
-        super().__init__()
-        self.parent = parent
-        self.maps = wgv_utils.get_exp_list()
-        self.addItems(self.maps)
-        self.installEventFilter(self)
-
-    def eventFilter(self, target, event):
-        if target == self and event.type() == QEvent.MouseButtonPress:
-            self.disable_maps()
-        return False
-
-    def disable_maps(self):
-        for i in range(self.count()):
-            item = self.model().item(i)
-            item.setEnabled(item.text() not in self.parent.next_exp_maps)
 
 
 class ExpFleets(QTableWidget):
@@ -275,7 +194,7 @@ class ExpFleets(QTableWidget):
     def on_start_expedition_finished(self, result: Tuple[dict, int]) -> None:
         start_res = result[0]
         if start_res is None:
-            self.logger.debug("start res is None")
+            self.logger.debug("Start res is None")
             return
         fleet_idx = result[1]
         fleet_id = str(fleet_idx + 5)
@@ -296,20 +215,27 @@ class ExpFleets(QTableWidget):
         else:
             pass
 
+        btn = self.exp_buttons.buttons()[fleet_idx]
+        btn.setText(BTN_TEXT_STOP)
+        btn.setEnabled(True)
+
     def stop_expedition(self, curr_map: str, fleet_idx: int) -> int:
         self._cancel_exp(curr_map)
         return fleet_idx
 
     def on_stop_expedition_finished(self, fleet_idx: int) -> None:
+        btn = self.exp_buttons.buttons()[fleet_idx]
+        btn.setText(BTN_TEXT_START)
+        btn.setEnabled(True)
         self.side_dock.cancel_one_expedition(fleet_idx)
 
     def on_get_result_finished(self, res) -> None:
         # TODO: updateTaskVo
         if res is None:
-            self.logger.debug("get result res is None")
+            self.logger.debug("Get result res is None")
             return
         self.sig_exp.emit(res['userLevelVo'])
-        success_str = "big success" if res['bigSuccess'] == 1 else "success"
+        success_str = "Big success!!" if res['bigSuccess'] == 1 else "Success!"
         self.logger.info(success_str)
 
         # update reward items
@@ -326,19 +252,29 @@ class ExpFleets(QTableWidget):
                 elif item['itemCid'] == 741:
                     self.sig_bp_dev.emit(item['num'])
                 else:
-                    self.logger.debug('unprocessed item cid')
+                    self.logger.debug('Unprocessed item cid')
                     self.logger.debug(item)
         # update resources
         self.update_resources(res['userResVo'])
         # update summary table
         self.summary.on_newAward(res['newAward'])
 
-        self.logger.info("The fleet start a new expedition")
+        self.logger.info("The fleet starts a new expedition")
         self.bee_start.start()
 
     def on_button_clicked(self, fleet_idx: int, is_auto: bool = False) -> None:
         # TODO: check if fleet class requirement met
+
+        # checks running threads and prevents malicious users to overload the GUI
+        if self.bee_start is not None and self.bee_start.isRunning() is True:
+            return
+        if self.bee_stop is not None and self.bee_stop.isRunning() is True:
+            return
+        if self.bee_res is not None and self.bee_res.isRunning() is True:
+            return
+
         btn = self.exp_buttons.buttons()[fleet_idx]
+        btn.setEnabled(False)
         curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
         if btn.text() == BTN_TEXT_START or is_auto is True:
 
@@ -348,21 +284,17 @@ class ExpFleets(QTableWidget):
             self.bee_res.terminate()
 
             if self.get_counter_label(fleet_idx) == EXP_LABEL_R:  # if idling
-                self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
+                self.logger.info(f'Fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
                 self.bee_start.start()
             else:
-                self.logger.info(f'fleet #{fleet_idx + 5} retrieve expedition rewards on {self.next_exp_maps[fleet_idx]}')
+                self.logger.info(f'Fleet #{fleet_idx + 5} retrieve expedition rewards on {self.next_exp_maps[fleet_idx]}')
                 self.bee_res.start()
-
-            btn.setText(BTN_TEXT_STOP)
         elif btn.text() == BTN_TEXT_STOP:
-            self.logger.info(f'fleet #{fleet_idx + 5} stops expedition on {self.next_exp_maps[fleet_idx]}')
+            self.logger.info(f'Fleet #{fleet_idx + 5} stops expedition on {self.next_exp_maps[fleet_idx]}')
 
             self.bee_stop = CallbackWorker(self.stop_expedition, (curr_map, fleet_idx), self.on_stop_expedition_finished)
             self.bee_stop.terminate()
             self.bee_stop.start()
-
-            btn.setText(BTN_TEXT_START)
         else:
             pass
 

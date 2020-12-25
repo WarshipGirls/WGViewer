@@ -11,7 +11,8 @@ from src.func.log_handler import get_new_logger
 from src.gui.side_dock.dock import SideDock
 from .expedition.table import ExpTable
 from .expedition.summary import DailySummary
-from .expedition.fleets import ExpFleets, PopupFleets
+from .expedition.fleets import ExpFleets
+from .expedition.ui_widgets import PopupFleets
 
 
 # TODO: get real-time data
