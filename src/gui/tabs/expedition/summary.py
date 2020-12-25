@@ -109,7 +109,7 @@ class DailySummary(QTableWidget):
         elif col == 3:
             self.day_values[row + 3] += data
         else:
-            self.logger.debug('unexpected case at update_day_val')
+            self.logger.debug("Unexpected case at update_day_val")
 
     def update_week_val(self, row: int, col: int, data: int):
         self.update_val(row, col, data)
@@ -118,7 +118,7 @@ class DailySummary(QTableWidget):
         elif col == 3:
             self.week_values[row - 2] += data
         else:
-            self.logger.debug('unexpected case at update_week_val')
+            self.logger.debug("Unexpected case at update_week_val")
 
     def on_newAward(self, data: dict) -> None:
         # 2: fuel, 3: ammo, 4: steel, 9: bauxite, 141: instant_build, 241: bp_build, 541, instant_repair, 741: bp_equip
@@ -150,7 +150,7 @@ class DailySummary(QTableWidget):
                 self.update_week_val(9, 3, data[key])
             else:
                 # 6, not in shipItem
-                debug_str = f'unprocessed newAward key: {key}: {data[key]}'
+                debug_str = f'Unprocessed newAward key: {key}: {data[key]}'
                 self.logger.debug(debug_str)
         with open(d_path, 'w', newline='') as f:
             writer = csv.writer(f)

@@ -194,7 +194,7 @@ class ExpFleets(QTableWidget):
     def on_start_expedition_finished(self, result: Tuple[dict, int]) -> None:
         start_res = result[0]
         if start_res is None:
-            self.logger.debug("start res is None")
+            self.logger.debug("Start res is None")
             return
         fleet_idx = result[1]
         fleet_id = str(fleet_idx + 5)
@@ -232,10 +232,10 @@ class ExpFleets(QTableWidget):
     def on_get_result_finished(self, res) -> None:
         # TODO: updateTaskVo
         if res is None:
-            self.logger.debug("get result res is None")
+            self.logger.debug("Get result res is None")
             return
         self.sig_exp.emit(res['userLevelVo'])
-        success_str = "big success" if res['bigSuccess'] == 1 else "success"
+        success_str = "Big success!!" if res['bigSuccess'] == 1 else "Success!"
         self.logger.info(success_str)
 
         # update reward items
@@ -252,14 +252,14 @@ class ExpFleets(QTableWidget):
                 elif item['itemCid'] == 741:
                     self.sig_bp_dev.emit(item['num'])
                 else:
-                    self.logger.debug('unprocessed item cid')
+                    self.logger.debug('Unprocessed item cid')
                     self.logger.debug(item)
         # update resources
         self.update_resources(res['userResVo'])
         # update summary table
         self.summary.on_newAward(res['newAward'])
 
-        self.logger.info("The fleet start a new expedition")
+        self.logger.info("The fleet starts a new expedition")
         self.bee_start.start()
 
     def on_button_clicked(self, fleet_idx: int, is_auto: bool = False) -> None:
@@ -284,13 +284,13 @@ class ExpFleets(QTableWidget):
             self.bee_res.terminate()
 
             if self.get_counter_label(fleet_idx) == EXP_LABEL_R:  # if idling
-                self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
+                self.logger.info(f'Fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
                 self.bee_start.start()
             else:
-                self.logger.info(f'fleet #{fleet_idx + 5} retrieve expedition rewards on {self.next_exp_maps[fleet_idx]}')
+                self.logger.info(f'Fleet #{fleet_idx + 5} retrieve expedition rewards on {self.next_exp_maps[fleet_idx]}')
                 self.bee_res.start()
         elif btn.text() == BTN_TEXT_STOP:
-            self.logger.info(f'fleet #{fleet_idx + 5} stops expedition on {self.next_exp_maps[fleet_idx]}')
+            self.logger.info(f'Fleet #{fleet_idx + 5} stops expedition on {self.next_exp_maps[fleet_idx]}')
 
             self.bee_stop = CallbackWorker(self.stop_expedition, (curr_map, fleet_idx), self.on_stop_expedition_finished)
             self.bee_stop.terminate()
