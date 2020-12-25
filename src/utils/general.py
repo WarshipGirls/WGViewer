@@ -7,6 +7,7 @@ import time
 
 from random import randint
 from threading import Event
+from typing import List
 from PyQt5.QtCore import QSettings, pyqtSlot
 
 from src.data import get_qsettings_file
@@ -43,6 +44,16 @@ def get_game_version() -> str:
 
 def force_quit(code: int) -> None:
     os._exit(code)
+
+
+def welcome_console_message() -> List[str]:
+    x = ['██╗    ██╗ ██████╗ ██╗   ██╗██╗███████╗██╗    ██╗███████╗██████╗ ',
+         '██║    ██║██╔════╝ ██║   ██║██║██╔════╝██║    ██║██╔════╝██╔══██╗',
+         '██║ █╗ ██║██║  ███╗██║   ██║██║█████╗  ██║ █╗ ██║█████╗  ██████╔╝',
+         '██║███╗██║██║   ██║╚██╗ ██╔╝██║██╔══╝  ██║███╗██║██╔══╝  ██╔══██╗',
+         '╚███╔███╔╝╚██████╔╝ ╚████╔╝ ██║███████╗╚███╔███╔╝███████╗██║  ██║',
+         ' ╚══╝╚══╝  ╚═════╝   ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝']
+    return x
 
 
 # ================================
