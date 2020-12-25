@@ -42,8 +42,10 @@ class SideDock(QDockWidget):
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
-    def __init__(self, parent):
+    def __init__(self, parent, realrun: bool):
         super(SideDock, self).__init__(parent)
+        self.is_realrun = realrun
+
         _, self.user_screen_h = wgv_utils.get_user_resolution()
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
 
@@ -250,7 +252,11 @@ class SideDock(QDockWidget):
             elif counters == self.exp_list_view.get_counters():
                 counters[idx] = 0
                 timers[idx].stop()
-                self.exp_list_view.auto_restart(idx)
+                if self.is_realrun:
+                    self.exp_list_view.auto_restart(idx)
+                else:
+                    # otherwise will cause problem
+                    pass
             else:
                 counters[idx] = 0
                 timers[idx].stop()
@@ -316,6 +322,8 @@ class SideDock(QDockWidget):
             self.table_model.update_BB(_get_item_by_id(10241))
             self.table_model.update_CV(_get_item_by_id(10141))
             self.table_model.update_SS(_get_item_by_id(10541))
+
+            self.table_model.write_csv()
 
     @pyqtSlot(dict)
     def update_lvl_label(self, x: dict) -> None:

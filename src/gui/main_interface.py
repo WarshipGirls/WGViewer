@@ -95,7 +95,7 @@ class MainInterface(QMainWindow):
 
     def create_side_dock(self) -> None:
         if self.side_dock is None:
-            self.side_dock = SideDock(self)
+            self.side_dock = SideDock(self, self.is_realrun)
         else:
             self.side_dock.show()
         if self.qsettings.contains(QKEYS.UI_SIDEDOCK_POS) is True:

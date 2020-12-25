@@ -5,8 +5,8 @@ from PyQt5.QtCore import Qt, pyqtSignal, QEvent
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QWidget, QTableWidget, QTableWidgetItem, QPushButton,
-    QHBoxLayout,
-    QTableView, QHeaderView, QAbstractScrollArea, QComboBox, QButtonGroup
+    QHBoxLayout, QVBoxLayout,
+    QTableView, QHeaderView, QAbstractScrollArea, QComboBox, QButtonGroup, QMainWindow, QLabel
 )
 
 from src import utils as wgv_utils
@@ -19,35 +19,67 @@ BTN_TEXT_START: str = 'START'
 BTN_TEXT_STOP: str = 'STOP'
 
 # TODO: user select fleet
-# TODO: auto switch exp map
 # TODO: refactor
+# TODO: use a worker thread for api calls
 
-'''
+"""
+fleet_id, str, represents '5', '6', '7', '8'
+fleet_idx, int, represents 0, 1, 2, 3
+"""
+
+
 class PopupFleets(QMainWindow):
-    def __init__(self, curr_fleet: list, user_ships: object):
+    def __init__(self, fleet_id: str):
         super().__init__()
-        self.curr_fleet = curr_fleet
-        self.info = user_ships
-        self.width = 400
-        self.height = 200
+        self.fleet = wgv_utils.get_exp_fleets()[fleet_id]
+        self.user_ships = get_processed_userShipVo()
 
         self.setStyleSheet(wgv_utils.get_color_scheme())
         self.setWindowTitle('WGViewer - Expedition Fleet Selection')
+        self.width = 200
+        self.height = 500
         self.resize(self.width, self.height)
 
-        content_layout = QVBoxLayout()
+        self.curr_tab = QTableWidget()
+        self.next_buttons = QButtonGroup()
+        self.set_curr_table(0)
 
-        self.tab = QTableWidget()
-        self.tab.setRowCount(7)
-        for ship_id in self.curr_fleet:
-            info = self.info[str(ship_id)]
-            self.set_one_ship(row, ship_id, info)
+        content_layout_widget = QWidget(self)
+        content_layout = QVBoxLayout(content_layout_widget)
+        content_layout.addWidget(QLabel(f'Current Fleet {fleet_id}'))
+        content_layout.addWidget(self.curr_tab)
+        content_layout.addWidget(QLabel(f'Expedition Fleet for Next Map'))
+        for b in self.next_buttons.buttons():
+            content_layout.addWidget(b)
+        self.setCentralWidget(content_layout_widget)
 
-    def set_one_ship(self, row, ship_id, info):
-        self.tab.setItem(row, 0, QTableWidgetItem(info['Name']))
-        self.tab.setItem()
-'''
+        self.show()
 
+    def set_curr_table(self, row: int) -> None:
+        self.curr_tab.setRowCount(6)
+        self.curr_tab.setColumnCount(3)
+        for ship_id in self.fleet:
+            info = self.user_ships[str(ship_id)]
+            self.curr_tab.setItem(row, 0, QTableWidgetItem(info['Class']))
+            self.curr_tab.setItem(row, 1, QTableWidgetItem(info['Lv.']))
+            self.curr_tab.setItem(row, 2, QTableWidgetItem(info['Name']))
+            row += 1
+        self.curr_tab.resizeColumnsToContents()
+        self.curr_tab.resizeRowsToContents()
+        self.curr_tab.setShowGrid(False)
+        self.curr_tab.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.curr_tab.horizontalHeader().hide()
+        self.curr_tab.verticalHeader().hide()
+        self.curr_tab.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.curr_tab.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.curr_tab.setEditTriggers(QTableView.NoEditTriggers)
+        self.curr_tab.setFocusPolicy(Qt.NoFocus)
+        self.curr_tab.setSelectionMode(QTableView.NoSelection)
+        self.curr_tab.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+
+    def set_next_table(self) -> None:
+        # TODO: like ship_window.py
+        pass
 
 class CustomComboBox(QComboBox):
     """
@@ -90,12 +122,10 @@ class ExpFleets(QTableWidget):
         self.summary = summary
         self.logger = logger
 
-        self.logger.info("██╗    ██╗ ██████╗ ██╗   ██╗██╗███████╗██╗    ██╗███████╗██████╗ ")
-        self.logger.info("██║    ██║██╔════╝ ██║   ██║██║██╔════╝██║    ██║██╔════╝██╔══██╗")
-        self.logger.info("██║ █╗ ██║██║  ███╗██║   ██║██║█████╗  ██║ █╗ ██║█████╗  ██████╔╝")
-        self.logger.info("██║███╗██║██║   ██║╚██╗ ██╔╝██║██╔══╝  ██║███╗██║██╔══╝  ██╔══██╗")
-        self.logger.info("╚███╔███╔╝╚██████╔╝ ╚████╔╝ ██║███████╗╚███╔███╔╝███████╗██║  ██║")
-        self.logger.info(" ╚══╝╚══╝  ╚═════╝   ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝")
+        for x in wgv_utils.welcome_console_message():
+            self.logger.info(x)
+        del x
+
         self.resource_info: ResourceTableModel = self.side_dock.table_model
 
         # Signals
@@ -129,6 +159,7 @@ class ExpFleets(QTableWidget):
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
         self.setShowGrid(False)
+        # Keep following one; it differs from resizeColumnsToContents()
         self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.horizontalHeader().hide()
         self.verticalHeader().hide()
@@ -228,11 +259,15 @@ class ExpFleets(QTableWidget):
         self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
         next_map = self.next_exp_maps[fleet_idx].replace('-', '000')
         fleet_id = str(fleet_idx + 5)
+        # TODO: if auto-on, the following not working, triple start calls
+        #   correct procedure is get result then start; manual works
         if self.get_counter_label(fleet_idx) == EXP_LABEL_R:  # if idling
             pass
         else:
             self._get_exp_result(curr_map)
         start_res = self._start_exp(next_map, fleet_id)
+        if start_res is None:
+            return
         d = next((i for i in start_res['pveExploreVo']['levels'] if i['fleetId'] == fleet_id))
         self._update_one_expedition(d)
 
