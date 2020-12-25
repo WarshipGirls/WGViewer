@@ -171,7 +171,7 @@ class ExpListView(AlignListView):
 
     def on_single_click(self, index: QModelIndex) -> None:
         """
-        Single click simply jumps to the Tab Expedition
+        Single click simply jumps to the Tab Expedition (when the tab is open)
         @param index: QModelIndex object
         @type index: QModelIndex
         @return: None
@@ -194,6 +194,17 @@ class ExpListView(AlignListView):
         fleet_idx = index.row()
         tab_exp = self.main_tabs.tabs.findChild(QWidget, 'tab_exp')
         tab_exp.fleet_table.on_button_clicked(fleet_idx)
+
+    def auto_restart(self, index: int) -> None:
+        """
+        Given the index of the expedition entry (same as fleet_idx), auto restart expedition
+        @param index: expedition entry
+        @type index: int
+        @return: None
+        @rtype: None
+        """
+        tab_exp = self.main_tabs.tabs.findChild(QWidget, 'tab_exp')
+        tab_exp.fleet_table.on_button_clicked(index)
 
     def get_exp_result(self, exp_map: str) -> dict:
         def _get_res() -> Tuple[bool, dict]:

@@ -248,9 +248,9 @@ class SideDock(QDockWidget):
                 self.bath_list_view.update_item(idx, 0, "Repairing Dock Unused")
                 self.bath_list_view.update_item(idx, 1, "--:--:--")
             elif counters == self.exp_list_view.get_counters():
-                # TODO: exp counter signals to restart
                 counters[idx] = 0
                 timers[idx].stop()
+                self.exp_list_view.auto_restart(idx)
             else:
                 counters[idx] = 0
                 timers[idx].stop()

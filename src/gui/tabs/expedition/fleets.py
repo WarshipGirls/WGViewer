@@ -18,8 +18,6 @@ from src.gui.side_dock.constants import EXP_LABEL_R
 BTN_TEXT_START: str = 'START'
 BTN_TEXT_STOP: str = 'STOP'
 
-# TODO: auto start expedition
-# TODO: auto get result
 # TODO: user select fleet
 # TODO: auto switch exp map
 
