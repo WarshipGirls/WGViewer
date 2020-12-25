@@ -188,6 +188,7 @@ class ExpFleets(QWidget):
 
     def on_dropdown_change(self, fleet: int, next_map: str) -> None:
         self.next_exp_maps[fleet] = next_map
+        #todo disable dropdown repeated values
         self.logger.debug(f"Next expedition map changed: {self.next_exp_maps}")
 
     def set_one_ship(self, row: int, col: int, ship_id: int, info: dict) -> None:
