@@ -149,7 +149,8 @@ class DailySummary(QTableWidget):
                 self.update_day_val(4, 3, data[key])
                 self.update_week_val(9, 3, data[key])
             else:
-                self.logger.debug('unprocessed newAward')
+                self.logger.debug('unprocessed newAward key:')
+                self.logger.debug(key)
         with open(d_path, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(self.day_values)

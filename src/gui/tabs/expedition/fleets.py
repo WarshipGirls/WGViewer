@@ -29,8 +29,8 @@ BTN_TEXT_STOP: str = 'STOP'
 fleet_id, str, represents '5', '6', '7', '8'
 fleet_idx, int, represents 0, 1, 2, 3
 
-Lesson: Basic rule of Qt and PyQt, the GUI is never modified from another thread other than the main thread,
-    the main thread is called the GUI thread!!!! – eyllanesc
+Lesson: "Basic rule of Qt and PyQt, the GUI is never modified from another thread other than the main thread,
+    the main thread is called the GUI thread!!!!" – eyllanesc
 """
 
 
@@ -134,6 +134,10 @@ class ExpFleets(QTableWidget):
         del x
 
         self.resource_info: ResourceTableModel = self.side_dock.table_model
+        # Workers
+        self.bee_start = None
+        self.bee_stop = None
+        self.bee_res = None
 
         # Signals
         self.sig_fuel.connect(self.resource_info.update_fuel)
@@ -251,16 +255,18 @@ class ExpFleets(QTableWidget):
         self.setItem(row + 1, col, QTableWidgetItem(lvl))
         self.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
 
+    # ================================
+    # Threads
+    # ================================
+
     def start_expedition(self, fleet_idx: int) -> Tuple[dict, int]:
         """
         Start an expedition.
-            - side_dock.exp_list_view also has access to this method
         @param fleet_idx: the 0-based fleet index
         @type fleet_idx: int
-        @return: None
-        @rtype: None
+        @return: server response of expedition/start, fleet index
+        @rtype: Tuple[dict, int]
         """
-
         next_map = self.next_exp_maps[fleet_idx].replace('-', '000')
         fleet_id = str(fleet_idx + 5)
         start_res = self._start_exp(next_map, fleet_id)
@@ -269,14 +275,13 @@ class ExpFleets(QTableWidget):
     def on_start_expedition_finished(self, result: Tuple[dict, int]) -> None:
         start_res = result[0]
         if start_res is None:
+            self.logger.debug("start res is None")
             return
         fleet_idx = result[1]
         fleet_id = str(fleet_idx + 5)
         d = next((i for i in start_res['pveExploreVo']['levels'] if i['fleetId'] == fleet_id))
         self._update_one_expedition(d)
 
-        button = self.exp_buttons.buttons()[fleet_idx]
-        button.setText(BTN_TEXT_STOP)
         self.curr_exp_maps[fleet_idx] = self.next_exp_maps[fleet_idx]
         item_map = QTableWidgetItem(self.curr_exp_maps[fleet_idx])
         item_map.setBackground(QColor(0, 0, 0))
@@ -292,35 +297,71 @@ class ExpFleets(QTableWidget):
             pass
 
     def stop_expedition(self, curr_map: str, fleet_idx: int) -> int:
-        self._cancel_exp(curr_map, fleet_idx)
+        self._cancel_exp(curr_map)
         return fleet_idx
 
     def on_stop_expedition_finished(self, fleet_idx: int) -> None:
         self.side_dock.cancel_one_expedition(fleet_idx)
 
+    def on_get_result_finished(self, res) -> None:
+        # TODO: updateTaskVo
+        if res is None:
+            self.logger.debug("get result res is None")
+            return
+        self.sig_exp.emit(res['userLevelVo'])
+        success_str = "big success" if res['bigSuccess'] == 1 else "success"
+        self.logger.info(success_str)
+
+        # update reward items
+        if 'packageVo' not in res:
+            pass
+        else:
+            for item in res['packageVo']:
+                if item['itemCid'] == 541:
+                    self.sig_repair.emit(item['num'])
+                elif item['itemCid'] == 141:
+                    self.sig_build.emit(item['num'])
+                elif item['itemCid'] == 241:
+                    self.sig_bp_construct.emit(item['num'])
+                elif item['itemCid'] == 741:
+                    self.sig_bp_dev.emit(item['num'])
+                else:
+                    self.logger.debug('unprocessed item cid')
+                    self.logger.debug(item)
+        # update resources
+        self.update_resources(res['userResVo'])
+        # update summary table
+        self.summary.on_newAward(res['newAward'])
+
+        self.logger.info("The fleet start a new expedition")
+        self.bee_start.start()
+
     def on_button_clicked(self, fleet_idx: int, is_auto: bool = False) -> None:
         # TODO: check if fleet class requirement met
         btn = self.exp_buttons.buttons()[fleet_idx]
+        curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
         if btn.text() == BTN_TEXT_START or is_auto is True:
-            self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
 
-            # self.start_expedition(fleet_idx)
-            curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
             self.bee_start = CallbackWorker(self.start_expedition, ([fleet_idx]), self.on_start_expedition_finished)
             self.bee_start.terminate()
-            self.bee_res = CallbackWorker(self._get_exp_result, ([curr_map, fleet_idx]), self.on_get_result_finished)
+            self.bee_res = CallbackWorker(self._get_exp_result, ([curr_map]), self.on_get_result_finished)
             self.bee_res.terminate()
+
             if self.get_counter_label(fleet_idx) == EXP_LABEL_R:  # if idling
+                self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
                 self.bee_start.start()
             else:
+                self.logger.info(f'fleet #{fleet_idx + 5} retrieve expedition rewards on {self.next_exp_maps[fleet_idx]}')
                 self.bee_res.start()
-                # self._get_exp_result(curr_map)
+
+            btn.setText(BTN_TEXT_STOP)
         elif btn.text() == BTN_TEXT_STOP:
             self.logger.info(f'fleet #{fleet_idx + 5} stops expedition on {self.next_exp_maps[fleet_idx]}')
-            curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
+
             self.bee_stop = CallbackWorker(self.stop_expedition, (curr_map, fleet_idx), self.on_stop_expedition_finished)
             self.bee_stop.terminate()
             self.bee_stop.start()
+
             btn.setText(BTN_TEXT_START)
         else:
             pass
@@ -351,46 +392,14 @@ class ExpFleets(QTableWidget):
         l = [i.text() for i in self.side_dock.exp_list_view.get_counter_labels()]
         return l[fleet_idx]
 
-    def _get_exp_result(self, curr_map: str, fleet_idx: int) -> Tuple[dict, int]:
+    def _get_exp_result(self, curr_map: str) -> dict:
         res = self.side_dock.exp_list_view.get_exp_result(curr_map)
-        return res, fleet_idx
-
-    def on_get_result_finished(self, result: Tuple[dict, int]) -> None:
-        res = result[0]
-        # TODO: updateTaskVo
-        self.sig_exp.emit(res['userLevelVo'])
-        success_str = "big success" if res['bigSuccess'] == 1 else "success"
-        self.logger.info(success_str)
-
-        # update reward items
-        if 'packageVo' not in res:
-            pass
-        else:
-            for item in res['packageVo']:
-                if item['itemCid'] == 541:
-                    self.sig_repair.emit(item['num'])
-                elif item['itemCid'] == 141:
-                    self.sig_build.emit(item['num'])
-                elif item['itemCid'] == 241:
-                    self.sig_bp_construct.emit(item['num'])
-                elif item['itemCid'] == 741:
-                    self.sig_bp_dev.emit(item['num'])
-                else:
-                    self.logger.debug('unprocessed item cid')
-        # update resources
-        self.update_resources(res['userResVo'])
-        # update summary table
-        self.summary.on_newAward(res['newAward'])
-
-        fleet_idx = result[1]
-        # self.bee_start = CallbackWorker(self.start_expedition, ([fleet_idx]), self.on_start_expedition_finished)
-        # self.bee_start.terminate()
-        self.bee_start.start()
+        return res
 
     def _start_exp(self, next_map: str, fleet_id: str) -> dict:
         return self.side_dock.exp_list_view.start_exp(next_map, fleet_id)
 
-    def _cancel_exp(self, exp_map: str, fleet_idx: int) -> dict:
+    def _cancel_exp(self, exp_map: str) -> dict:
         return self.side_dock.exp_list_view.cancel_exp(exp_map)
 
     def _update_one_expedition(self, data: dict) -> None:
