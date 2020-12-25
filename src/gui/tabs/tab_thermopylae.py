@@ -120,7 +120,7 @@ class TabThermopylae(QWidget):
         msg += "2. Adjutant 紫貂 (default) and Habakkuk (purchased in shop) are required;\n"
         msg += "3. Ships under Lv. 80 cannot be selected.\n"
         msg += "\nHow to Use\n"
-        msg += "1. Select ships, then press 'Set fleet'\n"
+        msg += "1. Select ships (rest non-battle ships are selected from old settings), then press 'Set fleet'\n"
         msg += "2. Press 'Pre-Battle Check'\n"
         msg += "3. Adjust your desired sortie times\n"
         msg += "4. Press 'Fresh Combat' or 'Resume Comba'\n"

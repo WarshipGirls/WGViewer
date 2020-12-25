@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QEvent
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QWidget, QTableWidget, QTableWidgetItem, QPushButton,
-    QHBoxLayout, QVBoxLayout,
+    QHBoxLayout,
     QTableView, QHeaderView, QAbstractScrollArea, QComboBox, QButtonGroup
 )
 
@@ -72,7 +72,7 @@ class CustomComboBox(QComboBox):
             item.setEnabled(item.text() not in self.parent.next_exp_maps)
 
 
-class ExpFleets(QWidget):
+class ExpFleets(QTableWidget):
     sig_fuel = pyqtSignal(int)
     sig_ammo = pyqtSignal(int)
     sig_steel = pyqtSignal(int)
@@ -101,8 +101,6 @@ class ExpFleets(QWidget):
         self.sig_bp_dev.connect(self.resource_info.update_bp_dev)
         self.sig_exp.connect(self.side_dock.update_lvl_label)
 
-        self.tab = QTableWidget()
-        self.layout = QVBoxLayout(self)
         self.init_ui()
 
         self.exp_buttons = QButtonGroup()
@@ -118,29 +116,20 @@ class ExpFleets(QWidget):
     # ================================
 
     def init_ui(self) -> None:
-        self.tab.setRowCount(28)
-        self.tab.setColumnCount(4)
-        self.tab.resizeColumnsToContents()
-        self.tab.resizeRowsToContents()
-        self.tab.setShowGrid(False)
-        self.tab.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.tab.horizontalHeader().hide()
-        self.tab.verticalHeader().hide()
-        self.tab.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tab.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tab.setEditTriggers(QTableView.NoEditTriggers)
-        self.tab.setFocusPolicy(Qt.NoFocus)
-        self.tab.setSelectionMode(QTableView.NoSelection)
-        self.tab.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-
-        self.layout.addWidget(self.tab)
-        self.setLayout(self.layout)
-
-    def get_row_count(self) -> int:
-        return self.tab.rowCount()
-
-    def get_col_count(self) -> int:
-        return self.tab.columnCount()
+        self.setRowCount(28)
+        self.setColumnCount(4)
+        self.resizeColumnsToContents()
+        self.resizeRowsToContents()
+        self.setShowGrid(False)
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.horizontalHeader().hide()
+        self.verticalHeader().hide()
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setEditTriggers(QTableView.NoEditTriggers)
+        self.setFocusPolicy(Qt.NoFocus)
+        self.setSelectionMode(QTableView.NoSelection)
+        self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
     def set_table(self) -> None:
         self.set_one_fleet(0, 0, '5')
@@ -152,11 +141,11 @@ class ExpFleets(QWidget):
         fleet_name = "Fleet #" + fleet_id
         item_fleet = QTableWidgetItem(fleet_name)
         item_fleet.setBackground(QColor(0, 0, 0))
-        self.tab.setItem(row, col, item_fleet)
+        self.setItem(row, col, item_fleet)
         map_name = wgv_utils.get_exp_map(fleet_id)
         item_map = QTableWidgetItem(map_name)
         item_map.setBackground(QColor(0, 0, 0))
-        self.tab.setItem(row, col + 1, item_map)
+        self.setItem(row, col + 1, item_map)
         row += 1
 
         fleet_idx = int(fleet_id) - 5
@@ -187,7 +176,7 @@ class ExpFleets(QWidget):
         l.setAlignment(Qt.AlignCenter)
         l.setContentsMargins(0, 0, 0, 0)
         w.setLayout(l)
-        self.tab.setCellWidget(row, col, w)
+        self.setCellWidget(row, col, w)
 
     def add_map_dropdown(self, row: int, col: int, fleet_idx: int, map_name: str) -> None:
         w = QWidget()
@@ -202,19 +191,19 @@ class ExpFleets(QWidget):
         l.addWidget(b)
         l.setContentsMargins(0, 0, 0, 0)
         w.setLayout(l)
-        self.tab.setCellWidget(row, col, w)
+        self.setCellWidget(row, col, w)
 
     def on_dropdown_change(self, fleet_idx: int, next_map: str) -> None:
         self.next_exp_maps[fleet_idx] = next_map
         self.logger.debug(f"Next expedition map changed: {self.next_exp_maps}")
 
     def set_one_ship(self, row: int, col: int, ship_id: int, info: dict) -> None:
-        self.tab.setItem(row, col, QTableWidgetItem(info['Name']))
+        self.setItem(row, col, QTableWidgetItem(info['Name']))
         s_id = "ID " + str(ship_id)
-        self.tab.setItem(row, col + 1, QTableWidgetItem(s_id))
+        self.setItem(row, col + 1, QTableWidgetItem(s_id))
         lvl = "Lv. " + info['Lv.']
-        self.tab.setItem(row + 1, col, QTableWidgetItem(lvl))
-        self.tab.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
+        self.setItem(row + 1, col, QTableWidgetItem(lvl))
+        self.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
 
     def on_button_clicked(self, fleet_idx: int) -> None:
         # TODO: check if fleet class requirement met
@@ -234,6 +223,16 @@ class ExpFleets(QWidget):
 
             btn.setText(BTN_TEXT_STOP)
             self.curr_exp_maps[fleet_idx] = self.next_exp_maps[fleet_idx]
+            if fleet_idx == 0:
+                self.setItem(0, 1, QTableWidgetItem(self.curr_exp_maps[fleet_idx]))
+            elif fleet_idx == 1:
+                self.setItem(0, 3, QTableWidgetItem(self.curr_exp_maps[fleet_idx]))
+            elif fleet_idx == 2:
+                self.setItem(14, 1, QTableWidgetItem(self.curr_exp_maps[fleet_idx]))
+            elif fleet_idx == 3:
+                self.setItem(14, 3, QTableWidgetItem(self.curr_exp_maps[fleet_idx]))
+            else:
+                pass
         elif btn.text() == BTN_TEXT_STOP:
             self.logger.info(f'fleet #{fleet_idx + 5} stops expedition on {self.next_exp_maps[fleet_idx]}')
             self._cancel_exp(curr_map, fleet_idx)
