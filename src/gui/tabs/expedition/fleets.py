@@ -20,6 +20,7 @@ BTN_TEXT_STOP: str = 'STOP'
 
 # TODO: user select fleet
 # TODO: auto switch exp map
+# TODO: refactor
 
 '''
 class PopupFleets(QMainWindow):
@@ -88,6 +89,13 @@ class ExpFleets(QTableWidget):
         self.side_dock = side_dock
         self.summary = summary
         self.logger = logger
+
+        self.logger.info("██╗    ██╗ ██████╗ ██╗   ██╗██╗███████╗██╗    ██╗███████╗██████╗ ")
+        self.logger.info("██║    ██║██╔════╝ ██║   ██║██║██╔════╝██║    ██║██╔════╝██╔══██╗")
+        self.logger.info("██║ █╗ ██║██║  ███╗██║   ██║██║█████╗  ██║ █╗ ██║█████╗  ██████╔╝")
+        self.logger.info("██║███╗██║██║   ██║╚██╗ ██╔╝██║██╔══╝  ██║███╗██║██╔══╝  ██╔══██╗")
+        self.logger.info("╚███╔███╔╝╚██████╔╝ ╚████╔╝ ██║███████╗╚███╔███╔╝███████╗██║  ██║")
+        self.logger.info(" ╚══╝╚══╝  ╚═════╝   ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝")
         self.resource_info: ResourceTableModel = self.side_dock.table_model
 
         # Signals
@@ -205,35 +213,51 @@ class ExpFleets(QTableWidget):
         self.setItem(row + 1, col, QTableWidgetItem(lvl))
         self.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
 
+    def start_expedition(self, fleet_idx: int) -> None:
+        """
+        Start an expedition.
+            - side_dock.exp_list_view also has access to this method
+        @param fleet_idx: the 0-based fleet index
+        @type fleet_idx: int
+        @return: None
+        @rtype: None
+        """
+        curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
+        button = self.exp_buttons.buttons()[fleet_idx]
+
+        self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
+        next_map = self.next_exp_maps[fleet_idx].replace('-', '000')
+        fleet_id = str(fleet_idx + 5)
+        if self.get_counter_label(fleet_idx) == EXP_LABEL_R:  # if idling
+            pass
+        else:
+            self._get_exp_result(curr_map)
+        start_res = self._start_exp(next_map, fleet_id)
+        d = next((i for i in start_res['pveExploreVo']['levels'] if i['fleetId'] == fleet_id))
+        self._update_one_expedition(d)
+
+        button.setText(BTN_TEXT_STOP)
+        self.curr_exp_maps[fleet_idx] = self.next_exp_maps[fleet_idx]
+        item_map = QTableWidgetItem(self.curr_exp_maps[fleet_idx])
+        item_map.setBackground(QColor(0, 0, 0))
+        if fleet_idx == 0:
+            self.setItem(0, 1, item_map)
+        elif fleet_idx == 1:
+            self.setItem(0, 3, item_map)
+        elif fleet_idx == 2:
+            self.setItem(14, 1, item_map)
+        elif fleet_idx == 3:
+            self.setItem(14, 3, item_map)
+        else:
+            pass
+
     def on_button_clicked(self, fleet_idx: int) -> None:
         # TODO: check if fleet class requirement met
         btn = self.exp_buttons.buttons()[fleet_idx]
-        curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
         if btn.text() == BTN_TEXT_START:
-            self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
-            next_map = self.next_exp_maps[fleet_idx].replace('-', '000')
-            fleet_id = str(fleet_idx + 5)
-            if self.get_counter_label(fleet_idx) == EXP_LABEL_R:  # if idling
-                pass
-            else:
-                self._get_exp_result(curr_map)
-            start_res = self._start_exp(next_map, fleet_id)
-            d = next((i for i in start_res['pveExploreVo']['levels'] if i['fleetId'] == fleet_id))
-            self._update_one_expedition(d)
-
-            btn.setText(BTN_TEXT_STOP)
-            self.curr_exp_maps[fleet_idx] = self.next_exp_maps[fleet_idx]
-            if fleet_idx == 0:
-                self.setItem(0, 1, QTableWidgetItem(self.curr_exp_maps[fleet_idx]))
-            elif fleet_idx == 1:
-                self.setItem(0, 3, QTableWidgetItem(self.curr_exp_maps[fleet_idx]))
-            elif fleet_idx == 2:
-                self.setItem(14, 1, QTableWidgetItem(self.curr_exp_maps[fleet_idx]))
-            elif fleet_idx == 3:
-                self.setItem(14, 3, QTableWidgetItem(self.curr_exp_maps[fleet_idx]))
-            else:
-                pass
+            self.start_expedition(fleet_idx)
         elif btn.text() == BTN_TEXT_STOP:
+            curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
             self.logger.info(f'fleet #{fleet_idx + 5} stops expedition on {self.next_exp_maps[fleet_idx]}')
             self._cancel_exp(curr_map, fleet_idx)
             btn.setText(BTN_TEXT_START)
