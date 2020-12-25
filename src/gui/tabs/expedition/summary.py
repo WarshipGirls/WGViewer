@@ -44,14 +44,17 @@ class DailySummary(QTableWidget):
         labels_col1 = ["Fuel", "Ammo.", "Steel", "Bauxite"]
         labels_col2 = ["Inst. Repair", "Inst. Build.", "Ship Blueprint", "Equip. Blueprint"]
         w_path, d_path = get_expedition_log()
-        if os.path.exists(w_path) and os.path.exists(d_path):
-            with open(w_path, 'r') as f:
-                data = next(csv.reader(f))
-                self.week_values = list(map(int, data))
+        if os.path.exists(d_path):
             with open(d_path, 'r') as f:
                 # the csv will be only one line
                 data = next(csv.reader(f))
                 self.day_values = list(map(int, data))
+        else:
+            pass
+        if os.path.exists(w_path):
+            with open(w_path, 'r') as f:
+                data = next(csv.reader(f))
+                self.week_values = list(map(int, data))
         else:
             pass
         self.set_labels(labels_col1, 0)
