@@ -21,7 +21,8 @@ def get_data_path(relative_path: str) -> str:
 
 
 class MainInterfaceMenuBar(QMenuBar):
-    # TODO if I want to denote the parent type as MainInterface; how to avoid recursive import?
+    # TODO: if a widget is open; disable it on menu bar
+    # TODO (low priority) if I want to denote the parent type as MainInterface; how to avoid recursive import?
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
