@@ -36,16 +36,12 @@ class ShipSelectWindow(QMainWindow):
 
     def init_ui(self) -> None:
         self.setStyleSheet(get_color_scheme())
-        self.setWindowTitle('WGViewer - Ship Selection')
+        self.setWindowTitle('WGViewer - Thermopylae')
 
         self.tab.setColumnCount(4)
         for ship_id, ship in self.user_ships.items():
             self.add_table_row(self.tab, ship_id, ship, self.ship_class, self.cost_lim)
 
-        # self.tab.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        # self.tab.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        # self.tab.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        # self.tab.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
         self.tab.resizeColumnsToContents()
         self.tab.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
 

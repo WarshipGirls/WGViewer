@@ -1,8 +1,8 @@
 from typing import Tuple, Callable, List, Union
 
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor
-from PyQt5.QtWidgets import QTreeView, QAbstractItemView, QHeaderView
+from PyQt5.QtWidgets import QTreeView, QAbstractItemView, QHeaderView, QWidget
 
 from src.data import load_cookies
 from src.exceptions.wgr_error import get_error, WarshipGirlsExceptions
@@ -16,7 +16,6 @@ from . import constants as CONST
 class AlignListView(QTreeView):
     """
     Custom View for aligning left and right items
-    # TODO: styling?? the font is TOO small
     """
 
     def __init__(self):
@@ -59,9 +58,13 @@ class AlignListView(QTreeView):
         self.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
 
-        self.doubleClicked.connect(self.on_click)
+        self.doubleClicked.connect(self.on_double_click)
+        self.clicked.connect(self.on_single_click)
 
-    def on_click(self, index: int) -> None:
+    def on_single_click(self, index: QModelIndex) -> None:
+        pass
+
+    def on_double_click(self, index: QModelIndex) -> None:
         pass
 
     def add_item(self, key: str, value: str, desc: str = None, is_limited: bool = False) -> Tuple[QStandardItem, QStandardItem]:
@@ -116,7 +119,10 @@ class BathListView(AlignListView):
         for i in range(4):
             _, self.counter_labels[i] = self.add_item(CONST.BATH_LABEL_L, CONST.BATH_LABEL_R)
 
-    def on_click(self, index) -> None:
+    def on_single_click(self, index: QModelIndex) -> None:
+        pass
+
+    def on_double_click(self, index: QModelIndex) -> None:
         pass
         # boat/repair/{ship cid}/{slot}
         # boat/rubdown/{ship cid}
@@ -128,11 +134,13 @@ class BuildListView(AlignListView):
         for i in range(4):
             _, self.counter_labels[i] = self.add_item(CONST.BLD_LABEL_L, CONST.BLD_LABEL_R)
 
-    def on_click(self, index) -> None:
+    def on_single_click(self, index: QModelIndex) -> None:
+        pass
+
+    def on_double_click(self, index: QModelIndex) -> None:
         pass
         # dock/buildBoat/{slot}/{fuel}/{ammo}/{steel}/{baux}
         # dock/getBoat/{slot}
-        # TODO: cancel build
 
 
 class DevListView(AlignListView):
@@ -141,24 +149,62 @@ class DevListView(AlignListView):
         for i in range(4):
             _, self.counter_labels[i] = self.add_item(CONST.DEV_LABEL_L, CONST.DEV_LABEL_R)
 
-    def on_click(self, index) -> None:
+    def on_single_click(self, index: QModelIndex) -> None:
+        pass
+
+    def on_double_click(self, index: QModelIndex) -> None:
         pass
         # dock/buildEquipment/{slot}/{fuel}/{ammo}/{steel}/{baux}
         # dock/dismantleEquipment       # TODO: #103
         # dock/getEquipment/2/
-        # TODO: cancel dev
 
 
 class ExpListView(AlignListView):
-    def __init__(self):
+    def __init__(self, main_tabs):
         super().__init__()
+        self.main_tabs = main_tabs
+
         self.api = API_EXPLORE(load_cookies())
         self.reconnection_limit = 3
         for i in range(4):
             _, self.counter_labels[i] = self.add_item(CONST.EXP_LABEL_L, CONST.EXP_LABEL_R)
 
-    def on_click(self, index) -> None:
-        pass
+    def on_single_click(self, index: QModelIndex) -> None:
+        """
+        Single click simply jumps to the Tab Expedition (when the tab is open)
+        @param index: QModelIndex object
+        @type index: QModelIndex
+        @return: None
+        @rtype: None
+        """
+        # Changes view to Tab Expedition upon clicking
+        # HARDCODING
+        self.main_tabs.tabs.setCurrentWidget(self.main_tabs.tabs.findChild(QWidget, 'tab_exp'))
+
+    def on_double_click(self, index: QModelIndex) -> None:
+        """
+        Double clicks serves the same function as the START/STOP button on Tab Expedition
+            - If on expedition, it stops the current expedition
+            - If on idle state, it collects rewards (if possible) and re-start expedition
+        @param index: QModelIndex object
+        @type index: QModelIndex
+        @return: None
+        @rtype: None
+        """
+        fleet_idx = index.row()
+        tab_exp = self.main_tabs.tabs.findChild(QWidget, 'tab_exp')
+        tab_exp.fleet_table.on_button_clicked(fleet_idx)
+
+    def auto_restart(self, index: int) -> None:
+        """
+        Given the index of the expedition entry (same as fleet_idx), auto restart expedition
+        @param index: expedition entry
+        @type index: int
+        @return: None
+        @rtype: None
+        """
+        tab_exp = self.main_tabs.tabs.findChild(QWidget, 'tab_exp')
+        tab_exp.fleet_table.on_button_clicked(index, True)
 
     def get_exp_result(self, exp_map: str) -> dict:
         def _get_res() -> Tuple[bool, dict]:
@@ -199,6 +245,7 @@ class ExpListView(AlignListView):
             else:
                 self.logger.debug(data)
             return res, data
+
         return self._reconnecting_calls(_cancel, 'cancel expedition')
 
 
@@ -206,7 +253,10 @@ class TaskListView(AlignListView):
     def __init__(self):
         super().__init__()
 
-    def on_click(self, index) -> None:
+    def on_single_click(self, index: QModelIndex) -> None:
+        pass
+
+    def on_double_click(self, index: QModelIndex) -> None:
         pass
         # task/getAward/{task_cid}
 

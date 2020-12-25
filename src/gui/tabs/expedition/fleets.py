@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Tuple
 from logging import Logger
 
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent
@@ -6,11 +6,12 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QWidget, QTableWidget, QTableWidgetItem, QPushButton,
     QHBoxLayout, QVBoxLayout,
-    QTableView, QHeaderView, QAbstractScrollArea, QComboBox, QButtonGroup
+    QTableView, QHeaderView, QAbstractScrollArea, QComboBox, QButtonGroup, QMainWindow, QLabel
 )
 
 from src import utils as wgv_utils
 from src.data import get_processed_userShipVo
+from src.func.worker import CallbackWorker
 from src.gui.side_dock.dock import SideDock
 from src.gui.side_dock.resource_model import ResourceTableModel
 from src.gui.side_dock.constants import EXP_LABEL_R
@@ -18,36 +19,73 @@ from src.gui.side_dock.constants import EXP_LABEL_R
 BTN_TEXT_START: str = 'START'
 BTN_TEXT_STOP: str = 'STOP'
 
-# TODO: auto start expedition
-# TODO: auto get result
 # TODO: user select fleet
-# TODO: auto switch exp map
+# TODO: refactor
+# TODO: use a worker thread for api calls
+# TODO: if auto-on, the original start_expedition not working, triple start calls
+#   correct procedure is get result then start; manual works
 
-'''
+"""
+fleet_id, str, represents '5', '6', '7', '8'
+fleet_idx, int, represents 0, 1, 2, 3
+
+Lesson: "Basic rule of Qt and PyQt, the GUI is never modified from another thread other than the main thread,
+    the main thread is called the GUI thread!!!!" – eyllanesc
+"""
+
+
 class PopupFleets(QMainWindow):
-    def __init__(self, curr_fleet: list, user_ships: object):
+    def __init__(self, fleet_id: str):
         super().__init__()
-        self.curr_fleet = curr_fleet
-        self.info = user_ships
-        self.width = 400
-        self.height = 200
+        self.fleet = wgv_utils.get_exp_fleets()[fleet_id]
+        self.user_ships = get_processed_userShipVo()
 
         self.setStyleSheet(wgv_utils.get_color_scheme())
         self.setWindowTitle('WGViewer - Expedition Fleet Selection')
+        self.width = 200
+        self.height = 500
         self.resize(self.width, self.height)
 
-        content_layout = QVBoxLayout()
+        self.curr_tab = QTableWidget()
+        self.next_buttons = QButtonGroup()
+        self.set_curr_table(0)
 
-        self.tab = QTableWidget()
-        self.tab.setRowCount(7)
-        for ship_id in self.curr_fleet:
-            info = self.info[str(ship_id)]
-            self.set_one_ship(row, ship_id, info)
+        content_layout_widget = QWidget(self)
+        content_layout = QVBoxLayout(content_layout_widget)
+        content_layout.addWidget(QLabel(f'Current Fleet {fleet_id}'))
+        content_layout.addWidget(self.curr_tab)
+        content_layout.addWidget(QLabel(f'Expedition Fleet for Next Map'))
+        for b in self.next_buttons.buttons():
+            content_layout.addWidget(b)
+        self.setCentralWidget(content_layout_widget)
 
-    def set_one_ship(self, row, ship_id, info):
-        self.tab.setItem(row, 0, QTableWidgetItem(info['Name']))
-        self.tab.setItem()
-'''
+        self.show()
+
+    def set_curr_table(self, row: int) -> None:
+        self.curr_tab.setRowCount(6)
+        self.curr_tab.setColumnCount(3)
+        for ship_id in self.fleet:
+            info = self.user_ships[str(ship_id)]
+            self.curr_tab.setItem(row, 0, QTableWidgetItem(info['Class']))
+            self.curr_tab.setItem(row, 1, QTableWidgetItem(info['Lv.']))
+            self.curr_tab.setItem(row, 2, QTableWidgetItem(info['Name']))
+            row += 1
+        self.curr_tab.resizeColumnsToContents()
+        self.curr_tab.resizeRowsToContents()
+        self.curr_tab.setShowGrid(False)
+        self.curr_tab.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.curr_tab.horizontalHeader().hide()
+        self.curr_tab.verticalHeader().hide()
+        self.curr_tab.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.curr_tab.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.curr_tab.setEditTriggers(QTableView.NoEditTriggers)
+        self.curr_tab.setFocusPolicy(Qt.NoFocus)
+        self.curr_tab.setSelectionMode(QTableView.NoSelection)
+        self.curr_tab.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+
+    def set_next_table(self) -> None:
+        # TODO: like ship_window.py
+        pass
 
 
 class CustomComboBox(QComboBox):
@@ -74,7 +112,7 @@ class CustomComboBox(QComboBox):
             item.setEnabled(item.text() not in self.parent.next_exp_maps)
 
 
-class ExpFleets(QWidget):
+class ExpFleets(QTableWidget):
     sig_fuel = pyqtSignal(int)
     sig_ammo = pyqtSignal(int)
     sig_steel = pyqtSignal(int)
@@ -90,7 +128,16 @@ class ExpFleets(QWidget):
         self.side_dock = side_dock
         self.summary = summary
         self.logger = logger
+
+        for x in wgv_utils.welcome_console_message():
+            self.logger.info(x)
+        del x
+
         self.resource_info: ResourceTableModel = self.side_dock.table_model
+        # Workers
+        self.bee_start = None
+        self.bee_stop = None
+        self.bee_res = None
 
         # Signals
         self.sig_fuel.connect(self.resource_info.update_fuel)
@@ -103,8 +150,6 @@ class ExpFleets(QWidget):
         self.sig_bp_dev.connect(self.resource_info.update_bp_dev)
         self.sig_exp.connect(self.side_dock.update_lvl_label)
 
-        self.tab = QTableWidget()
-        self.layout = QVBoxLayout(self)
         self.init_ui()
 
         self.exp_buttons = QButtonGroup()
@@ -120,29 +165,21 @@ class ExpFleets(QWidget):
     # ================================
 
     def init_ui(self) -> None:
-        self.tab.setRowCount(28)
-        self.tab.setColumnCount(4)
-        self.tab.resizeColumnsToContents()
-        self.tab.resizeRowsToContents()
-        self.tab.setShowGrid(False)
-        self.tab.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.tab.horizontalHeader().hide()
-        self.tab.verticalHeader().hide()
-        self.tab.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tab.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tab.setEditTriggers(QTableView.NoEditTriggers)
-        self.tab.setFocusPolicy(Qt.NoFocus)
-        self.tab.setSelectionMode(QTableView.NoSelection)
-        self.tab.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-
-        self.layout.addWidget(self.tab)
-        self.setLayout(self.layout)
-
-    def get_row_count(self) -> int:
-        return self.tab.rowCount()
-
-    def get_col_count(self) -> int:
-        return self.tab.columnCount()
+        self.setRowCount(28)
+        self.setColumnCount(4)
+        self.resizeColumnsToContents()
+        self.resizeRowsToContents()
+        self.setShowGrid(False)
+        # Keep following one; it differs from resizeColumnsToContents()
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.horizontalHeader().hide()
+        self.verticalHeader().hide()
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setEditTriggers(QTableView.NoEditTriggers)
+        self.setFocusPolicy(Qt.NoFocus)
+        self.setSelectionMode(QTableView.NoSelection)
+        self.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
     def set_table(self) -> None:
         self.set_one_fleet(0, 0, '5')
@@ -154,11 +191,11 @@ class ExpFleets(QWidget):
         fleet_name = "Fleet #" + fleet_id
         item_fleet = QTableWidgetItem(fleet_name)
         item_fleet.setBackground(QColor(0, 0, 0))
-        self.tab.setItem(row, col, item_fleet)
+        self.setItem(row, col, item_fleet)
         map_name = wgv_utils.get_exp_map(fleet_id)
         item_map = QTableWidgetItem(map_name)
         item_map.setBackground(QColor(0, 0, 0))
-        self.tab.setItem(row, col + 1, item_map)
+        self.setItem(row, col + 1, item_map)
         row += 1
 
         fleet_idx = int(fleet_id) - 5
@@ -189,7 +226,7 @@ class ExpFleets(QWidget):
         l.setAlignment(Qt.AlignCenter)
         l.setContentsMargins(0, 0, 0, 0)
         w.setLayout(l)
-        self.tab.setCellWidget(row, col, w)
+        self.setCellWidget(row, col, w)
 
     def add_map_dropdown(self, row: int, col: int, fleet_idx: int, map_name: str) -> None:
         w = QWidget()
@@ -204,41 +241,127 @@ class ExpFleets(QWidget):
         l.addWidget(b)
         l.setContentsMargins(0, 0, 0, 0)
         w.setLayout(l)
-        self.tab.setCellWidget(row, col, w)
+        self.setCellWidget(row, col, w)
 
     def on_dropdown_change(self, fleet_idx: int, next_map: str) -> None:
         self.next_exp_maps[fleet_idx] = next_map
         self.logger.debug(f"Next expedition map changed: {self.next_exp_maps}")
 
     def set_one_ship(self, row: int, col: int, ship_id: int, info: dict) -> None:
-        self.tab.setItem(row, col, QTableWidgetItem(info['Name']))
+        self.setItem(row, col, QTableWidgetItem(info['Name']))
         s_id = "ID " + str(ship_id)
-        self.tab.setItem(row, col + 1, QTableWidgetItem(s_id))
+        self.setItem(row, col + 1, QTableWidgetItem(s_id))
         lvl = "Lv. " + info['Lv.']
-        self.tab.setItem(row + 1, col, QTableWidgetItem(lvl))
-        self.tab.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
+        self.setItem(row + 1, col, QTableWidgetItem(lvl))
+        self.setItem(row + 1, col + 1, QTableWidgetItem(info['Class']))
 
-    def on_button_clicked(self, fleet_idx: int) -> None:
+    # ================================
+    # Threads
+    # ================================
+
+    def start_expedition(self, fleet_idx: int) -> Tuple[dict, int]:
+        """
+        Start an expedition.
+        @param fleet_idx: the 0-based fleet index
+        @type fleet_idx: int
+        @return: server response of expedition/start, fleet index
+        @rtype: Tuple[dict, int]
+        """
+        next_map = self.next_exp_maps[fleet_idx].replace('-', '000')
+        fleet_id = str(fleet_idx + 5)
+        start_res = self._start_exp(next_map, fleet_id)
+        return start_res, fleet_idx
+
+    def on_start_expedition_finished(self, result: Tuple[dict, int]) -> None:
+        start_res = result[0]
+        if start_res is None:
+            self.logger.debug("start res is None")
+            return
+        fleet_idx = result[1]
+        fleet_id = str(fleet_idx + 5)
+        d = next((i for i in start_res['pveExploreVo']['levels'] if i['fleetId'] == fleet_id))
+        self._update_one_expedition(d)
+
+        self.curr_exp_maps[fleet_idx] = self.next_exp_maps[fleet_idx]
+        item_map = QTableWidgetItem(self.curr_exp_maps[fleet_idx])
+        item_map.setBackground(QColor(0, 0, 0))
+        if fleet_idx == 0:
+            self.setItem(0, 1, item_map)
+        elif fleet_idx == 1:
+            self.setItem(0, 3, item_map)
+        elif fleet_idx == 2:
+            self.setItem(14, 1, item_map)
+        elif fleet_idx == 3:
+            self.setItem(14, 3, item_map)
+        else:
+            pass
+
+    def stop_expedition(self, curr_map: str, fleet_idx: int) -> int:
+        self._cancel_exp(curr_map)
+        return fleet_idx
+
+    def on_stop_expedition_finished(self, fleet_idx: int) -> None:
+        self.side_dock.cancel_one_expedition(fleet_idx)
+
+    def on_get_result_finished(self, res) -> None:
+        # TODO: updateTaskVo
+        if res is None:
+            self.logger.debug("get result res is None")
+            return
+        self.sig_exp.emit(res['userLevelVo'])
+        success_str = "big success" if res['bigSuccess'] == 1 else "success"
+        self.logger.info(success_str)
+
+        # update reward items
+        if 'packageVo' not in res:
+            pass
+        else:
+            for item in res['packageVo']:
+                if item['itemCid'] == 541:
+                    self.sig_repair.emit(item['num'])
+                elif item['itemCid'] == 141:
+                    self.sig_build.emit(item['num'])
+                elif item['itemCid'] == 241:
+                    self.sig_bp_construct.emit(item['num'])
+                elif item['itemCid'] == 741:
+                    self.sig_bp_dev.emit(item['num'])
+                else:
+                    self.logger.debug('unprocessed item cid')
+                    self.logger.debug(item)
+        # update resources
+        self.update_resources(res['userResVo'])
+        # update summary table
+        self.summary.on_newAward(res['newAward'])
+
+        self.logger.info("The fleet start a new expedition")
+        self.bee_start.start()
+
+    def on_button_clicked(self, fleet_idx: int, is_auto: bool = False) -> None:
         # TODO: check if fleet class requirement met
         btn = self.exp_buttons.buttons()[fleet_idx]
         curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
-        if btn.text() == BTN_TEXT_START:
-            self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
-            next_map = self.next_exp_maps[fleet_idx].replace('-', '000')
-            fleet_id = str(fleet_idx + 5)
+        if btn.text() == BTN_TEXT_START or is_auto is True:
+
+            self.bee_start = CallbackWorker(self.start_expedition, ([fleet_idx]), self.on_start_expedition_finished)
+            self.bee_start.terminate()
+            self.bee_res = CallbackWorker(self._get_exp_result, ([curr_map]), self.on_get_result_finished)
+            self.bee_res.terminate()
+
             if self.get_counter_label(fleet_idx) == EXP_LABEL_R:  # if idling
-                pass
+                self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
+                self.bee_start.start()
             else:
-                self._get_exp_result(curr_map)
-            start_res = self._start_exp(next_map, fleet_id)
-            d = next((i for i in start_res['pveExploreVo']['levels'] if i['fleetId'] == fleet_id))
-            self._update_one_expedition(d)
+                self.logger.info(f'fleet #{fleet_idx + 5} retrieve expedition rewards on {self.next_exp_maps[fleet_idx]}')
+                self.bee_res.start()
 
             btn.setText(BTN_TEXT_STOP)
-            self.curr_exp_maps[fleet_idx] = self.next_exp_maps[fleet_idx]
         elif btn.text() == BTN_TEXT_STOP:
             self.logger.info(f'fleet #{fleet_idx + 5} stops expedition on {self.next_exp_maps[fleet_idx]}')
-            self._cancel_exp(curr_map, fleet_idx)
+
+            self.bee_stop = CallbackWorker(self.stop_expedition, (curr_map, fleet_idx), self.on_stop_expedition_finished)
+            self.bee_stop.terminate()
+            self.bee_stop.start()
+
             btn.setText(BTN_TEXT_START)
         else:
             pass
@@ -269,38 +392,14 @@ class ExpFleets(QWidget):
         l = [i.text() for i in self.side_dock.exp_list_view.get_counter_labels()]
         return l[fleet_idx]
 
-    def _get_exp_result(self, curr_map: str) -> None:
-        # TODO: updateTaskVo
+    def _get_exp_result(self, curr_map: str) -> dict:
         res = self.side_dock.exp_list_view.get_exp_result(curr_map)
-        self.sig_exp.emit(res['userLevelVo'])
-        success_str = "big success" if res['bigSuccess'] == 1 else "success"
-        self.logger.info(success_str)
-
-        # update reward items
-        if 'packageVo' not in res:
-            pass
-        else:
-            for item in res['packageVo']:
-                if item['itemCid'] == 541:
-                    self.sig_repair.emit(item['num'])
-                elif item['itemCid'] == 141:
-                    self.sig_build.emit(item['num'])
-                elif item['itemCid'] == 241:
-                    self.sig_bp_construct.emit(item['num'])
-                elif item['itemCid'] == 741:
-                    self.sig_bp_dev.emit(item['num'])
-                else:
-                    self.logger.debug('unprocessed item cid')
-        # update resources
-        self.update_resources(res['userResVo'])
-        # update summary table
-        self.summary.on_newAward(res['newAward'])
+        return res
 
     def _start_exp(self, next_map: str, fleet_id: str) -> dict:
         return self.side_dock.exp_list_view.start_exp(next_map, fleet_id)
 
-    def _cancel_exp(self, exp_map: str, fleet_idx: int) -> dict:
-        self.side_dock.cancel_one_expedition(fleet_idx)
+    def _cancel_exp(self, exp_map: str) -> dict:
         return self.side_dock.exp_list_view.cancel_exp(exp_map)
 
     def _update_one_expedition(self, data: dict) -> None:

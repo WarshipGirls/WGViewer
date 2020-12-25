@@ -38,13 +38,14 @@ class SideDock(QDockWidget):
     """
     Side Dock/Panel, named "Navy Base Overview", displays all important data of the user.
         This is the first coded QWidget of WGViewer (even before LoginForm).
-    TODO: refactor
     """
     sig_resized = pyqtSignal()
     sig_closed = pyqtSignal()
 
-    def __init__(self, parent):
+    def __init__(self, parent, realrun: bool):
         super(SideDock, self).__init__(parent)
+        self.is_realrun = realrun
+
         _, self.user_screen_h = wgv_utils.get_user_resolution()
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
 
@@ -75,7 +76,7 @@ class SideDock(QDockWidget):
         self.triple_list_view = QHBoxLayout(self.triple_list_view_widget)
         self.build_list_view = BuildListView()
         self.dev_list_view = DevListView()
-        self.exp_list_view = ExpListView()
+        self.exp_list_view = ExpListView(parent.main_tabs)
         self.task_list_view = TaskListView()
         self.task_panel_widget = QWidget(self)
         self.task_panel_view = QHBoxLayout(self.task_panel_widget)
@@ -249,9 +250,13 @@ class SideDock(QDockWidget):
                 self.bath_list_view.update_item(idx, 0, "Repairing Dock Unused")
                 self.bath_list_view.update_item(idx, 1, "--:--:--")
             elif counters == self.exp_list_view.get_counters():
-                # TODO: exp counter signals to restart
                 counters[idx] = 0
                 timers[idx].stop()
+                if self.is_realrun:
+                    self.exp_list_view.auto_restart(idx)
+                else:
+                    # otherwise will cause problem
+                    pass
             else:
                 counters[idx] = 0
                 timers[idx].stop()
@@ -318,6 +323,8 @@ class SideDock(QDockWidget):
             self.table_model.update_CV(_get_item_by_id(10141))
             self.table_model.update_SS(_get_item_by_id(10541))
 
+            self.table_model.write_csv()
+
     @pyqtSlot(dict)
     def update_lvl_label(self, x: dict) -> None:
         # userLevelVo
@@ -350,7 +357,6 @@ class SideDock(QDockWidget):
 
             self.sign_widget.setText(data["friendVo"]["sign"])
 
-    @pyqtSlot(dict)
     def update_one_expedition(self, data: dict) -> None:
         # Input = pveExploreVo['levels'][_idx]
         _idx = int(data['fleetId'])-5
@@ -366,7 +372,6 @@ class SideDock(QDockWidget):
         self.exp_list_view.get_counters()[fleet_idx] = 0
         self.exp_list_view.get_counter_timers()[fleet_idx].stop()
 
-    @pyqtSlot(dict)
     def update_expeditions(self, data: dict) -> None:
         if data is not None:
             p = sorted(data["levels"], key=lambda x: int(x['fleetId']), reverse=False)

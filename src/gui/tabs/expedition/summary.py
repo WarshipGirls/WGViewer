@@ -44,14 +44,17 @@ class DailySummary(QTableWidget):
         labels_col1 = ["Fuel", "Ammo.", "Steel", "Bauxite"]
         labels_col2 = ["Inst. Repair", "Inst. Build.", "Ship Blueprint", "Equip. Blueprint"]
         w_path, d_path = get_expedition_log()
-        if os.path.exists(w_path) and os.path.exists(d_path):
-            with open(w_path, 'r') as f:
-                data = next(csv.reader(f))
-                self.week_values = list(map(int, data))
+        if os.path.exists(d_path):
             with open(d_path, 'r') as f:
                 # the csv will be only one line
                 data = next(csv.reader(f))
                 self.day_values = list(map(int, data))
+        else:
+            pass
+        if os.path.exists(w_path):
+            with open(w_path, 'r') as f:
+                data = next(csv.reader(f))
+                self.week_values = list(map(int, data))
         else:
             pass
         self.set_labels(labels_col1, 0)
@@ -146,7 +149,8 @@ class DailySummary(QTableWidget):
                 self.update_day_val(4, 3, data[key])
                 self.update_week_val(9, 3, data[key])
             else:
-                self.logger.debug('unprocessed newAward')
+                self.logger.debug('unprocessed newAward key:')
+                self.logger.debug(key)
         with open(d_path, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(self.day_values)

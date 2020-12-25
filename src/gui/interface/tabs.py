@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import (
 )
 
 from src.data import get_qsettings_file
-from src.func import qsettings_keys as QKEYS
 from src.func import logger_names as QLOGS
 from src.func.log_handler import get_logger
 from src.gui.tabs.advance_functions import TabAdvanceFunctions
