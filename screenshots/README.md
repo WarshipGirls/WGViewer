@@ -16,11 +16,11 @@ This part demonstrates fully functional features.
 
 > Interactive data graph (logging user resources)
 
-![alt text](./pics/general/resource_data_graph.png)
+![alt text](./pics/general/user_resource_data_graph.png)
 
 > Settings (allow extensive control over important parameters)
 
-![alt text](./pics/general/settings_page_game.png)
+![alt text](./pics/general/global_settings_page_game.png)
 
 ### Tab Dock
 
@@ -38,7 +38,7 @@ This part demonstrates fully functional features.
 
 > Informative expedition table
 
-![alt text](./pics/tab_exp/expedition_table.png)
+![alt text](./pics/tab_exp/Separated_expedition_table.png)
 
 ### Tab Thermopylae
 
