@@ -55,9 +55,16 @@ class MainInterface(QMainWindow):
         self.side_dock = None
         self.tray = None
 
-        self.init_side_dock()
-        # Tabs must be created before menu bar, as menu bar reference main_tabs
+        # 1. The init order cannot be changed right now
+        #   tab_dock init all ships data and it's independent of side dock
+        # 2. Tabs must be created before menu bar,  menu bar reference main_tabs
         self.main_tabs = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
+        # TODO loading speed is slow
+        self.main_tabs.init_tab(QKEYS.UI_TAB_SHIP, 'tab_dock')
+        self.init_side_dock()
+        self.main_tabs.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
+        self.main_tabs.init_tab(QKEYS.UI_TAB_THER, 'tab_thermopylae')
+        self.main_tabs.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
         self.menu_bar = MainInterfaceMenuBar(self)
         self.init_ui()
 

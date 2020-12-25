@@ -1,21 +1,26 @@
 import csv
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QStandardItem, QStandardItemModel
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QColor, QStandardItem, QStandardItemModel, QCloseEvent
 from PyQt5.QtWidgets import (
     QWidget,
     QHeaderView, QTableView,
     QVBoxLayout
 )
 
-from src.utils import get_user_resolution, get_big_success_rate
+from src.utils import get_user_resolution, get_big_success_rate, get_color_scheme
 
 
 class ExpTable(QWidget):
+    sig_close = pyqtSignal()
+
     # Long term TODO: max coefficient by iter through user's engineering bay stats
-    def __init__(self, filename: str):
+    def __init__(self, parent, filename: str):
         super().__init__()
+        self.parent = parent
         self.filename = filename
+
+        self.sig_close.connect(self.parent.on_table_close)
 
         self.table_model = QStandardItemModel(self)
         self.set_col_count(15)
@@ -28,6 +33,10 @@ class ExpTable(QWidget):
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.addWidget(self.table_view)
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        event.ignore()
+        self.sig_close.emit()
 
     # ================================
     # Getter / Setter
@@ -47,6 +56,7 @@ class ExpTable(QWidget):
     # ================================
 
     def init_ui(self) -> None:
+        self.setStyleSheet(get_color_scheme())
         self.merge_cells()
         self.init_header_ui()
         self.highlight_data([3, 4, 5, 6], highlight_color=None, bold=True)
@@ -60,9 +70,12 @@ class ExpTable(QWidget):
         self.table_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.table_view.setSelectionBehavior(QTableView.SelectRows)
         self.table_view.setEditTriggers(QTableView.NoEditTriggers)
+        user_w, user_h = get_user_resolution()
         for i in range(self.get_row_count()):
-            _, h = get_user_resolution()
-            self.table_view.setRowHeight(i, int(0.019 * h))
+            self.table_view.setRowHeight(i, int(0.019 * user_h))
+        _w = int(user_w * 0.443)
+        _h = int(user_h * 0.713)
+        self.resize(_w, _h)
 
     def init_header_ui(self) -> None:
         for c in [3, 7, 11]:

@@ -105,7 +105,8 @@ def get_ship_equips(cid: int) -> list:
 
 def get_exp_map(fleet_id: str) -> str:
     """
-    Given a fleet id, return expedition-able maps
+    Given a fleet id, return expedition-able maps.
+        If none, return '1-1'.
     @param fleet_id: fleet id, str form of int, ranging from 4 to 8
     @type fleet_id: str
     @return: Normally accepted representation of str
@@ -116,7 +117,7 @@ def get_exp_map(fleet_id: str) -> str:
         fleet = next(i for i in _json if i['fleetId'] == fleet_id)
         map_name = fleet['exploreId'].replace('000', '-')
     except StopIteration:
-        map_name = ""
+        map_name = '1-1'
     return map_name
 
 

@@ -53,16 +53,6 @@ class MainInterfaceTabs(QWidget):
         self._msg_label = None
         self.init_ui()
 
-        # TODO now tab_dock init important data
-        #   either make tab dock as default (must run)
-        #   or run tab dock functions save & load important data later
-        # TODO loading speed is really slow
-        # The init order cannot be changed right now
-        self.init_tab(QKEYS.UI_TAB_SHIP, 'tab_dock')
-        self.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
-        self.init_tab(QKEYS.UI_TAB_THER, 'tab_thermopylae')
-        self.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
-
         self.layout.addWidget(self.tabs, 0, 0)
         if self.has_tab is True:
             pass
@@ -108,6 +98,7 @@ class MainInterfaceTabs(QWidget):
             self.tab_adv = TabAdvanceFunctions(tab_name, self.parent.side_dock)
             self.tabs.addTab(self.tab_adv, "Advance (N/A)")
         elif tab_name == "tab_dock" and self.tab_ships is None:
+            # NOTE: tab_dock cannot be dependent on side dock
             self.tab_ships = TabShips(tab_name, self.is_realrun)
             self.tabs.addTab(self.tab_ships, "Dock")
         elif tab_name == "tab_exp" and self.tab_exp is None:

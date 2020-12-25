@@ -366,6 +366,9 @@ class Sortie:
     def update_side_dock_resources(self, x) -> None:
         self.parent.update_resources(x['oil'], x['ammo'], x['steel'], x['aluminium'])
 
+    def update_side_dock_experience(self, x) -> None:
+        self.parent.update_user_exp_label(x)
+
     def update_sortie_ticket(self, ticket: int = None, num: int = None) -> None:
         if ticket is None:
             self.parent.update_ticket(self.user_data['ticket'])
@@ -622,6 +625,7 @@ class Sortie:
             return "-1"
         is_night_battle = self.helper.check_night_battle(curr_node_id, challenge_res)
         battle_res = self.helper.get_war_result(is_night_battle)
+        self.update_side_dock_experience(battle_res['userLevelVo'])
         self.helper.process_battle_result(battle_res, list(self.battle_fleet))
 
         if int(battle_res['getScore$return']['flagKill']) == 1 or battle_res['resultLevel'] < 5:

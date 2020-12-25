@@ -3,7 +3,10 @@ import os
 import platform
 import shutil
 
+from typing import Tuple
+
 from pathlib import Path
+from datetime import date
 
 
 # ================================
@@ -73,6 +76,18 @@ def get_log_dir() -> str:
     else:
         pass
     return p
+
+
+def get_expedition_log() -> Tuple[str, str]:
+    # local timezone
+    t = list(map(str, date.today().isocalendar()))
+    dir_path = os.path.join(get_log_dir(), t[0], t[1])
+    if not os.path.isdir(dir_path):
+        os.makedirs(dir_path)
+    else:
+        pass
+
+    return os.path.join(dir_path, 'week.csv'), os.path.join(dir_path, f'{t[2]}.csv')
 
 
 def get_temp_dir() -> str:

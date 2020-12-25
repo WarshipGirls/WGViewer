@@ -31,7 +31,7 @@ def check_py_ver() -> None:
 def init_app_settings() -> None:
     WGV_APP.setWindowIcon(APP_ICON)
     if sys.platform.startswith('win32'):
-        app_id = u'PWYQ.WarshipGirlsViewer.WGViewer.version'  # arbitrary string
+        app_id = f'PWYQ.WarshipGirlsViewer.WGViewer.{get_app_version()}'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
     else:
         pass

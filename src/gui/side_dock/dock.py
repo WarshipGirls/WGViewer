@@ -1,12 +1,9 @@
 import os
-from typing import Tuple
 
-import pytz
 import re
 import sys
-import time
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QSize, QTimer, QSettings
 from PyQt5.QtGui import QIcon, QCloseEvent, QResizeEvent
@@ -24,6 +21,8 @@ from src.func.log_handler import get_logger
 from .resource_model import ResourceTableModel
 from .align_list_view import BathListView, BuildListView, DevListView, ExpListView, TaskListView
 from .constants import TASK_TYPE
+from .timer_helper import get_tasks_countdowns, _calc_left_time
+from .constants import EXP_LABEL_L, EXP_LABEL_R
 
 logger = get_logger(QLOGS.SIDE_DOCK)
 
@@ -49,23 +48,14 @@ class SideDock(QDockWidget):
         _, self.user_screen_h = wgv_utils.get_user_resolution()
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
 
+        self.equipment_names = wgv_data.get_shipEquipmnt()
+        self.ship_names = wgv_data.get_processed_userShipVo()
+
         # index 0 for daily, 1 for weekly, 2+ for tasks/events
         self.task_counter_desc_labels = []
         self.task_counter_labels = []
         self.task_counter_timers = []
         self.task_counters = []
-        self.bath_counter_labels = [None] * 4
-        self.bath_counter_timers = [None] * 4
-        self.bath_counters = [None] * 4
-        self.build_counter_labels = [None] * 4
-        self.build_counter_timers = [None] * 4
-        self.build_counters = [None] * 4
-        self.dev_counter_labels = [None] * 4
-        self.dev_counter_timers = [None] * 4
-        self.dev_counters = [None] * 4
-        self.exp_counter_labels = [None] * 4
-        self.exp_counter_timers = [None] * 4
-        self.exp_counters = [None] * 4
 
         self.name_layout_widget = QWidget(self)
         self.name_layout = QHBoxLayout(self.name_layout_widget)
@@ -76,21 +66,21 @@ class SideDock(QDockWidget):
         self.collect_count_label = QLabel(self.name_layout_widget)
 
         self.sign_widget = QLineEdit(self)
-        self.table_model = None
-        self.table_view = None
-        self.bath_list_view = None
-        self.bath_list_view_widget = None
-        self.bath_list_view_layout = None
-        self.triple_list_view_widget = None
-        self.triple_list_view = None
-        self.build_list_view = None
-        self.dev_list_view = None
-        self.exp_list_view = None
-        self.task_list_view = None
-        self.task_panel_view = None
-        self.task_panel_widget = None
-        self.countdowns_layout = None
-        self.countdowns_layout_widget = None
+        self.table_model = ResourceTableModel()
+        self.table_view = QTableView(self)
+        self.bath_list_view = BathListView()
+        self.bath_list_view_widget = QWidget(self)
+        self.bath_list_view_layout = QVBoxLayout(self.bath_list_view_widget)
+        self.triple_list_view_widget = QWidget(self)
+        self.triple_list_view = QHBoxLayout(self.triple_list_view_widget)
+        self.build_list_view = BuildListView()
+        self.dev_list_view = DevListView()
+        self.exp_list_view = ExpListView()
+        self.task_list_view = TaskListView()
+        self.task_panel_widget = QWidget(self)
+        self.task_panel_view = QHBoxLayout(self.task_panel_widget)
+        self.countdowns_layout_widget = QWidget(self)
+        self.countdowns_layout = QVBoxLayout(self.countdowns_layout_widget)
 
         self.sig_resized.connect(self.update_geometry)
         self.sig_closed.connect(parent.on_dock_closed)
@@ -132,8 +122,6 @@ class SideDock(QDockWidget):
         self.sign_widget.addAction(QIcon(icon_path), QLineEdit.LeadingPosition)
 
     def _init_resource_info(self) -> None:
-        self.table_model = ResourceTableModel()
-        self.table_view = QTableView(self)
         self.table_view.setModel(self.table_model)
         x = 0.03 * self.user_screen_h
         self.table_view.setIconSize(QSize(x, x))
@@ -149,58 +137,24 @@ class SideDock(QDockWidget):
         self.table_view.verticalScrollBar().setEnabled(False)
 
     def _init_bath_info(self) -> None:
-        self.bath_list_view_widget = QWidget(self)
-        self.bath_list_view_layout = QVBoxLayout(self.bath_list_view_widget)
         self.bath_list_view_layout.setContentsMargins(0, 0, 0, 0)
-        self.bath_list_view = BathListView()
-        for i in range(4):
-            _, self.bath_counter_labels[i] = self.bath_list_view.add_item("Repairing Dock Locked", "")
         self.bath_list_view_layout.addWidget(self.bath_list_view)
 
     def _init_triple_list(self) -> None:
-        self.triple_list_view_widget = QWidget(self)
-        self.triple_list_view = QHBoxLayout(self.triple_list_view_widget)
         self.triple_list_view.setContentsMargins(0, 0, 0, 0)
-        self._init_construction_info()
-        self._init_development_info()
-        self._init_expedition_info()
         self.triple_list_view.addWidget(self.build_list_view)
         self.triple_list_view.addWidget(self.dev_list_view)
         self.triple_list_view.addWidget(self.exp_list_view)
 
-    def _init_construction_info(self) -> None:
-        self.build_list_view = BuildListView()
-        for i in range(4):
-            _, self.build_counter_labels[i] = self.build_list_view.add_item("Constr. Slot", "Locked")
-
-    def _init_development_info(self) -> None:
-        self.dev_list_view = DevListView()
-        for i in range(4):
-            _, self.dev_counter_labels[i] = self.dev_list_view.add_item("Dev. Slot", "Locked")
-
-    def _init_expedition_info(self) -> None:
-        self.exp_list_view = ExpListView()
-        for i in range(4):
-            _, self.exp_counter_labels[i] = self.exp_list_view.add_item("Exped. Fleet", "Idling")
-
     def _init_task_panel(self) -> None:
-        self.task_panel_widget = QWidget(self)
-        self.task_panel_view = QHBoxLayout(self.task_panel_widget)
         self.task_panel_view.setContentsMargins(0, 0, 0, 0)
-        self._init_task_info()
         self._init_countdowns()
         self.task_panel_view.addWidget(self.task_list_view)
         self.task_panel_view.addWidget(self.countdowns_layout_widget)
 
-    def _init_task_info(self) -> None:
-        # Tasks view can be scrolled
-        self.task_list_view = TaskListView()
-
     def _init_countdowns(self) -> None:
         # TODO? design problem now the most suitable count is 4, 5 would be max
-        # although MoeFantasy opens mostly 1 event at a time, rarely 2.
-        self.countdowns_layout_widget = QWidget(self)
-        self.countdowns_layout = QVBoxLayout(self.countdowns_layout_widget)
+        #   although MoeFantasy opens mostly 1 event at a time, rarely 2.
         self.countdowns_layout.setContentsMargins(0, 0, 0, 0)
 
         l1 = QLabel(self.countdowns_layout_widget)
@@ -223,7 +177,7 @@ class SideDock(QDockWidget):
         self.countdowns_layout.addWidget(l2)
         self.countdowns_layout.addWidget(self.task_counter_labels[1])
 
-        _, _, d_counter, w_counter = self.get_tasks_countdowns()
+        _, _, d_counter, w_counter = get_tasks_countdowns()
         self.task_counters.append(d_counter)
         self.task_counters.append(w_counter)
 
@@ -246,47 +200,11 @@ class SideDock(QDockWidget):
         self.countdowns_layout.addWidget(l2)
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, idx)
 
-    @staticmethod
-    def get_tasks_countdowns() -> Tuple[datetime, datetime, float, float]:
-        """
-        returns [UTC+8 Time (in format), Local Time (in format), next daily (in sec), next weekly (in sec)]
-        """
-        utc_time = datetime.utcnow().replace(tzinfo=pytz.utc)
-        cn_time = utc_time.astimezone(pytz.timezone('Asia/Shanghai'))
-        local_time = utc_time.astimezone()
+    def get_ship_name(self, _id):
+        return self.ship_names[str(_id)]['Name']
 
-        def datetime_to_unixtime(t: datetime) -> float:
-            return time.mktime(t.timetuple())
-
-        if cn_time.hour < 3:
-            next_daily = datetime(cn_time.year, cn_time.month, cn_time.day, 3, 0, 0, 0, tzinfo=pytz.timezone('Asia/Shanghai'))
-        else:
-            tmr = cn_time + timedelta(days=1)
-            next_daily = datetime(tmr.year, tmr.month, tmr.day, 3, 0, 0, 0, tzinfo=pytz.timezone('Asia/Shanghai'))
-        next_daily_diff = datetime_to_unixtime(next_daily) - datetime_to_unixtime(cn_time)
-
-        if cn_time.hour < 4:
-            next_weekly = datetime(cn_time.year, cn_time.month, cn_time.day, 4, 0, 0, 0, tzinfo=pytz.timezone('Asia/Shanghai'))
-        else:
-            next_weekly = datetime(cn_time.year, cn_time.month, cn_time.day, 4, 0, 0, 0,
-                                   tzinfo=pytz.timezone('Asia/Shanghai'))
-            days_diff = timedelta(days=-cn_time.weekday(), weeks=1).days
-            next_weekly += timedelta(days=days_diff)
-        next_year = datetime(year=cn_time.year + 1, month=1, day=1, tzinfo=pytz.timezone('Asia/Shanghai'))
-        diff1 = datetime_to_unixtime(next_weekly) - datetime_to_unixtime(cn_time)
-        diff2 = datetime_to_unixtime(next_year) - datetime_to_unixtime(cn_time)
-        next_weekly_diff = min(diff1, diff2)
-        return cn_time, local_time, next_daily_diff, next_weekly_diff
-
-    @staticmethod
-    def get_ship_name(_id):
-        # TODO TODO
-        return _id
-
-    @staticmethod
-    def get_equip_name(cid):
-        # TODO TODO
-        return cid
+    def get_equip_name(self, cid: int) -> str:
+        return next((i for i in self.equipment_names if i['cid'] == cid), {'title': '?'})['title']
 
     @staticmethod
     def get_ship_type(_id: int) -> str:
@@ -300,15 +218,15 @@ class SideDock(QDockWidget):
         widget = None
         return
 
-    def get_exp_counters(self) -> list:
-        return self.exp_counters
+    def get_exp_list_view(self) -> ExpListView:
+        return self.exp_list_view
 
     # ================================
     # Timer Related
     # ================================
 
     def count_down(self, counters: list, labels: list, timers: list, idx: int) -> None:
-        # TODO? refactor
+        # TODO? refactor; each list view has its own countdown method?
         counters[idx] -= 1
         if counters[idx] > 0:
             pass
@@ -316,7 +234,7 @@ class SideDock(QDockWidget):
             if counters == self.task_counters:
                 if idx < 2:
                     # refreshing daily/weekly timers
-                    _, _, d, w = self.get_tasks_countdowns()
+                    _, _, d, w = get_tasks_countdowns()
                     counters[0] = d
                     counters[1] = w
                 else:
@@ -325,12 +243,12 @@ class SideDock(QDockWidget):
                     self._remove_widget(self.countdowns_layout, labels[idx])
                     self._remove_widget(self.countdowns_layout, self.task_counter_desc_labels[idx])
                     return
-            elif counters == self.bath_counters:
+            elif counters == self.bath_list_view.get_counters():
                 counters[idx] = 0
                 timers[idx].stop()
                 self.bath_list_view.update_item(idx, 0, "Repairing Dock Unused")
                 self.bath_list_view.update_item(idx, 1, "--:--:--")
-            elif counters == self.exp_counters:
+            elif counters == self.exp_list_view.get_counters():
                 # TODO: exp counter signals to restart
                 counters[idx] = 0
                 timers[idx].stop()
@@ -357,16 +275,11 @@ class SideDock(QDockWidget):
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, 0)
         self.start_new_timer(self.task_counters, self.task_counter_labels, self.task_counter_timers, 1)
 
-    @staticmethod
-    def _calc_left_time(t) -> int:
-        _diff = t - int(time.time())
-        return 0 if _diff <= 0 else _diff
-
     def _process_timer_data(self, _data, view, func, item_id, counters, labels, timers) -> None:
         for i, v in enumerate(_data):
             if v["locked"] == 0:
                 if "endTime" in v:
-                    _left_time = self._calc_left_time(v["endTime"])
+                    _left_time = _calc_left_time(v["endTime"])
                     counters[i] = _left_time
                     self.start_new_timer(counters, labels, timers, i)
                     val1 = func(v[item_id])
@@ -384,6 +297,9 @@ class SideDock(QDockWidget):
     @pyqtSlot(dict)
     def on_received_resource(self, data: dict) -> None:
         if data is not None:
+            def _get_item_by_id(item_id: int) -> int:
+                return next((i for i in x if i["itemCid"] == item_id), {"num": 0})["num"]
+
             u = data["userVo"]
             x = data["packageVo"]
             self.table_model.update_fuel(u["oil"])
@@ -391,31 +307,20 @@ class SideDock(QDockWidget):
             self.table_model.update_steel(u["steel"])
             self.table_model.update_bauxite(u["aluminium"])
             self.table_model.update_gold(u["gold"])
-            t = next((i for i in x if i["itemCid"] == 541), {"num": 0})["num"]
-            self.table_model.update_repair(t)
-            t = next((i for i in x if i["itemCid"] == 141), {"num": 0})["num"]
-            self.table_model.update_build(t)
-            t = next((i for i in x if i["itemCid"] == 241), {"num": 0})["num"]
-            self.table_model.update_bp_construct(t)
-            t = next((i for i in x if i["itemCid"] == 741), {"num": 0})["num"]
-            self.table_model.update_bp_dev(t)
-            t = next((i for i in x if i["itemCid"] == 66641), {"num": 0})["num"]
-            self.table_model.update_revive(t)
-            t = next((i for i in x if i["itemCid"] == 10441), {"num": 0})["num"]
-            self.table_model.update_DD(t)
-            t = next((i for i in x if i["itemCid"] == 10341), {"num": 0})["num"]
-            self.table_model.update_CA(t)
-            t = next((i for i in x if i["itemCid"] == 10241), {"num": 0})["num"]
-            self.table_model.update_BB(t)
-            t = next((i for i in x if i["itemCid"] == 10141), {"num": 0})["num"]
-            self.table_model.update_CV(t)
-            t = next((i for i in x if i["itemCid"] == 10541), {"num": 0})["num"]
-            self.table_model.update_SS(t)
-
-            self.table_model.write_csv()  # first-save upon start-up
+            self.table_model.update_repair(_get_item_by_id(541))
+            self.table_model.update_build(_get_item_by_id(141))
+            self.table_model.update_bp_construct(_get_item_by_id(241))
+            self.table_model.update_bp_dev(_get_item_by_id(741))
+            self.table_model.update_revive(_get_item_by_id(66641))
+            self.table_model.update_DD(_get_item_by_id(10441))
+            self.table_model.update_CA(_get_item_by_id(10341))
+            self.table_model.update_BB(_get_item_by_id(10241))
+            self.table_model.update_CV(_get_item_by_id(10141))
+            self.table_model.update_SS(_get_item_by_id(10541))
 
     @pyqtSlot(dict)
     def update_lvl_label(self, x: dict) -> None:
+        # userLevelVo
         if x is not None:
             self.lvl_label.setText("Lv. " + str(x["level"]))
             lvl_tooltip = str(x["exp"]) + " / " + str(x["nextLevelExpNeed"])
@@ -446,29 +351,41 @@ class SideDock(QDockWidget):
             self.sign_widget.setText(data["friendVo"]["sign"])
 
     @pyqtSlot(dict)
-    def update_expedition(self, data: dict) -> None:
+    def update_one_expedition(self, data: dict) -> None:
+        # Input = pveExploreVo['levels'][_idx]
+        _idx = int(data['fleetId'])-5
+        _exp_counters = self.exp_list_view.get_counters()
+        _exp_counters[_idx] = _calc_left_time(data["endTime"])
+        self.start_new_timer(_exp_counters, self.exp_list_view.get_counter_labels(), self.exp_list_view.get_counter_timers(), _idx)
+        n = "Fleet #" + data["fleetId"] + "   " + data["exploreId"].replace("000", "-")
+        self.exp_list_view.update_item(_idx, 0, n)
+
+    def cancel_one_expedition(self, fleet_idx: int) -> None:
+        self.exp_list_view.update_item(fleet_idx, 0, EXP_LABEL_L)
+        self.exp_list_view.update_item(fleet_idx, 1, EXP_LABEL_R)
+        self.exp_list_view.get_counters()[fleet_idx] = 0
+        self.exp_list_view.get_counter_timers()[fleet_idx].stop()
+
+    @pyqtSlot(dict)
+    def update_expeditions(self, data: dict) -> None:
         if data is not None:
             p = sorted(data["levels"], key=lambda x: int(x['fleetId']), reverse=False)
-            for idx, val in enumerate(p):
-                left_time = self._calc_left_time(val["endTime"])
-                self.exp_counters[idx] = left_time
-                self.start_new_timer(self.exp_counters, self.exp_counter_labels, self.exp_counter_timers, idx)
-                n = "Fleet #" + val["fleetId"] + "   " + val["exploreId"].replace("000", "-")
-                self.exp_list_view.update_item(idx, 0, n)
+            for _, val in enumerate(p):
+                self.update_one_expedition(val)
 
     @pyqtSlot(dict)
     def on_received_lists(self, data: dict) -> None:
         if data is not None:
             self._process_timer_data(data["repairDockVo"], self.bath_list_view, self.get_ship_name, "shipId",
-                                     self.bath_counters, self.bath_counter_labels, self.bath_counter_timers)
+                                     self.bath_list_view.get_counters(), self.bath_list_view.get_counter_labels(), self.bath_list_view.get_counter_timers())
 
             self._process_timer_data(data["dockVo"], self.build_list_view, self.get_ship_type, "shipType",
-                                     self.build_counters, self.build_counter_labels, self.build_counter_timers)
+                                     self.build_list_view.get_counters(), self.build_list_view.get_counter_labels(), self.build_list_view.get_counter_timers())
 
             self._process_timer_data(data["equipmentDockVo"], self.dev_list_view, self.get_equip_name, "equipmentCid",
-                                     self.dev_counters, self.dev_counter_labels, self.dev_counter_timers)
+                                     self.dev_list_view.get_counters(), self.bath_list_view.get_counter_labels(), self.dev_list_view.get_counter_timers())
 
-            self.update_expedition(data["pveExploreVo"])
+            self.update_expeditions(data["pveExploreVo"])
 
     @pyqtSlot(dict)
     def on_received_tasks(self, data: dict) -> None:
@@ -525,15 +442,15 @@ class SideDock(QDockWidget):
         self.qsettings.setValue(QKEYS.UI_SIDEDOCK, cb.isChecked())
 
     def update_geometry(self) -> None:
-        y = 0.03 * self.user_screen_h
-        h = 0.05 * self.user_screen_h
-        gap = 0.01 * self.user_screen_h
+        y = int(0.03 * self.user_screen_h)
+        h = int(0.05 * self.user_screen_h)
+        gap = int(0.01 * self.user_screen_h)
 
         self.name_layout_widget.setGeometry(0, y, self.geometry().width(), h)
         self.sign_widget.setGeometry(0, y + h, self.geometry().width(), y)
 
-        y = 2 * y + h + gap
-        h = 0.09 * self.user_screen_h
+        y = int(2 * y + h + gap)
+        h = int(0.09 * self.user_screen_h)
         self.table_view.setGeometry(0, y, self.geometry().width(), h)
         for i in range(5):
             self.table_view.setColumnWidth(i, self.geometry().width() / 5)
@@ -547,7 +464,7 @@ class SideDock(QDockWidget):
         self.triple_list_view_widget.setGeometry(0, y, self.geometry().width(), h)
 
         y = y + h + gap
-        h = 0.19 * self.user_screen_h
+        h = int(0.19 * self.user_screen_h)
         self.task_panel_widget.setGeometry(0, y, self.geometry().width(), h)
 
 # End of File
