@@ -74,7 +74,7 @@ class SideDock(QDockWidget):
         self.triple_list_view = QHBoxLayout(self.triple_list_view_widget)
         self.build_list_view = BuildListView()
         self.dev_list_view = DevListView()
-        self.exp_list_view = ExpListView()
+        self.exp_list_view = ExpListView(parent.main_tabs)
         self.task_list_view = TaskListView()
         self.task_panel_widget = QWidget(self)
         self.task_panel_view = QHBoxLayout(self.task_panel_widget)
