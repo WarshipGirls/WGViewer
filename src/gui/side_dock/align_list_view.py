@@ -204,7 +204,7 @@ class ExpListView(AlignListView):
         @rtype: None
         """
         tab_exp = self.main_tabs.tabs.findChild(QWidget, 'tab_exp')
-        tab_exp.fleet_table.start_expedition(index)
+        tab_exp.fleet_table.on_button_clicked(index, True)
 
     def get_exp_result(self, exp_map: str) -> dict:
         def _get_res() -> Tuple[bool, dict]:
