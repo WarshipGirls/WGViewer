@@ -157,11 +157,7 @@ class ExpListView(AlignListView):
             _, self.counter_labels[i] = self.add_item("Exped. Fleet", "Idling")  # HARDCODING
 
     def on_click(self, index) -> None:
-        # print('exp')
         pass
-        # explore/getResult/{exp_map}
-        # explore/Start/{fleet}/{exp_map}
-        # TODO: cancel exp
 
     def get_exp_result(self, exp_map: str) -> dict:
         def _get_res() -> Tuple[bool, dict]:
@@ -190,6 +186,19 @@ class ExpListView(AlignListView):
             return res, data
 
         return self._reconnecting_calls(_start, 'start expedition')
+
+    def cancel_exp(self, exp_map: str) -> dict:
+        def _cancel() -> Tuple[bool, dict]:
+            data = self.api.cancel(exp_map)
+            res = False
+            if 'eid' in data:
+                get_error(data['eid'])
+            elif 'status' in data:
+                res = True
+            else:
+                self.logger.debug(data)
+            return res, data
+        return self._reconnecting_calls(_cancel, 'cancel expedition')
 
 
 class TaskListView(AlignListView):

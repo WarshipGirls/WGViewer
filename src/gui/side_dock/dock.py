@@ -359,6 +359,13 @@ class SideDock(QDockWidget):
         n = "Fleet #" + data["fleetId"] + "   " + data["exploreId"].replace("000", "-")
         self.exp_list_view.update_item(_idx, 0, n)
 
+    def cancel_one_expedition(self, fleet_idx: int) -> None:
+        # HARDCODING
+        self.exp_list_view.update_item(fleet_idx, 0, "Exped. Fleet")
+        self.exp_list_view.update_item(fleet_idx, 1, "Idling")
+        self.exp_list_view.get_counters()[fleet_idx] = 0
+        self.exp_list_view.get_counter_timers()[fleet_idx].stop()
+
     @pyqtSlot(dict)
     def update_expeditions(self, data: dict) -> None:
         if data is not None:

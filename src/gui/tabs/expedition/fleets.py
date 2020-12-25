@@ -52,6 +52,7 @@ class PopupFleets(QMainWindow):
 class CustomComboBox(QComboBox):
     """
     QComboBox that can enable/disable certain items.
+        Rendering dropdown items upon clicking
     """
 
     def __init__(self, parent):
@@ -164,13 +165,10 @@ class ExpFleets(QWidget):
         self.curr_exp_maps[fleet_idx] = map_name
         self.add_map_dropdown(row, col, fleet_idx, map_name)
         left_time = self.get_left_time(fleet_idx)
-        if left_time is None:
+        if left_time is None or left_time <= 0:
             button_text = BTN_TEXT_START
         else:
-            if left_time > 0:
-                button_text = BTN_TEXT_STOP
-            else:
-                button_text = BTN_TEXT_START
+            button_text = BTN_TEXT_STOP
         self.add_button(row, col + 1, button_text, self.on_button_clicked, fleet_idx)
         row += 1
 
@@ -222,9 +220,9 @@ class ExpFleets(QWidget):
     def on_button_clicked(self, fleet_idx: int) -> None:
         # TODO: check if fleet class requirement met
         btn = self.exp_buttons.buttons()[fleet_idx]
+        curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
         if btn.text() == BTN_TEXT_START:
             self.logger.info(f'fleet #{fleet_idx + 5} start expedition on {self.next_exp_maps[fleet_idx]}')
-            curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
             next_map = self.next_exp_maps[fleet_idx].replace('-', '000')
             fleet_id = str(fleet_idx + 5)
             if self.get_counter_label(fleet_idx) == "Idling":  # HARDCODING TODO
@@ -238,7 +236,8 @@ class ExpFleets(QWidget):
             btn.setText(BTN_TEXT_STOP)
             self.curr_exp_maps[fleet_idx] = self.next_exp_maps[fleet_idx]
         elif btn.text() == BTN_TEXT_STOP:
-            self.logger.debug('stop expedition')
+            self.logger.info(f'fleet #{fleet_idx + 5} stops expedition on {self.next_exp_maps[fleet_idx]}')
+            self._cancel_exp(curr_map, fleet_idx)
             btn.setText(BTN_TEXT_START)
         else:
             pass
@@ -298,6 +297,10 @@ class ExpFleets(QWidget):
 
     def _start_exp(self, next_map: str, fleet_id: str) -> dict:
         return self.side_dock.exp_list_view.start_exp(next_map, fleet_id)
+
+    def _cancel_exp(self, exp_map: str, fleet_idx: int) -> dict:
+        self.side_dock.cancel_one_expedition(fleet_idx)
+        return self.side_dock.exp_list_view.cancel_exp(exp_map)
 
     def _update_one_expedition(self, data: dict) -> None:
         self.side_dock.update_one_expedition(data)
