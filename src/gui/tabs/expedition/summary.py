@@ -12,6 +12,12 @@ from src.data import get_expedition_log
 
 
 class DailySummary(QTableWidget):
+    """
+    Provide a summary table of expedition regarding daily and weekly sums, respectively.
+        Due to the data I/O characteristics, it is local timezone-aware and is automatically
+        refreshed upon a new day and a new week.
+    """
+
     def __init__(self, logger: Logger):
         super().__init__()
         self.logger = logger
@@ -21,6 +27,10 @@ class DailySummary(QTableWidget):
 
         self.init_table()
         self.init_ui()
+
+    # ================================
+    # UI
+    # ================================
 
     def init_table(self) -> None:
         self.setColumnCount(4)
@@ -69,6 +79,10 @@ class DailySummary(QTableWidget):
             self.setItem(row, col, QTableWidgetItem(labels[row - 6]))
             self.setItem(row, col + 1, QTableWidgetItem(str(self.week_values[row - 6])))
 
+    # ================================
+    # Data
+    # ================================
+
     def update_val(self, row: int, col: int, data: int) -> None:
         old_val = self.item(row, col).data(Qt.DisplayRole)
         new_val = int(old_val) + data
@@ -77,18 +91,18 @@ class DailySummary(QTableWidget):
     def update_day_val(self, row: int, col: int, data: int):
         self.update_val(row, col, data)
         if col == 1:
-            self.day_values[row-1] += data
+            self.day_values[row - 1] += data
         elif col == 3:
-            self.day_values[row+3] += data
+            self.day_values[row + 3] += data
         else:
             self.logger.debug('unexpected case at update_day_val')
 
     def update_week_val(self, row: int, col: int, data: int):
         self.update_val(row, col, data)
         if col == 1:
-            self.week_values[row-6] += data
+            self.week_values[row - 6] += data
         elif col == 3:
-            self.week_values[row-2] += data
+            self.week_values[row - 2] += data
         else:
             self.logger.debug('unexpected case at update_week_val')
 
