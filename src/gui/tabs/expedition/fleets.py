@@ -296,11 +296,18 @@ class ExpFleets(QTableWidget):
         else:
             pass
 
+        btn = self.exp_buttons.buttons()[fleet_idx]
+        btn.setText(BTN_TEXT_STOP)
+        btn.setEnabled(True)
+
     def stop_expedition(self, curr_map: str, fleet_idx: int) -> int:
         self._cancel_exp(curr_map)
         return fleet_idx
 
     def on_stop_expedition_finished(self, fleet_idx: int) -> None:
+        btn = self.exp_buttons.buttons()[fleet_idx]
+        btn.setText(BTN_TEXT_START)
+        btn.setEnabled(True)
         self.side_dock.cancel_one_expedition(fleet_idx)
 
     def on_get_result_finished(self, res) -> None:
@@ -339,6 +346,7 @@ class ExpFleets(QTableWidget):
     def on_button_clicked(self, fleet_idx: int, is_auto: bool = False) -> None:
         # TODO: check if fleet class requirement met
         btn = self.exp_buttons.buttons()[fleet_idx]
+        btn.setEnabled(False)
         curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
         if btn.text() == BTN_TEXT_START or is_auto is True:
 
@@ -353,16 +361,12 @@ class ExpFleets(QTableWidget):
             else:
                 self.logger.info(f'fleet #{fleet_idx + 5} retrieve expedition rewards on {self.next_exp_maps[fleet_idx]}')
                 self.bee_res.start()
-
-            btn.setText(BTN_TEXT_STOP)
         elif btn.text() == BTN_TEXT_STOP:
             self.logger.info(f'fleet #{fleet_idx + 5} stops expedition on {self.next_exp_maps[fleet_idx]}')
 
             self.bee_stop = CallbackWorker(self.stop_expedition, (curr_map, fleet_idx), self.on_stop_expedition_finished)
             self.bee_stop.terminate()
             self.bee_stop.start()
-
-            btn.setText(BTN_TEXT_START)
         else:
             pass
 
