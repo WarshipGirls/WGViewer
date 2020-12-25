@@ -264,6 +264,15 @@ class ExpFleets(QTableWidget):
 
     def on_button_clicked(self, fleet_idx: int, is_auto: bool = False) -> None:
         # TODO: check if fleet class requirement met
+
+        # checks running threads and prevents malicious users to overload the GUI
+        if self.bee_start is not None and self.bee_start.isRunning() is True:
+            return
+        if self.bee_stop is not None and self.bee_stop.isRunning() is True:
+            return
+        if self.bee_res is not None and self.bee_res.isRunning() is True:
+            return
+
         btn = self.exp_buttons.buttons()[fleet_idx]
         btn.setEnabled(False)
         curr_map = self.curr_exp_maps[fleet_idx].replace('-', '000')
