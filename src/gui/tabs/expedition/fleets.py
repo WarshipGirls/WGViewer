@@ -1,7 +1,7 @@
 from typing import Callable, List
 from logging import Logger
 
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QEvent
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QWidget, QTableWidget, QTableWidgetItem, QPushButton,
@@ -47,6 +47,29 @@ class PopupFleets(QMainWindow):
         self.tab.setItem(row, 0, QTableWidgetItem(info['Name']))
         self.tab.setItem()
 '''
+
+
+class CustomComboBox(QComboBox):
+    """
+    QComboBox that can enable/disable certain items.
+    """
+
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+        self.maps = wgv_utils.get_exp_list()
+        self.addItems(self.maps)
+        self.installEventFilter(self)
+
+    def eventFilter(self, target, event):
+        if target == self and event.type() == QEvent.MouseButtonPress:
+            self.disable_maps()
+        return False
+
+    def disable_maps(self):
+        for i in range(self.count()):
+            item = self.model().item(i)
+            item.setEnabled(item.text() not in self.parent.next_exp_maps)
 
 
 class ExpFleets(QWidget):
@@ -172,8 +195,7 @@ class ExpFleets(QWidget):
 
     def add_map_dropdown(self, row: int, col: int, fleet_idx: int, map_name: str) -> None:
         w = QWidget()
-        b = QComboBox()
-        b.addItems(self.maps)
+        b = CustomComboBox(self)
         t = 'Select Next Expedition Map\n'
         t += '- next one will auto switch after current one is done\n'
         t += '- leave it unchanged for auto-continue'
@@ -186,9 +208,8 @@ class ExpFleets(QWidget):
         w.setLayout(l)
         self.tab.setCellWidget(row, col, w)
 
-    def on_dropdown_change(self, fleet: int, next_map: str) -> None:
-        self.next_exp_maps[fleet] = next_map
-        #todo disable dropdown repeated values
+    def on_dropdown_change(self, fleet_idx: int, next_map: str) -> None:
+        self.next_exp_maps[fleet_idx] = next_map
         self.logger.debug(f"Next expedition map changed: {self.next_exp_maps}")
 
     def set_one_ship(self, row: int, col: int, ship_id: int, info: dict) -> None:
@@ -216,6 +237,7 @@ class ExpFleets(QWidget):
             self._update_one_expedition(d)
 
             btn.setText(BTN_TEXT_STOP)
+            self.curr_exp_maps[fleet_idx] = self.next_exp_maps[fleet_idx]
         elif btn.text() == BTN_TEXT_STOP:
             self.logger.debug('stop expedition')
             btn.setText(BTN_TEXT_START)
