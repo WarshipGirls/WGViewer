@@ -252,6 +252,8 @@ class SideDock(QDockWidget):
             elif counters == self.exp_list_view.get_counters():
                 counters[idx] = 0
                 timers[idx].stop()
+                # To avoid "Idling" (uninitialized) issue
+                labels[idx].setText(str(timedelta(seconds=counters[idx])))
                 if self.is_realrun:
                     self.exp_list_view.auto_restart(idx)
                 else:
