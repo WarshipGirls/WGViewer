@@ -1,9 +1,6 @@
 @echo ================================================
 @echo      Warship Girls Viewer Windows Build
 @echo ================================================
-@rm -rf build/
-@rm -rf dist/
-@cd tools/
 goto :DOES_PYTHON_EXIST
 :DOES_PYTHON_EXIST
 python -V | find /v "Python" >NUL 2>NUL && (goto :PYTHON_DOES_NOT_EXIST)
@@ -19,7 +16,14 @@ goto :EOF
 @SET PyVer=%ver:~0,6%%ver:~7,1%%ver:~9,1%
 @Rem Win10 truncate username to 5 letters
 @SET uname=%username:~0,5%
+
+@rm -rf build/ dist/ wgv_venv/
+python -m virtualenv wgv_venv
+CALL %CD%\wgv_venv\Scripts\activate.bat
+pip install -r requirements.txt
+CD tools/
 C:\Users\%uname%\AppData\Local\Programs\Python\%PyVer%\python.exe fix_pyinstaller.py > ..\gui_main.spec
-@cd ..
+CD ..
 pyinstaller.exe --clean gui_main.spec
+CALL %CD%\wgv_venv\Scripts\deactivate.bat
 @goto :EOF

@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 '''
+a.datas += [(name, path, typecode)]
 Example: a.datas += [('images/icon.ico', '[workspace]\\WGViewer\\src\\images\\icon.ico',  'DATA')]
 
 The first argument is the location the resource will be available at in the packaged application
@@ -10,15 +11,31 @@ and the second is the location of the resource in the source directory.
 This is not limited to just images either. Any file can be packaged along with the source code.
 '''
 
-
 SPEC_ROOT: str = os.path.split(Path().parent.absolute())[0]
 
+
+def get_plotly_path() -> str:
+    if sys.platform.startswith('win32'):
+        x = os.path.join(SPEC_ROOT, 'wgv_venv', 'Lib', 'site-packages', 'plotly')
+    elif sys.platform.startswith('linux'):
+        py_ver = f'python{sys.version_info.major}.{sys.version_info.minor}'
+        x = os.path.join(SPEC_ROOT, 'wgv_venv', 'lib', py_ver, 'site-packages', 'plotly')
+        x.replace("\\", "\\\\")
+    else:
+        sys.exit('Your OS is not supported yet. Please help improve the scripts')
+    # return "(r'{}', 'plotly'),".format(x)
+    return x
+
+
 CUSTOM_DATA_FILES: list = [
-  "('docs/version_log.md','{}/docs/version_log.md','DATA'),".format(SPEC_ROOT)
+    "('docs/version_log.md','{}/docs/version_log.md','DATA'),".format(SPEC_ROOT),
+    # "Tree('{}')".format(get_plotly_path())
 ]
 
+
 def header(_spec_root: str) -> str:
-    t = """# -*- mode: python ; coding: utf-8 -*-
+    hooks_path = os.path.join(_spec_root, 'hooks')
+    output_text = """# -*- mode: python ; coding: utf-8 -*-
 import sys
 block_cipher = None
 a = Analysis(
@@ -27,7 +44,7 @@ a = Analysis(
   binaries=[],
   datas=[],
   hiddenimports=[],
-  hookspath=[],
+  hookspath=['{}'],
   runtime_hooks=[],
   excludes=[],
   win_no_prefer_redirects=False,
@@ -35,8 +52,8 @@ a = Analysis(
   cipher=block_cipher,
   noarchive=False
 )
-""".format(_spec_root)
-    return t
+""".format(_spec_root, hooks_path)
+    return output_text
 
 
 def datas_import() -> str:
@@ -45,10 +62,12 @@ def datas_import() -> str:
     root_dir = os.path.dirname(os.path.realpath(__file__))
     prefix_len = len(root_dir) + 1
 
-    t = "a.datas += ["
+    output_text = ""
+    # output_text += "a.datas += Tree('{}')\n".format(get_plotly_path())
+    output_text += "a.datas += ["
     for c in CUSTOM_DATA_FILES:
-      t += c
-      t += "\n"
+        output_text += c
+        output_text += "\n"
 
     for subdir, dirs, files in os.walk(root_dir):
         for file in files:
@@ -66,9 +85,9 @@ def datas_import() -> str:
                 else:
                     sys.exit('The OS is not supported yet. Please manually update.')
                 res_str = "('" + first + "','" + second + "','DATA'),\n"
-                t += res_str
-    t += "]"
-    return t
+                output_text += res_str
+    output_text += "]"
+    return output_text
 
 
 def footer() -> str:
@@ -78,7 +97,7 @@ def footer() -> str:
         name = 'WGViewer-linux64'
     else:
         sys.exit('The OS is not supported yet. Please manually update.')
-    t = """
+    output_text = """
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(pyz,
@@ -98,7 +117,7 @@ exe = EXE(pyz,
   icon='assets/favicon.ico'
 )
 """.format(name)
-    return t
+    return output_text
 
 
 print(header(SPEC_ROOT))

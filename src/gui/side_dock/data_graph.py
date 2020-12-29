@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QWidget
 # from PyQt5.QtWidgets import QVBoxLayout
 
 from src.data import get_user_dir
+from src.func.log_handler import get_logger
 from src.utils import ts_to_date, get_color_option
 # from src.utils import get_user_resolution, get_color_scheme
 from . import constants as CONST
@@ -24,6 +25,7 @@ class UserDataGraph(QWidget):
     # to-do: remove the "wide" white margins (removed since abandon QWebEngine)
     TODO? when data get large, show a loading animation
     """
+
     def __init__(self):
         super().__init__()
         # self.browser = QWebEngineView(self)
@@ -65,22 +67,28 @@ class UserDataGraph(QWidget):
             self.resource_data[0] = list(map(ts_to_date, self.resource_data[0]))
 
     def show_graph(self, start_idx: int, end_idx: int, title: str) -> None:
-        self.read_csv()
-        fig = go.Figure()
-        for i in range(start_idx, end_idx):
-            fig.add_trace(go.Scatter(
-                x=self.resource_data[0],
-                y=self.resource_data[i],
-                name=CONST.CSV_HEADER[i]
-            ))
-        fig.update_layout(title=title)
-        if get_color_option() == "qdarkstyle":
-            # self.setStyleSheet(get_color_scheme())
-            fig.layout.template = pio.templates["plotly_dark"]
-        else:
-            pass
-        # self.browser.setHtml(fig.to_html(include_plotlyjs='cdn'))
-        # self.show()
-        fig.show()
+        try:
+            self.read_csv()
+            fig = go.Figure()
+            for i in range(start_idx, end_idx):
+                fig.add_trace(go.Scatter(
+                    x=self.resource_data[0],
+                    y=self.resource_data[i],
+                    name=CONST.CSV_HEADER[i]
+                ))
+            fig.update_layout(title=title)
+            if get_color_option() == "qdarkstyle":
+                # self.setStyleSheet(get_color_scheme())
+                fig.layout.template = pio.templates["plotly_dark"]
+            else:
+                pass
+            # self.browser.setHtml(fig.to_html(include_plotlyjs='cdn'))
+            # self.show()
+            fig.show()
+        except FileNotFoundError as e:
+            logger = get_logger('DATAGRAPH')
+            logger.debug('===================================')
+            logger.debug(e)
+            logger.debug('===================================')
 
 # End of File
