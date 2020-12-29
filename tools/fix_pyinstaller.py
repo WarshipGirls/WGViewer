@@ -12,24 +12,8 @@ This is not limited to just images either. Any file can be packaged along with t
 '''
 
 SPEC_ROOT: str = os.path.split(Path().parent.absolute())[0]
-
-
-def get_plotly_path() -> str:
-    if sys.platform.startswith('win32'):
-        x = os.path.join(SPEC_ROOT, 'wgv_venv', 'Lib', 'site-packages', 'plotly')
-    elif sys.platform.startswith('linux'):
-        py_ver = f'python{sys.version_info.major}.{sys.version_info.minor}'
-        x = os.path.join(SPEC_ROOT, 'wgv_venv', 'lib', py_ver, 'site-packages', 'plotly')
-        x.replace("\\", "\\\\")
-    else:
-        sys.exit('Your OS is not supported yet. Please help improve the scripts')
-    # return "(r'{}', 'plotly'),".format(x)
-    return x
-
-
 CUSTOM_DATA_FILES: list = [
     "('docs/version_log.md','{}/docs/version_log.md','DATA'),".format(SPEC_ROOT),
-    # "Tree('{}')".format(get_plotly_path())
 ]
 
 
@@ -63,7 +47,6 @@ def datas_import() -> str:
     prefix_len = len(root_dir) + 1
 
     output_text = ""
-    # output_text += "a.datas += Tree('{}')\n".format(get_plotly_path())
     output_text += "a.datas += ["
     for c in CUSTOM_DATA_FILES:
         output_text += c
