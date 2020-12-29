@@ -57,6 +57,12 @@ class TestDirectoryIntegrity(unittest.TestCase):
         self.assertEqual(_dir.is_dir(), True)
         self.assertEqual(is_dir_empty(_dir), False)
 
+    def test_pyinstaller_hooks_dir_exists(self):
+        _dir = ROOT_DIR.joinpath('hooks')
+        self.assertEqual(_dir.exists(), True)
+        self.assertEqual(_dir.is_dir(), True)
+        self.assertEqual(is_dir_empty(_dir), False)
+
 
 class TestFileIntegrity(unittest.TestCase):
 
