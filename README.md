@@ -52,12 +52,9 @@ Please see [at this directory](screenshots). Updating as work progresses.
 #### Windows
 
 ```
-# 1. start a virtual environment
-# 2. install required packages
-> pip install -r requirements.txt
-# 3. run auto build batch script
+# 1. run auto build batch script
 > win_build.bat
-# 4. The .exe is now in dist/
+# 2. The .exe is now in dist/
 ```
 
 #### Unix
