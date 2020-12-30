@@ -123,7 +123,7 @@ class TabThermopylae(QWidget):
         msg += "1. Select ships (rest non-battle ships are selected from old settings), then press 'Set fleet'\n"
         msg += "2. Press 'Pre-Battle Check'\n"
         msg += "3. Adjust your desired sortie times\n"
-        msg += "4. Press 'Fresh Combat' or 'Resume Comba'\n"
+        msg += "4. Press 'Fresh Combat' or 'Resume Combat'\n"
         msg += "?. Now just wait or find an easter egg to boost sortie speed"
         t.setFontPointSize(10)
         t.setText(msg)
