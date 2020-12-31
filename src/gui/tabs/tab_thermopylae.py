@@ -299,6 +299,8 @@ class TabThermopylae(QWidget):
     def on_fresh_sortie(self) -> None:
         reset_sleep_event()
         self._is_speed_mode = False
+        self._is_timer_start = False
+        self._is_first_timer = True
 
         self.disable_sortie_widgets()
         self.button_stop_sortie.setEnabled(True)
@@ -307,6 +309,8 @@ class TabThermopylae(QWidget):
     def on_resume_sortie(self) -> None:
         reset_sleep_event()
         self._is_speed_mode = False
+        self._is_timer_start = False
+        self._is_first_timer = True
 
         self.disable_sortie_widgets()
         self.button_stop_sortie.setEnabled(True)
