@@ -351,6 +351,7 @@ class GameSettings(SettingsTemplate):
 
 
 class TabsSettings(SettingsTemplate):
+    # TODO: make this scroll-able
     def __init__(self, qsettings):
         super().__init__(qsettings)
         for col in range(5):
@@ -383,14 +384,18 @@ class TabsSettings(SettingsTemplate):
             create_qcombobox(repair_choices, 1),
         ]
 
+        # Expedition
+        self.exp_auto = QCheckBox("Auto Expedition", self)
+
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         row = 0
         row = self.init_thermopylae(row)
+        row = self.init_expedition(row)
         self.init_hack(row)
 
-    def handle_auto_ticket(self):
+    def handle_auto_ticket(self) -> None:
         self.qsettings.setValue(QKEYS.THER_TKT_AUTO, (self.ther_ticket_auto.isChecked()))
         self.ther_ticket_resource.setEnabled(self.ther_ticket_auto.isChecked())
 
@@ -444,6 +449,15 @@ class TabsSettings(SettingsTemplate):
         row += 1
         return row
 
+    def init_expedition(self, row: int) -> int:
+        self.layout.addWidget(create_qlabel('Expedition', font_size=HEADER3), row, 0)
+        self.set_checkbox_status(self.exp_auto, QKEYS.EXP_AUTO, False)
+        self.exp_auto.stateChanged.connect(lambda _: self.qsettings.setValue(QKEYS.EXP_AUTO, self.exp_auto.isChecked()))
+        self.layout.addWidget(self.exp_auto, row, 1)
+
+        row += 1
+        return row
+
     def create_input(self, _input: str, _edit: QSpinBox, _default: list, idx: int, _field: str) -> None:
         # Lesson: locals() shows all arguments https://stackoverflow.com/a/50763376/14561914
         if _input == '':
@@ -485,6 +499,9 @@ class TabsSettings(SettingsTemplate):
         self.qsettings.setValue(QKEYS.THER_REPAIRS, _d)
         for i in range(6):
             self.ther_repairs[i].setCurrentIndex(1)
+
+        # Expedition
+        self.exp_auto.setChecked(False)
 
     def get_init_value(self, field: str, is_default: bool = False) -> Union[list, int]:
         if (self.qsettings.contains(field) is True) and (is_default is False):
