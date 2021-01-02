@@ -6,6 +6,8 @@ from packaging import version
 from src import utils as wgv_utils
 from src.func import logger_names as QLOGS
 from src.func.log_handler import get_logger
+from src.func.worker import Worker
+from src.gui.custom_widgets import QtWaitingSpinner
 
 logger = get_logger(QLOGS.LOGIN)
 
@@ -14,10 +16,21 @@ class WGViewerVersionCheck:
     def __init__(self, parent):
         self.latest_ver = None
         self.parent = parent
+
+        self.is_check_finished = False
+        self.loading_screen = QtWaitingSpinner(self)
+        self.bee = Worker(self.check_version, ())
+        self.bee.finished.connect(self.check_finished)
+        self.bee.terminate()
         try:
-            self.check_version()
+            self.loading_screen.start()
+            self.bee.start()
         except urllib.error.HTTPError as e:
             logger.error(e)
+
+    def check_finished(self) -> None:
+        self.loading_screen.stop()
+        self.is_check_finished = True
 
     def check_version(self) -> None:
         url = 'https://raw.githubusercontent.com/WarshipGirls/WGViewer/master/version'

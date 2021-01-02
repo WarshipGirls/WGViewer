@@ -56,4 +56,12 @@ def get_error(error_id: [str, int]) -> NoReturn:
     else:
         raise WarshipGirlsExceptions(0, "UNKNOWN ERROR")
 
+
+def get_error_text(error_id: [str, int]) -> str:
+    if str(error_id) in ERROR_JSON:
+        res = ERROR_JSON[str(error_id)]
+    else:
+        res = "UNKNOWN ERROR"
+    return res
+
 # End of File

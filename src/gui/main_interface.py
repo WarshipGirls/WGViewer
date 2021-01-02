@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
 
 from src import data as wgv_data
 from src import utils as wgv_utils
+from src.exceptions.wgr_error import get_error_text
 from src.func import qsettings_keys as QKEYS
 from src.gui.side_dock.dock import SideDock
 from src.gui.interface.tabs import MainInterfaceTabs
@@ -170,6 +171,11 @@ class MainInterface(QMainWindow):
             wgv_data.save_api_initGame(data)
         else:
             data = wgv_data.get_api_initGame()
+
+        if 'eid' in data:
+            wgv_utils.popup_msg(get_error_text(data['eid']), "Init Error")
+            sys.exit(-1)
+
         try:
             wgv_data.save_equipmentVo(data['equipmentVo'])
             wgv_data.save_user_tactics(data['tactics'])
