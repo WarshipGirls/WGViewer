@@ -12,7 +12,6 @@ from src.gui.side_dock.dock import SideDock
 from src.gui.interface.tabs import MainInterfaceTabs
 from src.gui.interface.menubar import MainInterfaceMenuBar
 from src.gui.system_tray import TrayIcon
-from src.utils import popup_msg
 from src.wgr import WGR_API
 
 
@@ -178,7 +177,7 @@ class MainInterface(QMainWindow):
             wgv_data.save_user_fleets(data['fleetVo'])
             wgv_data.save_pveExploreVo(data['pveExploreVo'])
         except KeyError:
-            popup_msg("Game data init failed...", "Init Error")
+            wgv_utils.popup_msg("Game data init failed...", "Init Error")
             # TODO? quit_application() not working
             sys.exit(-1)
 
