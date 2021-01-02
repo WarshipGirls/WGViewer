@@ -1,3 +1,13 @@
+## 0.2.3dev
+
+> 2021 Jan 2nd; pre-released
+
+- API: Simplify structure
+- BLD: fix plotly for pyinstaller
+- EXP: Add auto expedition
+- SIDE: Refactor code
+- THER: Improve robustness
+
 ## 0.2.2dev
 
 > 2020 December 19th; pre-released

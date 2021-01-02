@@ -54,14 +54,16 @@ Please see [at this directory](screenshots). Updating as work progresses.
 ```
 # 1. run auto build batch script
 > win_build.bat
-# 2. The .exe is now in dist/
+# 2. Run the application
+> dist\WGViewer-win64.exe
 ```
 
 #### Unix
 
 ```
+# 1. run auto build bash script
 > $ ./linux_build.sh
-# Run the application
+# 2. Run the application
 > $ ./dist/WGViewer-linux64
 ```
 
