@@ -39,7 +39,7 @@ class LoginForm(QWidget):
 
     def __init__(self):
         super().__init__()
-        WGViewerVersionCheck(self)
+        self._version_check = WGViewerVersionCheck(self)
 
         self.sig_login.connect(self.start_login)
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
@@ -340,6 +340,9 @@ class LoginForm(QWidget):
 
     @pyqtSlot()
     def start_login(self) -> None:
+        self._version_check = None
+        del self._version_check
+
         if self.check_disclaimer.isChecked() is True:
             self.container.setEnabled(False)
             self.on_save_clicked()

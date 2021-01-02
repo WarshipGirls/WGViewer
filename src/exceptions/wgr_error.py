@@ -5,7 +5,7 @@ import sys
 from typing import NoReturn  # Differ than None; NoReturn for abnormally end a function
 
 from PyQt5.QtCore import pyqtSignal, QObject
-from src.utils import increase_sleep_interval, popup_msg
+from src.utils import increase_sleep_interval
 
 
 def get_data_path(relative_path: str) -> str:
@@ -55,5 +55,13 @@ def get_error(error_id: [str, int]) -> NoReturn:
         raise WarshipGirlsExceptions(error_id, ERROR_JSON[str(error_id)])
     else:
         raise WarshipGirlsExceptions(0, "UNKNOWN ERROR")
+
+
+def get_error_text(error_id: [str, int]) -> str:
+    if str(error_id) in ERROR_JSON:
+        res = ERROR_JSON[str(error_id)]
+    else:
+        res = "UNKNOWN ERROR"
+    return res
 
 # End of File
