@@ -123,7 +123,7 @@ class TabThermopylae(QWidget):
         msg += "1. Select ships (rest non-battle ships are selected from old settings), then press 'Set fleet'\n"
         msg += "2. Press 'Pre-Battle Check'\n"
         msg += "3. Adjust your desired sortie times\n"
-        msg += "4. Press 'Fresh Combat' or 'Resume Comba'\n"
+        msg += "4. Press 'Fresh Combat' or 'Resume Combat'\n"
         msg += "?. Now just wait or find an easter egg to boost sortie speed"
         t.setFontPointSize(10)
         t.setText(msg)
@@ -299,6 +299,8 @@ class TabThermopylae(QWidget):
     def on_fresh_sortie(self) -> None:
         reset_sleep_event()
         self._is_speed_mode = False
+        self._is_timer_start = False
+        self._is_first_timer = True
 
         self.disable_sortie_widgets()
         self.button_stop_sortie.setEnabled(True)
@@ -307,6 +309,8 @@ class TabThermopylae(QWidget):
     def on_resume_sortie(self) -> None:
         reset_sleep_event()
         self._is_speed_mode = False
+        self._is_timer_start = False
+        self._is_first_timer = True
 
         self.disable_sortie_widgets()
         self.button_stop_sortie.setEnabled(True)

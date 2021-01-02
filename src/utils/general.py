@@ -12,6 +12,7 @@ from PyQt5.QtCore import QSettings, pyqtSlot
 
 from src.data import get_qsettings_file
 from src.func import qsettings_keys as QKEYS
+from src.func.worker import Worker
 
 _qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)
 _sleep_event = Event()
@@ -85,13 +86,21 @@ def ts_to_date(ts: int) -> str:
 # Sleep Event
 # ================================
 
-@pyqtSlot()
-def increase_sleep_interval() -> None:
-    logging.debug('!! received speed ticket !!')
+def _increase_sleep_interval() -> None:
     lo = _qsettings.value(QKEYS.GAME_SPD_LO, type=int)
     hi = _qsettings.value(QKEYS.GAME_SPD_HI, type=int)
     _qsettings.setValue(QKEYS.GAME_SPD_LO, lo + 2)
     _qsettings.setValue(QKEYS.GAME_SPD_HI, hi + 2)
+
+
+_worker = Worker(_increase_sleep_interval, ())
+_worker.terminate()
+
+
+@pyqtSlot()
+def increase_sleep_interval() -> None:
+    logging.debug('!! received speed ticket !!')
+    _worker.start()
 
 
 def reset_sleep_event() -> None:

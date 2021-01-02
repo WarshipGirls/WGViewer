@@ -32,6 +32,8 @@ class TabBar(QTabBar):
 
 
 class MainInterfaceTabs(QWidget):
+    # TODO: always start tab expedition
+    # TODO: hide tab expedition instead of close
     def __init__(self, parent, threadpool: QThreadPool, is_realrun: bool):
         super().__init__()
         logger.info("Creating Main Interface Tabs...")

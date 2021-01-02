@@ -34,13 +34,16 @@ E63_A1_ID: str = '931802'
 
 
 class Sortie:
+    # TODO: expedition thread will make this stop?
     def __init__(self, parent, api: API_SIX, dd: list, cv: list, main_fleet: list, is_realrun: bool):
         super().__init__()
         self.parent = parent
         self.api = api
         self.escort_DD = dd
         self.escort_CV = cv
-        self.main_fleet = main_fleet  # main fleet (6SS)
+        # TODO: bug, user selected SS are not set (old SS still used somehow)
+        # self.main_fleet = main_fleet  # main fleet (6SS)
+        self.main_fleet = [73239,75269,50773,16488,36848,132974]
         self.battle_fleet = set()  # ships that on battle
         self.logger = get_logger(QLOGS.TAB_THER)
 
@@ -155,8 +158,12 @@ class Sortie:
         if len(user_selected.difference(set(prev_fleet))) == 0:
             user_selected = prev_fleet
         else:
-            while len(user_selected) <= T_CONST.CHAP_FLEET_LEN[-1]:  # HARDCODING for now (only supports E6)
-                user_selected.add(prev_fleet.pop())
+            while len(user_selected) < T_CONST.CHAP_FLEET_LEN[-1]:  # HARDCODING for now (only supports E6)
+                x = prev_fleet.pop()
+                ship = self.user_ships[str(x)]
+                if ship['Class'] == 'SS':
+                    continue
+                user_selected.add(x)
         self.final_fleet = list(user_selected)
 
         self.logger.info("Setting final fleet:")
@@ -282,7 +289,8 @@ class Sortie:
                 self.curr_node = E61_0_ID
                 self.set_sub_map(T_CONST.SUB_MAP1_ID)
                 self._clean_memory()
-                self.api.setChapterBoat(T_CONST.E6_ID, self.final_fleet)
+                # TODO: test the following
+                self.helper.set_chapter_fleet(T_CONST.E6_ID, self.final_fleet)
             else:
                 pass
             next_id = self.starting_node()
@@ -469,7 +477,7 @@ class Sortie:
                 ss.append(s)
         if len(ss) >= 4:
             temp = set([int(j) for j in ss])
-            self.battle_fleet = self.helper.reorder_battle_list(list(temp))
+            self.battle_fleet = set(self.helper.reorder_battle_list(list(temp)))
         else:
             self.battle_fleet = set(list(map(int, fleet)))
 
@@ -563,6 +571,11 @@ class Sortie:
                 self.boat_pool.union(new_boat)
             else:
                 raise wgv_error.ThermopylaeSortieRestart("Bad luck with Habakkuk. Restarting")
+        else:
+            pass
+
+        if curr_node_id == T_CONST.BOSS_NODES[0] and len(set(self.battle_fleet).intersection(set(self.main_fleet))) < 4:
+            raise wgv_error.ThermopylaeSortieRestart("SS number less than 4 for E6-1 BOSS. Restarting")
         else:
             pass
 

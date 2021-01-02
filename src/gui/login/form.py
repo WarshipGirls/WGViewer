@@ -35,8 +35,8 @@ def create_label(text: str) -> QLabel:
 
 class LoginForm(QWidget):
     sig_login = pyqtSignal()
+    # TODO: multi-user support (#152)
 
-    # TODO: get a logger with LOGIN, and replace all of them in login module
     def __init__(self):
         super().__init__()
         WGViewerVersionCheck(self)
