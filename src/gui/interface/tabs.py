@@ -32,8 +32,6 @@ class TabBar(QTabBar):
 
 
 class MainInterfaceTabs(QWidget):
-    # TODO: always start tab expedition
-    # TODO: hide tab expedition instead of close
     def __init__(self, parent, threadpool: QThreadPool, is_realrun: bool):
         super().__init__()
         logger.info("Creating Main Interface Tabs...")
@@ -72,6 +70,13 @@ class MainInterfaceTabs(QWidget):
         self.tabs.tabCloseRequested.connect(self.close_tab)
 
     def init_tab(self, key: str, obj_name: str) -> None:
+        if obj_name == 'tab_exp':
+            self.add_tab(obj_name)
+            self.tabs.removeTab(self.tabs.count()-1)
+            return
+        else:
+            pass
+
         if self.qsettings.contains(key):
             if self.qsettings.value(key, type=bool) is True:
                 self.add_tab(obj_name)
@@ -102,8 +107,11 @@ class MainInterfaceTabs(QWidget):
             # NOTE: tab_dock cannot be dependent on side dock
             self.tab_ships = TabShips(tab_name, self.is_realrun)
             self.tabs.addTab(self.tab_ships, "Dock")
-        elif tab_name == "tab_exp" and self.tab_exp is None:
-            self.tab_exp = TabExpedition(tab_name, self.parent.side_dock)
+        elif tab_name == "tab_exp":
+            if self.tab_exp is None:
+                self.tab_exp = TabExpedition(tab_name, self.parent.side_dock)
+            else:
+                pass
             self.tabs.addTab(self.tab_exp, "Expedition (dev)")
         elif tab_name == "tab_thermopylae" and self.tab_thermopylae is None:
             self.tab_thermopylae = TabThermopylae(tab_name, self.parent.side_dock, self.is_realrun)
@@ -113,7 +121,13 @@ class MainInterfaceTabs(QWidget):
 
     def close_tab(self, index: int) -> None:
         tab = self.tabs.widget(index)
-        logger.debug(f'{tab.objectName()} is closed.')
+
+        if tab == self.tab_exp:
+            logger.debug(f'{tab.objectName()} is hidden.')
+            self.tabs.removeTab(index)
+            return
+        else:
+            logger.debug(f'{tab.objectName()} is closed.')
 
         # TODO reopen tab will create a new object
         #   should we save the old data, or let the user decide?
