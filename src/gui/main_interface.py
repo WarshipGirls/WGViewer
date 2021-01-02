@@ -170,11 +170,15 @@ class MainInterface(QMainWindow):
             wgv_data.save_api_initGame(data)
         else:
             data = wgv_data.get_api_initGame()
-
-        wgv_data.save_equipmentVo(data['equipmentVo'])
-        wgv_data.save_user_tactics(data['tactics'])
-        wgv_data.save_userVo(data['userVo'])
-        wgv_data.save_user_fleets(data['fleetVo'])
-        wgv_data.save_pveExploreVo(data['pveExploreVo'])
+        try:
+            wgv_data.save_equipmentVo(data['equipmentVo'])
+            wgv_data.save_user_tactics(data['tactics'])
+            wgv_data.save_userVo(data['userVo'])
+            wgv_data.save_user_fleets(data['fleetVo'])
+            wgv_data.save_pveExploreVo(data['pveExploreVo'])
+        except KeyError:
+            wgv_utils.popup_msg("Game data init failed...", "Init Error")
+            # TODO? quit_application() not working
+            sys.exit(-1)
 
 # End of File

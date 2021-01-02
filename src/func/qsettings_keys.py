@@ -40,6 +40,8 @@ THER_DD: str = 'THER/escort_destroyer_list'  # list of int; len=2 ship ids
 THER_CV: str = 'THER/escort_carrier_list'  # list of int; len=1, ship ids
 THER_SS: str = 'THER/battle_submarines'  # list of int; len=6, ship ids
 
+EXP_AUTO: str = 'EXP/auto_expedition'  # bool
+
 UI_TAB_ADV: str = 'UI/TAB/advance'  # bool
 UI_TAB_EXP: str = 'UI/TAB/expedition'  # bool
 UI_TAB_SHIP: str = 'UI/TAB/ship'  # bool

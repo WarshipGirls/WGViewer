@@ -48,6 +48,12 @@ class SideDock(QDockWidget):
 
         _, self.user_screen_h = wgv_utils.get_user_resolution()
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
+        if self.qsettings.contains(QKEYS.EXP_AUTO) and self.qsettings.value(QKEYS.EXP_AUTO, type=bool):
+            logger.debug("Auto expedition is on")
+            self.is_exp_auto = True
+        else:
+            logger.debug("Auto expedition is off")
+            self.is_exp_auto = False
 
         self.equipment_names = wgv_data.get_shipEquipmnt()
         self.ship_names = wgv_data.get_processed_userShipVo()
@@ -254,7 +260,7 @@ class SideDock(QDockWidget):
                 timers[idx].stop()
                 # To avoid "Idling" (uninitialized) issue
                 labels[idx].setText(str(timedelta(seconds=counters[idx])))
-                if self.is_realrun:
+                if self.is_realrun and self.is_exp_auto:
                     self.exp_list_view.auto_restart(idx)
                 else:
                     # otherwise will cause problem

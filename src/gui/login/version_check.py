@@ -14,7 +14,6 @@ class WGViewerVersionCheck:
     def __init__(self, parent):
         self.latest_ver = None
         self.parent = parent
-
         try:
             self.check_version()
         except urllib.error.HTTPError as e:
