@@ -19,7 +19,7 @@ The official sites of the mobile game, Warship Girls (R), are [here (CN)][CN], [
 
 ## Main Features
 
-As of `v0.2.2dev+` ([commit 4a366e7c][commit-url]),
+As of `v0.2.3dev` ([commit 4a366e7c][commit-url]),
 
 - Auto sortie on Thermopylae Ex-6, with user customized fleet
 - Auto (& Manual) perform expedition tasks
@@ -33,10 +33,10 @@ Please see [at this directory](screenshots). Updating as work progresses.
 
 ## Download
 
-| OS          | WGViewer version | Download Links        | Size   | Comment |
-|:-----------:|:----------------:|:---------------------:|:------:|:-------:|
-| Windows x64 | 0.2.2dev         | [GH release][d-win]   | ~92 MB |         |
-| Linux x64   | 0.2.1dev         | [GH release][d-linux] | ~70 MB | unzip it and run on CLI |
+| OS          | WGViewer version | Download Links        | Size    | Comment |
+|:-----------:|:----------------:|:---------------------:|:-------:|:-------:|
+| Windows x64 | 0.2.3dev         | [GH release][d-win]   | ~113 MB |         |
+| Linux x64   | 0.2.1dev         | [GH release][d-linux] | ~70 MB  | unzip it and run on CLI |
 
 ## Development
 
@@ -95,5 +95,5 @@ The copyright of the shipgirl art resources used in the WGViewer belong to Moefa
 [Intl]: http://www.warshipgirls.com/en/
 [commit-url]: https://github.com/WarshipGirls/WGViewer/tree/4a366e7c45a6e0e9e2116e04f94980b7e88b821f
 
-[d-win]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.2-dev/WGViewer-win64.zip
+[d-win]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.3-dev/WGViewer-win64.zip
 [d-linux]: https://github.com/WarshipGirls/WGViewer/releases/download/v0.2.1-dev/WGViewer-linux64.zip
