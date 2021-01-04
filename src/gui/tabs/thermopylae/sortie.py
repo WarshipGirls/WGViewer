@@ -41,9 +41,7 @@ class Sortie:
         self.api = api
         self.escort_DD = dd
         self.escort_CV = cv
-        # TODO: bug, user selected SS are not set (old SS still used somehow)
-        # self.main_fleet = main_fleet  # main fleet (6SS)
-        self.main_fleet = [73239,75269,50773,16488,36848,132974]
+        self.main_fleet = main_fleet  # main fleet (6SS)
         self.battle_fleet = set()  # ships that on battle
         self.logger = get_logger(QLOGS.TAB_THER)
 
@@ -164,6 +162,11 @@ class Sortie:
                 if ship['Class'] == 'SS':
                     continue
                 user_selected.add(x)
+                if len(prev_fleet) == 0:
+                    break
+            while len(user_selected) < T_CONST.CHAP_FLEET_LEN[-1]:  # HARDCODING for now (only supports E6)
+                for x in self.user_ships:
+                    user_selected.add(x)
         self.final_fleet = list(user_selected)
 
         self.logger.info("Setting final fleet:")
@@ -289,8 +292,12 @@ class Sortie:
                 self.curr_node = E61_0_ID
                 self.set_sub_map(T_CONST.SUB_MAP1_ID)
                 self._clean_memory()
-                # TODO: test the following
-                self.helper.set_chapter_fleet(T_CONST.E6_ID, self.final_fleet)
+                _fleet_info = self.pre_sortie.get_fleet_info()
+                _fleet = set(_fleet_info['chapterInfo']['boats'])
+                if len(_fleet.difference(set(self.final_fleet))) == 0:
+                    pass
+                else:
+                    self.helper.set_chapter_fleet(T_CONST.E6_ID, self.final_fleet)
             else:
                 pass
             next_id = self.starting_node()
@@ -617,9 +624,12 @@ class Sortie:
         else:
             # repairs to full HP
             repair_res = self.helper.process_repair(supply_res['shipVO'], [1])
-        if 'userVo' in repair_res:
+        try:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
+        except KeyError as e:
+            self.logger.debug(e)
+            self.logger.debug(repair_res)
 
         set_sleep()
         if self.is_running is False:

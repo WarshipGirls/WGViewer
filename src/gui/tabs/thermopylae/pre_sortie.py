@@ -23,6 +23,7 @@ class PreSortieCheck:
         self.sub_map_id: str = ""
         self.map_data: dict = {}
         self.user_data: dict = {}
+        self.fleet_info: dict = {}
 
     # ================================
     # Fetch Server Response
@@ -108,6 +109,7 @@ class PreSortieCheck:
             res = False
         else:
             self.final_fleet = last_fleets
+            self.fleet_info = fleet_info
             res = True
         return res
 
@@ -134,6 +136,9 @@ class PreSortieCheck:
 
     def get_final_fleet(self) -> list:
         return self.final_fleet
+
+    def get_fleet_info(self) -> dict:
+        return self.fleet_info
 
     def get_map_data(self) -> dict:
         return self.map_data
