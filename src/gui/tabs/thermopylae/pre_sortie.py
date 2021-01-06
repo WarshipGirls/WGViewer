@@ -23,6 +23,7 @@ class PreSortieCheck:
         self.sub_map_id: str = ""
         self.map_data: dict = {}
         self.user_data: dict = {}
+        self.fleet_info: dict = {}
 
     # ================================
     # Fetch Server Response
@@ -91,7 +92,7 @@ class PreSortieCheck:
 
         b = fleet_info['chapterInfo']['boats']
         if len(b) == 0:
-            self.logger.info('User has not entered E6. Select from previous settings')
+            self.logger.info('User has not entered E6.')
             self.sub_map_id = fleet_info['chapterInfo']['level_id']
             last_fleets = user_e6['boats']
         elif len(b) == T_CONST.CHAP_FLEET_LEN[-1] and fleet_info['chapterInfo']['level_id'] in T_CONST.SUB_MAP_IDS:
@@ -108,6 +109,7 @@ class PreSortieCheck:
             res = False
         else:
             self.final_fleet = last_fleets
+            self.fleet_info = fleet_info
             res = True
         return res
 
@@ -134,6 +136,9 @@ class PreSortieCheck:
 
     def get_final_fleet(self) -> list:
         return self.final_fleet
+
+    def get_fleet_info(self) -> dict:
+        return self.fleet_info
 
     def get_map_data(self) -> dict:
         return self.map_data

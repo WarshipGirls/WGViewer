@@ -61,6 +61,7 @@ class TabExpedition(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
 
         right_layout = QVBoxLayout()
+        self.right_text_box.document().setMaximumBlockCount(100)
         self.right_text_box.setFont(QFont('Consolas'))
         self.right_text_box.setFontPointSize(10)
         self.right_text_box.setReadOnly(True)

@@ -41,9 +41,7 @@ class Sortie:
         self.api = api
         self.escort_DD = dd
         self.escort_CV = cv
-        # TODO: bug, user selected SS are not set (old SS still used somehow)
-        # self.main_fleet = main_fleet  # main fleet (6SS)
-        self.main_fleet = [73239,75269,50773,16488,36848,132974]
+        self.main_fleet = main_fleet  # main fleet (6SS)
         self.battle_fleet = set()  # ships that on battle
         self.logger = get_logger(QLOGS.TAB_THER)
 
@@ -164,6 +162,11 @@ class Sortie:
                 if ship['Class'] == 'SS':
                     continue
                 user_selected.add(x)
+                if len(prev_fleet) == 0:
+                    break
+            while len(user_selected) < T_CONST.CHAP_FLEET_LEN[-1]:  # HARDCODING for now (only supports E6)
+                for x in self.user_ships:
+                    user_selected.add(x)
         self.final_fleet = list(user_selected)
 
         self.logger.info("Setting final fleet:")
@@ -282,17 +285,24 @@ class Sortie:
                     self.set_sub_map(T_CONST.SUB_MAP1_ID)
                 elif chapter_status == 3:
                     self._reset_chapter()
-                    pass
                 else:
                     pass
             elif self.curr_node == "0" or self.curr_sub_map == "0" or self.curr_sub_map == T_CONST.SUB_MAP1_ID:
                 self.curr_node = E61_0_ID
                 self.set_sub_map(T_CONST.SUB_MAP1_ID)
                 self._clean_memory()
-                # TODO: test the following
-                self.helper.set_chapter_fleet(T_CONST.E6_ID, self.final_fleet)
             else:
                 pass
+            try:
+                _fleet_info = self.pre_sortie.fetch_fleet_info()
+                if _fleet_info['chapterInfo']['status'] == '1' and len(_fleet_info['chapterInfo']['boats']) == 0:
+                    self.helper.set_chapter_fleet(T_CONST.E6_ID, self.final_fleet)
+                else:
+                    pass
+                del _fleet_info
+            except KeyError as e:
+                self.logger.debug(e)
+                return False
             next_id = self.starting_node()
 
             while next_id not in T_CONST.BOSS_NODES:
@@ -454,7 +464,7 @@ class Sortie:
             if self.curr_sub_map == T_CONST.SUB_MAP3_ID and curr_node == T_CONST.BOSS_NODES[2]:
                 raise wgv_error.ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
             else:
-                raise wgv_error.ThermopylaeSortieRestart("Redo Final Boss Fight")
+                raise wgv_error.ThermopylaeSortieRestart("Finished current sub map")
         else:
             pass
 
@@ -574,8 +584,8 @@ class Sortie:
         else:
             pass
 
-        if curr_node_id == T_CONST.BOSS_NODES[0] and len(set(self.battle_fleet).intersection(set(self.main_fleet))) < 4:
-            raise wgv_error.ThermopylaeSortieRestart("SS number less than 4 for E6-1 BOSS. Restarting")
+        if curr_node_id == T_CONST.BOSS_NODES[0] and len(set(self.battle_fleet).intersection(set(self.main_fleet))) < 3:
+            raise wgv_error.ThermopylaeSortieRestart("SS number less than 3 for E6-1 BOSS. Restarting")
         else:
             pass
 
@@ -617,9 +627,12 @@ class Sortie:
         else:
             # repairs to full HP
             repair_res = self.helper.process_repair(supply_res['shipVO'], [1])
-        if 'userVo' in repair_res:
+        try:
             self.update_side_dock_resources(repair_res['userVo'])
             self.update_side_dock_repair(repair_res['packageVo'])
+        except KeyError as e:
+            self.logger.debug(e)
+            self.logger.debug(repair_res)
 
         set_sleep()
         if self.is_running is False:
