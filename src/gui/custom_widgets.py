@@ -2,9 +2,17 @@ from math import ceil
 
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer, pyqtSlot, QRect
 from PyQt5.QtGui import QCloseEvent, QColor, QPalette, QPainter
-from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QScrollArea, QMainWindow, QApplication, QFrame
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget, QScrollArea, QMainWindow, QApplication, QFrame, QProgressBar
 
-from src.utils import get_user_resolution
+from src.utils import get_user_resolution, get_color_scheme
+
+
+def _center_QMainWindow(main_window: QMainWindow) -> None:
+    frame_gm = main_window.frameGeometry()
+    screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+    center_point = QApplication.desktop().screenGeometry(screen).center()
+    frame_gm.moveCenter(center_point)
+    main_window.move(frame_gm.topLeft())
 
 
 class ClickableLabel(QLabel):
@@ -47,15 +55,8 @@ class ScrollBoxWindow(QMainWindow):
         # TODO? use setContentMargins to fill the window; instead of setGeometry (inelegant)
         label.setGeometry(0, 0, self.w, self.h)
         self.resize(self.w, self.h)
-        self.center()
+        _center_QMainWindow(self)
         self.sig_close.connect(parent.delete_version_log)
-
-    def center(self) -> None:
-        frame_gm = self.frameGeometry()
-        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
-        center_point = QApplication.desktop().screenGeometry(screen).center()
-        frame_gm.moveCenter(center_point)
-        self.move(frame_gm.topLeft())
 
     def closeEvent(self, e: QCloseEvent) -> None:
         self.sig_close.emit()
@@ -276,5 +277,25 @@ class QtWaitingSpinner(QWidget):
 
     def setMinimumTrailOpacity(self, min_trail_opacity):
         self.mMinimumTrailOpacity = min_trail_opacity
+
+
+class QtProgressBar(QMainWindow):
+    def __init__(self, parent, title: str):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setStyleSheet(get_color_scheme())
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setValue(0)
+        self.setCentralWidget(self.progress_bar)
+        user_w, user_h = get_user_resolution()
+        _w = int(user_w * 0.2)
+        _h = int(user_h * 0.05)
+        self.resize(_w, _h)
+        _center_QMainWindow(self)
+        self.hide()
+
+    @pyqtSlot(int)
+    def update_value(self, val: int) -> None:
+        self.progress_bar.setValue(val)
 
 # End of File

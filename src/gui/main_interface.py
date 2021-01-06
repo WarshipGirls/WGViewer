@@ -1,7 +1,7 @@
 import os
 import sys
 
-from PyQt5.QtCore import Qt, pyqtSlot, QThreadPool, QSettings
+from PyQt5.QtCore import Qt, pyqtSlot, QThreadPool, QSettings, pyqtSignal
 from PyQt5.QtGui import QCloseEvent, QHideEvent, QResizeEvent, QMoveEvent
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
 
@@ -9,20 +9,13 @@ from src import data as wgv_data
 from src import utils as wgv_utils
 from src.exceptions.wgr_error import get_error_text
 from src.func import qsettings_keys as QKEYS
+from src.func.worker import CallbackWorker
+from src.gui.custom_widgets import QtProgressBar
 from src.gui.side_dock.dock import SideDock
 from src.gui.interface.tabs import MainInterfaceTabs
 from src.gui.interface.menubar import MainInterfaceMenuBar
 from src.gui.system_tray import TrayIcon
 from src.wgr import WGR_API
-
-
-def init_zip_files() -> None:
-    dir_size = sum(entry.stat().st_size for entry in os.scandir(wgv_data.get_zip_dir()))
-    # E.zip + S.zip + init.zip ~= 34M+
-    if dir_size < 30000000:
-        wgv_data.init_resources()
-    else:
-        pass
 
 
 def get_data_path(relative_path: str) -> str:
@@ -33,41 +26,76 @@ def get_data_path(relative_path: str) -> str:
 
 
 class MainInterface(QMainWindow):
-    # https://stackoverflow.com/questions/2970312/pyqt4-qtcore-pyqtsignal-object-has-no-attribute-connect
+    """
+    Main Interface of WGViewer. The entry point of all functional QWidgets (tabs, side dock...).
 
-    def __init__(self, cookies: dict, realrun: bool = True):
+    @note:
+        - all data initialization must occur before any UI initialization
+    @todo:
+        - if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob. Qt.Focus issue)
+    """
+
+    # https://stackoverflow.com/questions/2970312/pyqt4-qtcore-pyqtsignal-object-has-no-attribute-connect
+    sig_progress_bar = pyqtSignal(int)
+
+    def __init__(self, cookies: dict, login_form: pyqtSignal, realrun: bool = True):
         super().__init__()
+        self.hide()
         self.cookies = cookies
+        self.sig_close_login = login_form
         self.is_realrun = realrun
 
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         self.threadpool = QThreadPool()
         self.api = WGR_API(self.cookies)
 
-        # !!! all DATA initialization must occur before any UI initialization !!!
-
-        # TODO TODO multi-threading
-        init_zip_files()
-        self.api_initGame()
-
-        # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob.
-        #  Qt.Focus issue)
         self.side_dock_on = False
         self.side_dock = None
         self.tray = None
+        self.main_tabs = None
+        self.menu_bar = None
+        # This widget is deleted upon completion
+        self.progress_bar = QtProgressBar(self, title="Downloading Essential Resource Zips")
+        self.sig_progress_bar.connect(self.progress_bar.update_value)
+        # This bee is deleted upon completion
+        self.bee_download_zip = CallbackWorker(self.init_zip_files, ([self.sig_progress_bar]), self.zip_download_finished)
+        self.bee_download_zip.terminate()
 
-        # 1. The init order cannot be changed right now
-        #   tab_dock init all ships data and it's independent of side dock
-        # 2. Tabs must be created before menu bar,  menu bar reference main_tabs
-        self.main_tabs = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
-        # TODO loading speed is slow
-        self.main_tabs.init_tab(QKEYS.UI_TAB_SHIP, 'tab_dock')
-        self.init_side_dock()
-        self.main_tabs.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
-        self.main_tabs.init_tab(QKEYS.UI_TAB_THER, 'tab_thermopylae')
-        self.main_tabs.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
-        self.menu_bar = MainInterfaceMenuBar(self)
-        self.init_ui()
+    def start_rendering(self) -> None:
+        self.progress_bar.show()
+        self.bee_download_zip.start()
+
+    def zip_download_finished(self, res: bool) -> None:
+        self.progress_bar.close()
+        self.progress_bar = None
+        del self.progress_bar
+        self.bee_download_zip = None
+        del self.bee_download_zip
+        self.show()
+        if self.sig_close_login is not None:
+            self.sig_close_login.emit()
+            self.sig_close_login = None
+            del self.sig_close_login
+        else:
+            pass
+
+        if res is True:
+            # Original UI initialization sequence
+            self.api_initGame()
+            # 1. The init order cannot be changed right now
+            #   tab_dock init all ships data and it's independent of side dock
+            # 2. Tabs must be created before menu bar,  menu bar reference main_tabs
+            self.main_tabs = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
+            # TODO loading speed is slow
+            self.main_tabs.init_tab(QKEYS.UI_TAB_SHIP, 'tab_dock')
+            self.init_side_dock()
+            self.main_tabs.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
+            self.main_tabs.init_tab(QKEYS.UI_TAB_THER, 'tab_thermopylae')
+            self.main_tabs.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
+            self.menu_bar = MainInterfaceMenuBar(self)
+            self.init_ui()
+        else:
+            wgv_utils.popup_msg("Failed to download essential zip resources.")
 
     # ================================
     # Initialization
@@ -160,6 +188,26 @@ class MainInterface(QMainWindow):
             self.qsettings.setValue(QKEYS.UI_MAIN_POS, self.pos())
         else:
             pass
+
+    @staticmethod
+    def get_zip_files_size() -> int:
+        # E.zip + S.zip + init.zip ~= 34M+
+        dir_size = sum(entry.stat().st_size for entry in os.scandir(wgv_data.get_zip_dir()))
+        return dir_size
+
+    def init_zip_files(self, progress_bar: pyqtSignal) -> bool:
+        dir_size = self.get_zip_files_size()
+        if dir_size < 30000000:
+            wgv_data.init_resources(progress_bar)
+            # Re-assess folder size after downloading
+            dir_size = self.get_zip_files_size()
+            if dir_size < 30000000:
+                res = False
+            else:
+                res = True
+        else:
+            res = True
+        return res
 
     # ================================
     # WGR APIs

@@ -13,6 +13,11 @@ logger = get_logger(QLOGS.LOGIN)
 
 
 class WGViewerVersionCheck:
+    """
+    Check if user's client version is up-to-date.
+    This class is only instantiated during LogIn, and it is deleted after LogIn checking complete.
+    """
+
     def __init__(self):
         self.latest_ver = None
         self.is_check_finished = False
@@ -43,7 +48,7 @@ class WGViewerVersionCheck:
                 logger.error(f'Version check has unexpected outcome user: {user_ver}, cloud: {latest_ver}')
                 res = -1
         else:
-            wgv_utils.popup_msg('Latest app version check failed due to bad Internet connection.')
+            wgv_utils.popup_msg('Failed to check latest app version due to unideal Internet connection.')
             res = 1
 
         if res == 0:

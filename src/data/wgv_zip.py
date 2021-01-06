@@ -4,6 +4,8 @@ import zipfile
 
 import urllib.request
 
+from PyQt5.QtCore import pyqtSignal
+
 equip_zip_url = "https://github.com/WarshipGirls/WGViewer/raw/master/zip/E.zip"
 ship_zip_url = "https://github.com/WarshipGirls/WGViewer/raw/master/zip/S.zip"
 init_zip_url = "https://github.com/WarshipGirls/WGViewer/raw/master/zip/init.zip"
@@ -14,28 +16,26 @@ my_urls = [equip_zip_url, ship_zip_url, init_zip_url]
 # ================================
 
 
-def _download(url: str) -> str:
+def _download(url: str, progress_bar: pyqtSignal) -> str:
+    logging.debug(f'Downloading {url}')
     # download from Github
     l = url.rindex('/') + 1
     filename = url[l:]
     filepath = os.path.join(get_zip_dir(), filename)
 
-    # TODO: maybe show this on GUI
     def _progress(block_num, block_size, total_size):
         downloaded = block_num * block_size
         progress = int((downloaded / total_size) * 100)
-        output_str = "Download progress " + str(progress) + "%."
-        logging.info(output_str)
+        progress_bar.emit(progress)
 
     local_filename, _ = urllib.request.urlretrieve(url=url, filename=filepath, reporthook=_progress)
     return filename
 
 
-def _download_all(urls: list) -> list:
+def _download_all(urls: list, progress_bar: pyqtSignal) -> list:
     res = []
     for url in urls:
-        logging.info(f'Downloading {url}')
-        res.append(_download(url))
+        res.append(_download(url, progress_bar))
     return res
 
 
@@ -58,8 +58,8 @@ def _unzip_all(filenames: list) -> None:
 # ================================
 
 
-def init_resources() -> None:
-    res = _download_all(my_urls)
+def init_resources(progress_bar: pyqtSignal) -> None:
+    res = _download_all(my_urls, progress_bar)
     _unzip_all(res)
 
 

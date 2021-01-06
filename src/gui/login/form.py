@@ -35,6 +35,7 @@ def create_label(text: str) -> QLabel:
 
 class LoginForm(QWidget):
     sig_login = pyqtSignal()
+    sig_close = pyqtSignal()
     # TODO: multi-user support (#152)
 
     def __init__(self):
@@ -42,6 +43,7 @@ class LoginForm(QWidget):
         self._version_check = WGViewerVersionCheck()
 
         self.sig_login.connect(self.start_login)
+        self.sig_close.connect(self.on_main_interface_setup)
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
         self.encryptor = Encryptor()
         self.channel = ""
@@ -225,13 +227,17 @@ class LoginForm(QWidget):
     # General
     # ================================
 
+    @pyqtSlot()
+    def on_main_interface_setup(self) -> None:
+        self.close()
+
     def login_success(self, is_bypass: bool = False) -> None:
         if is_bypass is True:
-            self.mi = MainInterface(wgv_data.load_cookies())
+            self.mi = MainInterface(wgv_data.load_cookies(), self.sig_close)
         else:
-            self.mi = MainInterface(self.account.get_cookies())
-        self.mi.show()
-        self.close()
+            self.mi = MainInterface(self.account.get_cookies(), self.sig_close)
+        self.mi.start_rendering()
+        self.hide()
 
     def login_failed(self) -> None:
         self.button_login.setText('Login')

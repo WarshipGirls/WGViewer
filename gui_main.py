@@ -84,7 +84,7 @@ def _testrun() -> None:
     dev_warning += "In order to test offline, one real run (to get server data sample) is required!\n"
     dev_warning += "==== WARNING  END ====\n"
     logging.warning(dev_warning)
-    mi.show()
+    mi.start_rendering()
 
 
 # ================================
@@ -120,7 +120,7 @@ if __name__ == '__main__':
             from src.gui.main_interface import MainInterface
             from src import data as wgr_data
 
-            mi = MainInterface(wgr_data.load_cookies(), False)
+            mi = MainInterface(wgr_data.load_cookies(), None, False)
             _testrun()
 
     sys.exit(WGV_APP.exec_())
