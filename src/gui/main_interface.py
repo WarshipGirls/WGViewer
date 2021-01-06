@@ -38,10 +38,11 @@ class MainInterface(QMainWindow):
     # https://stackoverflow.com/questions/2970312/pyqt4-qtcore-pyqtsignal-object-has-no-attribute-connect
     sig_progress_bar = pyqtSignal(int)
 
-    def __init__(self, cookies: dict, realrun: bool = True):
+    def __init__(self, cookies: dict, login_form: pyqtSignal, realrun: bool = True):
         super().__init__()
         self.hide()
         self.cookies = cookies
+        self.sig_close_login = login_form
         self.is_realrun = realrun
 
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
@@ -71,6 +72,13 @@ class MainInterface(QMainWindow):
         self.bee_download_zip = None
         del self.bee_download_zip
         self.show()
+        if self.sig_close_login is not None:
+            self.sig_close_login.emit()
+            self.sig_close_login = None
+            del self.sig_close_login
+        else:
+            pass
+
         if res is True:
             # Original UI initialization sequence
             self.api_initGame()
