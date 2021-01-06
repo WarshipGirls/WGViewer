@@ -181,6 +181,7 @@ class TabThermopylae(QWidget):
         self.left_layout.setRowStretch(4, 1)
 
     def init_right_layout(self) -> None:
+        self.right_text_box.document().setMaximumBlockCount(100)
         self.right_text_box.setFont(QFont('Consolas'))
         self.right_text_box.setFontPointSize(10)
         self.right_text_box.setReadOnly(True)
