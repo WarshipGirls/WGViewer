@@ -230,7 +230,7 @@ class LoginForm(QWidget):
             self.mi = MainInterface(wgv_data.load_cookies())
         else:
             self.mi = MainInterface(self.account.get_cookies())
-        self.mi.show()
+        self.mi.start_rendering()
         self.close()
 
     def login_failed(self) -> None:
