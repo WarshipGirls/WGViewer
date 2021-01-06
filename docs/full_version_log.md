@@ -2,6 +2,7 @@
 
 > 2021 Jan 6th
 
+- LOGIN: Fix version check UI threading block
 - THER: Fix setting customized chapter boats
 
 ## 0.2.3dev
