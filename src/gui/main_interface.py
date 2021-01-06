@@ -9,6 +9,8 @@ from src import data as wgv_data
 from src import utils as wgv_utils
 from src.exceptions.wgr_error import get_error_text
 from src.func import qsettings_keys as QKEYS
+from src.func.worker import CallbackWorker
+from src.gui.custom_widgets import QtWaitingSpinner
 from src.gui.side_dock.dock import SideDock
 from src.gui.interface.tabs import MainInterfaceTabs
 from src.gui.interface.menubar import MainInterfaceMenuBar
@@ -16,13 +18,6 @@ from src.gui.system_tray import TrayIcon
 from src.wgr import WGR_API
 
 
-def init_zip_files() -> None:
-    dir_size = sum(entry.stat().st_size for entry in os.scandir(wgv_data.get_zip_dir()))
-    # E.zip + S.zip + init.zip ~= 34M+
-    if dir_size < 30000000:
-        wgv_data.init_resources()
-    else:
-        pass
 
 
 def get_data_path(relative_path: str) -> str:
@@ -47,7 +42,12 @@ class MainInterface(QMainWindow):
         # !!! all DATA initialization must occur before any UI initialization !!!
 
         # TODO TODO multi-threading
-        init_zip_files()
+        self.loading_screen = QtWaitingSpinner(self)
+        self.bee_download_zip = CallbackWorker(self.init_zip_files, (), self.zip_download_finished)
+        self.bee_download_zip.terminate()
+        self.loading_screen.start()
+        self.bee_download_zip.start()
+        # init_zip_files()
         self.api_initGame()
 
         # TODO? if creates side dock first and ui later, the sign LineEdit cursor in side dock flashes (prob.
@@ -56,6 +56,7 @@ class MainInterface(QMainWindow):
         self.side_dock = None
         self.tray = None
 
+        """
         # 1. The init order cannot be changed right now
         #   tab_dock init all ships data and it's independent of side dock
         # 2. Tabs must be created before menu bar,  menu bar reference main_tabs
@@ -68,6 +69,27 @@ class MainInterface(QMainWindow):
         self.main_tabs.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
         self.menu_bar = MainInterfaceMenuBar(self)
         self.init_ui()
+        """
+        self.main_tabs = None
+        self.menu_bar = None
+
+    def zip_download_finished(self, res: bool) -> None:
+        self.loading_screen.stop()
+        if res is True:
+            # 1. The init order cannot be changed right now
+            #   tab_dock init all ships data and it's independent of side dock
+            # 2. Tabs must be created before menu bar,  menu bar reference main_tabs
+            self.main_tabs = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
+            # TODO loading speed is slow
+            self.main_tabs.init_tab(QKEYS.UI_TAB_SHIP, 'tab_dock')
+            self.init_side_dock()
+            self.main_tabs.init_tab(QKEYS.UI_TAB_EXP, 'tab_exp')
+            self.main_tabs.init_tab(QKEYS.UI_TAB_THER, 'tab_thermopylae')
+            self.main_tabs.init_tab(QKEYS.UI_TAB_ADV, 'tab_adv')
+            self.menu_bar = MainInterfaceMenuBar(self)
+            self.init_ui()
+        else:
+            wgv_utils.popup_msg("Failed to download essential zip resources.")
 
     # ================================
     # Initialization
@@ -161,6 +183,26 @@ class MainInterface(QMainWindow):
         else:
             pass
 
+    @staticmethod
+    def get_zip_files_size() -> int:
+        # E.zip + S.zip + init.zip ~= 34M+
+        dir_size = sum(entry.stat().st_size for entry in os.scandir(wgv_data.get_zip_dir()))
+        return dir_size
+
+    def init_zip_files(self) -> bool:
+        dir_size = self.get_zip_files_size()
+        if dir_size < 30000000:
+            wgv_data.init_resources()
+            # Re-assess folder size after downloading
+            dir_size = self.get_zip_files_size()
+            if dir_size < 30000000:
+                res = False
+            else:
+                res = True
+        else:
+            res = True
+        return res
+
     # ================================
     # WGR APIs
     # ================================
@@ -188,3 +230,4 @@ class MainInterface(QMainWindow):
             sys.exit(-1)
 
 # End of File
+
