@@ -293,12 +293,16 @@ class Sortie:
                 self._clean_memory()
             else:
                 pass
-            _fleet_info = self.pre_sortie.get_fleet_info()
-            if _fleet_info['chapterInfo']['status'] == '1' and len(_fleet_info['chapterInfo']['boats']) == 0:
-                self.helper.set_chapter_fleet(T_CONST.E6_ID, self.final_fleet)
-            else:
-                pass
-            del _fleet_info
+            try:
+                _fleet_info = self.pre_sortie.fetch_fleet_info()
+                if _fleet_info['chapterInfo']['status'] == '1' and len(_fleet_info['chapterInfo']['boats']) == 0:
+                    self.helper.set_chapter_fleet(T_CONST.E6_ID, self.final_fleet)
+                else:
+                    pass
+                del _fleet_info
+            except KeyError as e:
+                self.logger.debug(e)
+                return False
             next_id = self.starting_node()
 
             while next_id not in T_CONST.BOSS_NODES:
