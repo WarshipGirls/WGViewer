@@ -1,8 +1,8 @@
 name: 'auto release'
-on:
-  push:
-    paths:
-      - './version'
+on: push
+  # push:
+  #   paths:
+  #     - './version'
 
 jobs:
   auto-release-win:
