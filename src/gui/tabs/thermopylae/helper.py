@@ -272,11 +272,16 @@ class SortieHelper:
             res = False
             if 'eid' in data:
                 get_error(data['eid'])
-            # TODO elif
+            elif 'chapterInfo' in data and 'boats' in data['chapterInfo']:
+                if len(set(fleet).difference(set(data['chapterInfo']['boats']))) == 0:
+                    res = True
+                else:
+                    self.logger.debug('undesired chapter ship set')
+                    self.logger.debug(data)
             else:
                 self.logger.debug(data)
-                res = True
             return res, data
+
         return self._reconnecting_calls(_set_fleets, 'set chapter boats')
 
     def set_war_fleet(self, fleet: list) -> dict:

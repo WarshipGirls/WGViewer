@@ -285,21 +285,20 @@ class Sortie:
                     self.set_sub_map(T_CONST.SUB_MAP1_ID)
                 elif chapter_status == 3:
                     self._reset_chapter()
-                    pass
                 else:
                     pass
             elif self.curr_node == "0" or self.curr_sub_map == "0" or self.curr_sub_map == T_CONST.SUB_MAP1_ID:
                 self.curr_node = E61_0_ID
                 self.set_sub_map(T_CONST.SUB_MAP1_ID)
                 self._clean_memory()
-                _fleet_info = self.pre_sortie.get_fleet_info()
-                _fleet = set(_fleet_info['chapterInfo']['boats'])
-                if len(_fleet.difference(set(self.final_fleet))) == 0:
-                    pass
-                else:
-                    self.helper.set_chapter_fleet(T_CONST.E6_ID, self.final_fleet)
             else:
                 pass
+            _fleet_info = self.pre_sortie.get_fleet_info()
+            if _fleet_info['chapterInfo']['status'] == '1' and len(_fleet_info['chapterInfo']['boats']) == 0:
+                self.helper.set_chapter_fleet(T_CONST.E6_ID, self.final_fleet)
+            else:
+                pass
+            del _fleet_info
             next_id = self.starting_node()
 
             while next_id not in T_CONST.BOSS_NODES:
@@ -461,7 +460,7 @@ class Sortie:
             if self.curr_sub_map == T_CONST.SUB_MAP3_ID and curr_node == T_CONST.BOSS_NODES[2]:
                 raise wgv_error.ThermopylaeSortieDone("FINISHED ALL SUB MAPS!")
             else:
-                raise wgv_error.ThermopylaeSortieRestart("Redo Final Boss Fight")
+                raise wgv_error.ThermopylaeSortieRestart("Finished current sub map")
         else:
             pass
 
@@ -581,8 +580,8 @@ class Sortie:
         else:
             pass
 
-        if curr_node_id == T_CONST.BOSS_NODES[0] and len(set(self.battle_fleet).intersection(set(self.main_fleet))) < 4:
-            raise wgv_error.ThermopylaeSortieRestart("SS number less than 4 for E6-1 BOSS. Restarting")
+        if curr_node_id == T_CONST.BOSS_NODES[0] and len(set(self.battle_fleet).intersection(set(self.main_fleet))) < 3:
+            raise wgv_error.ThermopylaeSortieRestart("SS number less than 3 for E6-1 BOSS. Restarting")
         else:
             pass
 
