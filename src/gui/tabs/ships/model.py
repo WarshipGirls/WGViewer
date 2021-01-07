@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Tuple
 
 from PyQt5.QtCore import Qt, QVariant, pyqtSlot
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
@@ -9,6 +10,7 @@ from src import data as wgv_data
 from src import utils as wgv_utils
 from src.func import logger_names as QLOGS
 from src.func.log_handler import get_logger
+from src.func.worker import CallbackWorker
 from src.wgr import API_BOAT
 from . import constant as SCONST
 
@@ -37,6 +39,7 @@ class ShipModel(QStandardItemModel):
         self.tactics_json = None
         self.user_tactics = None
         self.init_json()
+        self.qthreads = []
 
         self.ships_raw_data = None
         self.ships_data = []
@@ -107,38 +110,56 @@ class ShipModel(QStandardItemModel):
         """
         assert (len(cid) == 8)
 
-        mid = str(int(cid[3:6]))
-        if cid[:3] == "100":
-            prefix = "S_NORMAL_"
-        elif cid[:3] == "110":
-            prefix = "S_NORMAL_1"
-        elif cid[:2] == "18":
-            prefix = "S_NORMAL_8"
-            mid = mid.rjust(4, '0')[1:]
-        else:
-            err = "Unrecognized ship cid pattern: " + cid
-            logger.warning(err)
-            return None
+        def _load_image(_cid, _logger) -> Tuple[bool, QStandardItem]:
+            _img = QPixmap()
+            _mid = str(int(_cid[3:6]))
+            if _cid[:3] == "100":
+                _prefix = "S_NORMAL_"
+            elif _cid[:3] == "110":
+                _prefix = "S_NORMAL_1"
+            elif _cid[:2] == "18":
+                _prefix = "S_NORMAL_8"
+                _mid = _mid.rjust(4, '0')[1:]
+            else:
+                _err = "Unrecognized ship cid pattern: " + _cid
+                _logger.warning(_err)
+                return False, _img
+            _img_path = "S/" + _prefix + _mid + ".png"
+            _res = _img.load(os.path.join(wgv_data.get_zip_dir(), get_data_path(_img_path)))
+            _img = _img.scaled(78, 44)  # This is time-consuming
+            _thumbnail = QStandardItem()
+            _thumbnail.setData(QVariant(_img), Qt.DecorationRole)
+            _thumbnail.setData(_cid, Qt.UserRole)
+            return _res, _thumbnail
 
-        # QTableWidgetItem requires unique assignment; thus, same pic cannot assign twice. Differ from QIcon
-        img_path = "S/" + prefix + mid + ".png"
-        img = QPixmap()
-        is_loaded = img.load(os.path.join(wgv_data.get_zip_dir(), get_data_path(img_path)))
-        if is_loaded:
-            thumbnail = QStandardItem()
-            thumbnail.setData(QVariant(img.scaled(78, 44)), Qt.DecorationRole)
-            # hidden cid as Qt.UserRole
-            thumbnail.setData(cid, Qt.UserRole)
-            self.setItem(row, 0, thumbnail)
-        else:
-            tmp = QPixmap()
-            tmp.load(os.path.join(wgv_data.get_zip_dir(), get_data_path("S/0v0.png")))
-            tmp2 = QStandardItem()
-            tmp2.setData(QVariant(tmp.scaled(78, 44)), Qt.DecorationRole)
-            tmp2.setData(cid, Qt.UserRole)
-            self.setItem(row, 0, tmp2)
-            err = "Image path does not exist: " + img_path
-            logger.warning(err)
+        def _load_image_finished(res: [bool, QStandardItem]) -> None:
+            if res[0] is True:
+                self.setItem(row, 0, res[1])
+            else:
+                def _load_temp_image(_cid) -> QStandardItem:
+                    _tmp = QPixmap()
+                    _tmp.load(os.path.join(wgv_data.get_zip_dir(), get_data_path("S/0v0.png")))
+                    _tmp = _tmp.scaled(78, 44)
+                    _tmp2 = QStandardItem()
+                    _tmp2.setData(QVariant(_tmp), Qt.DecorationRole)
+                    _tmp2.setData(_cid, Qt.UserRole)
+                    return _tmp2
+
+                def _load_temp_image_finished(res_temp: QStandardItem) -> None:
+                    # hidden cid as Qt.UserRole
+                    self.setItem(row, 0, res_temp)
+                    err = "Image path does not exist: " + cid
+                    logger.warning(err)
+
+                bee_tmp = CallbackWorker(_load_temp_image, ([cid]), _load_temp_image_finished)
+                bee_tmp.terminate()
+                self.qthreads.append(bee_tmp)
+                bee_tmp.start()
+
+        bee = CallbackWorker(_load_image, (cid, logger), _load_image_finished)
+        bee.terminate()
+        self.qthreads.append(bee)
+        bee.start()
 
     def set_name(self, *args) -> None:
         wig = QStandardItem(args[1])
@@ -289,7 +310,7 @@ class ShipModel(QStandardItemModel):
         self.setItem(args[0], 20, wig)
 
     def set_equips(self, *args) -> None:
-
+        # TODO: threading
         col = 21
         for e in args[1]:
             e = str(e)
