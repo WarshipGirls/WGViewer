@@ -2,7 +2,7 @@ import os
 import sys
 from typing import Tuple
 
-from PyQt5.QtCore import Qt, QVariant, pyqtSlot
+from PyQt5.QtCore import Qt, QVariant, pyqtSlot, pyqtSignal
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
 from PyQt5.QtWidgets import QTableView
 
@@ -76,7 +76,7 @@ class ShipModel(QStandardItemModel):
         self.tactics_json = wgv_data.get_tactics_json()
         self.user_tactics = wgv_data.get_user_tactics()
 
-    def set_data(self, _data: dict) -> None:
+    def set_data(self, _data: dict, progress: pyqtSignal) -> None:
         self.ships_raw_data = _data
 
         for i in range(28):  # up to (not including) 28
@@ -89,10 +89,10 @@ class ShipModel(QStandardItemModel):
             else:
                 for ship in ship_lists:
                     self.insertRow(self.rowCount())
+                    progress.emit(self.rowCount())
                     self.add_ship(self.rowCount() - 1, ship)
 
     def add_ship(self, row: int, d: dict) -> None:
-        logger.info(f"Populating {row}")
         self.set_thumbnail(row, str(d["shipCid"]))
         self.set_name(row, d["title"], d["married"], d["create_time"], d["marry_time"])
         self.set_id(row, d["id"], d["isLocked"])
@@ -112,6 +112,7 @@ class ShipModel(QStandardItemModel):
 
         def _load_image(_cid, _logger) -> Tuple[bool, QStandardItem]:
             _img = QPixmap()
+            _thumbnail = QStandardItem()
             _mid = str(int(_cid[3:6]))
             if _cid[:3] == "100":
                 _prefix = "S_NORMAL_"
@@ -123,19 +124,25 @@ class ShipModel(QStandardItemModel):
             else:
                 _err = "Unrecognized ship cid pattern: " + _cid
                 _logger.warning(_err)
-                return False, _img
+                return False, _thumbnail
             _img_path = "S/" + _prefix + _mid + ".png"
             _res = _img.load(os.path.join(wgv_data.get_zip_dir(), get_data_path(_img_path)))
+            if _res is False:
+                return _res, _thumbnail
             _img = _img.scaled(78, 44)  # This is time-consuming
-            _thumbnail = QStandardItem()
             _thumbnail.setData(QVariant(_img), Qt.DecorationRole)
             _thumbnail.setData(_cid, Qt.UserRole)
             return _res, _thumbnail
 
-        def _load_image_finished(res: [bool, QStandardItem]) -> None:
+        def _load_image_finished(res: Tuple[bool, QStandardItem]) -> None:
+            if len(self.qthreads) > 0 and self.qthreads[0].isFinished():
+                self.qthreads.pop(0)
+
             if res[0] is True:
                 self.setItem(row, 0, res[1])
             else:
+                del res
+
                 def _load_temp_image(_cid) -> QStandardItem:
                     _tmp = QPixmap()
                     _tmp.load(os.path.join(wgv_data.get_zip_dir(), get_data_path("S/0v0.png")))
@@ -146,6 +153,9 @@ class ShipModel(QStandardItemModel):
                     return _tmp2
 
                 def _load_temp_image_finished(res_temp: QStandardItem) -> None:
+                    if len(self.qthreads) > 0 and self.qthreads[0].isFinished():
+                        self.qthreads.pop(0)
+
                     # hidden cid as Qt.UserRole
                     self.setItem(row, 0, res_temp)
                     err = "Image path does not exist: " + cid
@@ -309,8 +319,28 @@ class ShipModel(QStandardItemModel):
         wig = QStandardItem(slot)
         self.setItem(args[0], 20, wig)
 
+    @staticmethod
+    def _load_equip_image(_cid) -> Tuple[bool, QStandardItem]:
+        _raw_path = "E/equip_L_" + str(int(_cid[3:6])) + ".png"
+        _img = QPixmap()
+        _res = _img.load(os.path.join(wgv_data.get_zip_dir(), get_data_path(_raw_path)))
+        _thumbnail = QStandardItem()
+        if _res is False:
+            return _res, _thumbnail
+        _thumbnail.setData(QVariant(_img), Qt.DecorationRole)
+        _thumbnail.setData(_cid, Qt.UserRole)  # hide Equipment cid
+        return _res, _thumbnail
+
     def set_equips(self, *args) -> None:
-        # TODO: threading
+        def _load_equip_image_finished(res: Tuple[bool, QStandardItem]) -> None:
+            if len(self.qthreads) > 0 and self.qthreads[0].isFinished():
+                self.qthreads.pop(0)
+
+            if res[0] is True:
+                self.setItem(args[0], col, res[1])
+            else:
+                logger.warning(f'Image for equipment {e} is absent.')
+
         col = 21
         for e in args[1]:
             e = str(e)
@@ -322,18 +352,10 @@ class ShipModel(QStandardItemModel):
                 continue
             else:
                 pass
-            raw_path = "E/equip_L_" + str(int(e[3:6])) + ".png"
-            img_path = os.path.join(wgv_data.get_zip_dir(), get_data_path(raw_path))
-
-            img = QPixmap()
-            is_loaded = img.load(img_path)
-            if is_loaded:
-                thumbnail = QStandardItem()
-                thumbnail.setData(QVariant(img), Qt.DecorationRole)
-                thumbnail.setData(e, Qt.UserRole)  # hide Equipment cid
-                self.setItem(args[0], col, thumbnail)
-            else:
-                logger.warning(f'Image for equipment {e} is absent.')
+            bee = CallbackWorker(self._load_equip_image, ([e]), _load_equip_image_finished)
+            bee.terminate()
+            self.qthreads.append(bee)
+            bee.start()
             col += 1
 
         rest = 4 - len(args[1])
@@ -368,17 +390,19 @@ class ShipModel(QStandardItemModel):
             logger.error('Equipment change is failed.')
             return
 
-        raw_path = "E/equip_L_" + str(int(equip_id[3:6])) + ".png"
-        img_path = os.path.join(wgv_data.get_zip_dir(), get_data_path(raw_path))
-        img = QPixmap()
-        is_loaded = img.load(img_path)
-        if is_loaded:
-            thumbnail = QStandardItem()
-            thumbnail.setData(QVariant(img), Qt.DecorationRole)
-            thumbnail.setData(equip_id, Qt.UserRole)
-            self.setItem(row, col, thumbnail)
-        else:
-            logger.warning(f'Image for equipment {equip_id} is absent.')
+        def _load_equip_image_finished(_res: Tuple[bool, QStandardItem]) -> None:
+            if len(self.qthreads) > 0 and self.qthreads[0].isFinished():
+                self.qthreads.pop(0)
+
+            if _res[0] is True:
+                self.setItem(row, col, _res[1])
+            else:
+                logger.warning(f'Image for equipment {equip_id} is absent.')
+
+        bee = CallbackWorker(self._load_equip_image, ([equip_id]), _load_equip_image_finished)
+        bee.terminate()
+        self.qthreads.append(bee)
+        bee.start()
 
     def set_tactics(self, *args) -> None:
         # stupid MoeFantasy makes it inefficient; can't access tactics LV by ship data

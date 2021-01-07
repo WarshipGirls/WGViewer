@@ -46,7 +46,7 @@ class MainInterface(QMainWindow):
         self.is_realrun = realrun
 
         self.qsettings = QSettings(wgv_data.get_qsettings_file(), QSettings.IniFormat)
-        self.threadpool = QThreadPool()
+        self.threadpool = QThreadPool.globalInstance()
         self.api = WGR_API(self.cookies)
 
         self.side_dock_on = False
@@ -85,7 +85,7 @@ class MainInterface(QMainWindow):
             # 1. The init order cannot be changed right now
             #   tab_dock init all ships data and it's independent of side dock
             # 2. Tabs must be created before menu bar,  menu bar reference main_tabs
-            self.main_tabs = MainInterfaceTabs(self, self.threadpool, self.is_realrun)
+            self.main_tabs = MainInterfaceTabs(self, self.is_realrun)
             # TODO loading speed is slow
             self.main_tabs.init_tab(QKEYS.UI_TAB_SHIP, 'tab_dock')
             self.init_side_dock()

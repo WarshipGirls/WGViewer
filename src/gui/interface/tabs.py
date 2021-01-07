@@ -32,11 +32,11 @@ class TabBar(QTabBar):
 
 
 class MainInterfaceTabs(QWidget):
-    def __init__(self, parent, threadpool: QThreadPool, is_realrun: bool):
+    def __init__(self, parent, is_realrun: bool):
         super().__init__()
         logger.info("Creating Main Interface Tabs...")
         self.parent = parent
-        self.threadpool = threadpool
+        self.threadpool = QThreadPool.globalInstance()
         self.is_realrun = is_realrun
 
         self.qsettings = QSettings(get_qsettings_file(), QSettings.IniFormat)

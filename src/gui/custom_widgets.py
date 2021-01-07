@@ -280,11 +280,12 @@ class QtWaitingSpinner(QWidget):
 
 
 class QtProgressBar(QMainWindow):
-    def __init__(self, parent, title: str):
+    def __init__(self, parent, title: str, _max: int = 100):
         super().__init__(parent)
         self.setWindowTitle(title)
         self.setStyleSheet(get_color_scheme())
         self.progress_bar = QProgressBar()
+        self.progress_bar.setMaximum(_max)
         self.progress_bar.setValue(0)
         self.setCentralWidget(self.progress_bar)
         user_w, user_h = get_user_resolution()
