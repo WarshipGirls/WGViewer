@@ -11,6 +11,8 @@
 [![GitHub Org's stars](https://img.shields.io/github/stars/WarshipGirls?style=social)](https://github.com/WarshipGirls/WGViewer)
 [![GitHub all releases](https://img.shields.io/github/downloads/WarshipGirls/WGViewer/total)](https://github.com/WarshipGirls/WGViewer/releases)
 
+> This project is ARCHIVED due to the complete frame update of the game (v5.3.0). The hacking mathod used in this project is outdated.
+
 This project, `WGViewer`, is inspired by [Kancolle Viewer poi][poi] and [one of Warship Girls auto scripts][ProtectorMoe].
 The goal of the project is to create a cross-desktop-platform game viewer and automation tool.
 The idea is to hack the game and use its native APIs to mimic an official client's behaviors ([legal issue disclaimer](DISCLAIMER.md)).
